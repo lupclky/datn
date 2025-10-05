@@ -924,6 +924,15 @@ ALTER TABLE `voucher_usage`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Chỉ mục cho bảng `product_features`
+--
+ALTER TABLE `product_features`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `feature_id` (`feature_id`),
+  ADD KEY `created_at` (`created_at`);
+
+--
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
 
@@ -1006,6 +1015,12 @@ ALTER TABLE `voucher_usage`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT cho bảng `product_features`
+--
+ALTER TABLE `product_features`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
 -- Ràng buộc đối với các bảng kết xuất
 --
 
@@ -1073,8 +1088,51 @@ ALTER TABLE `voucher_usage`
   ADD CONSTRAINT `voucher_usage_ibfk_1` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`),
   ADD CONSTRAINT `voucher_usage_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
   ADD CONSTRAINT `voucher_usage_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Ràng buộc cho bảng `product_features`
+--
+ALTER TABLE `product_features`
+  ADD CONSTRAINT `product_features_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `product_features_ibfk_2` FOREIGN KEY (`feature_id`) REFERENCES `lock_features` (`id`) ON DELETE CASCADE;
+
 COMMIT;
 
+-- --------------------------------------------------------
+--
+-- Cấu trúc bảng cho bảng `product_features`
+--
+
+CREATE TABLE `product_features` (
+  `id` bigint NOT NULL,
+  `product_id` int NOT NULL COMMENT 'ID sản phẩm',
+  `feature_id` int NOT NULL COMMENT 'ID chức năng',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `product_features`
+--
+
+INSERT INTO `product_features` (`id`, `product_id`, `feature_id`, `created_at`) VALUES
+(1, 1, 1, '2025-06-13 12:00:00'),
+(2, 1, 3, '2025-06-13 12:00:00'),
+(3, 1, 5, '2025-06-13 12:00:00'),
+(4, 2, 1, '2025-06-13 12:00:00'),
+(5, 2, 2, '2025-06-13 12:00:00'),
+(6, 3, 1, '2025-06-13 12:00:00'),
+(7, 3, 3, '2025-06-13 12:00:00'),
+(8, 3, 4, '2025-06-13 12:00:00'),
+(9, 3, 7, '2025-06-13 12:00:00'),
+(10, 4, 1, '2025-06-13 12:00:00'),
+(11, 4, 3, '2025-06-13 12:00:00'),
+(12, 4, 4, '2025-06-13 12:00:00'),
+(13, 4, 6, '2025-06-13 12:00:00'),
+(14, 5, 1, '2025-06-13 12:00:00'),
+(15, 5, 5, '2025-06-13 12:00:00'),
+(16, 5, 6, '2025-06-13 12:00:00');
+
+-- --------------------------------------------------------
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+

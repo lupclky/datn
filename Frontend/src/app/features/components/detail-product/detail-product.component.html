@@ -147,6 +147,32 @@
         </div>
       </div>
     </div>
+
+    <!-- Product Features Section -->
+    @if (mainProduct.features && mainProduct.features.length > 0) {
+      <div class="product-features-section">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <h3 class="section-title">Chức năng nổi bật</h3>
+              <div class="features-grid">
+                @for (feature of mainProduct.features; track feature.id) {
+                  <div class="feature-card">
+                    <div class="feature-icon">
+                      <i class="pi pi-cog"></i>
+                    </div>
+                    <div class="feature-content">
+                      <h5 class="feature-title">{{ feature.name }}</h5>
+                      <p class="feature-description">{{ feature.description }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
   
     <!-- Related Products & Reviews -->
     <div class="extra-info-section">

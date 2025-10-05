@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.List;
+
 @Data //toString
 @Getter
 @Setter
@@ -31,4 +33,6 @@ public class ProductDTO {
 
     @Min(value = 0, message = "Quantity must be greater than or equal to 0")
     private Long quantity;
+
+    private List<Long> featureIds;
 }

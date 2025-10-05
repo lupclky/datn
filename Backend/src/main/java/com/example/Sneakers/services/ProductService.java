@@ -10,8 +10,10 @@ import com.example.Sneakers.models.Category;
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.ProductImage;
 import com.example.Sneakers.repositories.CategoryRepository;
+import com.example.Sneakers.repositories.ProductFeatureRepository;
 import com.example.Sneakers.repositories.ProductImageRepository;
 import com.example.Sneakers.repositories.ProductRepository;
+import com.example.Sneakers.services.ProductFeatureService;
 import com.example.Sneakers.responses.ListProductResponse;
 import com.example.Sneakers.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,8 @@ public class ProductService implements IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
+    private final ProductFeatureRepository productFeatureRepository;
+    private final ProductFeatureService productFeatureService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
@@ -51,6 +55,11 @@ public class ProductService implements IProductService {
                 .quantity(productDTO.getQuantity())
                 .build();
         Product savedProduct = productRepository.save(newProduct);
+
+        // Assign features to product if provided
+        if (productDTO.getFeatureIds() != null && !productDTO.getFeatureIds().isEmpty()) {
+            productFeatureService.assignFeaturesToProduct(savedProduct.getId(), productDTO.getFeatureIds());
+        }
 
         // Publish event for indexing
         eventPublisher.publishEvent(new ProductSaveEvent(savedProduct));
@@ -99,6 +108,11 @@ public class ProductService implements IProductService {
             existingProduct.setDiscount(productDTO.getDiscount());
             existingProduct.setQuantity(productDTO.getQuantity());
             Product updatedProduct = productRepository.save(existingProduct);
+
+            // Update features if provided
+            if (productDTO.getFeatureIds() != null) {
+                productFeatureService.assignFeaturesToProduct(updatedProduct.getId(), productDTO.getFeatureIds());
+            }
 
             // Publish event for re-indexing
             eventPublisher.publishEvent(new ProductSaveEvent(updatedProduct));

@@ -1,0 +1,129 @@
+<div class="feature-manage-container">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <div class="feature-header">
+        <h2>Quản lý chức năng khóa cửa</h2>
+        <div class="header-actions">
+            <button pButton pRipple
+                    type="button"
+                    label="Thêm chức năng"
+                    icon="pi pi-plus"
+                    class="p-button-success"
+                    (click)="openNew()">
+            </button>
+        </div>
+    </div>
+
+    <p-card styleClass="feature-table-card">
+        <div class="feature-table">
+            <p-table [value]="features"
+                    [loading]="loading"
+                    [paginator]="true"
+                    [rows]="10"
+                    [rowsPerPageOptions]="[10, 20, 50]"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} chức năng"
+                    styleClass="p-datatable-striped"
+                    [scrollable]="true"
+                    scrollHeight="flex"
+                    responsiveLayout="scroll">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:10%">ID</th>
+                        <th style="width:25%">Tên chức năng</th>
+                        <th style="width:45%">Mô tả</th>
+                        <th style="width:10%">Trạng thái</th>
+                        <th style="width:10%">Thao tác</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-feature>
+                    <tr>
+                        <td data-label="ID">#{{ feature.id }}</td>
+                        <td data-label="Tên chức năng">{{ feature.name }}</td>
+                        <td data-label="Mô tả">{{ feature.description }}</td>
+                        <td data-label="Trạng thái">
+                            <span [class]="'status-badge ' + (feature.isActive ? 'status-active' : 'status-inactive')">
+                                {{ feature.isActive ? 'Hoạt động' : 'Không hoạt động' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button pButton
+                                        pRipple
+                                        type="button"
+                                        icon="pi pi-pencil"
+                                        class="p-button-rounded p-button-success p-button-text"
+                                        pTooltip="Chỉnh sửa"
+                                        (click)="editFeature(feature)">
+                                </button>
+                                <button pButton
+                                        pRipple
+                                        type="button"
+                                        icon="pi pi-trash"
+                                        class="p-button-rounded p-button-warning p-button-text"
+                                        pTooltip="Xóa"
+                                        (click)="deleteFeature(feature)">
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="5" class="text-center py-5">Không có chức năng nào</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </p-card>
+</div>
+
+<!-- Feature Dialog -->
+<p-dialog
+    header="{{ editMode ? 'Chỉnh sửa chức năng' : 'Thêm chức năng mới' }}"
+    [(visible)]="featureDialog"
+    [modal]="true"
+    [style]="{width: '50vw', 'max-width': '600px'}"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="p-fluid">
+        <div class="field">
+            <label for="featureName">Tên chức năng</label>
+            <input id="featureName"
+                   type="text"
+                   pInputText
+                   [(ngModel)]="feature.name"
+                   [class.ng-invalid]="submitted && !feature.name?.trim()"
+                   placeholder="Nhập tên chức năng"
+                   required>
+            <small class="p-error" *ngIf="submitted && !feature.name?.trim()">Tên chức năng là bắt buộc</small>
+        </div>
+
+        <div class="field">
+            <label for="featureDescription">Mô tả</label>
+            <textarea id="featureDescription"
+                      rows="3"
+                      pInputTextarea
+                      [(ngModel)]="feature.description"
+                      placeholder="Nhập mô tả chức năng">
+            </textarea>
+        </div>
+
+        <div class="field">
+            <label class="p-checkbox-label">
+                <p-checkbox
+                    [(ngModel)]="feature.isActive"
+                    inputId="featureActive">
+                </p-checkbox>
+                Hoạt động
+            </label>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple type="button" label="Lưu" icon="pi pi-check" class="p-button-raised" (click)="saveFeature()"></button>
+    </ng-template>
+</p-dialog>
+

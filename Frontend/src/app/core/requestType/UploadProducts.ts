@@ -5,4 +5,5 @@ export interface ProductUploadReq {
     description: string,
     discount: number,
     quantity: number,
+    featureIds?: number[],
 }

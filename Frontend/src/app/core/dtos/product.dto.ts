@@ -12,4 +12,9 @@ export interface ProductDto {
         id: number;
         image_url: string;
     }[],
+    features?: {
+        id: number;
+        name: string;
+        description: string;
+    }[],
 }

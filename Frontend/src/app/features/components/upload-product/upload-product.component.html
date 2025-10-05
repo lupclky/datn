@@ -89,6 +89,21 @@
                 </div>
 
                 <div class="field">
+                    <label for="features">Chức năng khóa cửa</label>
+                    <p-multiSelect
+                        id="features"
+                        [options]="featuresOptions"
+                        [(ngModel)]="selectedFeatures"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Chọn chức năng"
+                        [maxSelectedLabels]="3"
+                        selectedItemsLabel="{0} chức năng đã chọn">
+                    </p-multiSelect>
+                    <small class="form-hint">Chọn các chức năng mà khóa cửa này có</small>
+                </div>
+
+                <div class="field">
                     <label>Hình ảnh sản phẩm</label>
                     <p-fileUpload #fileUpload
                                   mode="advanced" 

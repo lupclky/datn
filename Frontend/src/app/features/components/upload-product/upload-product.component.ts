@@ -9,6 +9,7 @@ import { BaseComponent } from '../../../core/commonComponent/base.component';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DropdownModule } from 'primeng/dropdown';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { CardModule } from 'primeng/card';
 import { MenuItem } from 'primeng/api';
 import { CategoriesService } from '../../../core/services/categories.service';
@@ -19,6 +20,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ToastModule } from 'primeng/toast';
 import { LoadingService } from '../../../core/services/loading.service';
 import { ProductUploadReq } from '../../../core/requestType/UploadProducts';
+import { LockFeatureService, LockFeature } from '../../../core/services/lock-feature.service';
 
 
 @Component({
@@ -35,6 +37,7 @@ import { ProductUploadReq } from '../../../core/requestType/UploadProducts';
     InputTextModule,
     InputNumberModule,
     DropdownModule,
+    MultiSelectModule,
     CardModule,
     ToastModule
   ],
@@ -45,10 +48,13 @@ export class UploadProductComponent extends BaseComponent implements OnInit {
   public productForm: FormGroup;
   private categoryId!: string;
   public categoriesOptions: MenuItem[] = [];
+  public featuresOptions: MenuItem[] = [];
+  public selectedFeatures: number[] = [];
 
   constructor(
     private readonly fb: FormBuilder,
     private categoriesService: CategoriesService,
+    private lockFeatureService: LockFeatureService,
     private productService: ProductService,
     private toastService : ToastService,
     private router: Router,
@@ -74,7 +80,18 @@ export class UploadProductComponent extends BaseComponent implements OnInit {
           }
         })
       })
-    ).subscribe()
+    ).subscribe();
+
+    this.lockFeatureService.getAllFeatures().pipe(
+      tap((features) => {
+        this.featuresOptions = features.map((item: LockFeature) => {
+          return {
+            label: item.name,
+            value: item.id
+          }
+        })
+      })
+    ).subscribe();
   }
 
   onCategoryChange(event: any){
@@ -102,6 +119,7 @@ export class UploadProductComponent extends BaseComponent implements OnInit {
       discount: this.productForm.value.discount,
       category_id: parseInt(this.categoryId, 10),
       quantity: this.productForm.value.quantity,
+      featureIds: this.selectedFeatures
     };
 
     this.productService.uploadProduct(productData).pipe(
@@ -113,8 +131,9 @@ export class UploadProductComponent extends BaseComponent implements OnInit {
 
         return this.productService.uploadImageProduct(formData, response.productId).pipe(
           tap(() => {
-            this.toastService.success('Thêm sản phẩm thành công!');
+            this.toastService.success('Thêm khóa cửa thành công!');
             this.productForm.reset();
+            this.selectedFeatures = [];
             fileUpload.clear();
             this.router.navigate(['/admin/products']);
           }),

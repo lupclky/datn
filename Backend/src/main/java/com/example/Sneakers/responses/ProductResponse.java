@@ -11,6 +11,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -38,7 +39,18 @@ public class ProductResponse extends BaseResponse{
     @JsonProperty("product_images")
     private List<ProductImage> productImages= new ArrayList<>();
 
+    private List<FeatureResponse> features = new ArrayList<>();
+
     public static ProductResponse fromProduct(Product product){
+        List<FeatureResponse> features = product.getProductFeatures() != null ?
+            product.getProductFeatures().stream()
+                .map(pf -> FeatureResponse.builder()
+                    .id(pf.getFeature().getId())
+                    .name(pf.getFeature().getName())
+                    .description(pf.getFeature().getDescription())
+                    .build())
+                .collect(Collectors.toList()) : new ArrayList<>();
+
         ProductResponse productResponse = ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -49,6 +61,7 @@ public class ProductResponse extends BaseResponse{
                 .discount(product.getDiscount())
                 .quantity(product.getQuantity())
                 .productImages(product.getProductImages())
+                .features(features)
                 .build();
         productResponse.setCreatedAt(product.getCreatedAt());
         productResponse.setUpdatedAt(product.getUpdatedAt());

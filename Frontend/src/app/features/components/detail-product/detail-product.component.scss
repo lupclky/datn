@@ -314,6 +314,100 @@
       }
     }
   }
+
+  // Product Features Section
+  .product-features-section {
+    padding: 3rem 0;
+    background: #fff;
+    border-top: 1px solid #e9ecef;
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 2rem;
+      text-align: center;
+      position: relative;
+
+      &::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #007bff, #00d4ff);
+        margin: 1rem auto 0;
+        border-radius: 2px;
+      }
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+
+      .feature-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 20px rgba(0, 123, 255, 0.1);
+          border-color: #007bff;
+        }
+
+        .feature-icon {
+          flex-shrink: 0;
+          width: 48px;
+          height: 48px;
+          background: linear-gradient(135deg, #007bff, #00d4ff);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          font-size: 1.25rem;
+        }
+
+        .feature-content {
+          flex: 1;
+
+          .feature-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #212529;
+            margin: 0 0 0.5rem 0;
+          }
+
+          .feature-description {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin: 0;
+            line-height: 1.5;
+          }
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding: 2rem 0;
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+  }
   
   // Extra Info Section (Related Products & Reviews)
   .extra-info-section {
