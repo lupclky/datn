@@ -1,0 +1,210 @@
+<div class="user-manage-container">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
+    <div class="user-header">
+        <h2>Quản lý người dùng</h2>
+        <div class="header-actions">
+            <div class="header-search-container" (click)="showSearchDialog = true" pTooltip="Tìm kiếm & Lọc nâng cao" tooltipPosition="bottom">
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText placeholder="Tìm kiếm người dùng..." readonly class="p-inputtext-sm">
+                </span>
+            </div>
+            <button pButton pRipple 
+                    type="button" 
+                    label="Thêm người dùng" 
+                    icon="pi pi-plus"
+                    class="p-button-success"
+                    (click)="openAddUserDialog()">
+            </button>
+        </div>
+    </div>
+
+    <p-dialog header="Tìm kiếm & Lọc người dùng" [(visible)]="showSearchDialog" [modal]="true" [style]="{width: '50vw', 'max-width': '600px'}" [draggable]="false" [resizable]="false">
+        <div class="p-fluid grid align-items-center" style="margin-top: 1rem;">
+            <div class="field col-12 md:col-6">
+                <label for="nameSearch">Tìm kiếm tên</label>
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText id="nameSearch" [(ngModel)]="searchTerm" placeholder="Nhập tên người dùng">
+                </span>
+            </div>
+            <div class="field col-12 md:col-6">
+                <label for="roleFilter">Vai trò</label>
+                <p-dropdown id="roleFilter"
+                            [options]="userOptions"
+                            [(ngModel)]="selectedRole"
+                            placeholder="Chọn vai trò"
+                            optionLabel="label"
+                            optionValue="value"
+                            [showClear]="true">
+                </p-dropdown>
+            </div>
+            <div class="field col-12 md:col-6">
+                <label for="statusFilter">Trạng thái</label>
+                <p-dropdown id="statusFilter"
+                            [options]="statusOptions"
+                            [(ngModel)]="selectedStatus"
+                            placeholder="Chọn trạng thái"
+                            optionLabel="label"
+                            optionValue="value"
+                            [showClear]="true">
+                </p-dropdown>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple type="button" label="Xóa lọc" icon="pi pi-times" class="p-button-text" (click)="resetSearch(); showSearchDialog = false"></button>
+            <button pButton pRipple type="button" label="Áp dụng" icon="pi pi-check" class="p-button-raised" (click)="applyFilter(); showSearchDialog = false"></button>
+        </ng-template>
+    </p-dialog>
+
+    <p-card styleClass="user-table-card">
+        <div class="user-table">
+            <p-table [value]="filteredUsers" 
+                    [loading]="loading"
+                    [paginator]="true"
+                    [rows]="15"
+                    [rowsPerPageOptions]="[15, 30, 50]" 
+                    [showCurrentPageReport]="true" 
+                    currentPageReportTemplate="Hiển thị {first} đến {last} của {totalRecords} người dùng"
+                    [totalRecords]="filteredUsers.length"
+                    styleClass="p-datatable-striped"
+                    [scrollable]="true"
+                    scrollHeight="flex"
+                    responsiveLayout="scroll"
+                    [globalFilterFields]="['fullname', 'phone_number', 'email', 'address']">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:8%">ID</th>
+                        <th style="width:18%">Họ và tên</th>
+                        <th style="width:12%">Số điện thoại</th>
+                        <th style="width:18%">Email</th>
+                        <th style="width:15%">Địa chỉ</th>
+                        <th style="width:10%">Ngày sinh</th>
+                        <th style="width:8%">Vai trò</th>
+                        <th style="width:8%">Trạng thái</th>
+                        <th style="width:3%">Thao tác</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-user>
+                    <tr>
+                        <td data-label="ID">#{{ user.id }}</td>
+                        <td data-label="Họ và tên">{{ user.fullname }}</td>
+                        <td data-label="Số điện thoại">{{ user.phone_number }}</td>
+                        <td data-label="Email">{{ user.email }}</td>
+                        <td data-label="Địa chỉ">{{ user.address }}</td>
+                        <td data-label="Ngày sinh">{{ user.date_of_birth | date:'dd/MM/yyyy' }}</td>
+                        <td data-label="Vai trò">
+                            <p-dropdown [options]="userOptions" 
+                                        [ngModel]="user.role?.id"
+                                        optionLabel="label" 
+                                        optionValue="value"
+                                        (onChange)="onRoleChange($event, user.id)"
+                                        appendTo="body"
+                                        [style]="{'min-width': '120px'}">
+                            </p-dropdown>
+                        </td>
+                        <td data-label="Trạng thái">
+                            <p-tag [value]="user.is_active ? 'Hoạt động' : 'Vô hiệu'" 
+                                   [severity]="user.is_active ? 'success' : 'danger'"
+                                   (click)="changeActiveStatus(user)"
+                                   [style]="{'cursor': 'pointer'}"
+                                   [pTooltip]="user.is_active ? 'Click để vô hiệu hóa' : 'Click để kích hoạt'">
+                            </p-tag>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button pButton 
+                                        pRipple 
+                                        type="button" 
+                                        icon="pi pi-pencil"
+                                        class="p-button-rounded p-button-text p-button-info"
+                                        pTooltip="Chỉnh sửa" 
+                                        (click)="editUser(user)">
+                                </button>
+                                <button pButton 
+                                        pRipple 
+                                        type="button" 
+                                        icon="pi pi-trash"
+                                        class="p-button-rounded p-button-text p-button-danger"
+                                        pTooltip="Xóa" 
+                                        (click)="confirmDelete(user.id)">
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="9" class="text-center py-5">Không có người dùng nào</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </p-card>
+
+    <!-- Edit User Dialog -->
+    <p-dialog header="Chỉnh sửa thông tin người dùng" [(visible)]="showEditDialog" [modal]="true" [style]="{width: '600px'}" [draggable]="false" [resizable]="false">
+        <div class="p-fluid">
+            <div class="field">
+                <label for="editFullname">Họ và tên</label>
+                <input type="text" pInputText id="editFullname" [(ngModel)]="editingUser.fullname" placeholder="Nhập họ và tên">
+            </div>
+            <div class="field">
+                <label for="editPhone">Số điện thoại</label>
+                <input type="text" pInputText id="editPhone" [(ngModel)]="editingUser.phone_number" placeholder="Nhập số điện thoại">
+            </div>
+            <div class="field">
+                <label for="editEmail">Email</label>
+                <input type="email" pInputText id="editEmail" [(ngModel)]="editingUser.email" placeholder="Nhập email">
+            </div>
+            <div class="field">
+                <label for="editAddress">Địa chỉ</label>
+                <textarea pInputTextarea id="editAddress" [(ngModel)]="editingUser.address" placeholder="Nhập địa chỉ" rows="3"></textarea>
+            </div>
+            <div class="field">
+                <label for="editDateOfBirth">Ngày sinh</label>
+                <p-calendar id="editDateOfBirth" [(ngModel)]="editingUser.date_of_birth" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="closeEditDialog()"></button>
+            <button pButton pRipple type="button" label="Lưu" icon="pi pi-check" class="p-button-raised" (click)="saveUser()"></button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Add User Dialog -->
+    <p-dialog header="Thêm người dùng mới" [(visible)]="showAddDialog" [modal]="true" [style]="{width: '600px'}" [draggable]="false" [resizable]="false">
+        <div class="p-fluid">
+            <div class="field">
+                <label for="addFullname">Họ và tên</label>
+                <input type="text" pInputText id="addFullname" [(ngModel)]="addUser.fullname" placeholder="Nhập họ và tên">
+            </div>
+            <div class="field">
+                <label for="addPhone">Số điện thoại</label>
+                <input type="text" pInputText id="addPhone" [(ngModel)]="addUser.phone_number" placeholder="Nhập số điện thoại">
+            </div>
+            <div class="field">
+                <label for="addEmail">Email</label>
+                <input type="email" pInputText id="addEmail" [(ngModel)]="addUser.email" placeholder="Nhập email">
+            </div>
+            <div class="field">
+                <label for="addPassword">Mật khẩu</label>
+                <input type="password" pInputText id="addPassword" [(ngModel)]="addUser.password" placeholder="Nhập mật khẩu">
+            </div>
+            <div class="field">
+                <label for="addAddress">Địa chỉ</label>
+                <textarea pInputTextarea id="addAddress" [(ngModel)]="addUser.address" placeholder="Nhập địa chỉ" rows="3"></textarea>
+            </div>
+            <div class="field">
+                <label for="addDateOfBirth">Ngày sinh</label>
+                <p-calendar id="addDateOfBirth" [(ngModel)]="addUser.date_of_birth" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="closeAddDialog()"></button>
+            <button pButton pRipple type="button" label="Thêm" icon="pi pi-check" class="p-button-raised" (click)="addUserF()"></button>
+        </ng-template>
+    </p-dialog>
+</div>

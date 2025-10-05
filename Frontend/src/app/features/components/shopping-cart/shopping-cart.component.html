@@ -1,0 +1,143 @@
+<p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>
+
+<div class="cart-wrapper">
+  <div class="cart-header">
+    <h1>Giỏ hàng của bạn</h1>
+    <p>Có {{ productsInCart.length }} sản phẩm trong giỏ hàng</p>
+  </div>
+
+  @if(productsInCart.length > 0) {
+    <div class="cart-content">
+      <!-- Left Column: Cart Items -->
+      <div class="cart-items-section">
+        <div class="items-card">
+          <div class="items-header">
+            <p-button label="Tiếp tục mua sắm" icon="pi pi-arrow-left" styleClass="p-button-text" routerLink="/all-product"></p-button>
+            <p-button label="Xóa tất cả" icon="pi pi-trash" styleClass="p-button-text p-button-danger" (click)="confirmDeleteAll()"></p-button>
+          </div>
+          
+          <div class="items-list">
+            @for(item of productsInCart; track item.id){
+              <div class="cart-item" [class.selected]="isProductSelected(item.id)">
+                <!-- Product Image -->
+                <div class="item-image">
+                  <img [src]="apiImage + item.products.thumbnail" [alt]="item.products.name">
+                </div>
+                
+                <!-- Product Info -->
+                <div class="item-info">
+                  <h4 class="product-name">{{ item.products.name }}</h4>
+                  <div class="product-meta">
+                    <span class="size">Size: {{ item.size }}</span>
+                    <span class="price">{{ item.products.price | currency:'VND':'symbol':'1.0-0' }}</span>
+                  </div>
+                  
+                  <!-- Quantity Controls -->
+                  <div class="quantity-controls">
+                    <span class="quantity-label">Số lượng:</span>
+                    <p-inputNumber [(ngModel)]="item.quantity" [min]="1" [max]="10"
+                                   (onInput)="updateProductSubject.next({id: item.id, quantity: +$event.value})"
+                                   buttonLayout="horizontal" [showButtons]="true"
+                                   decrementButtonClass="p-button-secondary p-button-sm"
+                                   incrementButtonClass="p-button-secondary p-button-sm"
+                                   incrementButtonIcon="pi pi-plus"
+                                   decrementButtonIcon="pi pi-minus"
+                                   styleClass="quantity-input">
+                    </p-inputNumber>
+                  </div>
+                </div>
+                
+                <!-- Actions & Total -->
+                <div class="item-actions">
+                  <div class="item-total">
+                    {{ (item.products.price * item.quantity) | currency:'VND':'symbol':'1.0-0' }}
+                  </div>
+                  <div class="action-buttons">
+                    <div class="select-product">
+                      <p-checkbox [binary]="true" [value]="item.id" (onChange)="onCheckboxChange($event, item.id)" styleClass="mr-2"></p-checkbox>
+                      <label class="select-label">Chọn</label>
+                    </div>
+                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger p-button-sm" (click)="deleteProduct(item.id)" pTooltip="Xóa sản phẩm"></p-button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Order Summary -->
+      <div class="summary-section">
+        <div class="summary-card">
+          <h2 class="summary-title">Tóm tắt đơn hàng</h2>
+          
+          @if(productToOrder.length > 0) {
+            <div class="selected-products">
+              <p class="selected-count">
+                <i class="pi pi-check-circle"></i>
+                Đã chọn {{ productToOrder.length }} sản phẩm
+              </p>
+            </div>
+          } @else {
+            <div class="no-selection">
+              <p class="selection-notice">
+                <i class="pi pi-info-circle"></i>
+                Vui lòng chọn sản phẩm để thanh toán
+              </p>
+            </div>
+          }
+          
+          <div class="summary-details">
+            <div class="summary-line">
+              <span>Tổng phụ:</span>
+              <span class="amount">{{ getSelectedProductsTotal() | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="summary-line">
+              <span>Phí vận chuyển:</span>
+              <span class="amount">{{ shipCost | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="summary-line total">
+              <span>Tổng cộng:</span>
+              <span class="total-amount">{{ getSelectedProductsTotal() + shipCost | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+          </div>
+
+          <div class="summary-actions">
+            <button type="button" 
+                    class="p-button p-component checkout-btn"
+                    [disabled]="productToOrder.length === 0"
+                    (click)="sendProductToOrder()">
+              <i class="pi pi-credit-card"></i>
+              <span>Tiến hành thanh toán</span>
+            </button>
+            
+            @if(productToOrder.length === 0) {
+              <p class="checkout-hint">Chọn ít nhất 1 sản phẩm để thanh toán</p>
+            }
+          </div>
+        </div>
+
+        <!-- Additional Info Card -->
+        <div class="info-card">
+          <h3>Thông tin vận chuyển</h3>
+          <ul class="shipping-info">
+            <li><i class="pi pi-check-circle"></i> Miễn phí vận chuyển cho đơn hàng trên 500,000₫</li>
+            <li><i class="pi pi-clock"></i> Giao hàng trong 2-3 ngày làm việc</li>
+            <li><i class="pi pi-shield"></i> Đổi trả miễn phí trong 30 ngày</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+      <div class="empty-content">
+        <i class="pi pi-shopping-cart empty-icon"></i>
+        <h3>Giỏ hàng của bạn đang trống</h3>
+        <p>Hãy bắt đầu mua sắm để lấp đầy giỏ hàng nào!</p>
+        <p-button label="Bắt đầu mua sắm" icon="pi pi-arrow-right" routerLink="/all-product" styleClass="start-shopping-btn"></p-button>
+      </div>
+    </div>
+  }
+</div>

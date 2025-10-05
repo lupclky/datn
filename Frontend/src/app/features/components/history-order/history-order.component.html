@@ -1,0 +1,123 @@
+<div class="order-history-page">
+  <p-toast></p-toast>
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <i class="pi pi-history"></i> Lịch sử đơn hàng
+    </h1>
+    <p class="page-subtitle">Theo dõi và quản lý các đơn hàng đã đặt của bạn</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-container">
+    <div class="search-field">
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Tìm theo mã ĐH, tên sản phẩm..." class="search-input" />
+      </span>
+    </div>
+    <div class="status-filter">
+      <p-dropdown [options]="statusOptions" [(ngModel)]="selectedStatus" (onChange)="onStatusChange()" placeholder="Lọc trạng thái" [showClear]="true" styleClass="status-dropdown"></p-dropdown>
+    </div>
+    <p-button icon="pi pi-filter-slash" styleClass="p-button-text" (click)="clearFilters()" pTooltip="Xóa bộ lọc"></p-button>
+  </div>
+
+  <!-- Orders List -->
+  <div class="orders-list-container">
+    @if(loading) {
+      <div class="loading-state">
+        <p-progressSpinner strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
+        <span>Đang tải đơn hàng...</span>
+      </div>
+    } @else if(filteredOrders.length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-inbox"></i>
+        <h3>{{ historyOrder.length === 0 ? 'Bạn chưa có đơn hàng nào' : 'Không tìm thấy đơn hàng' }}</h3>
+        <p>{{ historyOrder.length === 0 ? 'Hãy bắt đầu mua sắm để xem lịch sử đơn hàng của bạn tại đây.' : 'Vui lòng thử lại với bộ lọc khác.' }}</p>
+      </div>
+    } @else {
+      <div class="orders-list">
+        @for (order of pagedOrders; track order.id) {
+          <div class="order-card">
+            <!-- Order Header -->
+            <div class="order-header" [ngClass]="'status-' + order.status">
+              <div class="order-id-section">
+                <span class="order-id" (click)="viewOrderDetail(order.id)">Đơn hàng #{{order.id}}</span>
+                <p-tag [value]="getStatusLabel(order.status)" [severity]="getStatusSeverity(order.status)" styleClass="status-tag"></p-tag>
+              </div>
+              <div class="order-date">{{ order.order_date | date: 'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+
+            <!-- Order Body -->
+            <div class="order-body" (click)="viewOrderDetail(order.id)">
+              <div class="product-image-container">
+                <img [src]="apiImage + order.thumbnail" [alt]="order.product_name" class="product-image" onerror="this.src='/assets/images/placeholder.jpg'" />
+                @if (order.total_products > 1) {
+                  <span class="more-products-badge">+{{ order.total_products - 1 }}</span>
+                }
+              </div>
+              <div class="product-info">
+                <p class="product-name">{{ order.product_name }}</p>
+                <p class="buyer-info">Người nhận: {{ order.fullname }}</p>
+                <p class="payment-method">
+                  HT thanh toán: 
+                  <span [ngSwitch]="order.payment_method">
+                    <ng-container *ngSwitchCase="'cod'">Thanh toán khi nhận hàng</ng-container>
+                    <ng-container *ngSwitchCase="'Stripe'">Thẻ Visa/Mastercard</ng-container>
+                    <ng-container *ngSwitchDefault>{{ order.payment_method }}</ng-container>
+                  </span>
+                </p>
+              </div>
+              <div class="order-total">
+                <span class="total-label">Tổng cộng</span>
+                <span class="total-amount">{{ order.total_money | currency: 'VND' : 'symbol' }}</span>
+              </div>
+            </div>
+
+            <!-- Order Footer with Actions -->
+            <div class="order-footer">
+              <div class="actions">
+                <p-button label="Xem chi tiết" icon="pi pi-eye" styleClass="p-button-sm p-button-text" (click)="viewOrderDetail(order.id)"></p-button>
+                
+                @if (canReturnOrder(order)) {
+                  <p-button label="Trả hàng" icon="pi pi-replay" styleClass="p-button-sm p-button-text p-button-success" (click)="requestReturn(order.id)"></p-button>
+                }
+                
+                @if(order.status === 'payment_failed'){
+                  @if(order.payment_method === 'Stripe'){
+                    <p-button label="Thanh toán lại" icon="pi pi-credit-card" styleClass="p-button-sm p-button-text p-button-danger" (click)="retryPayment(order)"></p-button>
+                  }
+                  @if(order.payment_method === 'VNPAY'){
+                    <p-button label="Thanh toán lại" icon="pi pi-credit-card" styleClass="p-button-sm p-button-text p-button-danger" (click)="retryVnpayPayment(order)"></p-button>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      
+      <!-- Paginator -->
+      <p-paginator
+        [rows]="rows"
+        [totalRecords]="filteredOrders.length"
+        (onPageChange)="paginate($event)"
+        #p
+        [rowsPerPageOptions]="[5, 10, 20]"
+      ></p-paginator>
+    }
+  </div>
+</div>
+
+<!-- Stripe Payment Dialog -->
+<p-dialog header="Thanh toán an toàn bằng thẻ" [(visible)]="showStripeDialog" [modal]="true" [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
+  @if (selectedOrderForPayment) {
+    <app-stripe-payment
+      [orderId]="selectedOrderForPayment.id"
+      [paymentAmount]="getRoundedAmount(selectedOrderForPayment.total_money)"
+      (paymentSuccess)="onStripePaymentSuccess($event)"
+      (paymentError)="onStripePaymentError($event)"
+      (paymentCancel)="onStripePaymentCancel()">
+    </app-stripe-payment>
+  }
+</p-dialog>

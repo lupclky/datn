@@ -1,0 +1,215 @@
+<header class="modern-header">
+  <div class="header-container">
+    <!-- Left Section: Logo + Brand Name -->
+    <div class="header-left">
+      <div class="brand-section">
+        <img src="../../../../assets/images/hvmlogo.gif" alt="Logo" class="logo-img">
+        <h1 class="brand-name">
+          <a [routerLink]="['/']">SNEAKER STORE</a>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Right Section: Search, User & Cart -->
+    <div class="header-right">
+      <!-- Search -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <input 
+            [(ngModel)]="searchValue" 
+            (input)="onSearchInput($event)"
+            (keydown.enter)="sendContentSearch()"
+            (focus)="showSuggestions = true"
+            (blur)="hideSuggestions()"
+            type="text" 
+            placeholder="Tìm kiếm sản phẩm..." 
+            class="search-input"
+          />
+          <button (click)="sendContentSearch()" class="search-btn">
+            <i class="pi pi-search"></i>
+          </button>
+        </div>
+        
+        <!-- Search Suggestions -->
+        <div class="search-suggestions" *ngIf="showSuggestions && searchSuggestions.length > 0">
+          <div 
+            class="suggestion-item" 
+            *ngFor="let product of searchSuggestions"
+            (mousedown)="selectProduct(product)"
+          >
+            <img [src]="apiImage + product.thumbnail" [alt]="product.name" class="suggestion-image">
+            <div class="suggestion-info">
+              <div class="suggestion-name">{{ product.name }}</div>
+              <div class="suggestion-price">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="search-suggestions" *ngIf="showSuggestions && searchValue.length > 0 && searchSuggestions.length === 0">
+          <div class="no-results">Không tìm thấy sản phẩm nào</div>
+        </div>
+      </div>
+
+      <!-- User Section -->
+      @if(token == null) {
+        <div class="auth-links">
+          <a [routerLink]="['/auth-login']" class="auth-link">Đăng nhập</a>
+          <span class="divider">|</span>
+          <a [routerLink]="['/register']" class="auth-link">Đăng ký</a>
+        </div>
+      } @else {
+        <div class="user-menu-container">
+          <div class="user-menu" (click)="menu.toggle($event)">
+            <div class="user-avatar">
+              <i class="pi pi-user"></i>
+            </div>
+            <span class="user-name">{{userName}}</span>
+            <i class="pi pi-chevron-down"></i>
+          </div>
+          <p-menu #menu [model]="itemsMenuAvatar" [popup]="true" [appendTo]="'body'"></p-menu>
+        </div>
+      }
+
+      <!-- Cart Section (only for customers) -->
+      @if(roleId == 1 || !roleId) {
+        <div class="cart-section" 
+             (mouseenter)="showCartPreview = true" 
+             (mouseleave)="showCartPreview = false">
+          <div class="cart-link" [routerLink]="['/shoppingCart']">
+            <div class="cart-icon-wrapper">
+              <i class="pi pi-shopping-cart"></i>
+              <p-badge [value]="quantityInCart.toString()" severity="danger"></p-badge>
+            </div>
+            <span class="cart-text">Giỏ hàng</span>
+          </div>
+
+          <!-- Cart Preview Popup -->
+          <div class="cart-preview" [class.show]="showCartPreview" *ngIf="products && products.length > 0">
+            <h5 class="cart-preview-title">Giỏ hàng của bạn</h5>
+            <div class="cart-items">
+              @for (item of products; track item) {
+                <div class="cart-item">
+                  <button 
+                    (click)="deleteProduct($event, item.id)" 
+                    class="remove-btn"
+                    title="Xóa sản phẩm">
+                    <i class="pi pi-times"></i>
+                  </button>
+                  <img [src]="apiImage + item.products.thumbnail" [alt]="item.products.name" class="item-image" />
+                  <div class="item-info">
+                    <span class="item-name">{{ item.products.name }}</span>
+                    <div class="item-details">
+                      <span>Size: {{ item.size }}</span>
+                      <span class="item-price">{{ item.products.price | currency:'VND':'symbol':'1.0-0'}}</span>
+                      <span>x{{ item.quantity }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="cart-footer">
+              <button [routerLink]="['/shoppingCart']" class="view-cart-btn">Xem giỏ hàng</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  <p-toast></p-toast>
+</header>
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" (click)="toggleMenu()">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" [class.show]="isMenuOpen">
+      <ul class="navbar-nav w-100 justify-content-center">
+        @if(roleId == 1 || !roleId){
+          <li class="nav-item">
+            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Trang chủ</a>
+          </li>
+      
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/Intro']" routerLinkActive="active">Giới thiệu</a>
+          </li>
+      
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/news']" routerLinkActive="active">Tin tức</a>
+          </li>
+      
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/contact']" routerLinkActive="active">Liên hệ</a>
+          </li>
+      
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">Tất cả sản phẩm</a>
+          </li>
+        } @else if (roleId == 2) {
+          <li class="nav-item">
+            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+              <i class="pi pi-home"></i>
+              <span class="nav-text">Trang chủ</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/admin/dashboard']" routerLinkActive="active">
+              <i class="pi pi-chart-bar"></i>
+              <span class="nav-text">Dashboard</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/userManage']" routerLinkActive="active">
+              <i class="pi pi-users"></i>
+              <span class="nav-text">Người dùng</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/orderManage']" routerLinkActive="active">
+              <i class="pi pi-shopping-cart"></i>
+              <span class="nav-text">Đơn hàng</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/uploadProduct']" routerLinkActive="active">
+              <i class="pi pi-plus"></i>
+              <span class="nav-text">Sản phẩm</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/categoryManage']" routerLinkActive="active">
+              <i class="pi pi-tags"></i>
+              <span class="nav-text">Danh mục</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/voucherManage']" routerLinkActive="active">
+              <i class="pi pi-ticket"></i>
+              <span class="nav-text">Voucher</span>
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/admin/returns']" routerLinkActive="active">
+              <i class="pi pi-replay"></i>
+              <span class="nav-text">Trả hàng</span>
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">
+              <i class="pi pi-th-large"></i>
+              <span class="nav-text">Cửa hàng</span>
+            </a>
+          </li>
+        } @else {}
+      </ul>
+    </div>
+  </div>
+</nav>

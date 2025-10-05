@@ -1,0 +1,14 @@
+<div class="layout-main">
+  <div class="layout-header-section" [class.header-hidden]="isHeaderHidden">
+    <app-app-header></app-app-header>
+  </div>
+  
+  <div class="layout-main-content">
+    <router-outlet></router-outlet>
+  </div>
+  <div class="layout-footer">
+    <app-app-footer></app-app-footer>
+  </div>
+  <app-ai-chatbot></app-ai-chatbot>
+  <app-scroll-to-top></app-scroll-to-top>
+</div>

@@ -1,0 +1,77 @@
+<div class="login-page">
+  <p-toast></p-toast>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="card-header">
+        <h1 class="title">Đăng nhập</h1>
+        <p class="subtitle">Chào mừng bạn quay trở lại!</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form">
+        <div class="form-group">
+          <label for="userName">Số điện thoại</label>
+          <input 
+            type="tel"
+            id="userName"
+            formControlName="userName"
+            placeholder="Nhập số điện thoại"
+            class="form-input"
+            pKeyFilter="int">
+          <div *ngIf="userName?.invalid && (userName?.dirty || userName?.touched)" class="error-message">
+            <small *ngIf="userName?.errors?.['required']">Số điện thoại không được để trống.</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <div class="password-field">
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="Nhập mật khẩu"
+              class="form-input">
+            <button 
+              type="button"
+              class="password-toggle"
+              (click)="togglePassword()">
+              <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+          <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="error-message">
+            <small *ngIf="password?.errors?.['required']">Mật khẩu không được để trống.</small>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" formControlName="rememberMe">
+            <span class="checkmark"></span>
+            <span class="checkbox-text">Ghi nhớ tài khoản</span>
+          </label>
+          <a routerLink="/forgot-password" class="forgot-link">Quên mật khẩu?</a>
+        </div>
+
+        <button type="submit" class="login-btn" [disabled]="loginForm.invalid">
+          Đăng nhập
+        </button>
+
+        <div class="divider">
+          <span>hoặc</span>
+        </div>
+
+        <div class="register-prompt">
+          <span>Chưa có tài khoản? </span>
+          <a routerLink="/register" class="register-link">Đăng ký ngay</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="back-home">
+                <a routerLink="/Home" class="back-link">
+        <i class="pi pi-arrow-left"></i>
+        <span>Quay về trang chủ</span>
+      </a>
+    </div>
+  </div>
+</div>
