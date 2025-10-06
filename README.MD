@@ -25,7 +25,7 @@ mvn spring-boot:run
 - Install packed (Require Node Js)
 
 ```
-npm install
+npm install --legacy-peer-deps
 npm audit fix
 npm start
 ```
