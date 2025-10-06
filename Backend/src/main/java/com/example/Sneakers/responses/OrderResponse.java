@@ -2,16 +2,11 @@ package com.example.Sneakers.responses;
 
 import com.example.Sneakers.models.Order;
 import com.example.Sneakers.models.OrderDetail;
-import com.example.Sneakers.models.User;
-import com.example.Sneakers.models.Voucher;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,8 +39,8 @@ public class OrderResponse {
     private String note;
 
     @JsonProperty("order_date")
-    // @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private LocalDate orderDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime orderDate;
 
     @JsonProperty("status")
     private String status;

@@ -42,6 +42,11 @@ public class WebSecurityConfig {
                                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                                 .authorizeHttpRequests(requests -> {
                                         requests
+                                                        // Review endpoints require authentication
+                                                        .requestMatchers(POST, String.format("%s/reviews/**", apiPrefix)).authenticated()
+                                                        .requestMatchers(PUT, String.format("%s/reviews/**", apiPrefix)).authenticated()
+                                                        .requestMatchers(DELETE, String.format("%s/reviews/**", apiPrefix)).authenticated()
+                                                        // All other requests are permitted
                                                         .anyRequest().permitAll();
 
                                 })

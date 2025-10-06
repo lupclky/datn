@@ -16,7 +16,8 @@ import { CategoryDto } from '../../../core/dtos/Category.dto';
 import { VoucherDisplayComponent } from '../voucher-display/voucher-display.component';
 
 import { AiChatbotComponent } from '../../../core/components/ai-chatbot/ai-chatbot.component';
-
+import { RatingModule } from 'primeng/rating';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
@@ -27,7 +28,9 @@ import { AiChatbotComponent } from '../../../core/components/ai-chatbot/ai-chatb
     BadgeModule,
     RouterModule,
     AiChatbotComponent,
-    VoucherDisplayComponent
+    VoucherDisplayComponent,
+    RatingModule,
+    FormsModule
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']

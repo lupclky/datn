@@ -91,14 +91,18 @@
                     <tr>
                         <td data-label="Mã ĐH">#{{ order.id }}</td>
                         <td data-label="Người mua">{{ order.fullname }}</td>
-                        <td data-label="Email">{{ order.email }}</td>
-                        <td data-label="SĐT">{{ order.phone_number }}</td>
+                        <td data-label="Email / SĐT">
+                            <div class="flex flex-column">
+                                <span>{{ order.email }}</span>
+                                <small class="text-muted">{{ order.phone_number }}</small>
+                            </div>
+                        </td>
                         <td data-label="Phương thức TT">
                             <span [ngClass]="getPaymentMethodClass(order.payment_method)">
                                 {{ order.payment_method }}
                             </span>
                         </td>
-                        <td data-label="Ngày đặt">{{ order.order_date | date:'dd/MM/yyyy' }}</td>
+                        <td data-label="Ngày đặt">{{ order.order_date | date:'dd/MM/yyyy HH:mm' }}</td>
                         <td data-label="Tổng tiền">{{ order.total_money | currency:'VND':'symbol':'1.0-0' }}</td>
                         <td data-label="Trạng thái ĐH">
                             <p-dropdown [options]="orderStateOptions" 

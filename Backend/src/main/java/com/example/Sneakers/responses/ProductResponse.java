@@ -40,6 +40,10 @@ public class ProductResponse extends BaseResponse{
     private List<ProductImage> productImages= new ArrayList<>();
 
     private List<FeatureResponse> features = new ArrayList<>();
+    
+    private Double averageRating;
+    
+    private Long totalReviews;
 
     public static ProductResponse fromProduct(Product product){
         List<FeatureResponse> features = product.getProductFeatures() != null ?

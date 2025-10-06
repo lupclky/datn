@@ -120,7 +120,6 @@ networks:
   Sneaker-network:
     name: Sneaker-network
     driver: bridge
-    external: true
 
 volumes:
   jenkins_home:

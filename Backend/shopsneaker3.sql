@@ -79,7 +79,7 @@ CREATE TABLE `orders` (
   `phone_number` varchar(20) NOT NULL,
   `address` varchar(200) NOT NULL,
   `note` varchar(100) DEFAULT '',
-  `order_date` date DEFAULT NULL,
+  `order_date` datetime DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
   `total_money` bigint DEFAULT NULL,
   `shipping_method` varchar(100) DEFAULT NULL,
@@ -99,20 +99,20 @@ CREATE TABLE `orders` (
 
 INSERT INTO `orders` (`id`, `user_id`, `fullname`, `email`, `phone_number`, `address`, `note`, `order_date`, `status`, `total_money`, `shipping_method`, `shipping_date`, `payment_method`, `active`, `voucher_id`, `discount_amount`, `payment_intent_id`, `vnp_txn_ref`, `vnp_transaction_no`) VALUES
 (1, 1, 'Trần Đức Em', 'ducanh21112003@gmail.com', '0865247233', 'Hanoi', '', NULL, NULL, 1000000, 'express', NULL, 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(2, 1, 'Lưu Thuỳ Linh', 'chill@gmail.com', '0123456789', 'Hanoi', 'Hàng dễ vỡ xin nhẹ tay', '2024-02-19', 'shipped', 1000001, 'express', '2024-02-19', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(3, 1, 'Hà Quang Dương', 'duong2032003@gmail.com', '0123456789', 'Hanoi', '', '2024-02-18', 'pending', 1000000, 'express', '2024-02-18', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(4, 1, 'Hà Quang Dương', 'duong2032003@gmail.com', '0123456789', 'Hanoi', '', '2024-02-18', 'pending', 1000000, 'express', '2024-02-18', 'cod', 0, NULL, 0, NULL, NULL, NULL),
+(2, 1, 'Lưu Thuỳ Linh', 'chill@gmail.com', '0123456789', 'Hanoi', 'Hàng dễ vỡ xin nhẹ tay', '2024-02-19 10:30:00', 'shipped', 1000001, 'express', '2024-02-19', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(3, 1, 'Hà Quang Dương', 'duong2032003@gmail.com', '0123456789', 'Hanoi', '', '2024-02-18 14:15:30', 'pending', 1000000, 'express', '2024-02-18', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(4, 1, 'Hà Quang Dương', 'duong2032003@gmail.com', '0123456789', 'Hanoi', '', '2024-02-18 16:45:22', 'pending', 1000000, 'express', '2024-02-18', 'cod', 0, NULL, 0, NULL, NULL, NULL),
 (5, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', NULL, 'shipped', 123, 'express', NULL, 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(6, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-19', 'pending', 123, 'express', '2024-03-19', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(7, 13, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-20', 'pending', 149633200, 'express', '2024-03-20', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(8, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-21', 'pending', 123, 'express', '2024-03-21', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(9, 14, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27', 'pending', 1081170816, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(10, 14, 'Đức Anh', 'ducanh@gmail.com', '0865247233', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27', 'delivered', 209694496, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(11, 14, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27', 'pending', 0, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(12, 14, 'Trần Đức Anh', 'ducanh@yahoo.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-29', 'pending', 3000000, 'express', '2024-03-29', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(13, 14, 'Trần Đức Anh', 'ducanh@gmail.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-02', 'pending', 3000000, 'express', '2024-04-02', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(14, 14, 'Trần Đức Anh', 'ducanh@gmail.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 3000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(15, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'delivered', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(6, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-19 09:20:15', 'pending', 123, 'express', '2024-03-19', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(7, 13, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-20 11:05:42', 'pending', 149633200, 'express', '2024-03-20', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(8, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-21 15:30:10', 'pending', 123, 'express', '2024-03-21', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(9, 14, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27 13:25:55', 'pending', 1081170816, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(10, 14, 'Đức Anh', 'ducanh@gmail.com', '0865247233', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27 08:40:20', 'delivered', 209694496, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(11, 14, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27 17:10:05', 'pending', 0, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(12, 14, 'Trần Đức Anh', 'ducanh@yahoo.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-29 09:15:45', 'pending', 3000000, 'express', '2024-03-29', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(13, 14, 'Trần Đức Anh', 'ducanh@gmail.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-02 11:20:30', 'pending', 3000000, 'express', '2024-04-02', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(14, 14, 'Trần Đức Anh', 'ducanh@gmail.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05 14:35:12', 'pending', 3000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
+(15, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05 16:50:22', 'delivered', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
 (16, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 0, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
 (17, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 0, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
 (18, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 0, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
@@ -337,6 +337,34 @@ INSERT INTO `order_details` (`id`, `order_id`, `product_id`, `price`, `number_of
 (123, 90, 14, 3852473, 1, 3852473, 36),
 (124, 91, 3, 24076756, 1, 24076756, 41),
 (125, 92, 5784, 29000000, 1, 29000000, 36);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `lock_features`
+--
+
+CREATE TABLE `lock_features` (
+  `id` bigint NOT NULL,
+  `name` varchar(100) NOT NULL COMMENT 'Tên chức năng',
+  `description` text COMMENT 'Mô tả chức năng',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT 'Trạng thái hoạt động',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `lock_features`
+--
+
+INSERT INTO `lock_features` (`id`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'Mở khóa vân tay', 'Nhận diện và mở khóa bằng vân tay', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(2, 'Mở khóa mã PIN', 'Nhập mã PIN để mở khóa', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(3, 'Mở khóa thẻ từ', 'Quẹt thẻ từ để mở khóa', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(4, 'Kết nối Bluetooth', 'Kết nối và điều khiển qua Bluetooth', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(5, 'Kết nối WiFi', 'Kết nối và điều khiển qua WiFi', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(6, 'Chống nước', 'Có khả năng chống nước', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(7, 'Cảnh báo an ninh', 'Cảnh báo khi có xâm nhập', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00');
 
 -- --------------------------------------------------------
 
@@ -630,6 +658,56 @@ INSERT INTO `product_images` (`id`, `product_id`, `image_url`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `product_features`
+--
+
+CREATE TABLE `product_features` (
+  `id` bigint NOT NULL,
+  `product_id` int NOT NULL COMMENT 'ID sản phẩm',
+  `feature_id` bigint NOT NULL COMMENT 'ID chức năng',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `product_features`
+--
+
+INSERT INTO `product_features` (`id`, `product_id`, `feature_id`, `created_at`) VALUES
+(1, 1, 1, '2025-06-13 12:00:00'),
+(2, 1, 3, '2025-06-13 12:00:00'),
+(3, 2, 1, '2025-06-13 12:00:00'),
+(4, 2, 2, '2025-06-13 12:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` bigint NOT NULL,
+  `product_id` int NOT NULL COMMENT 'ID sản phẩm',
+  `user_id` int NOT NULL COMMENT 'ID người dùng',
+  `rating` int NOT NULL COMMENT 'Đánh giá từ 1-5 sao',
+  `comment` text COMMENT 'Nội dung bình luận',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `created_at`, `updated_at`) VALUES
+(1, 1, 18, 5, 'Sản phẩm rất tốt, chất lượng cao!', '2025-06-13 15:00:00', '2025-06-13 15:00:00'),
+(2, 1, 14, 4, 'Tốt, giá hợp lý', '2025-06-13 16:00:00', '2025-06-13 16:00:00'),
+(3, 2, 18, 5, 'Rất hài lòng với sản phẩm', '2025-06-13 17:00:00', '2025-06-13 17:00:00'),
+(4, 3, 15, 3, 'Tạm được', '2025-06-13 18:00:00', '2025-06-13 18:00:00');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `return_requests`
 --
 
@@ -731,7 +809,9 @@ CREATE TABLE `users` (
   `date_of_birth` datetime(6) DEFAULT NULL,
   `facebook_account_id` int DEFAULT '0',
   `google_account_id` int DEFAULT '0',
-  `role_id` int DEFAULT NULL
+  `role_id` int DEFAULT NULL,
+  `reset_password_token` varchar(255) DEFAULT NULL,
+  `reset_password_token_expiry` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -847,6 +927,13 @@ ALTER TABLE `orders`
   ADD KEY `idx_orders_payment_intent_id` (`payment_intent_id`);
 
 --
+-- Chỉ mục cho bảng `lock_features`
+--
+ALTER TABLE `lock_features`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_is_active` (`is_active`);
+
+--
 -- Chỉ mục cho bảng `order_details`
 --
 ALTER TABLE `order_details`
@@ -875,6 +962,15 @@ ALTER TABLE `return_requests`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_return_requests_order_id` (`order_id`),
   ADD KEY `idx_return_requests_status` (`status`);
+
+--
+-- Chỉ mục cho bảng `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `idx_rating` (`rating`);
 
 --
 -- Chỉ mục cho bảng `roles`
@@ -949,6 +1045,12 @@ ALTER TABLE `categories`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT cho bảng `lock_features`
+--
+ALTER TABLE `lock_features`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
@@ -977,6 +1079,12 @@ ALTER TABLE `product_images`
 --
 ALTER TABLE `return_requests`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT cho bảng `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `roles`
@@ -1018,7 +1126,7 @@ ALTER TABLE `voucher_usage`
 -- AUTO_INCREMENT cho bảng `product_features`
 --
 ALTER TABLE `product_features`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Ràng buộc đối với các bảng kết xuất
@@ -1064,6 +1172,13 @@ ALTER TABLE `return_requests`
   ADD CONSTRAINT `return_requests_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 
 --
+-- Ràng buộc cho bảng `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Ràng buộc cho bảng `social_accounts`
 --
 ALTER TABLE `social_accounts`
@@ -1097,42 +1212,6 @@ ALTER TABLE `product_features`
   ADD CONSTRAINT `product_features_ibfk_2` FOREIGN KEY (`feature_id`) REFERENCES `lock_features` (`id`) ON DELETE CASCADE;
 
 COMMIT;
-
--- --------------------------------------------------------
---
--- Cấu trúc bảng cho bảng `product_features`
---
-
-CREATE TABLE `product_features` (
-  `id` bigint NOT NULL,
-  `product_id` int NOT NULL COMMENT 'ID sản phẩm',
-  `feature_id` int NOT NULL COMMENT 'ID chức năng',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Đang đổ dữ liệu cho bảng `product_features`
---
-
-INSERT INTO `product_features` (`id`, `product_id`, `feature_id`, `created_at`) VALUES
-(1, 1, 1, '2025-06-13 12:00:00'),
-(2, 1, 3, '2025-06-13 12:00:00'),
-(3, 1, 5, '2025-06-13 12:00:00'),
-(4, 2, 1, '2025-06-13 12:00:00'),
-(5, 2, 2, '2025-06-13 12:00:00'),
-(6, 3, 1, '2025-06-13 12:00:00'),
-(7, 3, 3, '2025-06-13 12:00:00'),
-(8, 3, 4, '2025-06-13 12:00:00'),
-(9, 3, 7, '2025-06-13 12:00:00'),
-(10, 4, 1, '2025-06-13 12:00:00'),
-(11, 4, 3, '2025-06-13 12:00:00'),
-(12, 4, 4, '2025-06-13 12:00:00'),
-(13, 4, 6, '2025-06-13 12:00:00'),
-(14, 5, 1, '2025-06-13 12:00:00'),
-(15, 5, 5, '2025-06-13 12:00:00'),
-(16, 5, 6, '2025-06-13 12:00:00');
-
--- --------------------------------------------------------
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 

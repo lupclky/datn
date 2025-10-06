@@ -16,18 +16,14 @@ import com.example.Sneakers.utils.BuilderEmailContent;
 import com.example.Sneakers.utils.Email;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,7 +126,7 @@ public class OrderService implements IOrderService {
 
         Order order = Order.builder()
                 .user(user)
-                .orderDate(LocalDate.now())
+                .orderDate(LocalDateTime.now())
                 .status(initialStatus) // Sử dụng trạng thái đã xác định
                 .fullName(orderDTO.getFullName())
                 .email(orderDTO.getEmail())

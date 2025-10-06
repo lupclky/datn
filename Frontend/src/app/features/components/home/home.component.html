@@ -13,27 +13,27 @@
         </div>
         <div class="carousel-inner">
           <div class="carousel-item active">
-            <img src="../../../../assets/images/bannerGiay.jpg" class="d-block w-100" alt="Banner Giày 1">
+            <img src="../../../../assets/images/van1.jpg" class="d-block w-100" alt="Khoá vân tay thông minh">
             <div class="carousel-caption d-none d-md-block">
-              <h1 class="display-4 fw-bold">Bộ Sưu Tập Mới</h1>
-              <p class="lead">Khám phá những mẫu giày thể thao mới nhất</p>
-              <button class="btn btn-primary btn-lg">Khám Phá Ngay</button>
+              <h1 class="display-4 fw-bold">Khoá vân tay thông minh</h1>
+              <p class="lead">Bảo mật hiện đại, mở khoá một chạm</p>
+              <button class="btn btn-primary btn-lg">Khám phá ngay</button>
             </div>
           </div>
           <div class="carousel-item">
-            <img src="../../../../assets/images/bannerGiay2.jpg" class="d-block w-100" alt="Banner Giày 2">
+            <img src="../../../../assets/images/van3.jpg" class="d-block w-100" alt="Khoá cửa điện tử">
             <div class="carousel-caption d-none d-md-block">
-              <h1 class="display-4 fw-bold">Giảm Giá Đặc Biệt</h1>
-              <p class="lead">Lên đến 50% cho tất cả sản phẩm</p>
-              <button class="btn btn-danger btn-lg">Mua Ngay</button>
+              <h1 class="display-4 fw-bold">Ưu đãi đặc biệt</h1>
+              <p class="lead">Giảm đến 50% cho dòng khoá cao cấp</p>
+              <button class="btn btn-danger btn-lg">Mua ngay</button>
             </div>
           </div>
           <div class="carousel-item">
-            <img src="../../../../assets/images/bannerGiay3.jpg" class="d-block w-100" alt="Banner Giày 3">
+            <img src="../../../../assets/images/van4.jpg" class="d-block w-100" alt="Khoá cửa thông minh Korea">
             <div class="carousel-caption d-none d-md-block">
-              <h1 class="display-4 fw-bold">Chất Lượng Hàng Đầu</h1>
-              <p class="lead">Cam kết chất lượng và phong cách</p>
-              <button class="btn btn-success btn-lg">Xem Thêm</button>
+              <h1 class="display-4 fw-bold">Chất lượng Hàn Quốc</h1>
+              <p class="lead">Thiết kế sang trọng, vận hành bền bỉ</p>
+              <button class="btn btn-success btn-lg">Xem thêm</button>
             </div>
           </div>
         </div>
@@ -75,6 +75,12 @@
                 </div>
                 <div class="product-info">
                   <h5 class="product-title">{{product.name}}</h5>
+                  @if(product.averageRating && product.averageRating > 0) {
+                    <div class="product-rating">
+                      <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                      <span class="rating-count">({{product.totalReviews}})</span>
+                    </div>
+                  }
                   <div class="product-price">
                     <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
                     @if(product.discount > 0) {
@@ -95,44 +101,44 @@
       <div class="container">
         <div class="row text-center mb-5">
           <div class="col-12">
-            <h2 class="section-title">Danh Mục Sản Phẩm</h2>
-            <p class="section-subtitle">Khám phá bộ sưu tập đa dạng của chúng tôi</p>
+            <h2 class="section-title">Danh mục sản phẩm khoá</h2>
+            <p class="section-subtitle">Giải pháp an ninh cho mọi không gian</p>
           </div>
         </div>
         <div class="row g-4">
           <div class="col-md-4">
             <div class="category-card">
               <div class="category-image">
-                <img src="../../../../assets/images/bannerGiay.jpg" alt="Giày Thể Thao" class="img-fluid">
+                <img src="../../../../assets/images/van2.jpg" alt="Khoá vân tay" class="img-fluid">
               </div>
               <div class="category-content">
-                <h4>Giày Thể Thao</h4>
-                <p>Dành cho hoạt động thể thao và phong cách casual</p>
-                <button class="btn btn-outline-primary">Xem Thêm</button>
+                <h4>Khoá vân tay</h4>
+                <p>Mở khoá một chạm, bảo mật cao, tiện lợi hàng ngày</p>
+                <button class="btn btn-outline-primary">Xem thêm</button>
               </div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="category-card">
               <div class="category-image">
-                <img src="../../../../assets/images/bannerGiay2.jpg" alt="Giày Công Sở" class="img-fluid">
+                <img src="../../../../assets/images/van5.jpg" alt="Khoá thẻ từ & mã số" class="img-fluid">
               </div>
               <div class="category-content">
-                <h4>Giày Công Sở</h4>
-                <p>Lịch lãm và chuyên nghiệp cho môi trường làm việc</p>
-                <button class="btn btn-outline-primary">Xem Thêm</button>
+                <h4>Khoá thẻ từ & mã số</h4>
+                <p>Linh hoạt, dễ dùng cho gia đình và văn phòng</p>
+                <button class="btn btn-outline-primary">Xem thêm</button>
               </div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="category-card">
               <div class="category-image">
-                <img src="../../../../assets/images/bannerGiay3.jpg" alt="Giày Sneaker" class="img-fluid">
+                <img src="../../../../assets/images/v1.jpg" alt="Phụ kiện khoá" class="img-fluid">
               </div>
               <div class="category-content">
-                <h4>Sneaker Premium</h4>
-                <p>Phong cách đường phố và xu hướng thời trang</p>
-                <button class="btn btn-outline-primary">Xem Thêm</button>
+                <h4>Phụ kiện khoá</h4>
+                <p>Ruột khoá, pin, chốt an toàn, linh kiện chính hãng</p>
+                <button class="btn btn-outline-primary">Xem thêm</button>
               </div>
             </div>
           </div>
@@ -145,8 +151,8 @@
       <div class="container">
         <div class="row text-center mb-5">
           <div class="col-12">
-            <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
-            <p class="section-subtitle">Những sản phẩm được yêu thích nhất</p>
+            <h2 class="section-title">Khoá nổi bật</h2>
+            <p class="section-subtitle">Mẫu khoá bán chạy, tính năng hiện đại</p>
           </div>
         </div>
         <div class="row g-4">
@@ -161,6 +167,12 @@
                 </div>
                 <div class="product-info">
                   <h5 class="product-title">{{product.name}}</h5>
+                  @if(product.averageRating && product.averageRating > 0) {
+                    <div class="product-rating">
+                      <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                      <span class="rating-count">({{product.totalReviews}})</span>
+                    </div>
+                  }
                   <div class="product-price">
                     <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
                     @if(product.discount > 0) {
@@ -174,7 +186,7 @@
           }
         </div>
         <div class="text-center mt-4">
-          <button class="btn btn-outline-primary btn-lg" routerLink="/all-product">Xem Tất Cả Sản Phẩm</button>
+          <button class="btn btn-outline-primary btn-lg" routerLink="/allProduct">Xem tất cả sản phẩm</button>
         </div>
       </div>
     </section>
@@ -184,8 +196,8 @@
       <div class="container">
         <div class="row text-center mb-5">
           <div class="col-12">
-            <h2 class="section-title">Hàng Mới Về</h2>
-            <p class="section-subtitle">Những mẫu giày mới nhất từ các thương hiệu hàng đầu</p>
+            <h2 class="section-title">Khoá mới về</h2>
+            <p class="section-subtitle">Cập nhật dòng khoá mới nhất từ Hàn Quốc</p>
           </div>
         </div>
         <div class="row g-4">
@@ -214,8 +226,8 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-md-6">
-            <h2 class="display-5 fw-bold mb-3">KHUYẾN MÃI ĐỘC QUYỀN</h2>
-            <p class="lead mb-4">Giảm giá lên đến 50% cho tất cả sản phẩm giày thể thao cao cấp</p>
+            <h2 class="display-5 fw-bold mb-3">KHUYẾN MÃI KHOÁ VÂN TAY</h2>
+            <p class="lead mb-4">Ưu đãi đến 50% cho các mẫu khoá thông minh cao cấp</p>
             <div class="countdown-timer mb-4">
               <div class="d-flex gap-3">
                 <div class="time-unit">

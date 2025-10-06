@@ -94,10 +94,10 @@
                    type="text"
                    pInputText
                    [(ngModel)]="feature.name"
-                   [class.ng-invalid]="submitted && !feature.name?.trim()"
+                   [class.ng-invalid]="submitted && !feature.name.trim()"
                    placeholder="Nhập tên chức năng"
                    required>
-            <small class="p-error" *ngIf="submitted && !feature.name?.trim()">Tên chức năng là bắt buộc</small>
+            <small class="p-error" *ngIf="submitted && !feature.name.trim()">Tên chức năng là bắt buộc</small>
         </div>
 
         <div class="field">

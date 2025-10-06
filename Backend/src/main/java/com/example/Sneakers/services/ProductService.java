@@ -13,6 +13,7 @@ import com.example.Sneakers.repositories.CategoryRepository;
 import com.example.Sneakers.repositories.ProductFeatureRepository;
 import com.example.Sneakers.repositories.ProductImageRepository;
 import com.example.Sneakers.repositories.ProductRepository;
+import com.example.Sneakers.repositories.ReviewRepository;
 import com.example.Sneakers.services.ProductFeatureService;
 import com.example.Sneakers.responses.ListProductResponse;
 import com.example.Sneakers.responses.ProductResponse;
@@ -37,6 +38,7 @@ public class ProductService implements IProductService {
     private final ProductImageRepository productImageRepository;
     private final ProductFeatureRepository productFeatureRepository;
     private final ProductFeatureService productFeatureService;
+    private final ReviewRepository reviewRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
@@ -82,7 +84,15 @@ public class ProductService implements IProductService {
         // (nếu có)
         Page<Product> productPage;
         productPage = productRepository.searchProducts(categoryId, keyword, pageRequest);
-        return productPage.map(ProductResponse::fromProduct);
+        return productPage.map(product -> {
+            ProductResponse response = ProductResponse.fromProduct(product);
+            // Add rating stats
+            Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
+            Long totalReviews = reviewRepository.countByProductId(product.getId());
+            response.setAverageRating(avgRating != null ? avgRating : 0.0);
+            response.setTotalReviews(totalReviews);
+            return response;
+        });
     }
 
     @Override

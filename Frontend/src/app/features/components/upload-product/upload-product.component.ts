@@ -82,7 +82,7 @@ export class UploadProductComponent extends BaseComponent implements OnInit {
       })
     ).subscribe();
 
-    this.lockFeatureService.getAllFeatures().pipe(
+    this.lockFeatureService.getActiveFeatures().pipe(
       tap((features) => {
         this.featuresOptions = features.map((item: LockFeature) => {
           return {

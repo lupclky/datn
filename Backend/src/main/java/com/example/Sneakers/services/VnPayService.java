@@ -134,8 +134,8 @@ public class VnPayService implements IVnPayService {
         String vnp_Amount = String.valueOf(amount);
         log.info("Step 4: Refund amount: {} (original: {})", vnp_Amount, order.getTotalMoney());
 
-        // Convert LocalDate to LocalDateTime at start of day to include time components
-        String vnp_TransactionDate = order.getOrderDate().atStartOfDay().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        // Format LocalDateTime directly for VNPAY
+        String vnp_TransactionDate = order.getOrderDate().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         log.info("Step 4: Transaction date: {}", vnp_TransactionDate);
 
         String vnp_RequestId = VNPayUtil.getRandomNumber(8);

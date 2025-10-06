@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/product-features")
+@RequestMapping("${api.prefix}/product-features")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ProductFeatureController {

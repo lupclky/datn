@@ -30,6 +30,11 @@ import { CategoriesDto } from '../../../core/dtos/categories.dto';
 import { RouterModule } from '@angular/router';
 import { TabViewModule } from 'primeng/tabview';
 import { ProductUploadReq } from '../../../core/requestType/UploadProducts';
+import { ReviewService, Review } from '../../../core/services/review.service';
+import { RatingModule } from 'primeng/rating';
+import { TooltipModule } from 'primeng/tooltip';
+import { LockFeatureService } from '../../../core/services/lock-feature.service';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 
 @Component({
@@ -50,7 +55,10 @@ import { ProductUploadReq } from '../../../core/requestType/UploadProducts';
     DropdownModule,
     CardModule,
     RouterModule,
-    TabViewModule
+    TabViewModule,
+    RatingModule,
+    TooltipModule,
+    MultiSelectModule
   ],
   templateUrl: './detail-product.component.html',
   styleUrl: './detail-product.component.scss'
@@ -58,19 +66,30 @@ import { ProductUploadReq } from '../../../core/requestType/UploadProducts';
 export class DetailProductComponent extends BaseComponent implements OnInit,AfterViewInit {
   public productForm: FormGroup;
   public roleId: number = 100;
-  private token: string | null = null;
+  public token: string | null = null; // Changed to public for template access
   private id !: string ;
   public mainProduct !: ProductDto;
   public responsiveOptions : any[] = [];
   public images : {id : number, image_url : string}[] = [];
   public relatedProducts: ProductDto[] = [];
   public quantity : number = 1;
-  public sizes : number[] = [36,37,38,39,40,41,42,43,44];
-  public size : number = this.sizes[0];
+  // Removed size selection for lock products
   public apiImage: string = environment.apiImage;
   public categoriesOptions: MenuItem[] = [];
+  public featuresOptions: MenuItem[] = [];
+  public selectedFeatures: number[] = [];
   private categoryId!: string;
   public categoryNameOfProduct!: string;
+  public currentUserId: number = 0; // Add to compare with review owner
+  
+  // Reviews
+  public reviews: Review[] = [];
+  public averageRating: number = 0;
+  public totalReviews: number = 0;
+  public newReviewRating: number = 5;
+  public newReviewComment: string = '';
+  public isSubmittingReview: boolean = false;
+  public hasUserReviewed: boolean = false;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -84,12 +103,16 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     private userService: UserService,
     private confirmationService: ConfirmationService,
     private loadingService: LoadingService,
-    private categoriesService: CategoriesService
+    private categoriesService: CategoriesService,
+    private reviewService: ReviewService,
+    private lockFeatureService: LockFeatureService
   ) {
     super();
     if (typeof localStorage != 'undefined'){
       this.token = localStorage.getItem("token");
-      this.roleId = parseInt(JSON.parse(localStorage.getItem("userInfor") || '{"role_id": "0"}').role_id || '0');
+      const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{"role_id": "0", "id": "0"}');
+      this.roleId = parseInt(userInfor.role_id || '0');
+      this.currentUserId = parseInt(userInfor.id || '0');
     }
     this.productForm = this.fb.group({
       productName: [, Validators.required],
@@ -146,6 +169,10 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
           })
           this.categoryId = product.category_id?.toString() ?? '';
           this.images = product.product_images;
+          // Set selected features
+          if (product.features && product.features.length > 0) {
+            this.selectedFeatures = product.features.map(f => f.id);
+          }
         }),
         switchMap(() => {
           return this.categoriesService.getCategoryById(parseInt(this.categoryId)).pipe(
@@ -171,6 +198,9 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
           this.relatedProducts = product.products.filter(p => p.quantity > 0);
         }),
       ).subscribe();
+
+      // Load reviews
+      this.loadReviews();
     }
 
     this.categoriesService.getCategories().pipe(
@@ -182,14 +212,25 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
           }
         })
       })
-    ).subscribe()
+    ).subscribe();
+
+    // Load features (only active ones for product assignment)
+    this.lockFeatureService.getActiveFeatures().pipe(
+      tap((features) => {
+        this.featuresOptions = features.map((item) => {
+          return {
+            label: item.name,
+            value: item.id
+          }
+        })
+      })
+    ).subscribe();
   }
 
   addToCart(){
     this.productService.addProductToCart({
       product_id: Number(this.id),
-      quantity: this.quantity,
-      size:  this.size
+      quantity: this.quantity
     }).pipe(
       tap(() => {
         this.toastService.success("Thêm sản phẩm vào giỏ hàng thành công");
@@ -215,7 +256,6 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     const cartItems = [{
       id: Math.random(), // temporary id
       quantity: this.quantity,
-      size: this.size,
       products: this.mainProduct
     }];
 
@@ -327,6 +367,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       category_id: parseInt(this.categoryId, 10),
       discount: this.productForm.value.discount,
       quantity: this.productForm.value.quantity,
+      featureIds: this.selectedFeatures
     };
 
     // Start the update process
@@ -360,5 +401,114 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
+  }
+
+  loadReviews(): void {
+    if (!this.id) return;
+    
+    // Load reviews
+    this.reviewService.getReviewsByProduct(parseInt(this.id)).pipe(
+      tap((reviews) => {
+        this.reviews = reviews;
+        // Check if current user has already reviewed
+        if (this.currentUserId > 0) {
+          this.hasUserReviewed = reviews.some(r => r.userId === this.currentUserId);
+        }
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+
+    // Load rating stats
+    this.reviewService.getProductRatingStats(parseInt(this.id)).pipe(
+      tap((stats) => {
+        this.averageRating = stats.averageRating || 0;
+        this.totalReviews = stats.totalReviews || 0;
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  submitReview(): void {
+    if (!this.token) {
+      this.toastService.fail('Vui lòng đăng nhập để đánh giá sản phẩm');
+      return;
+    }
+
+    if (this.newReviewRating < 1 || this.newReviewRating > 5) {
+      this.toastService.fail('Vui lòng chọn số sao từ 1 đến 5');
+      return;
+    }
+
+    this.isSubmittingReview = true;
+
+    this.reviewService.createReview({
+      productId: parseInt(this.id),
+      rating: this.newReviewRating,
+      comment: this.newReviewComment
+    }).pipe(
+      tap(() => {
+        this.toastService.success('Đánh giá của bạn đã được gửi thành công!');
+        this.newReviewRating = 5;
+        this.newReviewComment = '';
+        this.loadReviews(); // Reload reviews
+      }),
+      catchError((err) => {
+        const errorMessage = err.error?.error || err.error?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.';
+        this.toastService.fail(errorMessage);
+        return of(err);
+      }),
+      finalize(() => {
+        this.isSubmittingReview = false;
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  deleteReview(reviewId: number): void {
+    console.log('deleteReview called with ID:', reviewId);
+    
+    if (!reviewId) {
+      console.error('Review ID is undefined or null');
+      this.toastService.fail('Lỗi: Không tìm thấy ID đánh giá');
+      return;
+    }
+
+    console.log('About to call confirmationService.confirm');
+    
+    try {
+      this.confirmationService.confirm({
+        message: 'Bạn có chắc chắn muốn xóa đánh giá này?',
+        header: 'Xác nhận xóa',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          console.log('User confirmed deletion');
+          this.reviewService.deleteReview(reviewId).pipe(
+            tap(() => {
+              console.log('Delete successful');
+              this.toastService.success('Đã xóa đánh giá');
+              this.hasUserReviewed = false; // Reset flag
+              this.loadReviews(); // Reload reviews
+            }),
+            catchError((err) => {
+              console.error('Delete review error:', err);
+              const errorMessage = err.error?.error || err.error?.message || 'Không thể xóa đánh giá';
+              this.toastService.fail(errorMessage);
+              return of(err);
+            }),
+            takeUntil(this.destroyed$)
+          ).subscribe();
+        },
+        reject: () => {
+          console.log('User cancelled deletion');
+        }
+      });
+      console.log('confirmationService.confirm called successfully');
+    } catch (error) {
+      console.error('Error calling confirmationService.confirm:', error);
+    }
+  }
+
+  getStarArray(rating: number): number[] {
+    return Array(5).fill(0).map((_, i) => i < rating ? 1 : 0);
   }
 }

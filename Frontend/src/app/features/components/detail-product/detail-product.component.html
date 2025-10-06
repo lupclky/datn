@@ -1,6 +1,9 @@
+<!-- Global components -->
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
 @if (mainProduct && (roleId == 1 || !roleId)){
   <div class="product-detail-page">
-    <p-toast></p-toast>
     
     <!-- Breadcrumb -->
     <div class="breadcrumb-section">
@@ -36,6 +39,19 @@
                 </ng-template>
               </p-galleria>
             </div>
+            @if (((mainProduct.features?.length || 0) > 0)) {
+              <div class="feature-tags">
+                <span class="feature-label">Chức năng:</span>
+                <div class="feature-list">
+                  @for (feature of (mainProduct.features ?? []); track feature.id) {
+                    <span class="feature-tag" [pTooltip]="feature.description || feature.name">
+                      <i class="pi pi-check-circle"></i>
+                      {{ feature.name }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
           </div>
   
           <!-- Product Information -->
@@ -43,6 +59,15 @@
             <div class="product-info">
               <!-- Product Title -->
               <h1 class="product-title">{{mainProduct.name}}</h1>
+
+              <!-- Product Rating -->
+              @if(totalReviews > 0) {
+                <div class="product-rating-summary">
+                  <p-rating [(ngModel)]="averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                  <span class="rating-text">{{averageRating | number:'1.1-1'}}</span>
+                  <span class="rating-count">({{totalReviews}} đánh giá)</span>
+                </div>
+              }
 
               <!-- Product Badge -->
               @if(mainProduct.discount > 0) {
@@ -73,18 +98,7 @@
                 <p>{{mainProduct.description}}</p>
               </div>
               
-              <!-- Size Selection -->
-              <div class="size-selection">
-                <h4 class="selection-title">Chọn size</h4>
-                <div class="size-options">
-                  @for (item of sizes; track item) {
-                    <label class="size-option" [class.selected]="item === size">
-                      <input type="radio" name="size" [value]="item" [(ngModel)]="size">
-                      <span class="size-button">{{item}}</span>
-                    </label>
-                  }
-                </div>
-              </div>
+              <!-- Size selection removed for lock products -->
               
               <!-- Quantity Selection -->
               <div class="quantity-selection">
@@ -174,56 +188,141 @@
       </div>
     }
   
-    <!-- Related Products & Reviews -->
-    <div class="extra-info-section">
+    <!-- Related Products Section -->
+    <div class="related-products-section">
       <div class="container">
-        <p-tabView>
-          <p-tabPanel header="Sản phẩm liên quan">
-            <div class="related-products-content">
-              @if(relatedProducts.length > 0) {
-                <div class="row g-4">
-                  @for(product of relatedProducts; track product){
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                      <div class="related-product-card" (click)="goToDetail(product.id)">
-                        <div class="product-image">
-                          <img [src]="apiImage + product.thumbnail" [alt]="product.name">
-                          @if(product.discount > 0) {
-                            <span class="discount-badge">-{{product.discount}}%</span>
-                          }
+        <div class="section-header">
+          <h2 class="section-title">Sản phẩm liên quan</h2>
+        </div>
+        <div class="related-products-content">
+          @if(relatedProducts.length > 0) {
+            <div class="row g-4">
+              @for(product of relatedProducts; track product){
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                  <div class="related-product-card" (click)="goToDetail(product.id)">
+                    <div class="product-image">
+                      <img [src]="apiImage + product.thumbnail" [alt]="product.name">
+                      @if(product.discount > 0) {
+                        <span class="discount-badge">-{{product.discount}}%</span>
+                      }
+                    </div>
+                    <div class="product-content">
+                      <h5 class="product-name">{{product.name}}</h5>
+                      <div class="product-price">
+                        <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
+                        @if(product.discount > 0) {
+                          <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="no-products">Không có sản phẩm liên quan.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="reviews-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Đánh giá sản phẩm</h2>
+        </div>
+        <div class="reviews-content">
+              <!-- Rating Summary -->
+              <div class="rating-summary">
+                <div class="average-rating">
+                  <h3>{{averageRating | number:'1.1-1'}}</h3>
+                  <p-rating [(ngModel)]="averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                  <p>{{totalReviews}} đánh giá</p>
+                </div>
+              </div>
+
+              <!-- Add Review Form -->
+              @if(token && !hasUserReviewed) {
+                <div class="add-review-form">
+                  <h4>Viết đánh giá của bạn</h4>
+                  <div class="form-group">
+                    <label>Đánh giá:</label>
+                    <p-rating [(ngModel)]="newReviewRating" [cancel]="false"></p-rating>
+                  </div>
+                  <div class="form-group">
+                    <label>Nhận xét:</label>
+                    <textarea 
+                      [(ngModel)]="newReviewComment" 
+                      rows="4" 
+                      pInputTextarea 
+                      placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm...">
+                    </textarea>
+                  </div>
+                  <button 
+                    pButton 
+                    label="Gửi đánh giá" 
+                    icon="pi pi-send" 
+                    (click)="submitReview()"
+                    [disabled]="isSubmittingReview"
+                    [loading]="isSubmittingReview">
+                  </button>
+                </div>
+              } @else if(token && hasUserReviewed) {
+                <div class="already-reviewed">
+                  <p><i class="pi pi-check-circle"></i> Bạn đã đánh giá sản phẩm này.</p>
+                </div>
+              } @else {
+                <div class="login-prompt">
+                  <p>Vui lòng <a [routerLink]="['/auth-login']">đăng nhập</a> để đánh giá sản phẩm.</p>
+                </div>
+              }
+
+              <!-- Reviews History -->
+              <div class="reviews-history">
+                <h4 class="history-title">Lịch sử đánh giá</h4>
+              <div class="reviews-list">
+                @if(reviews.length > 0) {
+                  @for(review of reviews; track review.id) {
+                    <div class="review-item">
+                      <div class="review-header">
+                        <div class="reviewer-info">
+                          <i class="pi pi-user"></i>
+                          <span class="reviewer-name">{{review.userName}}</span>
                         </div>
-                        <div class="product-content">
-                          <h5 class="product-name">{{product.name}}</h5>
-                          <div class="product-price">
-                            <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
-                            @if(product.discount > 0) {
-                              <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
-                            }
-                          </div>
+                        <div class="review-rating">
+                          <p-rating [(ngModel)]="review.rating" [readonly]="true" [cancel]="false"></p-rating>
                         </div>
+                      </div>
+                      <div class="review-body">
+                        <p>{{review.comment}}</p>
+                      </div>
+                      <div class="review-footer">
+                        <span class="review-date">{{review.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                        @if(review.userId === currentUserId && review.id) {
+                          <button 
+                            pButton 
+                            icon="pi pi-trash" 
+                            class="p-button-text p-button-danger p-button-sm" 
+                            (click)="deleteReview(review.id)"
+                            [pTooltip]="'Xóa đánh giá (ID: ' + review.id + ')'">
+                          </button>
+                        }
                       </div>
                     </div>
                   }
-                </div>
-              } @else {
-                <p>Không có sản phẩm liên quan.</p>
-              }
+                } @else {
+                  <p class="no-reviews">Chưa có đánh giá nào cho sản phẩm này.</p>
+                }
+              </div>
+              </div>
             </div>
-          </p-tabPanel>
-          <p-tabPanel header="Đánh giá sản phẩm">
-            <div class="reviews-content">
-              <!-- Placeholder for reviews component -->
-              <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-            </div>
-          </p-tabPanel>
-        </p-tabView>
       </div>
     </div>
   </div>
 } 
 @else if (mainProduct && roleId == 2) {
     <div class="admin-edit-container">
-      <p-toast></p-toast>
-      <p-confirmDialog></p-confirmDialog>
 
       <div class="admin-header">
         <h2>Chỉnh sửa sản phẩm</h2>
@@ -328,6 +427,24 @@
                       </p-dropdown>
                     </div>
                   </div>
+                </div>
+
+                <div class="field">
+                  <label for="features">Chức năng khóa cửa</label>
+                  <p-multiSelect
+                    id="features"
+                    [options]="featuresOptions"
+                    [(ngModel)]="selectedFeatures"
+                    [ngModelOptions]="{standalone: true}"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Chọn chức năng"
+                    [maxSelectedLabels]="3"
+                    selectedItemsLabel="{0} chức năng đã chọn"
+                    [filter]="true"
+                    filterPlaceHolder="Tìm kiếm...">
+                  </p-multiSelect>
+                  <small class="form-hint">Chọn các chức năng mà khóa cửa này có</small>
                 </div>
   
                 <div class="grid">

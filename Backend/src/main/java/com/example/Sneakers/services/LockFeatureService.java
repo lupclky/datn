@@ -15,6 +15,13 @@ public class LockFeatureService {
     private final LockFeatureRepository lockFeatureRepository;
 
     public List<LockFeatureDTO> getAllFeatures() {
+        List<LockFeature> features = lockFeatureRepository.findAll();
+        return features.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<LockFeatureDTO> getActiveFeatures() {
         List<LockFeature> features = lockFeatureRepository.findByIsActiveTrue();
         return features.stream()
                 .map(this::convertToDTO)

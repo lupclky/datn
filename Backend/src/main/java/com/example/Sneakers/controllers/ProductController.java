@@ -5,6 +5,7 @@ import com.example.Sneakers.dtos.ProductDTO;
 import com.example.Sneakers.dtos.ProductImageDTO;
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.ProductImage;
+import com.example.Sneakers.repositories.ReviewRepository;
 import com.example.Sneakers.responses.ListProductResponse;
 import com.example.Sneakers.responses.ProductListResponse;
 import com.example.Sneakers.responses.ProductResponse;
@@ -45,6 +46,7 @@ public class ProductController {
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private final IProductService productService;
     private final LocalizationUtils localizationUtils;
+    private final ReviewRepository reviewRepository;
 
     @PostMapping("")
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -197,7 +199,13 @@ public class ProductController {
             @PathVariable("id") Long productId) {
         try {
             Product existingProduct = productService.getProductById(productId);
-            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
+            ProductResponse response = ProductResponse.fromProduct(existingProduct);
+            // Add rating stats
+            Double avgRating = reviewRepository.getAverageRatingByProductId(productId);
+            Long totalReviews = reviewRepository.countByProductId(productId);
+            response.setAverageRating(avgRating != null ? avgRating : 0.0);
+            response.setTotalReviews(totalReviews);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

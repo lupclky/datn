@@ -22,6 +22,10 @@ export class LockFeatureService {
     return this.http.get<LockFeature[]>(this.apiUrl);
   }
 
+  getActiveFeatures(): Observable<LockFeature[]> {
+    return this.http.get<LockFeature[]>(`${this.apiUrl}/active`);
+  }
+
   getFeatureById(id: number): Observable<LockFeature> {
     return this.http.get<LockFeature>(`${this.apiUrl}/${id}`);
   }

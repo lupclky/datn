@@ -9,6 +9,8 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { LockFeatureService } from '../../../core/services/lock-feature.service';
+import { CardModule } from 'primeng/card';
+import { CheckboxModule } from 'primeng/checkbox';
 
 interface LockFeature {
   id?: number;
@@ -28,7 +30,9 @@ interface LockFeature {
     InputTextModule,
     DialogModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    CardModule,
+    CheckboxModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './feature-manage.component.html',

@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { AiService, ChatResponse } from '../../services/ai.service';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment.development';
+import { PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 interface ChatMessage {
   content: string;
@@ -38,7 +40,8 @@ export class AiChatbotComponent implements OnInit {
 
   constructor(
     private aiService: AiService,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -188,17 +191,19 @@ How can I help you find the perfect sneakers today?`;
   }
 
   onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      this.selectedImage.set(file);
+    if (isPlatformBrowser(this.platformId)) {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        this.selectedImage.set(file);
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.imagePreview.set(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.imagePreview.set(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   }
 
@@ -222,12 +227,14 @@ How can I help you find the perfect sneakers today?`;
   }
 
   private scrollToBottom(): void {
-    setTimeout(() => {
-      if (this.scrollContainer) {
-        const element = this.scrollContainer.nativeElement;
-        element.scrollTop = element.scrollHeight;
-      }
-    }, 100);
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        if (this.scrollContainer) {
+          const element = this.scrollContainer.nativeElement;
+          element.scrollTop = element.scrollHeight;
+        }
+      }, 100);
+    }
   }
 
   clearChat(): void {

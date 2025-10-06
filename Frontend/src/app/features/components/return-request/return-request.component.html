@@ -15,7 +15,7 @@
 
       <div *ngIf="!isLoading && order" class="order-details">
         <h2>Chi tiết đơn hàng #{{ order.id }}</h2>
-        <p><strong>Ngày đặt:</strong> {{ order.order_date | date: 'dd/MM/yyyy' }}</p>
+        <p><strong>Ngày đặt:</strong> {{ order.order_date | date: 'dd/MM/yyyy HH:mm' }}</p>
         <p><strong>Tổng tiền:</strong> {{ order.total_money | currency:'VND':'symbol' }}</p>
         <p><strong>Trạng thái:</strong> <span class="status-badge status-{{order.status.toLowerCase()}}">{{ order.status }}</span></p>
 

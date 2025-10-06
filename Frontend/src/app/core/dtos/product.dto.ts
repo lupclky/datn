@@ -17,4 +17,6 @@ export interface ProductDto {
         name: string;
         description: string;
     }[],
+    averageRating?: number,
+    totalReviews?: number,
 }
