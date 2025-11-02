@@ -50,24 +50,27 @@ public class WebSecurityConfig {
                                                         .anyRequest().permitAll();
 
                                 })
-                                .csrf(AbstractHttpConfigurer::disable);
-                http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
-                        @Override
-                        public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {
-                                CorsConfiguration configuration = new CorsConfiguration();
-                                configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Angular dev server
-                                configuration.setAllowedMethods(
-                                                Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-                                configuration.setAllowedHeaders(
-                                                Arrays.asList("authorization", "content-type", "x-auth-token"));
-                                configuration.setExposedHeaders(List.of("x-auth-token"));
-                                configuration.setAllowCredentials(true); // Allow credentials
-                                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                                source.registerCorsConfiguration("/**", configuration);
-                                httpSecurityCorsConfigurer.configurationSource(source);
-                        }
-                });
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .cors(Customizer.withDefaults());
 
                 return http.build();
+        }
+
+        @Bean
+        public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of(
+                                "http://localhost:4200",
+                                "http://localhost:4201",
+                                "http://localhost:4300",
+                                "http://localhost:4301"
+                ));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(Arrays.asList("Authorization", "authorization", "Content-Type", "content-type", "x-auth-token"));
+                configuration.setExposedHeaders(List.of("x-auth-token"));
+                configuration.setAllowCredentials(true);
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
         }
 }

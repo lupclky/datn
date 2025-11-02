@@ -24,7 +24,7 @@ import { UserDto } from '../../dtos/user.dto';
   styleUrl: './app-navbar.component.scss'
 })
 export class AppNavbarComponent extends BaseComponent implements OnInit {
-  public roleId: number = 100;
+  public roleId: number | null = null;
   public token: string | null = null;
   public isMenuOpen: boolean = false;
   public isLoggedIn: boolean = false;
@@ -39,7 +39,12 @@ export class AppNavbarComponent extends BaseComponent implements OnInit {
     if (typeof localStorage != 'undefined'){
       this.token = localStorage.getItem("token");
       this.isLoggedIn = !!this.token;
-      this.roleId = parseInt(JSON.parse(localStorage.getItem("userInfor") || '{"role_id": "0"}').role_id || '0');
+      if (this.token) {
+        const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{"role": {"id": 0}}');
+        this.roleId = userInfor?.role?.id || null;
+      } else {
+        this.roleId = null;
+      }
     }
   }
 

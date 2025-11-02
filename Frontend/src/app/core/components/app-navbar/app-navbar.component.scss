@@ -15,8 +15,20 @@
 
   .navbar-nav {
     gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
 
     .nav-item {
+      flex-shrink: 0; // Prevent nav items from shrinking
+      
       .nav-link {
         color: $white-color;
         padding: 0.6rem 0.8rem;

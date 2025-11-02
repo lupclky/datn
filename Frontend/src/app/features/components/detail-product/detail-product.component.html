@@ -2,7 +2,7 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-@if (mainProduct && (roleId == 1 || !roleId)){
+@if (mainProduct && (roleId == 2 || !roleId)){
   <div class="product-detail-page">
     
     <!-- Breadcrumb -->
@@ -321,7 +321,7 @@
     </div>
   </div>
 } 
-@else if (mainProduct && roleId == 2) {
+@else if (mainProduct && roleId == 1) {
     <div class="admin-edit-container">
 
       <div class="admin-header">

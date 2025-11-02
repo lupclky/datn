@@ -21,7 +21,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'Sneakers-Ui';
+  title = 'Khóa vân tay Hàn Quốc';
   isBlockedModalVisible: boolean = false;
   private modalSubscription!: Subscription;
 

@@ -1,25 +1,41 @@
 import { Routes } from '@angular/router';
-import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
-import { OrderDetailComponent } from '../components/order-detail/order-detail.component';
-import { ReturnManageComponent } from '../components/return-manage/return-manage.component';
-import { FeatureManageComponent } from '../components/feature-manage/feature-manage.component';
+import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
+import { ProductManagementComponent } from './product-management/product-management.component';
+import { CategoryManagementComponent } from './category-management/category-management.component';
+import { NewsManagementComponent } from './news-management/news-management.component';
+import { UserManagementComponent } from './user-management/user-management.component';
+import { OrderManagementComponent } from './order-management/order-management.component';
 
 export const ADMIN_ROUTES: Routes = [
   {
-    path: 'dashboard',
-    component: AdminDashboardComponent
-  },
-  {
-    path: 'orders/:id',
-    component: OrderDetailComponent
-  },
-  {
-    path: 'returns',
-    component: ReturnManageComponent
-  },
-  {
-    path: 'features',
-    component: FeatureManageComponent
-  },
-  // ... existing code ...
-]; 
+    path: '',
+    component: AdminLayoutComponent,
+    children: [
+      {
+        path: '',
+        redirectTo: 'products',
+        pathMatch: 'full'
+      },
+      {
+        path: 'products',
+        component: ProductManagementComponent
+      },
+      {
+        path: 'categories',
+        component: CategoryManagementComponent
+      },
+      {
+        path: 'news',
+        component: NewsManagementComponent
+      },
+      {
+        path: 'users',
+        component: UserManagementComponent
+      },
+      {
+        path: 'orders',
+        component: OrderManagementComponent
+      }
+    ]
+  }
+];

@@ -96,10 +96,11 @@ export class LoginComponent extends BaseComponent implements OnInit, AfterViewIn
       }),
       switchMap(() => {
         console.log('Submitting login form...');
-        return this.userSerivce.login({
+        const loginData: any = {
           phone_number: this.loginForm.value.userName,
           password: this.loginForm.value.password
-        }).pipe(
+        };
+        return this.userSerivce.login(loginData).pipe(
           tap((loginVal: loginDetailDto) => {
             if (isPlatformBrowser(this.platformId)) {
               console.log('Login successful');

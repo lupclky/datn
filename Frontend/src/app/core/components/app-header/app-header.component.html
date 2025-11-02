@@ -3,9 +3,9 @@
     <!-- Left Section: Logo + Brand Name -->
     <div class="header-left">
       <div class="brand-section">
-        <img src="../../../../assets/images/hvmlogo.gif" alt="Khoá vân tay Korea" class="logo-img">
+        <img src="../../../../assets/images/hvmlogo.gif" alt="Khóa vân tay Hàn Quốc" class="logo-img">
         <h1 class="brand-name">
-          <a [routerLink]="['/']">Khoá vân tay Korea</a>
+          <a [routerLink]="['/']">Khóa vân tay Hàn Quốc</a>
         </h1>
       </div>
     </div>
@@ -22,7 +22,7 @@
             (focus)="showSuggestions = true"
             (blur)="hideSuggestions()"
             type="text" 
-            placeholder="Tìm kiếm sản phẩm..." 
+            placeholder="Tìm kiếm khóa vân tay..." 
             class="search-input"
           />
           <button (click)="sendContentSearch()" class="search-btn">
@@ -71,7 +71,7 @@
       }
 
       <!-- Cart Section (only for customers) -->
-      @if(roleId == 1 || !roleId) {
+      @if(roleId == 2 || !roleId) {
         <div class="cart-section" 
              (mouseenter)="showCartPreview = true" 
              (mouseleave)="showCartPreview = false">
@@ -80,7 +80,7 @@
               <i class="pi pi-shopping-cart"></i>
               <p-badge [value]="quantityInCart.toString()" severity="danger"></p-badge>
             </div>
-            <span class="cart-text">Giỏ hàng</span>
+            <span class="cart-text">Giỏ khóa</span>
           </div>
 
           <!-- Cart Preview Popup -->
@@ -125,7 +125,7 @@
     
     <div class="collapse navbar-collapse" [class.show]="isMenuOpen">
       <ul class="navbar-nav w-100 justify-content-center">
-        @if(roleId == 1 || !roleId){
+        @if(roleId == 2 || !roleId){
           <li class="nav-item">
             <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Trang chủ</a>
           </li>
@@ -145,75 +145,21 @@
           <li class="nav-item">
             <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">Tất cả sản phẩm</a>
           </li>
-        } @else if (roleId == 2) {
+        } @else if (roleId == 1) {
           <li class="nav-item">
-            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-              <i class="pi pi-home"></i>
-              <span class="nav-text">Trang chủ</span>
-            </a>
+            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Trang chủ</a>
           </li>
-
+      
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/admin/dashboard']" routerLinkActive="active">
-              <i class="pi pi-chart-bar"></i>
-              <span class="nav-text">Dashboard</span>
-            </a>
+            <a class="nav-link" [routerLink]="['/news']" routerLinkActive="active">Tin tức</a>
           </li>
-
+      
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/userManage']" routerLinkActive="active">
-              <i class="pi pi-users"></i>
-              <span class="nav-text">Người dùng</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/orderManage']" routerLinkActive="active">
-              <i class="pi pi-shopping-cart"></i>
-              <span class="nav-text">Đơn hàng</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/uploadProduct']" routerLinkActive="active">
-              <i class="pi pi-plus"></i>
-              <span class="nav-text">Sản phẩm</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/categoryManage']" routerLinkActive="active">
-              <i class="pi pi-tags"></i>
-              <span class="nav-text">Danh mục</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/voucherManage']" routerLinkActive="active">
-              <i class="pi pi-ticket"></i>
-              <span class="nav-text">Voucher</span>
-            </a>
+            <a class="nav-link" [routerLink]="['/contact']" routerLinkActive="active">Liên hệ</a>
           </li>
           
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/admin/returns']" routerLinkActive="active">
-              <i class="pi pi-replay"></i>
-              <span class="nav-text">Trả hàng</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/admin/features']" routerLinkActive="active">
-              <i class="pi pi-cog"></i>
-              <span class="nav-text">Chức năng</span>
-            </a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">
-              <i class="pi pi-th-large"></i>
-              <span class="nav-text">Cửa hàng</span>
-            </a>
+            <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">Tất cả sản phẩm</a>
           </li>
         } @else {}
       </ul>

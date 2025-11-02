@@ -174,4 +174,10 @@ export class UserService {
       headers: this.getHeaders()
     });
   }
+
+  getAllUsers(): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.apiUrl}/getAll`, {
+      headers: this.getHeaders()
+    });
+  }
 }

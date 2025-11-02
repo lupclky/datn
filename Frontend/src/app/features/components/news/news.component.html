@@ -1,254 +1,167 @@
-<section class="news">
-  <!-- header -->
-  <div class="news-header text-center">
+<section class="news-page">
+  <!-- Header with Background -->
+  <div class="news-hero">
+    <div class="hero-overlay"></div>
     <div class="container">
-      <div class="row justify-content-center align-items-center" style="width: 100%;">
-        <div class="col-lg-9 col-md-10">
-          <h2 class="fw-bold">TIN TỨC</h2>
-        </div>
+      <div class="hero-content">
+        <h1 class="hero-title">Tin Tức & Sự Kiện</h1>
+        <p class="hero-subtitle">Cập nhật thông tin mới nhất về sản phẩm và công nghệ</p>
       </div>
     </div>
   </div>
 
-  <!-- content -->
-  <div class=" news-content d-flex justify-content-center">
-    <div class="container" style="margin: 0; width: 100%">
-      <div class="row justify-content-between align-items-start">
-        <!-- left -->
-        <div class="col-md-3 col-lg-3 d-sm-none d-md-block d-flex news-content-post">
-          <!-- search bar -->
-          <div class="input-group justify-content-start mt-4" style="width: 100%; margin-top: 30px !important;">
-            <div class="form-outline" data-mdb-input-init style="width: 85%;">
-              <input type="search" id="form1" class="form-control" placeholder="Search.." />
+  <!-- Main Content -->
+  <div class="news-content">
+    <div class="container">
+      <!-- Search & Filter Section -->
+      <div class="search-filter-section">
+        <div class="row align-items-center">
+          <div class="col-lg-8 col-md-7 mb-3 mb-md-0">
+            <div class="search-box">
+              <i class="pi pi-search search-icon"></i>
+              <input 
+                type="text" 
+                class="form-control search-input" 
+                [(ngModel)]="searchQuery"
+                (input)="onSearch()"
+                placeholder="Tìm kiếm tin tức, sự kiện...">
             </div>
-            <button type="button" class="btn btn-danger" data-mdb-ripple-init>
-              <i class="pi pi-search"></i>
-            </button>
           </div>
-          <!-- post recommendation -->
-          <div class="my-4">
-            <h4 class="text-dark text-start">BÀI VIẾT MỚI NHẤT</h4>
-            <div class="news-content-post_table my-4">
-              <div class="container">
-                <div class="row g-5 align-items-center justify-content-center news-content-post_table-item">
-                  <div class="col-4">
-                    <img src="../../../../assets/images/post1.jpg" alt="giaycv" class="img-fluid rounded-circle"
-                      style="margin-left: 10px; ; width: 60px; height:60px">
-                  </div>
+          <div class="col-lg-4 col-md-5 text-md-end">
+            <div class="total-news">
+              <i class="pi pi-list"></i>
+              <span>{{ totalRecords }} bài viết</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  <div class="col-8">
-                    <h2 class="lead card-title text-dark child-content-post-item">Cảm xúc từ những tia nắng cuối cùng
-                      cho phép ý
-                      tưởng lộ
-                      nét...</h2>
-                  </div>
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner-wrapper">
+          <div class="spinner-border text-danger" role="status"></div>
+          <p class="mt-3">Đang tải tin tức...</p>
+        </div>
+      </div>
+
+      <!-- News Grid -->
+      <div class="news-grid" *ngIf="!isLoading && newsList.length > 0">
+        <div class="row g-4">
+          <div class="col-lg-4 col-md-6" *ngFor="let news of newsList">
+            <div class="news-card" (click)="openNewsDetail(news)">
+              <div class="news-card-image">
+                <img 
+                  [src]="news.thumbnail || 'assets/images/post1.jpg'" 
+                  [alt]="news.title"
+                  loading="lazy">
+                <div class="news-badge">
+                  <span class="badge-text">{{ formatDate(news.createdAt) }}</span>
                 </div>
-
-                <div class="row my-2 g-5 align-items-center justify-content-center news-content-post_table-item">
-                  <div class="col-4">
-                    <img src="../../../../assets/images/post2.jpg" alt="giaycv" class="img-fluid rounded-circle"
-                      style="margin-left: 10px; width: 60px; height:60px">
-                  </div>
-
-                  <div class="col-8">
-                    <h2 class="lead card-title text-dark child-content-post-item">Đặc biệt, tên gọi khác của loại vải
-                      Corduroy
-                      sợi to (3-8
-                      sợi/inch)- ...</h2>
-                  </div>
+                <div class="news-overlay">
+                  <i class="pi pi-eye"></i>
+                  <span>Xem chi tiết</span>
                 </div>
-
-                <div class="row my-2 g-5 align-items-center justify-content-center news-content-post_table-item">
-                  <div class="col-4">
-                    <img src="../../../../assets/images/post3.jpg" alt="giaycv" class="img-fluid rounded-circle"
-                      style="margin-left: 10px; width: 60px; height:60px">
+              </div>
+              <div class="news-card-body">
+                <h3 class="news-title">{{ news.title }}</h3>
+                <p class="news-excerpt">{{ getExcerpt(news.content) }}</p>
+                <div class="news-footer">
+                  <div class="news-meta">
+                    <i class="pi pi-user"></i>
+                    <span>Admin</span>
                   </div>
-
-                  <div class="col-8">
-                    <p class="lead card-title text-dark child-content-post-item">Hẳn mọi người đã không mấy xa lạ với
-                      chất liệu
-                      Corduroy -
-                      Nhung...</p>
-                  </div>
-                </div>
-
-                <div class="row my-2 g-5 align-items-center justify-content-center news-content-post_table-item">
-                  <div class="col-4">
-                    <img src="../../../../assets/images/post4.jpg" alt="giaycv" class="img-fluid rounded-circle"
-                      style="margin-left: 10px; width: 60px; height:60px">
-                  </div>
-
-                  <div class="col-8">
-                    <p class="lead card-title text-dark child-content-post-item">Hai yếu tố trên phối trộn cùng với
-                      những gam màu
-                      tươi tắn
-                      để...</p>
-                  </div>
-                </div>
-
-                <div class="row my-2 g-5 align-items-center justify-content-center news-content-post_table-item">
-                  <div class="col-4">
-                    <img src="../../../../assets/images/post5.jpg" alt="giaycv" class="img-fluid rounded-circle"
-                      style="margin-left: 10px; width: 60px; height:60px">
-                  </div>
-
-                  <div class="col-8">
-                    <p class="lead card-title text-dark child-content-post-item">Chất liệu Corduroy lần đầu tiên được
-                      ứng dụng trên
-                      dáng
-                      giày...</p>
+                  <div class="news-status">
+                    <span class="status-badge" [class.active]="news.status === 'ACTIVE'">
+                      {{ news.status }}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- right -->
-        <div class="col-md-8 col-lg-8 news-content-shoes">
-          <div class="row my-5 d-flex align-items-center justify-content-center g-5">
-            <div class="col-6 col-lg-4">
-              <div class="card">
-                <div class="card-body py-3">
-                  <img src="../../../../assets/images/post2.jpg" alt="giaycv" class="img-fluid">
-                  <span class="position-absolute top-10 start-0 translate-middle badge rounded-circle bg-danger"
-                    style="width: 60px; height: 60px">
-                    <div class="card-body__date">
-                      <p style="font-size: 16px; line-height: 0px;">08</p>
-                      <p style="font-size: 12px;">Th<span style="font-size: 16px;">3</span></p>
-                    </div>
-                  </span>
-                </div>
-                <div class="card-footer text-center tw-bold border-0">
-                  <h2 class="lead card-title text-dark fw-bold">Nike - hãng giày ra đời từ bài luận
-                    trong
-                    trường đại học
-                  </h2>
-                  <p class="my-2 text-secondary">Nike - hãng giày ra đời từ bài luận trong
-                    trường đại học Phil Knight nảy ra ý tưởng về Nike nhờ tham gia đội...</p>
-
-                </div>
-              </div>
-            </div>
-
-            <div class="col-6 col-lg-4">
-              <div class="card">
-                <div class="card-body py-3">
-                  <img src="../../../../assets/images/post4.jpg" alt="giayvan" class="img-fluid">
-                  <span class="position-absolute top-10 start-0 translate-middle badge rounded-circle bg-danger"
-                    style="width: 60px; height: 60px">
-                    <div class="card-body__date">
-                      <p style="font-size: 16px; line-height: 0px;">23</p>
-                      <p style="font-size: 12px;">Th<span style="font-size: 16px;">5</span></p>
-                    </div>
-                  </span>
-                </div>
-                <div class="card-footer text-center tw-bold border-0">
-                  <h2 class="lead card-title text-dark fw-bold">10 kiểu giày dép Hermes dễ phối đồ cho
-                    nữ
-                  </h2>
-                  <p class="my-2 text-secondary">Loạt boots, cao gót, sandals hay sneakers… của Hermes được phái
-                    nữ ưa chuộng, dễ phối đồ, còn chưa chuan đến 1,8 triệu đồng ...</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-6 col-lg-4">
-              <div class="card">
-                <div class="card-body py-3">
-                  <img src="../../../../assets/images/post6.jpg" alt="giayvan" class="img-fluid">
-                  <span class="position-absolute top-10 start-0 translate-middle badge rounded-circle bg-danger"
-                    style="width: 60px; height: 60px">
-                    <div class="card-body__date">
-                      <p style="font-size: 16px; line-height: 0px;">12</p>
-                      <p style="font-size: 12px;">Th<span style="font-size: 16px;">9</span></p>
-                    </div>
-                  </span>
-                </div>
-                <div class="card-footer text-center tw-bold border-0">
-                  <h2 class="lead card-title text-dark fw-bold">giayBOM - Thương hiệu giày dành cho
-                    người Việt
-                  </h2>
-                  <p class="my-2 text-secondary">giayBOM mang tới những với sản phẩm giày được thiết kế phù hợp với
-                    người Việt, với mẫu mã đa dạng.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row my-5 align-items-center justify-content-center g-5">
-
-            <div class="col-6 col-lg-4">
-              <div class="card">
-                <div class="card-body py-3">
-                  <img src="../../../../assets/images/post1.jpg" alt="giaycv" class="img-fluid">
-                  <span class="position-absolute top-10 start-0 translate-middle badge rounded-circle bg-danger"
-                    style="width: 60px; height: 60px">
-                    <div class="card-body__date">
-                      <p style="font-size: 16px; line-height: 0px;">21</p>
-                      <p style="font-size: 12px;">Th<span style="font-size: 16px;">10</span>
-                      </p>
-                    </div>
-                  </span>
-                </div>
-                <div class="card-footer text-center tw-bold border-0">
-                  <h2 class="lead card-title text-dark fw-bold">5 nguyên liệu quen thuộc xử lý mùi hôi
-                    giày
-                  </h2>
-                  <p class="my-2 text-secondary">Giày đi lâu ngày không chỉ có mùi hôi mà còn sinh ra vi khuẩn
-                    gây hại. Tuy nhiên từ những nguyên liệu đơn giản, bạn có thể khắc phục được vấn đề này.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-6 col-lg-4">
-              <div class="card">
-                <div class="card-body py-3">
-                  <img src="../../../../assets/images/post5.jpg" alt="giayvan" class="img-fluid">
-                  <span class="position-absolute top-10 start-0 translate-middle badge rounded-circle bg-danger"
-                    style="width: 60px; height: 60px">
-                    <div class="card-body__date">
-                      <p style="font-size: 16px; line-height: 0px;">02</p>
-                      <p style="font-size: 12px;">Th<span style="font-size: 16px;">11</span>
-                      </p>
-                    </div>
-                  </span>
-                </div>
-                <div class="card-footer text-center tw-bold border-0">
-                  <h2 class="lead card-title text-dark fw-bold">Giày Pierre Cardin cho nam giảm đến nửa
-                    giá
-                  </h2>
-                  <p class="my-2 text-secondary">Nhiều mẫu giày tây, giày lười Pierre Cardin cho nam giảm giá
-                    đến 50% trên Shop VnExpress, còn chưa đến 1,8 triệu đồng một đôi.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-6 col-lg-4">
-              <div class="card">
-                <div class="card-body py-3">
-                  <img src="../../../../assets/images/post3.jpg" alt="giayvan" class="img-fluid">
-                  <span class="position-absolute top-10 start-0 translate-middle badge rounded-circle bg-danger"
-                    style="width: 60px; height: 60px">
-                    <div class="card-body__date">
-                      <p style="font-size: 16px; line-height: 0px;">30</p>
-                      <p style="font-size: 12px;">Th<span style="font-size: 16px;">12</span>
-                      </p>
-                    </div>
-                  </span>
-                </div>
-                <div class="card-footer text-center tw-bold border-0">
-                  <h2 class="lead card-title text-dark fw-bold">Dune London ra mắt giày, túi xách bản
-                    giới hạn
-                  </h2>
-                  <p class="my-2 text-secondary">Chào Xuân Hè 2021, Dune London giới thiệu bộ sưu bộ sưu tập
-                    giày và phụ kiện phiên bản giới hạn cho cả nam và nữ, còn chưa đến 1,8 triệu đồng một đôi</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isLoading && newsList.length === 0">
+        <div class="empty-icon">
+          <i class="pi pi-inbox"></i>
         </div>
+        <h3>Không tìm thấy tin tức</h3>
+        <p>Thử tìm kiếm với từ khóa khác hoặc quay lại sau</p>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper" *ngIf="!isLoading && totalRecords > pageSize">
+        <p-paginator 
+          [rows]="pageSize" 
+          [totalRecords]="totalRecords" 
+          [first]="currentPage * pageSize"
+          (onPageChange)="onPageChange($event)" 
+          [rowsPerPageOptions]="[6, 9, 12]">
+        </p-paginator>
       </div>
     </div>
   </div>
 </section>
+
+<!-- News Detail Modal -->
+<p-dialog 
+  [(visible)]="showDetailModal" 
+  [modal]="true" 
+  [closable]="true"
+  [dismissableMask]="true"
+  [style]="{width: '90vw', maxWidth: '950px'}"
+  [contentStyle]="{padding: '0', overflow: 'auto', maxHeight: '80vh'}"
+  styleClass="news-detail-modal">
+  
+  <ng-template pTemplate="header">
+    <div class="modal-header-content">
+      <i class="pi pi-book header-icon"></i>
+      <h2 class="modal-title">{{ selectedNews?.title }}</h2>
+    </div>
+  </ng-template>
+
+  <div class="modal-content-wrapper" *ngIf="selectedNews">
+    <!-- Featured Image (Always show with fallback) -->
+    <div class="modal-featured-image">
+      <img 
+        [src]="selectedNews.thumbnail || 'assets/images/post1.jpg'" 
+        [alt]="selectedNews.title" 
+        loading="lazy">
+    </div>
+
+    <!-- Title -->
+    <div class="modal-title-content">
+      <h1 class="news-detail-title">{{ selectedNews.title }}</h1>
+    </div>
+
+    <!-- Meta Info -->
+    <div class="modal-meta">
+      <div class="meta-item">
+        <i class="pi pi-calendar"></i>
+        <span>{{ formatFullDate(selectedNews.createdAt) }}</span>
+      </div>
+      <div class="meta-item">
+        <i class="pi pi-user"></i>
+        <span>Admin</span>
+      </div>
+      <div class="meta-item">
+        <span class="status-badge" [class.active]="selectedNews.status === 'ACTIVE'">
+          {{ selectedNews.status }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-body-content">
+      <div [innerHTML]="selectedNews.content || '<p>Chưa có nội dung cho bài viết này.</p>'" class="news-content-html"></div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button type="button" class="btn btn-secondary btn-close-modal" (click)="closeModal()">
+      <i class="pi pi-times"></i> Đóng
+    </button>
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,16 @@
+@import '../product-management/product-management.component.scss';
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fff5f5;
+  color: #e53e3e;
+
+  &.active {
+    background: #f0fff4;
+    color: #38a169;
+  }
+}
+

@@ -1,0 +1,205 @@
+<div class="product-management">
+  <div class="page-header">
+    <h1 class="page-title">📦 Quản lý sản phẩm</h1>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <span>➕</span> Thêm sản phẩm
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchKeyword"
+        (keyup.enter)="searchProducts()"
+        placeholder="Tìm kiếm sản phẩm..."
+        class="search-input"
+      />
+      <button class="btn btn-secondary" (click)="searchProducts()">
+        🔍 Tìm kiếm
+      </button>
+    </div>
+
+    <div class="filter-box">
+      <select [(ngModel)]="selectedCategory" (change)="filterByCategory()" class="filter-select">
+        <option [value]="0">Tất cả danh mục</option>
+        <option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Hình ảnh</th>
+          <th>Tên sản phẩm</th>
+          <th>Danh mục</th>
+          <th>Giá</th>
+          <th>Giảm giá</th>
+          <th>Số lượng</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of filteredProducts">
+          <td>{{ product.id }}</td>
+          <td>
+            <img [src]="product.thumbnail" [alt]="product.name" class="product-thumbnail" />
+          </td>
+          <td>{{ product.name }}</td>
+          <td>{{ getCategoryName(product.category_id) }}</td>
+          <td>{{ formatPrice(product.price) }}</td>
+          <td>{{ product.discount }}%</td>
+          <td>{{ product.quantity }}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-edit" (click)="openEditModal(product)" title="Sửa">
+                ✏️
+              </button>
+              <button class="btn btn-delete" (click)="deleteProduct(product)" title="Xóa">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredProducts.length === 0">
+          <td colspan="8" class="no-data">Không có sản phẩm nào</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      class="btn btn-page" 
+      [disabled]="currentPage === 1"
+      (click)="goToPage(currentPage - 1)">
+      ‹ Trước
+    </button>
+    <button 
+      *ngFor="let page of pages"
+      class="btn btn-page" 
+      [class.active]="currentPage === page"
+      (click)="goToPage(page)">
+      {{ page }}
+    </button>
+    <button 
+      class="btn btn-page" 
+      [disabled]="currentPage === totalPages"
+      (click)="goToPage(currentPage + 1)">
+      Sau ›
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditing ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form class="modal-body">
+      <div class="form-group">
+        <label>Tên sản phẩm *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="currentProduct.name"
+          name="name"
+          class="form-control"
+          placeholder="Nhập tên sản phẩm"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Giá *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="currentProduct.price"
+            name="price"
+            class="form-control"
+            placeholder="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Giảm giá (%)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="currentProduct.discount"
+            name="discount"
+            class="form-control"
+            placeholder="0"
+            min="0"
+            max="100"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Số lượng *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="currentProduct.quantity"
+            name="quantity"
+            class="form-control"
+            placeholder="0"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Danh mục *</label>
+          <select 
+            [(ngModel)]="currentProduct.category_id"
+            name="category_id"
+            class="form-control">
+            <option [value]="0">Chọn danh mục</option>
+            <option *ngFor="let category of categories" [value]="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>URL Hình ảnh</label>
+        <input 
+          type="text" 
+          [(ngModel)]="currentProduct.thumbnail"
+          name="thumbnail"
+          class="form-control"
+          placeholder="https://example.com/image.jpg"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea 
+          [(ngModel)]="currentProduct.description"
+          name="description"
+          class="form-control"
+          rows="4"
+          placeholder="Nhập mô tả sản phẩm"
+        ></textarea>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
+      <button class="btn btn-primary" (click)="saveProduct()">
+        {{ isEditing ? 'Cập nhật' : 'Thêm mới' }}
+      </button>
+    </div>
+  </div>
+</div>
+

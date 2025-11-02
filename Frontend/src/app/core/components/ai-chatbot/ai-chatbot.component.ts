@@ -46,16 +46,16 @@ export class AiChatbotComponent implements OnInit {
 
   ngOnInit(): void {
     // Add welcome message with examples
-    const welcomeMessage = `Hi! I'm your AI sneaker shopping assistant. I have access to all products in our database.
+    const welcomeMessage = `Xin chào! Tôi là trợ lý AI chuyên về khóa vân tay. Tôi có quyền truy cập vào tất cả sản phẩm trong cơ sở dữ liệu.
 
-You can ask me things like:
-• "Show me running shoes under 3 million VND"
-• "What are the best Nike sneakers on sale?"
-• "Compare Adidas and Nike basketball shoes"
-• "I need comfortable shoes for daily wear"
-• "What sneakers do you have in size 42?"
+Bạn có thể hỏi tôi:
+• "Cho tôi xem các loại khóa vân tay dưới 5 triệu"
+• "Khóa vân tay GATEMAN tốt nhất đang giảm giá là gì?"
+• "So sánh khóa vân tay SAMSUNG và KAADAS"
+• "Tôi cần khóa vân tay chống nước cho cửa ngoài"
+• "Khóa vân tay nào phù hợp với cửa nhôm?"
 
-How can I help you find the perfect sneakers today?`;
+Hôm nay tôi có thể giúp bạn tìm khóa vân tay hoàn hảo!`;
     
     this.addMessage(welcomeMessage, 'bot');
     
@@ -88,9 +88,9 @@ How can I help you find the perfect sneakers today?`;
       // Send image with default prompt
       const preview = this.imagePreview();
       if (preview) {
-        this.addMessageWithImage('What can you tell me about this sneaker?', 'user', preview);
+        this.addMessageWithImage('Bạn có thể cho tôi biết về khóa vân tay này?', 'user', preview);
       }
-      this.sendImageMessage(image, 'What can you tell me about this sneaker?');
+      this.sendImageMessage(image, 'Bạn có thể cho tôi biết về khóa vân tay này?');
     } else if (message) {
       // Send text message
       this.sendTextMessage(message);
@@ -239,34 +239,34 @@ How can I help you find the perfect sneakers today?`;
 
   clearChat(): void {
     this.messages.set([]);
-    const welcomeMessage = `Hi! I'm your AI sneaker shopping assistant. I have access to all products in our database.
+    const welcomeMessage = `Xin chào! Tôi là trợ lý AI chuyên về khóa vân tay. Tôi có quyền truy cập vào tất cả sản phẩm trong cơ sở dữ liệu.
 
-You can ask me things like:
-• "Show me running shoes under 3 million VND"
-• "What are the best Nike sneakers on sale?"
-• "Compare Adidas and Nike basketball shoes"
-• "I need comfortable shoes for daily wear"
-• "What sneakers do you have in size 42?"
+Bạn có thể hỏi tôi:
+• "Cho tôi xem các loại khóa vân tay dưới 5 triệu"
+• "Khóa vân tay GATEMAN tốt nhất đang giảm giá là gì?"
+• "So sánh khóa vân tay SAMSUNG và KAADAS"
+• "Tôi cần khóa vân tay chống nước cho cửa ngoài"
+• "Khóa vân tay nào phù hợp với cửa nhôm?"
 
-How can I help you find the perfect sneakers today?`;
+Hôm nay tôi có thể giúp bạn tìm khóa vân tay hoàn hảo!`;
     
     this.addMessage(welcomeMessage, 'bot');
   }
 
   private checkAIStatus(): void {
-    // Check if AI index is initialized
-    const apiUrl = environment.apiUrl;
-    this.httpClient.get<{success: boolean; status: string; documentCount: number}>(`${apiUrl}/ai/initialize/status`)
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.status === 'not_initialized') {
-            this.addMessage('💡 Tip: Ask an admin to initialize the AI database for better product search results.', 'bot');
-          }
-        },
-        error: (error: any) => {
-          console.error('Failed to check AI status:', error);
-        }
-      });
+    // AI services disabled - skip status check
+    // const apiUrl = environment.apiUrl;
+    // this.httpClient.get<{success: boolean; status: string; documentCount: number}>(`${apiUrl}/ai/initialize/status`)
+    //   .subscribe({
+    //     next: (response) => {
+    //       if (response.success && response.status === 'not_initialized') {
+    //         this.addMessage('💡 Tip: Ask an admin to initialize the AI database for better product search results.', 'bot');
+    //       }
+    //     },
+    //     error: (error: any) => {
+    //       console.error('Failed to check AI status:', error);
+    //     }
+    //   });
   }
 
   initializeAI(): void {

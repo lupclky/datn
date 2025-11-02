@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+//@RestController
 @RequestMapping("${api.prefix}/ai/initialize")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor

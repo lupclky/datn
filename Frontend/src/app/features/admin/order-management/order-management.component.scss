@@ -1,0 +1,48 @@
+@import '../product-management/product-management.component.scss';
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.status-pending {
+    background: #fef5e7;
+    color: #f39c12;
+  }
+
+  &.status-processing {
+    background: #e8f4fd;
+    color: #3498db;
+  }
+
+  &.status-shipping {
+    background: #e8f5e9;
+    color: #4caf50;
+  }
+
+  &.status-delivered {
+    background: #f0fff4;
+    color: #38a169;
+  }
+
+  &.status-cancelled {
+    background: #fff5f5;
+    color: #e53e3e;
+  }
+}
+
+.status-select {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+}
+

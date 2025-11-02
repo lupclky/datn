@@ -1,0 +1,54 @@
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="!isSidebarOpen">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">🔐</span>
+        <span class="logo-text" *ngIf="isSidebarOpen">Admin Panel</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <a *ngFor="let item of menuItems" 
+         [routerLink]="item.route"
+         class="menu-item"
+         [class.active]="currentMenu === item.id"
+         (click)="navigateTo(item.route, item.id)">
+        <span class="menu-icon">{{ item.icon }}</span>
+        <span class="menu-label" *ngIf="isSidebarOpen">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <span class="menu-icon">🚪</span>
+        <span class="menu-label" *ngIf="isSidebarOpen">Đăng xuất</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span>☰</span>
+      </button>
+      <div class="header-right">
+        <div class="admin-info">
+          <span class="admin-name">{{ adminName }}</span>
+          <span class="admin-role">Administrator</span>
+        </div>
+        <div class="admin-avatar">
+          <span>👤</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
+

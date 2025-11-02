@@ -27,7 +27,7 @@ import { DividerModule } from 'primeng/divider';
       <div class="reset-password-wrapper">
         <div class="logo-section">
           <img src="../../../../assets/images/hvmlogo.gif" alt="Logo" class="logo">
-          <h1 class="brand-title">SNEAKER STORE</h1>
+          <h1 class="brand-title">KHÓA VÂN TAY HÀN QUỐC</h1>
         </div>
         
         <p-card class="reset-password-card">

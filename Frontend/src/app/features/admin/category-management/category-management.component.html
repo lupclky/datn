@@ -1,0 +1,78 @@
+<div class="category-management">
+  <div class="page-header">
+    <h1 class="page-title">📁 Quản lý danh mục</h1>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <span>➕</span> Thêm danh mục
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchKeyword"
+        (keyup)="searchCategories()"
+        placeholder="Tìm kiếm danh mục..."
+        class="search-input"
+      />
+      <button class="btn btn-secondary" (click)="searchCategories()">
+        🔍 Tìm kiếm
+      </button>
+    </div>
+  </div>
+
+  <!-- Categories Grid -->
+  <div class="categories-grid">
+    <div *ngFor="let category of filteredCategories" class="category-card">
+      <div class="category-icon">📁</div>
+      <div class="category-name">{{ category.name }}</div>
+      <div class="category-id">ID: {{ category.id }}</div>
+      <div class="category-actions">
+        <button class="btn btn-edit" (click)="openEditModal(category)">
+          ✏️ Sửa
+        </button>
+        <button class="btn btn-delete" (click)="deleteCategory(category)">
+          🗑️ Xóa
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="filteredCategories.length === 0" class="no-data-card">
+      <div class="no-data-icon">📭</div>
+      <div class="no-data-text">Không có danh mục nào</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditing ? 'Sửa danh mục' : 'Thêm danh mục mới' }}</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form class="modal-body">
+      <div class="form-group">
+        <label>Tên danh mục *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="currentCategory.name"
+          name="name"
+          class="form-control"
+          placeholder="Nhập tên danh mục"
+          autofocus
+        />
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
+      <button class="btn btn-primary" (click)="saveCategory()">
+        {{ isEditing ? 'Cập nhật' : 'Thêm mới' }}
+      </button>
+    </div>
+  </div>
+</div>
+

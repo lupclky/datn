@@ -82,7 +82,8 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
     super();
     if (typeof localStorage !== 'undefined') {
       this.token = localStorage.getItem('token');
-      this.roleId = parseInt(JSON.parse(localStorage.getItem("userInfor") || '{"role_id": "0"}').role_id || '0');
+      const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{"role": {"id": 0}}');
+      this.roleId = userInfor?.role?.id || null;
     }
 
     // Setup search suggestions with debounce
@@ -182,7 +183,9 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
     localStorage.removeItem("roleId");
     localStorage.removeItem("userInfor");
     localStorage.removeItem("productOrder");
-    window.location.href = "/Home";
+    this.router.navigate(['/Home']).then(() => {
+      window.location.reload();
+    });
   }
 
   sendContentSearch(){

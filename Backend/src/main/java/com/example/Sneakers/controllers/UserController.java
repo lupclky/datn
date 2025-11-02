@@ -91,7 +91,7 @@ public class UserController {
             );
         }
     }
-    @GetMapping("/getAll")
+    @GetMapping(value = "/getAll", produces = "application/json")
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getAllUsers(){
         try {

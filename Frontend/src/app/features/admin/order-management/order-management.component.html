@@ -1,0 +1,47 @@
+<div class="order-management">
+  <div class="page-header">
+    <h1 class="page-title">🛒 Quản lý đơn hàng</h1>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mã đơn</th>
+          <th>Khách hàng</th>
+          <th>Tổng tiền</th>
+          <th>Trạng thái</th>
+          <th>Ngày đặt</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td>#{{ order.id }}</td>
+          <td>{{ order.fullname }}</td>
+          <td>{{ formatPrice(order.total_money) }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="'status-' + order.status.toLowerCase()">
+              {{ order.status }}
+            </span>
+          </td>
+          <td>{{ formatDate(order.order_date) }}</td>
+          <td>
+            <select (change)="updateOrderStatus(order, $any($event.target).value)" class="status-select">
+              <option value="">Cập nhật trạng thái</option>
+              <option value="PENDING">Chờ xử lý</option>
+              <option value="PROCESSING">Đang xử lý</option>
+              <option value="SHIPPING">Đang giao</option>
+              <option value="DELIVERED">Đã giao</option>
+              <option value="CANCELLED">Đã hủy</option>
+            </select>
+          </td>
+        </tr>
+        <tr *ngIf="orders.length === 0">
+          <td colspan="6" class="no-data">Không có đơn hàng nào</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

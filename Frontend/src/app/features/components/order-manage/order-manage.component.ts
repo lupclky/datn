@@ -104,7 +104,7 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
       return false;
     }
     const user = JSON.parse(userInfo);
-    if (!user.role || user.role.id !== 2) { // 2 is admin role
+    if (!user.role || user.role.id !== 1) { // 1 is admin role
       this.toastService.fail('Bạn không có quyền truy cập trang này');
       this.router.navigate(['/']);
       return false;

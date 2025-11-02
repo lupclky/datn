@@ -1,0 +1,8 @@
+logs/
+*.log
+Backend/src/main/resources/logs/
+Backend/src/main/resources/logs/*.log
+Backend/BOOT-INF/
+Backend/target/
+Backend/build/
+*.bak

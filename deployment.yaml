@@ -32,10 +32,10 @@ services:
     ports:
       - 8089:8089
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql8-container:3306/shopsneaker3?serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql8-container:3306/shopsneaker?serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: shopsneaker3
+      MYSQL_DATABASE: shopsneaker
       CHROMA_BASE_URL: http://chroma-container:8000
     #depends_on only waits for the container to start, not for the service inside the container to be fully operational
     depends_on:
@@ -66,7 +66,7 @@ services:
     ports:
       - "9000:9000"
     environment:
-      - SONARQUBE_JDBC_URL=jdbc:mysql://mysql8-container:3306/sonarqube?useUnicode=true&characterEncoding=utf8&useSSL=false
+      - SONARQUBE_JDBC_URL=jdbc:mysql://mysql8-container:3306/shopsneaker?useUnicode=true&characterEncoding=utf8&useSSL=false
       - SONARQUBE_JDBC_USERNAME=root
       - SONARQUBE_JDBC_PASSWORD=admin
     volumes:

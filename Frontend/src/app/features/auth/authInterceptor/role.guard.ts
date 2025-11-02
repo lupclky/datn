@@ -31,7 +31,7 @@ export class RoleGuard implements CanActivate {
 
     return this.userService.getInforUser(token).pipe(
       map(userInfor => {
-        if (userInfor && userInfor.role && userInfor.role.id === 2) {
+        if (userInfor && userInfor.role && userInfor.role.id === 1) {
           // Role is Admin
           return true;
         } else {

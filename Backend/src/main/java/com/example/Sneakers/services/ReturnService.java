@@ -144,7 +144,7 @@ public class ReturnService implements IReturnService {
             throw new Exception("Order status is not eligible for return.");
         }
 
-        LocalDate orderDate = order.getOrderDate();
+        LocalDate orderDate = order.getOrderDate().toLocalDate();
         long daysSinceOrder = ChronoUnit.DAYS.between(orderDate, LocalDate.now());
         if (daysSinceOrder > 30) {
             throw new Exception("Return period of 30 days has expired.");

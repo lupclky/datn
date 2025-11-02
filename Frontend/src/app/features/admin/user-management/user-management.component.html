@@ -1,0 +1,150 @@
+<div class="user-management">
+  <p-toast></p-toast>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">👥 Quản lý người dùng</h1>
+      <p class="page-subtitle">Quản lý tất cả người dùng trong hệ thống</p>
+    </div>
+    <button class="btn btn-primary" (click)="openAddUserModal()">
+      <span>➕</span> Thêm người dùng
+    </button>
+  </div>
+
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchKeyword" 
+        (input)="searchUsers()"
+        placeholder="🔍 Tìm kiếm theo tên, số điện thoại, email..."
+        class="search-input">
+    </div>
+  </div>
+
+  <div class="users-table" *ngIf="!isLoading && filteredUsers.length > 0">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Họ tên</th>
+          <th>Số điện thoại</th>
+          <th>Email</th>
+          <th>Vai trò</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td>{{ user.id }}</td>
+          <td>
+            <div class="user-info">
+              <strong>{{ user.fullname || 'N/A' }}</strong>
+            </div>
+          </td>
+          <td>{{ user.phone_number }}</td>
+          <td>{{ user.email || 'N/A' }}</td>
+          <td>
+            <span class="badge" [class.badge-admin]="user.role?.name === 'ADMIN'" [class.badge-user]="user.role?.name === 'USER'">
+              {{ user.role?.name || 'N/A' }}
+            </span>
+          </td>
+          <td>
+            <span class="badge" [class.badge-active]="user.is_active" [class.badge-inactive]="!user.is_active">
+              {{ user.is_active ? 'Hoạt động' : 'Khóa' }}
+            </span>
+          </td>
+          <td>{{ formatDate(user.created_at) }}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-sm btn-edit" (click)="editUser(user)" title="Sửa">
+                ✏️
+              </button>
+              <button class="btn btn-sm btn-toggle" (click)="toggleUserStatus(user)" [title]="user.is_active ? 'Khóa' : 'Mở khóa'">
+                {{ user.is_active ? '🔒' : '🔓' }}
+              </button>
+              <button class="btn btn-sm btn-delete" (click)="deleteUser(user)" title="Xóa">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Đang tải danh sách người dùng...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && filteredUsers.length === 0">
+    <div class="icon">📭</div>
+    <h3>Không tìm thấy người dùng</h3>
+    <p>Thử tìm kiếm với từ khóa khác</p>
+  </div>
+</div>
+
+<!-- Modal for Add/Edit User -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditing ? 'Sửa người dùng' : 'Thêm người dùng mới' }}</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form class="modal-body">
+      <div class="form-group">
+        <label>Họ tên *</label>
+        <input type="text" [(ngModel)]="currentUser.fullname" name="fullname" class="form-control" placeholder="Nhập họ tên" />
+      </div>
+
+      <div class="form-group">
+        <label>Số điện thoại *</label>
+        <input type="text" [(ngModel)]="currentUser.phone_number" name="phone_number" class="form-control" placeholder="0123456789" />
+      </div>
+
+      <div class="form-group" *ngIf="!isEditing">
+        <label>Mật khẩu *</label>
+        <input type="password" [(ngModel)]="currentUser.password" name="password" class="form-control" placeholder="Nhập mật khẩu" />
+      </div>
+
+      <div class="form-group" *ngIf="!isEditing">
+        <label>Nhập lại mật khẩu *</label>
+        <input type="password" [(ngModel)]="currentUser.retypePassword" name="retypePassword" class="form-control" placeholder="Nhập lại mật khẩu" />
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="currentUser.email" name="email" class="form-control" placeholder="example@email.com" />
+      </div>
+
+      <div class="form-group">
+        <label>Địa chỉ</label>
+        <input type="text" [(ngModel)]="currentUser.address" name="address" class="form-control" placeholder="Nhập địa chỉ" />
+      </div>
+
+      <div class="form-group">
+        <label>Vai trò</label>
+        <select [(ngModel)]="currentUser.role_id" name="role_id" class="form-control">
+          <option [value]="2">USER</option>
+          <option [value]="1">ADMIN</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="isEditing">
+        <label>Trạng thái</label>
+        <select [(ngModel)]="currentUser.is_active" name="is_active" class="form-control">
+          <option [value]="true">Hoạt động</option>
+          <option [value]="false">Khóa</option>
+        </select>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
+      <button class="btn btn-primary" (click)="saveUser()">{{ isEditing ? 'Cập nhật' : 'Thêm mới' }}</button>
+    </div>
+  </div>
+</div>

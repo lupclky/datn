@@ -31,4 +31,17 @@ export class ToastService {
       sticky: true
     });
   }
+
+  // Alias methods for easier usage
+  showSuccess(content: string) {
+    this.success(content);
+  }
+
+  showError(content: string) {
+    this.fail(content);
+  }
+
+  showInfo(content: string) {
+    this.messageService.add({ severity: 'info', summary: 'Thông tin', detail: content });
+  }
 }

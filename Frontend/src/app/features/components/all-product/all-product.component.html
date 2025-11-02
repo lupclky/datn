@@ -1,4 +1,4 @@
-<section class="allProduct" [class.admin-view]="roleId !== 1 && roleId !== 100" [class.customer-view]="roleId === 1 || roleId === 100">
+<section class="allProduct" [class.admin-view]="roleId === 1" [class.customer-view]="roleId === 2 || roleId === 100 || !roleId">
   <!-- header -->
   <div class="allProduct-header">
     <div class="container">
@@ -138,10 +138,10 @@
                             <span class="original-price">{{item.price / (1-item.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
                           }
                         </div>
-                        @if (roleId !== 1 && roleId !== 100) {
+                        @if (roleId === 1) {
                           <p class="product-quantity">Số lượng: {{item.quantity}}</p>
                         }
-                        @if(roleId == 1 || !roleId) {
+                        @if(roleId == 2 || !roleId) {
                           <button class="btn btn-danger" (click)="navigateToDetail(item.id)" [disabled]="item.quantity === 0">XEM CHI TIẾT</button>
                         } @else {
                           <button class="btn btn-danger" (click)="navigateToDetail(item.id)">SỬA THÔNG TIN</button>

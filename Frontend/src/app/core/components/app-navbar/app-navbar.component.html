@@ -6,94 +6,67 @@
     
     <div class="collapse navbar-collapse" [class.show]="isMenuOpen">
       <ul class="navbar-nav w-100 justify-content-center">
-        @if(roleId == 1 || !roleId){
-          <li class="nav-item">
-            <a class="nav-link" aria-current="true" href="#">Trang chủ</a>
-          </li>
-      
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/Intro']">Giới thiệu</a>
-          </li>
-      
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/news']">Tin tức</a>
-          </li>
-      
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/contact']">Liên hệ</a>
-          </li>
-      
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/allProduct']">Tất cả sản phẩm</a>
-          </li>
-        } @else if (roleId == 2) {
+        @if(roleId == null || roleId == 2){
           <li class="nav-item">
             <a class="nav-link" aria-current="true" href="#">
               <i class="pi pi-home"></i>
               <span class="nav-text">Trang chủ</span>
             </a>
           </li>
-
+      
           <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/admin/dashboard']">
-              <i class="pi pi-chart-bar"></i>
-              <span class="nav-text">Dashboard</span>
+            <a class="nav-link" href="" [routerLink]="['/Intro']">
+              <i class="pi pi-info-circle"></i>
+              <span class="nav-text">Giới thiệu</span>
             </a>
           </li>
-
+      
           <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/userManage']">
-              <i class="pi pi-users"></i>
-              <span class="nav-text">Người dùng</span>
+            <a class="nav-link" href="" [routerLink]="['/news']">
+              <i class="pi pi-newspaper"></i>
+              <span class="nav-text">Tin tức</span>
             </a>
           </li>
-
+      
           <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/orderManage']">
-              <i class="pi pi-shopping-cart"></i>
-              <span class="nav-text">Đơn hàng</span>
+            <a class="nav-link" href="" [routerLink]="['/contact']">
+              <i class="pi pi-phone"></i>
+              <span class="nav-text">Liên hệ</span>
             </a>
           </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/uploadProduct']">
-              <i class="pi pi-plus"></i>
-              <span class="nav-text">Sản phẩm</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/categoryManage']">
-              <i class="pi pi-tags"></i>
-              <span class="nav-text">Danh mục</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/voucherManage']">
-              <i class="pi pi-ticket"></i>
-              <span class="nav-text">Voucher</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/admin/features']">
-              <i class="pi pi-cog"></i>
-              <span class="nav-text">Chức năng</span>
-            </a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" href="" [routerLink]="['/admin/returns']">
-              <i class="pi pi-replay"></i>
-              <span class="nav-text">Trả hàng</span>
-            </a>
-          </li>
-          
+      
           <li class="nav-item">
             <a class="nav-link" href="" [routerLink]="['/allProduct']">
               <i class="pi pi-th-large"></i>
-              <span class="nav-text">Cửa hàng</span>
+              <span class="nav-text">Tất cả sản phẩm</span>
+            </a>
+          </li>
+        } @else if (roleId == 1) {
+          <li class="nav-item">
+            <a class="nav-link" aria-current="true" href="">
+              <i class="pi pi-home"></i>
+              <span class="nav-text">Trang chủ</span>
+            </a>
+          </li>
+      
+          <li class="nav-item">
+            <a class="nav-link" href="" [routerLink]="['/news']">
+              <i class="pi pi-newspaper"></i>
+              <span class="nav-text">Tin tức</span>
+            </a>
+          </li>
+      
+          <li class="nav-item">
+            <a class="nav-link" href="" [routerLink]="['/contact']">
+              <i class="pi pi-phone"></i>
+              <span class="nav-text">Liên hệ</span>
+            </a>
+          </li>
+      
+          <li class="nav-item">
+            <a class="nav-link" href="" [routerLink]="['/allProduct']">
+              <i class="pi pi-th-large"></i>
+              <span class="nav-text">Tất cả sản phẩm</span>
             </a>
           </li>
         } @else {}

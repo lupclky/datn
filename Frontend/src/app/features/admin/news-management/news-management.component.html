@@ -1,0 +1,116 @@
+<div class="news-management">
+  <div class="page-header">
+    <h1 class="page-title">📰 Quản lý tin tức</h1>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <span>➕</span> Thêm tin tức
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchKeyword"
+        (keyup.enter)="searchNews()"
+        placeholder="Tìm kiếm tin tức..."
+        class="search-input"
+      />
+      <button class="btn btn-secondary" (click)="searchNews()">
+        🔍 Tìm kiếm
+      </button>
+    </div>
+
+    <div class="filter-box">
+      <select [(ngModel)]="selectedStatus" (change)="filterByStatus()" class="filter-select">
+        <option value="">Tất cả trạng thái</option>
+        <option value="ACTIVE">Đang hoạt động</option>
+        <option value="INACTIVE">Không hoạt động</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- News Table -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tiêu đề</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let news of filteredNews">
+          <td>{{ news.id }}</td>
+          <td>{{ news.title }}</td>
+          <td>
+            <span class="status-badge" [class.active]="news.status === 'ACTIVE'">
+              {{ news.status === 'ACTIVE' ? 'Đang hoạt động' : 'Không hoạt động' }}
+            </span>
+          </td>
+          <td>{{ formatDate(news.created_at) }}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-edit" (click)="openEditModal(news)">✏️</button>
+              <button class="btn btn-delete" (click)="deleteNews(news)">🗑️</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredNews.length === 0">
+          <td colspan="5" class="no-data">Không có tin tức nào</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn btn-page" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹ Trước</button>
+    <button *ngFor="let page of pages" class="btn btn-page" [class.active]="currentPage === page" (click)="goToPage(page)">{{ page }}</button>
+    <button class="btn btn-page" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">Sau ›</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditing ? 'Sửa tin tức' : 'Thêm tin tức mới' }}</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form class="modal-body">
+      <div class="form-group">
+        <label>Tiêu đề *</label>
+        <input type="text" [(ngModel)]="currentNews.title" name="title" class="form-control" placeholder="Nhập tiêu đề" />
+      </div>
+
+      <div class="form-group">
+        <label>Nội dung *</label>
+        <textarea [(ngModel)]="currentNews.content" name="content" class="form-control" rows="6" placeholder="Nhập nội dung"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>URL Hình ảnh</label>
+        <input type="text" [(ngModel)]="currentNews.image_url" name="image_url" class="form-control" placeholder="https://example.com/image.jpg" />
+      </div>
+
+      <div class="form-group">
+        <label>Trạng thái</label>
+        <select [(ngModel)]="currentNews.status" name="status" class="form-control">
+          <option value="ACTIVE">Đang hoạt động</option>
+          <option value="INACTIVE">Không hoạt động</option>
+        </select>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Hủy</button>
+      <button class="btn btn-primary" (click)="saveNews()">{{ isEditing ? 'Cập nhật' : 'Thêm mới' }}</button>
+    </div>
+  </div>
+</div>
+

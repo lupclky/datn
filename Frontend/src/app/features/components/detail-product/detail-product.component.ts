@@ -110,9 +110,9 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     super();
     if (typeof localStorage != 'undefined'){
       this.token = localStorage.getItem("token");
-      const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{"role_id": "0", "id": "0"}');
-      this.roleId = parseInt(userInfor.role_id || '0');
-      this.currentUserId = parseInt(userInfor.id || '0');
+      const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{"role": {"id": 0}, "id": 0}');
+      this.roleId = userInfor?.role?.id || null;
+      this.currentUserId = userInfor?.id || null;
     }
     this.productForm = this.fb.group({
       productName: [, Validators.required],
