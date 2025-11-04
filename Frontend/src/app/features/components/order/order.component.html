@@ -76,12 +76,66 @@
               <input id="fullName" type="text" pInputText formControlName="fullName">
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group full-width">
-              <label for="address">Địa chỉ</label>
-              <input id="address" type="text" pInputText formControlName="address">
+          
+          <!-- Địa chỉ giao hàng -->
+          <div class="address-section">
+            <h3 class="address-title">Địa chỉ giao hàng</h3>
+            <div class="address-note">
+              <i class="pi pi-info-circle"></i>
+              <span>Vui lòng nhập địa chỉ trước khi sáp nhập (trước 07/2025) để giao hàng được chính xác</span>
+            </div>
+            <div class="form-row address-row">
+              <div class="form-group">
+                <p-dropdown 
+                  [options]="provinces" 
+                  formControlName="province"
+                  placeholder="Chọn Tỉnh/Thành phố"
+                  optionLabel="label"
+                  optionValue="value"
+                  (onChange)="onProvinceChange($event)"
+                  [showClear]="false"
+                  styleClass="w-100">
+                </p-dropdown>
+              </div>
+              <div class="form-group">
+                <p-dropdown 
+                  [options]="districts" 
+                  formControlName="district"
+                  placeholder="Chọn Quận/Huyện"
+                  optionLabel="label"
+                  optionValue="value"
+                  (onChange)="onDistrictChange($event)"
+                  [disabled]="!selectedProvince"
+                  [showClear]="false"
+                  styleClass="w-100">
+                </p-dropdown>
+              </div>
+              <div class="form-group">
+                <p-dropdown 
+                  [options]="wards" 
+                  formControlName="ward"
+                  placeholder="Chọn Phường/Xã"
+                  optionLabel="label"
+                  optionValue="value"
+                  (onChange)="onWardChange($event)"
+                  [disabled]="!selectedDistrict"
+                  [showClear]="false"
+                  styleClass="w-100">
+                </p-dropdown>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <input 
+                  id="street" 
+                  type="text" 
+                  pInputText 
+                  formControlName="street"
+                  placeholder="Số nhà, tên đường">
+              </div>
             </div>
           </div>
+
           <div class="form-row">
             <div class="form-group">
               <label for="phoneNumber">Số điện thoại</label>
@@ -94,8 +148,8 @@
           </div>
           <div class="form-row">
             <div class="form-group full-width">
-              <label for="note">Ghi chú</label>
-              <textarea id="note" pInputTextarea formControlName="note" rows="3"></textarea>
+              <label for="note">Ghi chú (Ví dụ: Hãy gọi tôi khi chuẩn bị hàng xong)</label>
+              <textarea id="note" pInputTextarea formControlName="note" rows="3" placeholder="Ghi chú (Ví dụ: Hãy gọi tôi khi chuẩn bị hàng xong)"></textarea>
             </div>
           </div>
         </form>

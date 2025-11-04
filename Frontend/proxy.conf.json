@@ -1,13 +1,11 @@
 {
-  "/api/upload/*": {
-    "target": "https://www.primefaces.org/cdn",
-    "secure": true,
+  "/api/provinces": {
+    "target": "https://provinces.open-api.vn/api",
+    "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug",
-    "headers": {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization"
-    }
+    "pathRewrite": {
+      "^/api/provinces": ""
+    },
+    "logLevel": "debug"
   }
-} 
+}

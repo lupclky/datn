@@ -6,7 +6,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { FormBuilder, FormGroup, FormsModule, Validators, ReactiveFormsModule } from "@angular/forms";
 import { CommonService } from '../../../core/services/common.service';
 import { ProductsInCartDto } from '../../../core/dtos/productsInCart.dto';
-import { catchError, forkJoin, of, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, forkJoin, of, switchMap, takeUntil, tap, map } from 'rxjs';
 import { CurrencyPipe, AsyncPipe, NgClass } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
 import { ToastService } from '../../../core/services/toast.service';
@@ -31,6 +31,7 @@ import { VnpayService } from '../../../core/services/vnpay.service';
 import { VnpayPaymentResponse } from '../../../core/responses/vnpay-payment.response';
 import { CreateVnpayPaymentDto } from '../../../core/dtos/create-vnpay-payment.dto';
 import { Observable } from 'rxjs';
+import { VietnamAddressService, AddressDropdownOption } from '../../../core/services/vietnam-address.service';
 
 @Component({
   selector: 'app-order',
@@ -97,6 +98,14 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
   public showStripeDialog: boolean = false;
   public isStripePayment: boolean = false;
 
+  // Vietnam Address properties
+  public provinces: AddressDropdownOption[] = [];
+  public districts: AddressDropdownOption[] = [];
+  public wards: AddressDropdownOption[] = [];
+  public selectedProvince: number | null = null;
+  public selectedDistrict: number | null = null;
+  public selectedWard: number | null = null;
+
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
@@ -106,12 +115,16 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     private router: Router,
     private productService: ProductService,
     private voucherService: VoucherService,
-    private vnpayService: VnpayService
+    private vnpayService: VnpayService,
+    private vietnamAddressService: VietnamAddressService
   ) {
     super();
     this.inforShipForm = this.fb.group({
       fullName: ['', Validators.required],
-      address: ['', Validators.required],
+      province: [null, Validators.required],
+      district: [null, Validators.required],
+      ward: [null, Validators.required],
+      street: ['', Validators.required],
       phoneNumber: ['', [Validators.required, Validators.minLength(5)]],
       email: ['', [Validators.email]],
       note: ['']
@@ -140,6 +153,9 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     ];
     this.methodShippingValue = this.methodShipping[0];
     this.selectedPayMethod = this.paymentMethods[0];
+
+    // Load provinces on init
+    this.loadProvinces();
   }
 
   selectPaymentMethod(method: {name: string, key: string, logo: string}) {
@@ -213,26 +229,29 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{}');
     const userId = userInfor.id;
 
-    const orderData = {
-      ...(userId && { user_id: Number(userId) }),
-      fullname: this.inforShipForm.value.fullName,
-      email: this.inforShipForm.value.email,
-      phone_number: this.inforShipForm.value.phoneNumber,
-      address: this.inforShipForm.value.address,
-      note: this.inforShipForm.value.note || '',
-      shipping_method: this.methodShippingValue.name,
-      payment_method: this.selectedPayMethod.key,
-      cart_items: this.productOrder.map(item => ({
-        product_id: Number(item.product_id),
-        quantity: Number(item.quantity),
-        size: Number(item.size)
-      })),
-      sub_total: Math.round(this.totalCost),
-      total_money: Math.round(this.finalCost + this.methodShippingValue.price),
-      ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
-    };
+    this.buildCompleteAddress().pipe(
+      switchMap((completeAddress) => {
+        const orderData = {
+          ...(userId && { user_id: Number(userId) }),
+          fullname: this.inforShipForm.value.fullName,
+          email: this.inforShipForm.value.email,
+          phone_number: this.inforShipForm.value.phoneNumber,
+          address: completeAddress,
+          note: this.inforShipForm.value.note || '',
+          shipping_method: this.methodShippingValue.name,
+          payment_method: this.selectedPayMethod.key,
+          cart_items: this.productOrder.map(item => ({
+            product_id: Number(item.product_id),
+            quantity: Number(item.quantity),
+            size: Number(item.size)
+          })),
+          sub_total: Math.round(this.totalCost),
+          total_money: Math.round(this.finalCost + this.methodShippingValue.price),
+          ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
+        };
 
-    this.orderService.postOrder(orderData).pipe(
+        return this.orderService.postOrder(orderData);
+      }),
       tap((orderInfor: any) => {
         this.orderId = orderInfor.id;
         this.commonService.orderId.next(orderInfor.id);
@@ -256,26 +275,29 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{}');
     const userId = userInfor.id;
 
-    const orderData = {
-      ...(userId && { user_id: Number(userId) }),
-      fullname: this.inforShipForm.value.fullName,
-      email: this.inforShipForm.value.email,
-      phone_number: this.inforShipForm.value.phoneNumber,
-      address: this.inforShipForm.value.address,
-      note: this.inforShipForm.value.note || '',
-      shipping_method: this.methodShippingValue.name,
-      payment_method: this.selectedPayMethod.key,
-      cart_items: this.productOrder.map(item => ({
-        product_id: Number(item.product_id),
-        quantity: Number(item.quantity),
-        size: Number(item.size)
-      })),
-      sub_total: Math.round(this.totalCost),
-      total_money: Math.round(this.finalCost + this.methodShippingValue.price),
-      ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
-    };
+    this.buildCompleteAddress().pipe(
+      switchMap((completeAddress) => {
+        const orderData = {
+          ...(userId && { user_id: Number(userId) }),
+          fullname: this.inforShipForm.value.fullName,
+          email: this.inforShipForm.value.email,
+          phone_number: this.inforShipForm.value.phoneNumber,
+          address: completeAddress,
+          note: this.inforShipForm.value.note || '',
+          shipping_method: this.methodShippingValue.name,
+          payment_method: this.selectedPayMethod.key,
+          cart_items: this.productOrder.map(item => ({
+            product_id: Number(item.product_id),
+            quantity: Number(item.quantity),
+            size: Number(item.size)
+          })),
+          sub_total: Math.round(this.totalCost),
+          total_money: Math.round(this.finalCost + this.methodShippingValue.price),
+          ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
+        };
 
-    this.orderService.postOrder(orderData).pipe(
+        return this.orderService.postOrder(orderData);
+      }),
       switchMap(() => this.productService.deleteAllProductsFromCart())
     ).subscribe({
       next: () => {
@@ -298,26 +320,29 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     const userId = userInfor.id;
     let createdOrderId: number;
 
-    const orderData = {
-      ...(userId && { user_id: Number(userId) }),
-      fullname: this.inforShipForm.value.fullName,
-      email: this.inforShipForm.value.email,
-      phone_number: this.inforShipForm.value.phoneNumber,
-      address: this.inforShipForm.value.address,
-      note: this.inforShipForm.value.note || '',
-      shipping_method: this.methodShippingValue.name,
-      payment_method: this.selectedPayMethod.key,
-      cart_items: this.productOrder.map(item => ({
-        product_id: Number(item.product_id),
-        quantity: Number(item.quantity),
-        size: Number(item.size)
-      })),
-      sub_total: Math.round(this.totalCost),
-      total_money: Math.round(this.finalCost + this.methodShippingValue.price),
-      ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
-    };
+    this.buildCompleteAddress().pipe(
+      switchMap((completeAddress) => {
+        const orderData = {
+          ...(userId && { user_id: Number(userId) }),
+          fullname: this.inforShipForm.value.fullName,
+          email: this.inforShipForm.value.email,
+          phone_number: this.inforShipForm.value.phoneNumber,
+          address: completeAddress,
+          note: this.inforShipForm.value.note || '',
+          shipping_method: this.methodShippingValue.name,
+          payment_method: this.selectedPayMethod.key,
+          cart_items: this.productOrder.map(item => ({
+            product_id: Number(item.product_id),
+            quantity: Number(item.quantity),
+            size: Number(item.size)
+          })),
+          sub_total: Math.round(this.totalCost),
+          total_money: Math.round(this.finalCost + this.methodShippingValue.price),
+          ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
+        };
 
-    this.orderService.postOrder(orderData).pipe(
+        return this.orderService.postOrder(orderData);
+      }),
       tap((orderInfor: any) => {
         createdOrderId = orderInfor.id;
       }),
@@ -394,5 +419,108 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
 
   blockUi() {
     this.blockedUi = !this.blockedUi;
+  }
+
+  // Vietnam Address methods
+  loadProvinces(): void {
+    this.vietnamAddressService.getProvinces().pipe(
+      tap((provinces) => {
+        this.provinces = provinces;
+      }),
+      catchError((err) => {
+        console.error('Error loading provinces:', err);
+        this.toastService.fail('Không thể tải danh sách tỉnh/thành phố');
+        return of([]);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  onProvinceChange(event: any): void {
+    const provinceCode = event.value;
+    this.selectedProvince = provinceCode;
+    this.selectedDistrict = null;
+    this.selectedWard = null;
+    this.districts = [];
+    this.wards = [];
+    
+    // Reset district and ward form controls
+    this.inforShipForm.patchValue({
+      district: null,
+      ward: null
+    });
+
+    if (provinceCode) {
+      this.vietnamAddressService.getDistricts(provinceCode).pipe(
+        tap((districts) => {
+          this.districts = districts;
+        }),
+        catchError((err) => {
+          console.error('Error loading districts:', err);
+          this.toastService.fail('Không thể tải danh sách quận/huyện');
+          return of([]);
+        }),
+        takeUntil(this.destroyed$)
+      ).subscribe();
+    }
+  }
+
+  onDistrictChange(event: any): void {
+    const districtCode = event.value;
+    this.selectedDistrict = districtCode;
+    this.selectedWard = null;
+    this.wards = [];
+    
+    // Reset ward form control
+    this.inforShipForm.patchValue({
+      ward: null
+    });
+
+    if (districtCode) {
+      this.vietnamAddressService.getWards(districtCode).pipe(
+        tap((wards) => {
+          this.wards = wards;
+        }),
+        catchError((err) => {
+          console.error('Error loading wards:', err);
+          this.toastService.fail('Không thể tải danh sách phường/xã');
+          return of([]);
+        }),
+        takeUntil(this.destroyed$)
+      ).subscribe();
+    }
+  }
+
+  onWardChange(event: any): void {
+    this.selectedWard = event.value;
+  }
+
+  /**
+   * Build complete address from form values
+   */
+  private buildCompleteAddress(): Observable<string> {
+    const street = this.inforShipForm.value.street || '';
+    const wardCode = this.inforShipForm.value.ward;
+    const districtCode = this.inforShipForm.value.district;
+    const provinceCode = this.inforShipForm.value.province;
+
+    if (!wardCode || !districtCode || !provinceCode) {
+      return of(street);
+    }
+
+    return forkJoin({
+      ward: this.vietnamAddressService.getWardName(wardCode),
+      district: this.vietnamAddressService.getDistrictName(districtCode),
+      province: this.vietnamAddressService.getProvinceName(provinceCode)
+    }).pipe(
+      map(({ ward, district, province }) => {
+        const parts = [street, ward, district, province].filter(part => part && part.trim());
+        return parts.join(', ');
+      }),
+      catchError(() => {
+        // Fallback to just street if API fails
+        return of(street);
+      })
+    );
   }
 }
