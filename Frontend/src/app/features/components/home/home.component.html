@@ -2,49 +2,52 @@
 <div class="home">
     <!-- Hero Banner Section -->
     <section class="hero-banner">
-      <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+      <!-- Loading state -->
+      <div *ngIf="isLoadingBanners" class="text-center py-5">
+        <div class="spinner-border text-danger" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Banners -->
+      <div *ngIf="!isLoadingBanners && banners.length > 0" id="carouselBanners" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-indicators">
-          <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
-            aria-current="true" aria-label="Slide 1"></button>
-          <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
-            aria-label="Slide 2"></button>
-          <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
-            aria-label="Slide 3"></button>
+          <button *ngFor="let banner of banners; let i = index" 
+                  type="button" 
+                  [attr.data-bs-target]="'#carouselBanners'" 
+                  [attr.data-bs-slide-to]="i" 
+                  [class.active]="i === 0"
+                  [attr.aria-current]="i === 0 ? 'true' : null"
+                  [attr.aria-label]="'Slide ' + (i + 1)"></button>
         </div>
         <div class="carousel-inner">
-          <div class="carousel-item active">
-            <img src="../../../../assets/images/van1.jpg" class="d-block w-100" alt="Khoá vân tay thông minh">
+          <div *ngFor="let banner of banners; let i = index" class="carousel-item" [class.active]="i === 0">
+            <img [src]="getBannerImageUrl(banner)" class="d-block w-100" [alt]="banner.title">
             <div class="carousel-caption d-none d-md-block">
-              <h1 class="display-4 fw-bold">Khoá vân tay thông minh</h1>
-              <p class="lead">Bảo mật hiện đại, mở khoá một chạm</p>
-              <button class="btn btn-primary btn-lg">Khám phá ngay</button>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <img src="../../../../assets/images/van3.jpg" class="d-block w-100" alt="Khoá cửa điện tử">
-            <div class="carousel-caption d-none d-md-block">
-              <h1 class="display-4 fw-bold">Ưu đãi đặc biệt</h1>
-              <p class="lead">Giảm đến 50% cho dòng khoá cao cấp</p>
-              <button class="btn btn-danger btn-lg">Mua ngay</button>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <img src="../../../../assets/images/van4.jpg" class="d-block w-100" alt="Khoá cửa thông minh Korea">
-            <div class="carousel-caption d-none d-md-block">
-              <h1 class="display-4 fw-bold">Chất lượng Hàn Quốc</h1>
-              <p class="lead">Thiết kế sang trọng, vận hành bền bỉ</p>
-              <button class="btn btn-success btn-lg">Xem thêm</button>
+              <h1 class="display-4 fw-bold">{{ banner.title }}</h1>
+              <p *ngIf="banner.description" class="lead">{{ banner.description }}</p>
+              <button *ngIf="banner.button_text && banner.button_link" 
+                      class="btn btn-{{ banner.button_style || 'primary' }} btn-lg" 
+                      [routerLink]="banner.button_link">
+                {{ banner.button_text }}
+              </button>
             </div>
           </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+        <button *ngIf="banners.length > 1" class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
         </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <button *ngIf="banners.length > 1" class="carousel-control-next" type="button" data-bs-target="#carouselBanners" data-bs-slide="next">
           <span class="carousel-control-next-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Next</span>
         </button>
+      </div>
+
+      <!-- Fallback when no banners -->
+      <div *ngIf="!isLoadingBanners && banners.length === 0" class="carousel-fallback text-center py-5 bg-light">
+        <h3>Chưa có banner nào được hiển thị</h3>
+        <p class="text-muted">Vui lòng liên hệ quản trị viên để thêm banner</p>
       </div>
     </section>
 

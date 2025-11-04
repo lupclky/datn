@@ -3,7 +3,7 @@ import { CarouselModule } from 'primeng/carousel';
 import { BaseComponent } from '../../../core/commonComponent/base.component';
 import { ProductService } from '../../../core/services/product.service';
 import { ProductDto } from '../../../core/dtos/product.dto';
-import { catchError, filter, tap, of, map } from 'rxjs';
+import { catchError, filter, tap, of, map, takeUntil } from 'rxjs';
 import { AllProductDto } from '../../../core/dtos/AllProduct.dto';
 import { environment } from '../../../../environments/environment.development';
 import { CurrencyPipe } from '@angular/common';
@@ -18,6 +18,9 @@ import { VoucherDisplayComponent } from '../voucher-display/voucher-display.comp
 import { AiChatbotComponent } from '../../../core/components/ai-chatbot/ai-chatbot.component';
 import { RatingModule } from 'primeng/rating';
 import { FormsModule } from '@angular/forms';
+import { BannerService } from '../../../core/services/banner.service';
+import { BannerDto } from '../../../core/dtos/banner.dto';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-home',
@@ -30,7 +33,8 @@ import { FormsModule } from '@angular/forms';
     AiChatbotComponent,
     VoucherDisplayComponent,
     RatingModule,
-    FormsModule
+    FormsModule,
+    CommonModule
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
@@ -43,11 +47,14 @@ export class HomeComponent extends BaseComponent implements OnInit {
   public recommendedProducts: ProductDto[] = [];
   public apiImage: string = environment.apiImage;
   public categories: CategoryDto[] = [];
+  public banners: BannerDto[] = [];
+  public isLoadingBanners: boolean = false;
 
   constructor(
     private productService: ProductService,
     private recommendationService: RecommendationService,
     private categoriesService: CategoriesService,
+    private bannerService: BannerService,
     private router: Router
   ) {
     super();
@@ -56,6 +63,7 @@ export class HomeComponent extends BaseComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
     this.loadCategories();
+    this.loadBanners();
   }
 
   loadProducts(): void {
@@ -105,5 +113,27 @@ export class HomeComponent extends BaseComponent implements OnInit {
 
   getProductImageUrl(product: ProductDto): string {
     return `${this.apiImage}${product.thumbnail}`;
+  }
+
+  loadBanners(): void {
+    this.isLoadingBanners = true;
+    this.bannerService.getActiveBanners().pipe(
+      catchError((error) => {
+        console.error('Error loading banners:', error);
+        return of({ banners: [], total: 0, message: '' });
+      }),
+      tap((response) => {
+        this.banners = response.banners || [];
+        this.isLoadingBanners = false;
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  getBannerImageUrl(banner: BannerDto): string {
+    if (!banner.image_url) return '';
+    const cleanApiUrl = environment.apiUrl.replace(/\/$/, '');
+    const cleanImageUrl = banner.image_url.replace(/^\//, '');
+    return `${cleanApiUrl}/banners/images/${cleanImageUrl}`;
   }
 }

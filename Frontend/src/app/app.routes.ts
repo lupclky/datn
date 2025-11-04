@@ -5,8 +5,6 @@ import { LoginComponent } from './features/auth/components/login/login.component
 import { RegisterComponent } from './features/register/register.component';
 import { IntroductionComponent } from './features/components/introduction/introduction.component';
 import { NewsComponent } from './features/components/news/news.component';
-import { NewsDetailComponent } from './features/components/news-detail/news-detail.component';
-import { NewsManageComponent } from './features/components/news-manage/news-manage.component';
 import { ShoppingCartComponent } from './features/components/shopping-cart/shopping-cart.component';
 import { DetailProductComponent } from './features/components/detail-product/detail-product.component';
 import { AuthGuard } from './features/auth/authInterceptor/auth.guard';
@@ -22,7 +20,6 @@ import { RoleGuard } from './features/auth/authInterceptor/role.guard';
 import { CategoryManageComponent } from './features/components/category-manage/category-manage.component';
 import { UserManageComponent } from './features/components/user-manage/user-manage.component';
 import { OrderManageComponent } from './features/components/order-manage/order-manage.component';
-import { ProductManageComponent } from './features/components/product-manage/product-manage.component';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 // import { VoucherManageComponent } from './features/components/voucher-manage/voucher-manage.component';
 import { VoucherManageComponent } from './features/components/voucher-manage/voucher-manage.component';
@@ -33,6 +30,9 @@ import { ForgotPasswordComponent } from './features/components/forgot-password/f
 import { ResetPasswordComponent } from './features/components/reset-password/reset-password.component';
 import { ChangePasswordComponent } from './features/components/change-password/change-password.component';
 import { UserProfileComponent } from './features/components/user-profile/user-profile.component';
+import { BannerManageComponent } from './features/components/banner-manage/banner-manage.component';
+import { NewsManageComponent } from './features/components/news-manage/news-manage.component';
+import { NewsDetailComponent } from './features/components/news-detail/news-detail.component';
 
 export const routes: Routes = [
   {
@@ -69,11 +69,6 @@ export const routes: Routes = [
       {
         path: 'news/:id',
         component: NewsDetailComponent
-      },
-      {
-        path: 'newsManage',
-        component: NewsManageComponent,
-        canActivate: [RoleGuard]
       },
       {
         path: 'shoppingCart',
@@ -123,11 +118,6 @@ export const routes: Routes = [
         canActivate: [RoleGuard]
       },
       {
-        path: 'productManage',
-        component: ProductManageComponent,
-        canActivate: [RoleGuard]
-      },
-      {
         path: 'categoryManage',
         component: CategoryManageComponent,
         canActivate: [RoleGuard]
@@ -150,6 +140,16 @@ export const routes: Routes = [
       {
         path: 'voucherManage',
         component: VoucherManageComponent,
+        canActivate: [RoleGuard]
+      },
+      {
+        path: 'bannerManage',
+        component: BannerManageComponent,
+        canActivate: [RoleGuard]
+      },
+      {
+        path: 'newsManage',
+        component: NewsManageComponent,
         canActivate: [RoleGuard]
       },
       {

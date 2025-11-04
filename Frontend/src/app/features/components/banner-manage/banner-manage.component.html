@@ -1,0 +1,157 @@
+<div class="banner-manage-container p-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">Quản lý Banner</h2>
+      <button pButton type="button" label="Thêm Banner" icon="pi pi-plus" class="p-button-success" (click)="openNewDialog()"></button>
+    </div>
+
+    <div class="card-body">
+      <p-table [value]="banners" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-striped">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 5%">ID</th>
+            <th style="width: 10%">Hình ảnh</th>
+            <th style="width: 20%">Tiêu đề</th>
+            <th style="width: 15%">Mô tả</th>
+            <th style="width: 10%">Thứ tự</th>
+            <th style="width: 10%">Trạng thái</th>
+            <th style="width: 15%">Thời gian</th>
+            <th style="width: 15%">Thao tác</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-banner>
+          <tr>
+            <td>{{ banner.id }}</td>
+            <td>
+              <img [src]="getBannerImageUrl(banner.image_url)" 
+                   [alt]="banner.title" 
+                   (error)="onImageError($event)"
+                   style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;">
+            </td>
+            <td>{{ banner.title }}</td>
+            <td>
+              <span [pTooltip]="banner.description" tooltipPosition="top">
+                {{ (banner.description && banner.description.length > 50) ? (banner.description | slice:0:50) + '...' : banner.description }}
+              </span>
+            </td>
+            <td>{{ banner.display_order }}</td>
+            <td>
+              <span [class]="banner.is_active ? 'badge bg-success' : 'badge bg-secondary'">
+                {{ banner.is_active ? 'Hoạt động' : 'Không hoạt động' }}
+              </span>
+            </td>
+            <td>
+              <small>
+                <div *ngIf="banner.start_date">Bắt đầu: {{ banner.start_date | date:'dd/MM/yyyy HH:mm' }}</div>
+                <div *ngIf="banner.end_date">Kết thúc: {{ banner.end_date | date:'dd/MM/yyyy HH:mm' }}</div>
+              </small>
+            </td>
+            <td>
+              <button pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-warning me-2" 
+                      (click)="openEditDialog(banner)" pTooltip="Sửa" tooltipPosition="top"></button>
+              <button pButton type="button" [icon]="banner.is_active ? 'pi pi-eye-slash' : 'pi pi-eye'" 
+                      class="p-button-rounded p-button-text p-button-info me-2" 
+                      (click)="toggleStatus(banner)" 
+                      [pTooltip]="banner.is_active ? 'Vô hiệu hóa' : 'Kích hoạt'" tooltipPosition="top"></button>
+              <button pButton type="button" icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
+                      (click)="deleteBanner(banner.id!)" pTooltip="Xóa" tooltipPosition="top"></button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+              <p class="mt-3 text-muted">Chưa có banner nào</p>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog for Create/Edit Banner -->
+<p-dialog [(visible)]="displayDialog" [header]="isEditMode ? 'Sửa Banner' : 'Thêm Banner Mới'" [modal]="true" 
+          [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
+  <form [formGroup]="bannerForm" (ngSubmit)="saveBanner()">
+    <div class="row">
+      <!-- Title -->
+      <div class="col-12 mb-3">
+        <label for="title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+        <input type="text" pInputText id="title" formControlName="title" class="w-100" placeholder="Nhập tiêu đề banner"/>
+      </div>
+
+      <!-- Description -->
+      <div class="col-12 mb-3">
+        <label for="description" class="form-label">Mô tả</label>
+        <textarea pInputTextarea id="description" formControlName="description" rows="3" class="w-100" placeholder="Nhập mô tả"></textarea>
+      </div>
+
+      <!-- Image Upload -->
+      <div class="col-12 mb-3">
+        <label for="image" class="form-label">Hình ảnh <span class="text-danger">*</span></label>
+        <input type="file" class="form-control" id="image" accept="image/*" (change)="onFileSelect($event)"/>
+        <small class="text-muted">Kích thước khuyến nghị: 1920x600px (tối đa 5MB)</small>
+        <div *ngIf="imagePreview" class="mt-2">
+          <img [src]="imagePreview" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+        </div>
+      </div>
+
+      <!-- Button Text -->
+      <div class="col-md-6 mb-3">
+        <label for="buttonText" class="form-label">Text nút bấm</label>
+        <input type="text" pInputText id="buttonText" formControlName="button_text" class="w-100" placeholder="Ví dụ: Xem ngay"/>
+      </div>
+
+      <!-- Button Link -->
+      <div class="col-md-6 mb-3">
+        <label for="buttonLink" class="form-label">Link nút bấm</label>
+        <input type="text" pInputText id="buttonLink" formControlName="button_link" class="w-100" placeholder="Ví dụ: /allProduct"/>
+      </div>
+
+      <!-- Button Style -->
+      <div class="col-md-4 mb-3">
+        <label for="buttonStyle" class="form-label">Kiểu nút bấm</label>
+        <p-dropdown id="buttonStyle" [options]="buttonStyleOptions" formControlName="button_style" 
+                    placeholder="Chọn kiểu" [style]="{'width': '100%'}"></p-dropdown>
+      </div>
+
+      <!-- Display Order -->
+      <div class="col-md-4 mb-3">
+        <label for="displayOrder" class="form-label">Thứ tự hiển thị</label>
+        <p-inputNumber id="displayOrder" formControlName="display_order" [style]="{'width': '100%'}"></p-inputNumber>
+      </div>
+
+      <!-- Is Active -->
+      <div class="col-md-4 mb-3">
+        <label class="form-label d-block">Trạng thái</label>
+        <p-checkbox formControlName="is_active" [binary]="true" label="Kích hoạt" inputId="isActive"></p-checkbox>
+      </div>
+
+      <!-- Start Date -->
+      <div class="col-md-6 mb-3">
+        <label for="startDate" class="form-label">Ngày bắt đầu</label>
+        <p-calendar id="startDate" formControlName="start_date" [showTime]="true" dateFormat="dd/mm/yy" 
+                    [style]="{'width': '100%'}" placeholder="Chọn ngày bắt đầu"></p-calendar>
+      </div>
+
+      <!-- End Date -->
+      <div class="col-md-6 mb-3">
+        <label for="endDate" class="form-label">Ngày kết thúc</label>
+        <p-calendar id="endDate" formControlName="end_date" [showTime]="true" dateFormat="dd/mm/yy" 
+                    [style]="{'width': '100%'}" placeholder="Chọn ngày kết thúc"></p-calendar>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button pButton type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton type="submit" [label]="isEditMode ? 'Cập nhật' : 'Tạo mới'" icon="pi pi-check" 
+              [disabled]="bannerForm.invalid || isUploading" [loading]="isUploading"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+

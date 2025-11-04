@@ -1,0 +1,136 @@
+.banner-manage-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  margin-top: 80px;
+
+  .card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .card-header {
+      background-color: #f8f9fa;
+      padding: 1.5rem;
+      border-bottom: 1px solid #dee2e6;
+      border-radius: 8px 8px 0 0;
+
+      h2 {
+        color: #333;
+        font-weight: 600;
+      }
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+
+  ::ng-deep {
+    .p-datatable {
+      .p-datatable-thead > tr > th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        padding: 1rem;
+        border-bottom: 2px solid #dee2e6;
+      }
+
+      .p-datatable-tbody > tr > td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+      }
+
+      .p-datatable-tbody > tr:hover {
+        background-color: #f8f9fa;
+      }
+    }
+
+    .p-dialog {
+      .p-dialog-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .p-dialog-content {
+        padding: 2rem;
+      }
+    }
+
+    .p-calendar {
+      width: 100%;
+
+      input {
+        width: 100%;
+      }
+    }
+
+    .p-inputnumber {
+      width: 100%;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  .badge {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+  }
+
+  .img-thumbnail {
+    padding: 0.25rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+  }
+
+  // Action buttons styling
+  ::ng-deep {
+    .p-button.p-button-rounded.p-button-text {
+      width: 2.5rem;
+      height: 2.5rem;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      transition: none !important; // Tắt transition để không bị nháy
+      
+      &.p-button-warning {
+        color: #f59e0b;
+        &:hover {
+          background: rgba(245, 158, 11, 0.1);
+        }
+      }
+
+      &.p-button-info {
+        color: #3b82f6;
+        &:hover {
+          background: rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      &.p-button-danger {
+        color: #ef4444;
+        &:hover {
+          background: rgba(239, 68, 68, 0.1);
+        }
+      }
+
+      .pi {
+        font-size: 1.1rem !important;
+        line-height: 1;
+        display: inline-block;
+        opacity: 1 !important; // Đảm bảo không bị fade
+      }
+    }
+
+    // Tắt animation/transition cho table để không bị nháy
+    .p-datatable {
+      .p-datatable-tbody > tr {
+        transition: none !important;
+      }
+    }
+  }
+}
+
