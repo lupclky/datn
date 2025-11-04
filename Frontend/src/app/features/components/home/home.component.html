@@ -57,6 +57,49 @@
       </div>
     </section>
 
+    <!-- Categories Section -->
+    <section class="categories-section py-4">
+      <div class="container">
+        <div class="row text-center mb-4">
+          <div class="col-12">
+            <h2 class="section-title">Danh mục sản phẩm khoá</h2>
+            <p class="section-subtitle">Giải pháp an ninh cho mọi không gian</p>
+          </div>
+        </div>
+        <div class="row justify-content-center mb-4">
+          <div class="col-12">
+            <div class="categories-tags-wrapper">
+              <ng-container *ngFor="let category of categories">
+                <div class="category-tag" (click)="navigateToCategory(category.id)">
+                  <i class="pi pi-tag"></i>
+                  <span>{{category.name}}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row text-center mt-5 mb-3">
+          <div class="col-12">
+            <h3 class="features-title">Chức năng nổi bật</h3>
+          </div>
+        </div>
+        <div class="row justify-content-center">
+          <div class="col-12">
+            <div class="features-tags-wrapper">
+              <ng-container *ngFor="let feature of features">
+                <div class="feature-tag" (click)="navigateToFeature(feature.id)">
+                  <i [class]="feature.icon"></i>
+                  <span>{{feature.name}}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Recommended Products Section -->
     <section class="recommended-products py-5">
       <div class="container">
@@ -67,84 +110,28 @@
           </div>
         </div>
         <div class="row g-4">
-          @for(product of recommendedProducts; track product){
+          <ng-container *ngFor="let product of recommendedProducts">
             <div class="col-lg-3 col-md-6">
               <div class="product-card-recommended" (click)="navigateToDetail(product.id)">
                 <div class="product-image">
                   <img [src]="getProductImageUrl(product)" [alt]="product.name" class="img-fluid">
-                  @if(product.discount > 0) {
-                    <span class="discount-badge">-{{product.discount}}%</span>
-                  }
+                  <span *ngIf="product.discount > 0" class="discount-badge">-{{product.discount}}%</span>
                 </div>
                 <div class="product-info">
                   <h5 class="product-title">{{product.name}}</h5>
-                  @if(product.averageRating && product.averageRating > 0) {
-                    <div class="product-rating">
-                      <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
-                      <span class="rating-count">({{product.totalReviews}})</span>
-                    </div>
-                  }
+                  <div *ngIf="product.averageRating && product.averageRating > 0" class="product-rating">
+                    <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                    <span class="rating-count">({{product.totalReviews}})</span>
+                  </div>
                   <div class="product-price">
                     <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
-                    @if(product.discount > 0) {
-                      <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
-                    }
+                    <span *ngIf="product.discount > 0" class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
                   </div>
                   <button class="btn btn-primary btn-sm mt-2">Xem Chi Tiết</button>
                 </div>
               </div>
             </div>
-          }
-        </div>
-      </div>
-    </section>
-
-    <!-- Categories Section -->
-    <section class="categories-section py-5">
-      <div class="container">
-        <div class="row text-center mb-5">
-          <div class="col-12">
-            <h2 class="section-title">Danh mục sản phẩm khoá</h2>
-            <p class="section-subtitle">Giải pháp an ninh cho mọi không gian</p>
-          </div>
-        </div>
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="category-card">
-              <div class="category-image">
-                <img src="../../../../assets/images/van2.jpg" alt="Khoá vân tay" class="img-fluid">
-              </div>
-              <div class="category-content">
-                <h4>Khoá vân tay</h4>
-                <p>Mở khoá một chạm, bảo mật cao, tiện lợi hàng ngày</p>
-                <button class="btn btn-outline-primary">Xem thêm</button>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="category-card">
-              <div class="category-image">
-                <img src="../../../../assets/images/van5.jpg" alt="Khoá thẻ từ & mã số" class="img-fluid">
-              </div>
-              <div class="category-content">
-                <h4>Khoá thẻ từ & mã số</h4>
-                <p>Linh hoạt, dễ dùng cho gia đình và văn phòng</p>
-                <button class="btn btn-outline-primary">Xem thêm</button>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="category-card">
-              <div class="category-image">
-                <img src="../../../../assets/images/v1.jpg" alt="Phụ kiện khoá" class="img-fluid">
-              </div>
-              <div class="category-content">
-                <h4>Phụ kiện khoá</h4>
-                <p>Ruột khoá, pin, chốt an toàn, linh kiện chính hãng</p>
-                <button class="btn btn-outline-primary">Xem thêm</button>
-              </div>
-            </div>
-          </div>
+          </ng-container>
         </div>
       </div>
     </section>
@@ -267,6 +254,69 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- News Section -->
+    <section class="news-section py-5">
+      <div class="container">
+        <div class="row text-center mb-5">
+          <div class="col-12">
+            <h2 class="section-title">Tin Tức & Bài Viết</h2>
+            <p class="section-subtitle">Cập nhật những thông tin mới nhất về sản phẩm và công nghệ khóa thông minh</p>
+          </div>
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="isLoadingNews" class="text-center py-5">
+          <div class="spinner-border text-danger" role="status">
+            <span class="visually-hidden">Đang tải tin tức...</span>
+          </div>
+        </div>
+
+        <!-- News Grid -->
+        <div *ngIf="!isLoadingNews && latestNews.length > 0" class="row g-4">
+          <ng-container *ngFor="let news of latestNews">
+            <div class="col-lg-4 col-md-6">
+              <div class="news-card" (click)="navigateToNews(news.id)">
+                <div class="news-card-image">
+                  <img [src]="getNewsImageUrl(news)" [alt]="news.title" class="img-fluid">
+                  <span *ngIf="news.published_at" class="news-date-badge">
+                    <span class="day">{{ formatDate(news.published_at).day }}</span>
+                    <span class="month">Tháng {{ formatDate(news.published_at).month }}</span>
+                  </span>
+                </div>
+                <div class="news-card-body">
+                  <h5 class="news-card-title">{{ news.title }}</h5>
+                  <p *ngIf="news.summary" class="news-card-summary">{{ getTruncatedSummary(news.summary, 120) }}</p>
+                  <div class="news-card-footer">
+                    <div class="news-meta">
+                      <span *ngIf="news.views !== undefined" class="views">
+                        <i class="pi pi-eye"></i> {{ news.views }} lượt xem
+                      </span>
+                    </div>
+                    <button class="btn-read-more">
+                      Đọc thêm <i class="pi pi-arrow-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!isLoadingNews && latestNews.length === 0" class="text-center py-5">
+          <i class="pi pi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+          <p class="text-muted mt-3">Chưa có tin tức nào được đăng</p>
+        </div>
+
+        <!-- View All Button -->
+        <div *ngIf="latestNews.length > 0" class="text-center mt-5">
+          <button class="btn btn-outline-danger btn-lg" routerLink="/news">
+            Xem Tất Cả Tin Tức <i class="pi pi-arrow-right ms-2"></i>
+          </button>
         </div>
       </div>
     </section>

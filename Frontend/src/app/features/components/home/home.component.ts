@@ -21,6 +21,9 @@ import { FormsModule } from '@angular/forms';
 import { BannerService } from '../../../core/services/banner.service';
 import { BannerDto } from '../../../core/dtos/banner.dto';
 import { CommonModule } from '@angular/common';
+import { NewsService } from '../../../core/services/news.service';
+import { NewsDto } from '../../../core/dtos/news.dto';
+import { LockFeatureService, LockFeature } from '../../../core/services/lock-feature.service';
 
 @Component({
   selector: 'app-home',
@@ -49,12 +52,17 @@ export class HomeComponent extends BaseComponent implements OnInit {
   public categories: CategoryDto[] = [];
   public banners: BannerDto[] = [];
   public isLoadingBanners: boolean = false;
+  public latestNews: NewsDto[] = [];
+  public isLoadingNews: boolean = false;
+  public features: Array<{id?: number, name: string, icon: string}> = [];
 
   constructor(
     private productService: ProductService,
     private recommendationService: RecommendationService,
     private categoriesService: CategoriesService,
     private bannerService: BannerService,
+    private newsService: NewsService,
+    private lockFeatureService: LockFeatureService,
     private router: Router
   ) {
     super();
@@ -64,6 +72,8 @@ export class HomeComponent extends BaseComponent implements OnInit {
     this.loadProducts();
     this.loadCategories();
     this.loadBanners();
+    this.loadLatestNews();
+    this.loadFeatures();
   }
 
   loadProducts(): void {
@@ -135,5 +145,97 @@ export class HomeComponent extends BaseComponent implements OnInit {
     const cleanApiUrl = environment.apiUrl.replace(/\/$/, '');
     const cleanImageUrl = banner.image_url.replace(/^\//, '');
     return `${cleanApiUrl}/banners/images/${cleanImageUrl}`;
+  }
+
+  loadLatestNews(): void {
+    this.isLoadingNews = true;
+    this.newsService.getPublishedNews(0, 3).pipe(
+      catchError((error) => {
+        console.error('Error loading latest news:', error);
+        return of({ news_list: [], total_pages: 0, message: '' });
+      }),
+      tap((response) => {
+        this.latestNews = response.news_list || [];
+        this.isLoadingNews = false;
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  getNewsImageUrl(news: NewsDto): string {
+    if (!news.featured_image) {
+      return '../../../../assets/images/post1.jpg';
+    }
+    if (news.featured_image.startsWith('http')) {
+      return news.featured_image;
+    }
+    return `${environment.apiUrl}/news/images/${news.featured_image}`;
+  }
+
+  formatDate(dateString: string): { day: string, month: string } {
+    const date = new Date(dateString);
+    return {
+      day: date.getDate().toString().padStart(2, '0'),
+      month: (date.getMonth() + 1).toString()
+    };
+  }
+
+  getTruncatedTitle(title: string, maxLength: number = 50): string {
+    if (!title) return '';
+    return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
+  }
+
+  getTruncatedSummary(summary: string, maxLength: number = 100): string {
+    if (!summary) return '';
+    return summary.length > maxLength ? summary.substring(0, maxLength) + '...' : summary;
+  }
+
+  navigateToNews(newsId: number): void {
+    this.router.navigate(['/news', newsId]);
+  }
+
+  navigateToCategory(categoryId: number): void {
+    this.router.navigate(['/allProduct'], { 
+      queryParams: { category: categoryId } 
+    });
+  }
+
+  navigateToFeature(featureId: number | undefined): void {
+    if (featureId) {
+      this.router.navigate(['/allProduct'], { 
+        queryParams: { feature: featureId } 
+      });
+    }
+  }
+
+  loadFeatures(): void {
+    this.lockFeatureService.getActiveFeatures().pipe(
+      catchError((error) => {
+        console.error('Error loading features:', error);
+        return of([]);
+      }),
+      tap((features: LockFeature[]) => {
+        // Map features và add icon dựa trên tên
+        this.features = features.map(feature => ({
+          id: feature.id,
+          name: feature.name,
+          icon: this.getFeatureIcon(feature.name)
+        }));
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  private getFeatureIcon(featureName: string): string {
+    const name = featureName.toLowerCase();
+    if (name.includes('vân tay') || name.includes('fingerprint')) return 'pi pi-fingerprint';
+    if (name.includes('bluetooth')) return 'pi pi-wifi';
+    if (name.includes('mã số') || name.includes('password')) return 'pi pi-lock';
+    if (name.includes('thẻ') || name.includes('card')) return 'pi pi-credit-card';
+    if (name.includes('điều khiển') || name.includes('remote')) return 'pi pi-mobile';
+    if (name.includes('tự động') || name.includes('auto')) return 'pi pi-shield';
+    if (name.includes('báo động') || name.includes('alarm')) return 'pi pi-bell';
+    if (name.includes('pin') || name.includes('battery')) return 'pi pi-bolt';
+    return 'pi pi-cog'; // Default icon
   }
 }
