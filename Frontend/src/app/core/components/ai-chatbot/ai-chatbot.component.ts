@@ -46,16 +46,17 @@ export class AiChatbotComponent implements OnInit {
 
   ngOnInit(): void {
     // Add welcome message with examples
-    const welcomeMessage = `Hi! I'm your AI sneaker shopping assistant. I have access to all products in our database.
+    const welcomeMessage = `Xin chào! 👋 Tôi là trợ lý AI tư vấn khóa điện tử của Locker Korea. Tôi có quyền truy cập vào toàn bộ database sản phẩm khóa vân tay, khóa điện tử của cửa hàng.
 
-You can ask me things like:
-• "Show me running shoes under 3 million VND"
-• "What are the best Nike sneakers on sale?"
-• "Compare Adidas and Nike basketball shoes"
-• "I need comfortable shoes for daily wear"
-• "What sneakers do you have in size 42?"
+Bạn có thể hỏi tôi những câu như:
+• "Cho tôi xem khóa vân tay cho cửa nhà dưới 5 triệu VND"
+• "Khóa điện tử nào phù hợp cho căn hộ chung cư?"
+• "So sánh khóa Samsung và Dessmann"
+• "Tôi cần khóa cửa có tính năng mở từ xa"
+• "Khóa vân tay nào bảo mật nhất?"
+• "Gợi ý khóa điện tử cho cửa kính"
 
-How can I help you find the perfect sneakers today?`;
+Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     
     this.addMessage(welcomeMessage, 'bot');
     
@@ -111,12 +112,24 @@ How can I help you find the perfect sneakers today?`;
           if (response.success) {
             this.addMessage(response.response, 'bot');
           } else {
-            this.addMessage('Sorry, I couldn\'t process your request.', 'bot', true);
+            this.addMessage('Xin lỗi, tôi không thể xử lý yêu cầu của bạn. Vui lòng thử lại hoặc đặt câu hỏi khác.', 'bot', true);
           }
         },
         error: (error) => {
           console.error('Chat error:', error);
-          this.addMessage('Sorry, something went wrong. Please try again.', 'bot', true);
+          let errorMessage = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
+          
+          if (error.status === 0) {
+            errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+          } else if (error.status === 500) {
+            errorMessage = 'Lỗi máy chủ. AI service có thể chưa được khởi tạo. Vui lòng liên hệ admin.';
+          } else if (error.status === 503) {
+            errorMessage = 'Dịch vụ AI tạm thời không khả dụng. Vui lòng thử lại sau.';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          this.addMessage(errorMessage, 'bot', true);
         }
       });
   }
@@ -127,7 +140,7 @@ How can I help you find the perfect sneakers today?`;
     // Validate image size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (image.size > maxSize) {
-      this.addMessage('Image size too large. Please upload an image smaller than 5MB.', 'bot', true);
+      this.addMessage('Kích thước ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn 5MB.', 'bot', true);
       this.isLoading.set(false);
       return;
     }
@@ -135,7 +148,7 @@ How can I help you find the perfect sneakers today?`;
     // Validate image type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(image.type)) {
-      this.addMessage('Invalid image type. Please upload a JPEG, PNG, GIF, or WebP image.', 'bot', true);
+      this.addMessage('Định dạng ảnh không hợp lệ. Vui lòng chọn ảnh JPEG, PNG, GIF hoặc WebP.', 'bot', true);
       this.isLoading.set(false);
       return;
     }
@@ -149,19 +162,23 @@ How can I help you find the perfect sneakers today?`;
           if (response.success) {
             this.addMessage(response.response, 'bot');
           } else {
-            this.addMessage('Sorry, I couldn\'t analyze the image.', 'bot', true);
+            this.addMessage('Xin lỗi, tôi không thể phân tích hình ảnh này. Vui lòng thử lại với hình ảnh khác.', 'bot', true);
           }
         },
         error: (error) => {
           console.error('Image chat error:', error);
-          let errorMessage = 'Sorry, something went wrong while analyzing the image.';
+          let errorMessage = 'Xin lỗi, đã có lỗi xảy ra khi phân tích hình ảnh.';
           
           if (error.status === 413) {
-            errorMessage = 'Image file is too large. Please try a smaller image.';
+            errorMessage = 'Kích thước hình ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn 5MB.';
           } else if (error.status === 415) {
-            errorMessage = 'Unsupported image format. Please use JPEG, PNG, GIF, or WebP.';
+            errorMessage = 'Định dạng ảnh không được hỗ trợ. Vui lòng sử dụng JPEG, PNG, GIF hoặc WebP.';
           } else if (error.status === 400 && error.error?.error) {
             errorMessage = error.error.error;
+          } else if (error.status === 0) {
+            errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+          } else if (error.status === 500) {
+            errorMessage = 'Lỗi máy chủ khi xử lý ảnh. Vui lòng thử lại sau.';
           }
           
           this.addMessage(errorMessage, 'bot', true);
@@ -239,16 +256,17 @@ How can I help you find the perfect sneakers today?`;
 
   clearChat(): void {
     this.messages.set([]);
-    const welcomeMessage = `Hi! I'm your AI sneaker shopping assistant. I have access to all products in our database.
+    const welcomeMessage = `Xin chào! 👋 Tôi là trợ lý AI tư vấn khóa điện tử của Locker Korea. Tôi có quyền truy cập vào toàn bộ database sản phẩm khóa vân tay, khóa điện tử của cửa hàng.
 
-You can ask me things like:
-• "Show me running shoes under 3 million VND"
-• "What are the best Nike sneakers on sale?"
-• "Compare Adidas and Nike basketball shoes"
-• "I need comfortable shoes for daily wear"
-• "What sneakers do you have in size 42?"
+Bạn có thể hỏi tôi những câu như:
+• "Cho tôi xem khóa vân tay cho cửa nhà dưới 5 triệu VND"
+• "Khóa điện tử nào phù hợp cho căn hộ chung cư?"
+• "So sánh khóa Samsung và Dessmann"
+• "Tôi cần khóa cửa có tính năng mở từ xa"
+• "Khóa vân tay nào bảo mật nhất?"
+• "Gợi ý khóa điện tử cho cửa kính"
 
-How can I help you find the perfect sneakers today?`;
+Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     
     this.addMessage(welcomeMessage, 'bot');
   }
@@ -260,18 +278,25 @@ How can I help you find the perfect sneakers today?`;
       .subscribe({
         next: (response) => {
           if (response.success && response.status === 'not_initialized') {
-            this.addMessage('💡 Tip: Ask an admin to initialize the AI database for better product search results.', 'bot');
+            this.addMessage('💡 Mẹo: Yêu cầu admin khởi tạo database AI để có kết quả tìm kiếm sản phẩm tốt hơn. Click vào icon database ở góc trên bên phải.', 'bot');
+          } else if (response.success && response.status === 'initialized') {
+            console.log(`AI database đã sẵn sàng với ${response.documentCount} sản phẩm`);
           }
         },
         error: (error: any) => {
           console.error('Failed to check AI status:', error);
+          // Không hiển thị lỗi này cho user vì không quan trọng lắm
         }
       });
   }
 
   initializeAI(): void {
+    if (!confirm('Bạn có chắc chắn muốn khởi tạo lại database AI? Quá trình này có thể mất vài phút.')) {
+      return;
+    }
+    
     this.isLoading.set(true);
-    this.addMessage('Initializing AI database with all products...', 'bot');
+    this.addMessage('⏳ Đang khởi tạo database AI với toàn bộ sản phẩm... Vui lòng đợi trong giây lát.', 'bot');
     
     const apiUrl = environment.apiUrl;
     this.httpClient.post<{success: boolean; message: string}>(`${apiUrl}/ai/initialize/index-all`, {})
@@ -279,14 +304,24 @@ How can I help you find the perfect sneakers today?`;
       .subscribe({
         next: (response) => {
           if (response.success) {
-            this.addMessage('✅ AI database initialized successfully! I now have access to all products.', 'bot');
+            this.addMessage('✅ Khởi tạo database AI thành công! Tôi đã có quyền truy cập vào toàn bộ sản phẩm. Bạn có thể bắt đầu hỏi tôi về bất kỳ sản phẩm nào.', 'bot');
           } else {
-            this.addMessage('Failed to initialize AI database.', 'bot', true);
+            this.addMessage('❌ Không thể khởi tạo database AI. Vui lòng thử lại sau.', 'bot', true);
           }
         },
         error: (error: any) => {
           console.error('Failed to initialize AI:', error);
-          this.addMessage('Error initializing AI database. Please try again later.', 'bot', true);
+          let errorMessage = '❌ Lỗi khi khởi tạo database AI.';
+          
+          if (error.status === 0) {
+            errorMessage += ' Không thể kết nối đến server.';
+          } else if (error.status === 500) {
+            errorMessage += ' Lỗi máy chủ. Kiểm tra Google Cloud credentials và ChromaDB.';
+          } else if (error.error?.error) {
+            errorMessage = `❌ ${error.error.error}`;
+          }
+          
+          this.addMessage(errorMessage, 'bot', true);
         }
       });
   }
