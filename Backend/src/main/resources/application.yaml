@@ -24,7 +24,7 @@ spring:
     default-locate: en
   google:
     ai:
-      project-id: thermal-micron-435515-i8 # Replace with your Google Cloud project ID
+      project-id: first-strength-460610-i4 # Replace with your Google Cloud project ID
       location: us-central1
       model: gemini-2.0-flash-001
   autoconfigure:

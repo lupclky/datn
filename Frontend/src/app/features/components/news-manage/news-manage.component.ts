@@ -15,6 +15,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastService } from '../../../core/services/toast.service';
 import { EditorModule } from 'primeng/editor';
 import { environment } from '../../../../environments/environment.development';
+import { AiService } from '../../../core/services/ai.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-news-manage',
@@ -52,6 +54,7 @@ export class NewsManageComponent implements OnInit {
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   isUploading: boolean = false;
+  isGenerating: boolean = false;
 
   statusOptions = [
     { label: 'Nháp', value: 'DRAFT' },
@@ -66,6 +69,7 @@ export class NewsManageComponent implements OnInit {
     private toastService: ToastService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
+    private aiService: AiService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -324,6 +328,53 @@ export class NewsManageComponent implements OnInit {
     this.currentPage = event.page;
     this.pageSize = event.rows;
     this.loadNews();
+  }
+
+  generateContent(): void {
+    const title = this.newsForm.get('title')?.value;
+    
+    if (!title || title.trim() === '') {
+      this.toastService.warn('Vui lòng nhập tiêu đề trước khi tạo nội dung');
+      return;
+    }
+
+    // Get optional fields
+    const category = this.newsForm.get('category')?.value;
+    const summary = this.newsForm.get('summary')?.value;
+
+    this.isGenerating = true;
+    this.cdr.markForCheck();
+
+    this.aiService.generateNewsContent(title, category, summary)
+      .pipe(finalize(() => {
+        this.isGenerating = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.content) {
+            this.newsForm.patchValue({ content: response.content });
+            this.toastService.showSuccess('Thành công', 'Đã tạo nội dung bằng AI');
+            this.cdr.markForCheck();
+          } else {
+            this.toastService.showError('Lỗi', 'Không thể tạo nội dung');
+          }
+        },
+        error: (error) => {
+          console.error('Error generating content:', error);
+          let errorMessage = 'Không thể tạo nội dung. Vui lòng thử lại.';
+          
+          if (error.status === 0) {
+            errorMessage = 'Không thể kết nối đến server AI.';
+          } else if (error.status === 500) {
+            errorMessage = 'Lỗi server khi tạo nội dung. Kiểm tra Google Cloud credentials.';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          this.toastService.showError('Lỗi', errorMessage);
+        }
+      });
   }
 }
 

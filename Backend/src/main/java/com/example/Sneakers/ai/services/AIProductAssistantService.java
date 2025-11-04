@@ -149,23 +149,17 @@ public class AIProductAssistantService {
                 Hãy cung cấp câu trả lời hữu ích và chính xác dựa trên các sản phẩm trong cơ sở dữ liệu.
                 
                 Quy tắc trả lời:
-                1. Trả lời bằng tiếng Việt một cách tự nhiên, thân thiện, chuyên nghiệp
+                1. Trả lời bằng tiếng Việt tự nhiên, thân thiện, chuyên nghiệp
                 2. Nếu khách hỏi về sản phẩm cụ thể, hãy tham chiếu đến các sản phẩm thực tế ở trên
-                3. Luôn bao gồm: tên sản phẩm, giá, thương hiệu, tính năng chính, % giảm giá (nếu có)
+                3. Luôn bao gồm: tên sản phẩm, giá, thương hiệu, tính năng chính, %% giảm giá (nếu có)
                 4. Format giá tiền theo định dạng Việt Nam (VD: 5.500.000 VND)
-                5. Nếu có nhiều sản phẩm phù hợp, liệt kê 3-5 sản phẩm tốt nhất
+                5. Nếu có nhiều sản phẩm phù hợp, liệt kê 3-5 sản phẩm tốt nhất với điểm nổi bật ngắn gọn
                 6. Nếu không tìm thấy sản phẩm phù hợp, gợi ý sản phẩm thay thế hoặc hỏi thêm thông tin
-                7. Giải thích tại sao sản phẩm phù hợp với nhu cầu của khách hàng
-                8. Đưa ra lời khuyên chuyên môn về:
-                   - Tính năng bảo mật (vân tay, mật khẩu, thẻ từ, điều khiển từ xa)
-                   - Độ bền, chất liệu (hợp kim kẽm, thép không gỉ)
-                   - Loại cửa phù hợp (cửa gỗ, cửa kính, cửa nhôm)
-                   - Nguồn điện và pin dự phòng
-                   - Tính năng thông minh (WiFi, App, khóa từ xa)
-                   - Khả năng chống nước, chống bụi
-                   - Bảo hành và hỗ trợ lắp đặt
+                7. Giải thích ngắn gọn tại sao sản phẩm phù hợp (1-2 câu)
+                8. TRÁNH list dài các yếu tố. Chỉ đề cập 2-3 điểm quan trọng nhất liên quan trực tiếp đến câu hỏi
+                9. Độ dài trả lời: 150-300 từ, tập trung vào thông tin cần thiết
                 
-                Hãy trả lời một cách chuyên nghiệp, nhiệt tình và tập trung vào việc giúp khách hàng chọn được khóa điện tử phù hợp nhất cho nhu cầu an ninh của họ.
+                Hãy trả lời ngắn gọn, súc tích, tập trung vào thông tin khách hàng cần. Không cần liệt kê tất cả tính năng nếu không liên quan.
                 """, userQuery, productContext);
     }
 
@@ -180,13 +174,12 @@ public class AIProductAssistantService {
                 Hãy cung cấp câu trả lời tập trung vào các sản phẩm trong danh mục %s.
                 
                 Quy tắc trả lời:
-                1. Trả lời bằng tiếng Việt chuyên nghiệp
-                2. Nhấn mạnh đặc điểm bảo mật và công nghệ của sản phẩm trong danh mục này
-                3. Giải thích phân khúc giá và giá trị của từng sản phẩm
-                4. Đề xuất sản phẩm phù hợp với các loại cửa và nhu cầu khác nhau
-                5. Nêu rõ các ưu đãi đặc biệt, chính sách bảo hành và lắp đặt (nếu có)
-                6. Format: Tên khóa, thương hiệu, giá (VND), giảm giá (%), tính năng nổi bật, loại cửa phù hợp
-                7. So sánh công nghệ và mức độ bảo mật giữa các sản phẩm
+                1. Trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn
+                2. Nhấn mạnh 2-3 đặc điểm nổi bật nhất của danh mục này
+                3. So sánh ngắn gọn 2-3 sản phẩm tốt nhất
+                4. Format: Tên khóa, giá, tính năng chính (1 câu)
+                5. Độ dài: 150-250 từ, tránh list dài
+                6. Tập trung vào thông tin khách hàng cần
                 """, category, userQuery, productContext, category);
     }
 
@@ -201,14 +194,12 @@ public class AIProductAssistantService {
                 Hãy đưa ra gợi ý khóa điện tử trong phạm vi ngân sách của khách hàng.
                 
                 Quy tắc trả lời:
-                1. Trả lời bằng tiếng Việt chuyên nghiệp
-                2. Ưu tiên các sản phẩm có tính năng bảo mật tốt nhất trong tầm giá
-                3. Giải thích tại sao đây là lựa chọn tốt về giá trị/tiền (công nghệ, độ bền, bảo mật)
-                4. Xếp hạng sản phẩm theo độ phù hợp với ngân sách và nhu cầu
-                5. Nếu có sản phẩm cao hơn ngân sách một chút nhưng có tính năng vượt trội, có thể đề cập
-                6. So sánh các mức giá và tính năng/giá trị nhận được
-                7. Format giá: X.XXX.XXX VND (VD: 5.500.000 VND)
-                8. Lưu ý về chi phí lắp đặt (nếu có)
+                1. Trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn
+                2. Đề xuất 3 sản phẩm tốt nhất trong tầm giá, mỗi sản phẩm 1-2 câu
+                3. Giải thích ngắn gọn tại sao phù hợp (1 câu/sản phẩm)
+                4. Format giá: X.XXX.XXX VND
+                5. Độ dài: 150-250 từ, tránh list dài
+                6. Tập trung vào giá trị/tiền quan trọng nhất
                 """, minPrice, maxPrice, userQuery, productContext);
     }
 
@@ -277,30 +268,87 @@ public class AIProductAssistantService {
                 Dựa trên nhu cầu của khách hàng và các sản phẩm có sẵn, hãy đưa ra đề xuất chuyên nghiệp.
                 
                 Quy tắc đề xuất:
-                1. Trả lời bằng tiếng Việt với giọng điệu chuyên nghiệp, tư vấn tận tình
-                2. Phân tích nhu cầu an ninh thực sự của khách hàng từ mô tả:
-                   - Loại cửa (cửa chính, cửa phụ, cửa văn phòng)
-                   - Mức độ bảo mật cần thiết
-                   - Số lượng người sử dụng
-                   - Ngân sách
-                   - Tính năng ưu tiên (vân tay, app, từ xa, thẻ từ)
-                3. Đề xuất 3-5 khóa điện tử xếp theo độ phù hợp (cao → thấp)
-                4. Với mỗi sản phẩm, giải thích chi tiết:
-                   ✓ Tại sao khóa này phù hợp với nhu cầu của khách
-                   ✓ Tính năng bảo mật nổi bật (vân tay, mật khẩu, thẻ từ, app)
-                   ✓ Công nghệ sử dụng (cảm biến, kết nối, chống nước)
-                   ✓ Giá cả và giá trị nhận được
-                   ✓ Ưu đãi đặc biệt, bảo hành, lắp đặt miễn phí (nếu có)
-                5. Đưa ra lời khuyên thêm về:
-                   - Cách lắp đặt và sử dụng
-                   - Bảo trì và chăm sóc khóa điện tử
-                   - Cách tăng cường bảo mật
-                   - Lưu ý về pin và nguồn điện dự phòng
-                   - Khả năng mở khẩn cấp khi hết pin
-                6. Cảnh báo và lưu ý quan trọng (nếu có)
-                7. Format rõ ràng với emoji và cấu trúc dễ đọc
+                1. Trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn
+                2. Phân tích nhanh nhu cầu: loại cửa, ngân sách, tính năng ưu tiên (1-2 câu)
+                3. Đề xuất 3 khóa phù hợp nhất, mỗi khóa:
+                   - Tên, giá (1 câu)
+                   - Tại sao phù hợp (1 câu)
+                   - Tính năng nổi bật (1 câu)
+                4. Đưa ra 1-2 lời khuyên quan trọng nhất (không liệt kê dài)
+                5. Độ dài: 200-300 từ, tập trung vào thông tin cần thiết
+                6. Format rõ ràng, dễ đọc
                 
                 Hãy đưa ra đề xuất như một chuyên gia an ninh đang tư vấn chân thành để bảo vệ tài sản và gia đình khách hàng.
                 """, preferences, productContext);
+    }
+
+    public String provideWarrantyAdvice(String query) {
+        log.info("Providing warranty advice for: {}", query);
+        
+        String prompt = createWarrantyPrompt(query);
+        var response = geminiChatModel.chat(UserMessage.from(prompt));
+        
+        return response.aiMessage().text();
+    }
+
+    public String diagnoseLockIssue(String issueDescription) {
+        log.info("Diagnosing lock issue: {}", issueDescription);
+        
+        String prompt = createDiagnosticPrompt(issueDescription);
+        var response = geminiChatModel.chat(UserMessage.from(prompt));
+        
+        return response.aiMessage().text();
+    }
+
+    private String createWarrantyPrompt(String query) {
+        return String.format("""
+                Bạn là chuyên viên tư vấn chính sách bảo hành của Locker Korea, chuyên về khóa điện tử và khóa vân tay.
+                
+                Câu hỏi của khách hàng về bảo hành: "%s"
+                
+                Hãy tư vấn về chính sách bảo hành một cách chuyên nghiệp, rõ ràng.
+                
+                Quy tắc trả lời:
+                1. Trả lời bằng tiếng Việt, giọng điệu chuyên nghiệp và thân thiện
+                2. Nếu câu hỏi về thời gian bảo hành: thông thường 12-24 tháng tùy hãng
+                3. Nếu về phạm vi bảo hành: giải thích những gì được bảo hành (lỗi phần cứng, phần mềm) và không được bảo hành (lỗi do người dùng, thiên tai, hỏng do nước)
+                4. Nếu về quy trình bảo hành: hướng dẫn các bước (liên hệ, kiểm tra, sửa chữa/đổi mới)
+                5. Nếu về điều kiện bảo hành: cần hóa đơn, tem bảo hành, không tự ý sửa chữa
+                6. Nếu về chi phí: bảo hành miễn phí trong thời hạn, ngoài thời hạn có phí
+                7. Độ dài: 100-200 từ, ngắn gọn, rõ ràng
+                8. Nếu không chắc chắn, khuyên khách liên hệ hotline hoặc cửa hàng để được tư vấn chi tiết
+                
+                Hãy trả lời cụ thể, hữu ích và khuyến khích khách hàng liên hệ nếu cần hỗ trợ thêm.
+                """, query);
+    }
+
+    private String createDiagnosticPrompt(String issueDescription) {
+        return String.format("""
+                Bạn là kỹ thuật viên chẩn đoán lỗi khóa điện tử chuyên nghiệp của Locker Korea.
+                
+                Mô tả lỗi của khách hàng: "%s"
+                
+                Hãy chẩn đoán vấn đề và đưa ra giải pháp.
+                
+                Quy tắc chẩn đoán:
+                1. Trả lời bằng tiếng Việt, giọng điệu chuyên nghiệp, thân thiện
+                2. Phân tích các nguyên nhân có thể gây ra lỗi
+                3. Đưa ra các bước kiểm tra đơn giản khách hàng có thể tự làm
+                4. Đề xuất giải pháp khắc phục từ đơn giản đến phức tạp
+                5. Nếu cần hỗ trợ kỹ thuật, hướng dẫn liên hệ
+                
+                Các lỗi thường gặp và cách xử lý:
+                - Khóa không nhận vân tay: Làm sạch cảm biến, đăng ký lại vân tay, kiểm tra pin
+                - Khóa không mở bằng mật khẩu: Reset mật khẩu, kiểm tra pin, reset factory
+                - Khóa không kết nối app: Kiểm tra WiFi/Bluetooth, reset kết nối, cập nhật app
+                - Khóa kêu bíp liên tục: Pin yếu, lỗi cảm biến, khóa cửa sai cách
+                - Khóa không có điện: Thay pin, kiểm tra tiếp xúc pin, dùng chìa cơ khẩn cấp
+                - Khóa báo lỗi: Mã lỗi cụ thể, reset, liên hệ kỹ thuật
+                
+                6. Độ dài: 150-250 từ, tập trung vào giải pháp thực tế
+                7. Nếu lỗi phức tạp, khuyên khách liên hệ kỹ thuật viên
+                
+                Hãy chẩn đoán chính xác và đưa ra giải pháp rõ ràng, dễ thực hiện.
+                """, issueDescription);
     }
 }

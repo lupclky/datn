@@ -143,6 +143,78 @@ public class AIChatController {
         }
     }
 
+    @PostMapping("/generate-news")
+    public ResponseEntity<Map<String, Object>> generateNewsContent(@RequestBody Map<String, String> request) {
+        try {
+            String title = request.get("title");
+            String topic = request.get("topic");
+            String keywords = request.get("keywords");
+            
+            if (title == null || title.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Title is required"));
+            }
+
+            log.info("Generating news content for title: {}", title);
+
+            // Create prompt for news generation
+            String prompt = createNewsGenerationPrompt(title, topic, keywords);
+            
+            var response = geminiChatModel.chat(UserMessage.from(prompt));
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("content", response.aiMessage().text());
+            result.put("success", true);
+            result.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Error generating news content", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+    
+    private String createNewsGenerationPrompt(String title, String topic, String keywords) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Bạn là một biên tập viên chuyên nghiệp về khóa điện tử và công nghệ an ninh.\n\n");
+        prompt.append("Hãy viết một bài báo chi tiết và chuyên nghiệp với:\n");
+        prompt.append("Tiêu đề: ").append(title).append("\n");
+        
+        if (topic != null && !topic.trim().isEmpty()) {
+            prompt.append("Chủ đề: ").append(topic).append("\n");
+        }
+        
+        if (keywords != null && !keywords.trim().isEmpty()) {
+            prompt.append("Từ khóa cần đề cập: ").append(keywords).append("\n");
+        }
+        
+        prompt.append("\nYêu cầu:\n");
+        prompt.append("1. Viết bài bằng tiếng Việt chuyên nghiệp, dễ hiểu\n");
+        prompt.append("2. Cấu trúc rõ ràng với các phần: Mở bài, Nội dung chính (3-4 đoạn), Kết luận\n");
+        prompt.append("3. Độ dài: 800-1200 từ\n");
+        prompt.append("4. Sử dụng HTML formatting:\n");
+        prompt.append("   - <h2> cho tiêu đề phụ\n");
+        prompt.append("   - <p> cho đoạn văn\n");
+        prompt.append("   - <strong> cho từ khóa quan trọng\n");
+        prompt.append("   - <ul><li> cho danh sách\n");
+        prompt.append("   - <blockquote> cho trích dẫn (nếu có)\n");
+        prompt.append("5. Nội dung liên quan đến:\n");
+        prompt.append("   - Khóa điện tử, khóa vân tay, công nghệ smart lock\n");
+        prompt.append("   - An ninh gia đình, công nghệ bảo mật\n");
+        prompt.append("   - Xu hướng công nghệ IoT, smart home\n");
+        prompt.append("   - Tư vấn chọn mua và sử dụng\n");
+        prompt.append("6. Giọng văn chuyên nghiệp nhưng thân thiện, dễ tiếp cận\n");
+        prompt.append("7. Đưa ra thông tin hữu ích, tips thực tế cho người đọc\n");
+        prompt.append("8. KHÔNG đề cập đến thương hiệu cụ thể trừ khi có trong tiêu đề\n\n");
+        prompt.append("Hãy viết bài báo hoàn chỉnh với HTML formatting:");
+        
+        return prompt.toString();
+    }
+
     @PostMapping("/product-assistant/by-category")
     public ResponseEntity<Map<String, Object>> productAssistantByCategory(@RequestBody Map<String, String> request) {
         try {
@@ -231,6 +303,66 @@ public class AIChatController {
 
         } catch (Exception e) {
             log.error("Error in product recommendations", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/warranty-advice")
+    public ResponseEntity<Map<String, Object>> warrantyAdvice(@RequestBody Map<String, String> request) {
+        try {
+            String query = request.get("query");
+            if (query == null || query.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Query cannot be empty"));
+            }
+
+            log.info("Processing warranty advice request");
+
+            String response = aiProductAssistantService.provideWarrantyAdvice(query);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("response", response);
+            result.put("success", true);
+            result.put("type", "warranty-advice");
+            result.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Error in warranty advice", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/diagnose-issue")
+    public ResponseEntity<Map<String, Object>> diagnoseIssue(@RequestBody Map<String, String> request) {
+        try {
+            String issueDescription = request.get("issue");
+            if (issueDescription == null || issueDescription.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Issue description cannot be empty"));
+            }
+
+            log.info("Processing lock issue diagnosis");
+
+            String response = aiProductAssistantService.diagnoseLockIssue(issueDescription);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("response", response);
+            result.put("success", true);
+            result.put("type", "diagnosis");
+            result.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Error in issue diagnosis", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             errorResponse.put("success", false);

@@ -4,6 +4,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
 import dev.langchain4j.model.vertexai.VertexAiEmbeddingModel;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import static dev.langchain4j.internal.Utils.randomUUID;
 
 @Configuration
 @Slf4j
+@ConditionalOnProperty(name = "ai.enabled", havingValue = "true", matchIfMissing = false)
 public class EmbeddingConfig {
 
     @Value("${spring.google.ai.project-id}")

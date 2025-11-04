@@ -83,4 +83,32 @@ export class AiService {
       `${this.apiUrl}/ai/search/products/with-scores?query=${encodeURIComponent(query)}&topK=${topK}&minScore=${minScore}`
     );
   }
+
+  // Generate news content
+  generateNewsContent(title: string, topic?: string, keywords?: string): Observable<{content: string; success: boolean; timestamp: number}> {
+    const payload: any = { title };
+    if (topic) payload.topic = topic;
+    if (keywords) payload.keywords = keywords;
+    
+    return this.httpClient.post<{content: string; success: boolean; timestamp: number}>(
+      `${this.apiUrl}/ai/chat/generate-news`,
+      payload
+    );
+  }
+
+  // Warranty advice
+  warrantyAdvice(query: string): Observable<ChatResponse> {
+    return this.httpClient.post<ChatResponse>(
+      `${this.apiUrl}/ai/chat/warranty-advice`,
+      { query }
+    );
+  }
+
+  // Diagnose lock issue
+  diagnoseIssue(issueDescription: string): Observable<ChatResponse> {
+    return this.httpClient.post<ChatResponse>(
+      `${this.apiUrl}/ai/chat/diagnose-issue`,
+      { issue: issueDescription }
+    );
+  }
 } 

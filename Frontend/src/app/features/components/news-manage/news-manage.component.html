@@ -200,7 +200,29 @@
 
         <!-- Content -->
         <div class="col-12">
-          <label for="content" class="form-label">Nội dung</label>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label for="content" class="form-label mb-0">Nội dung</label>
+            <button pButton 
+                    type="button" 
+                    label="✨ Tạo nội dung bằng AI" 
+                    icon="pi pi-sparkles" 
+                    class="p-button-sm p-button-info"
+                    [disabled]="isGenerating || !newsForm.get('title')?.value"
+                    [loading]="isGenerating"
+                    (click)="generateContent()"
+                    pTooltip="Tạo nội dung tự động từ tiêu đề bằng AI" 
+                    tooltipPosition="left"></button>
+          </div>
+          
+          <!-- AI Generation Status -->
+          <div *ngIf="isGenerating" class="alert alert-info mb-3">
+            <div class="d-flex align-items-center">
+              <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span>🤖 AI đang tạo nội dung chuyên nghiệp cho bạn... Vui lòng đợi 10-20 giây.</span>
+            </div>
+          </div>
           
           <!-- Rich Text Editor for Browser -->
           <p-editor *ngIf="isBrowser" 
