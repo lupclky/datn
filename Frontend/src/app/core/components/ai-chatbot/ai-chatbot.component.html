@@ -13,7 +13,7 @@
 <div class="chat-container" [class.open]="isOpen()">
   <div class="chat-header">
     <div class="header-content">
-      <h3>AI Shopping Assistant</h3>
+      <h3>Trợ lý KVK Intelligence</h3>
       <span class="status-indicator"></span>
     </div>
     <div class="header-actions">
@@ -100,7 +100,7 @@
         type="text"
         [(ngModel)]="userInput"
         (keypress)="onKeyPress($event)"
-        placeholder="Ask about sneakers..."
+        placeholder="Hỏi về mọi thứ về khoá..."
         [disabled]="isLoading()"
         class="message-input">
 

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: mysql8-container
--- Thời gian đã tạo: Th6 13, 2025 lúc 11:59 AM
+-- Thời gian đã tạo: Th10 04, 2025 lúc 06:32 PM
 -- Phiên bản máy phục vụ: 8.2.0
--- Phiên bản PHP: 8.2.27
+-- Phiên bản PHP: 8.3.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,37 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `shopsneaker3`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `banners`
+--
+
+CREATE TABLE `banners` (
+  `id` bigint NOT NULL,
+  `title` varchar(500) NOT NULL COMMENT 'Tiêu đề banner',
+  `description` varchar(1000) DEFAULT NULL COMMENT 'Mô tả ngắn',
+  `image_url` varchar(500) NOT NULL COMMENT 'Đường dẫn hình ảnh',
+  `button_text` varchar(100) DEFAULT NULL COMMENT 'Text trên nút bấm',
+  `button_link` varchar(500) DEFAULT NULL COMMENT 'Link khi click nút',
+  `button_style` varchar(50) DEFAULT NULL COMMENT 'Màu nút: primary, danger, success, warning, info, secondary',
+  `display_order` int NOT NULL DEFAULT '0' COMMENT 'Thứ tự hiển thị (nhỏ hơn hiển thị trước)',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Trạng thái hiển thị',
+  `start_date` datetime DEFAULT NULL COMMENT 'Ngày bắt đầu hiển thị',
+  `end_date` datetime DEFAULT NULL COMMENT 'Ngày kết thúc hiển thị',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày tạo',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Ngày cập nhật'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Bảng quản lý banner trang chủ';
+
+--
+-- Đang đổ dữ liệu cho bảng `banners`
+--
+
+INSERT INTO `banners` (`id`, `title`, `description`, `image_url`, `button_text`, `button_link`, `button_style`, `display_order`, `is_active`, `start_date`, `end_date`, `created_at`, `updated_at`) VALUES
+(1, 'Khoá vân tay thông minh', 'Bảo mật hiện đại, mở khoá một chạm', 'cd5374a8-e538-41e4-967d-00e3423cdb1a_Kaiser 3_4.jpg', 'Khám phá ngay', '/allProduct', 'primary', 1, 1, '2025-11-04 12:58:04', '2026-02-02 12:58:04', '2025-11-04 12:58:04', '2025-11-04 13:44:28'),
+(2, 'Ưu đãi đặc biệt', 'Giảm đến 50% cho dòng khoá cao cấp', '9ddc4cd2-15d8-49fd-b91b-7d719957ce3c_sht-3517nt-1.jpg', 'Mua ngay', '/allProduct', 'danger', 2, 1, '2025-11-01 13:49:20', '2026-01-15 13:49:29', '2025-11-04 12:58:04', '2025-11-04 15:51:35'),
+(3, 'Chất lượng Hàn Quốc', 'Thiết kế sang trọng, vận hành bền bỉ', '77ee50a6-af85-43fe-a7df-94c19e967c29_64baf7b5-635b-4a9e-aec7-03d0fedac82f_nike-air-force-1-low-replica-800x600.jpg', 'Xem thêm', '/allProduct', 'success', 3, 1, NULL, NULL, '2025-11-04 12:58:04', '2025-11-04 13:44:26');
 
 -- --------------------------------------------------------
 
@@ -58,12 +89,77 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`) VALUES
-(1, 'Nike'),
-(2, 'Adidas'),
-(3, 'New Balance'),
-(4, 'Converse'),
-(5, 'Vans11'),
-(6, 'SAMSUNG');
+(1, 'GATEMAN'),
+(2, 'SAMSUNG'),
+(3, 'H-Gang'),
+(4, 'EPIC'),
+(5, 'WELKOM'),
+(7, 'KAISER+'),
+(8, 'UNICOR'),
+(9, 'HiOne+'),
+(10, 'Khóa cửa kính'),
+(11, 'Chuông hình');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `lock_features`
+--
+
+CREATE TABLE `lock_features` (
+  `id` bigint NOT NULL,
+  `name` varchar(100) NOT NULL COMMENT 'Tên chức năng',
+  `description` text COMMENT 'Mô tả chức năng',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT 'Trạng thái hoạt động',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `lock_features`
+--
+
+INSERT INTO `lock_features` (`id`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'Mở khóa vân tay', 'Nhận diện và mở khóa bằng vân tay', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(2, 'Mở khóa mã PIN', 'Nhập mã PIN để mở khóa', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(3, 'Mở khóa thẻ từ', 'Quẹt thẻ từ để mở khóa', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(4, 'Kết nối Bluetooth', 'Kết nối và điều khiển qua Bluetooth', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(5, 'Kết nối WiFi', 'Kết nối và điều khiển qua WiFi', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(6, 'Chống nước', 'Có khả năng chống nước', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
+(7, 'Cảnh báo an ninh', 'Cảnh báo khi có xâm nhập', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `news`
+--
+
+CREATE TABLE `news` (
+  `id` bigint NOT NULL,
+  `title` varchar(500) NOT NULL,
+  `content` text,
+  `summary` varchar(1000) DEFAULT NULL,
+  `author` varchar(100) DEFAULT NULL,
+  `category` varchar(50) DEFAULT NULL,
+  `status` enum('DRAFT','PUBLISHED','ARCHIVED') NOT NULL DEFAULT 'DRAFT',
+  `featured_image` varchar(500) DEFAULT NULL,
+  `views` bigint NOT NULL DEFAULT '0',
+  `published_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `thumbnail` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `news`
+--
+
+INSERT INTO `news` (`id`, `title`, `content`, `summary`, `author`, `category`, `status`, `featured_image`, `views`, `published_at`, `created_at`, `updated_at`, `thumbnail`) VALUES
+(1, 'Giới thiệu sản phẩm mới', '<p>Nội dung chi tiết về sản ph<span style=\"background-color: initial; color: inherit;\">Sau nhiều tháng thử nghiệm beta,&nbsp;</span><a href=\"https://tinhte.vn/tag/apple\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">Apple</a><span style=\"background-color: initial; color: inherit;\">&nbsp;hôm nay đã chính thức phát hành&nbsp;</span><a href=\"https://tinhte.vn/tag/ios-261\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iOS 26.1</a><span style=\"background-color: initial; color: inherit;\">&nbsp;và iPadOS 26.1 đến người dùng toàn cầu. Nếu như&nbsp;</span><a href=\"https://tinhte.vn/tag/ios-26\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iOS 26</a><span style=\"background-color: initial; color: inherit;\">&nbsp;là một cuộc lột xác về mặt giao diện với hiệu ứng Liquid Glass, thì&nbsp;</span><a href=\"https://tinhte.vn/tag/ios\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iOS</a><span style=\"background-color: initial; color: inherit;\">&nbsp;26.1 lại là một bản cập nhật mang tính hoàn thiện, tập trung vào việc lắng nghe phản hồi từ cộng đồng, tinh chỉnh trải nghiệm, và quan trọng nhất, AI Apple đã có tiếng Việt.</span></p><p><br></p><p><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: inherit;\"><img src=\"https://imgproxy7.tinhte.vn/NUfJH046YahZ_HW-22UTlJgIvTlNhrymgIa0jOut2hs/rs:fill:480:300:0/plain/https://photo2.tinhte.vn/data/attachment-files/2025/09/8844754_overr_neia.jpg\" height=\"300\" width=\"480\"></a></p><h2><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(20, 20, 20);\"><strong>Thử nhanh Apple Intelligence tiếng Việt: Cảm ơn Apple, mình đã chờ điều này hơn một năm qua</strong></a></h2><p><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(20, 20, 20);\">Bà con ơi, làng nước ơi, Apple AI có tiếng Việt rồi. Đây là một điều mình đã mong chờ trong hơn 1 năm qua, Siri tiếng Việt ừ cũng thường nhưng Apple Intelligence tiếng Việt lại là một chuyện khác, mới trải nghiệm sơ sơ là thấy đã rồi. Để xài AI...</a></p><p><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(20, 20, 20); background-color: initial;\">&nbsp;tinhte.vn</a></p><p><br></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Apple Intelligence chính thức hỗ trợ Tiếng Việt</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Đây chắc chắn là nâng cấp quan trọng và được mong chờ nhất đối với người dùng Việt Nam trong bản cập nhật lần này. Nền tảng trí tuệ nhân tạo của Apple giờ đây đã có thể hiểu và tương tác hoàn toàn bằng tiếng Việt, giúp anh em trải nghiệm nhiều tính năng mới mà trước đây chúng ta chỉ có thể trải nghiệm bằng tiếng Anh.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885130_8844754-overr-neia.jpg\" alt=\"8844754-overr-neia.jpg\"></span></p><p><br></p><p>Đầu tiên phải kể đến Writing Tools (Công cụ Viết). Tính năng này giờ đây đã có thể sử dụng hoàn toàn bằng tiếng Việt trên hầu hết mọi ứng dụng. Ae có thể dễ dàng yêu cầu AI tóm tắt một đoạn văn bản dài, viết lại theo một phong cách khác, sửa lỗi chính tả hay thậm chí chuyển đổi một đoạn so sánh thành dạng bảng biểu để dễ theo dõi hơn. Việc tích hợp sâu ChatGPT cũng cho phép người dùng đưa ra các yêu cầu phức tạp hơn bằng chính ngôn ngữ mẹ đẻ.</p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885131_8844747-piewjfipqwejf-2.jpg\" alt=\"8844747-piewjfipqwejf-2.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Trong ứng dụng Mail, AI có thể tự động đọc và tóm tắt nội dung các email dài bằng tiếng Việt một cách ngọt sớt, đồng thời đề xuất các câu trả lời thông minh phù hợp với ngữ cảnh. Cùng với khả năng lọc và phân loại mail tự động, việc quản lý email hàng ngày đã trở nên đơn giản và hiệu quả hơn rất nhiều.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885132_8844736-4.jpg\" alt=\"8844736-4.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Siri thế hệ mới cũng đã thông minh hơn khi giao tiếp bằng tiếng Việt. Nó có thể hiểu các câu lệnh phức tạp và tự nhiên hơn, thực hiện các tác vụ liền mạch như \"nhắn tin cho A rủ đi ăn phở, uống trà sữa\" hay thậm chí là yêu cầu ChatGPT soạn một đoạn văn bản rồi gửi đi.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885133_8844740-7-2.jpg\" alt=\"8844740-7-2.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Cuối cùng, Visual Intelligence cũng đã được Việt hóa. Khi ae hướng camera vào một địa điểm hay một đoạn văn bản, tính năng này có thể nhận diện và cung cấp các thông tin liên quan bằng tiếng Việt. Các tính năng sáng tạo như Image Playground và Genmoji cũng đã chấp nhận các câu lệnh mô tả bằng tiếng Việt, giúp cá nhân hóa trải nghiệm một cách sâu sắc hơn nhưng mấy cái đó thấy không vui nên mình không xài.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885134_8844742-11-2.jpg\" alt=\"8844742-11-2.jpg\"></span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Tùy chỉnh giao diện Liquid Glass</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Lắng nghe phản hồi từ những người dùng cho rằng giao diện Liquid Glass mặc định đôi khi hơi khó đọc do độ tương phản thấp, Apple đã bổ sung một tùy chọn tùy chỉnh quan trọng trong iOS 26.1. Trong mục Cài đặt &gt; Màn hình &amp; Độ sáng, người dùng giờ đây có thể chuyển đổi giữa hai chế độ: Clear và Tinted.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885135_tat-liquid-glass-trong-ban-cap-nhat-ios-26-1-8.jpg\" alt=\"tat-liquid-glass-trong-ban-cap-nhat-ios-26-1-8.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Chế độ Clear chính là giao diện Liquid Glass mặc định với các thành phần có độ trong mờ cao, cho phép nhìn thấy rõ hình nền phía sau. Trong khi đó, chế độ Tinted sẽ tăng độ mờ đục và thêm độ tương phản cho các yếu tố giao diện như nút bấm, thanh menu, giúp chúng trở nên nổi bật và dễ đọc hơn. Sự thay đổi này được áp dụng trên toàn bộ hệ điều hành, từ các ứng dụng cho đến thông báo trên Màn hình khóa.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">iPadOS 26.1: Slide Over chính thức trở lại, hoạt động song song với đa nhiệm cửa sổ</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Đây là một tin cực vui cho những người dùng iPad. Tính năng đa nhiệm Slide Over, vốn đã bị tạm thời loại bỏ trên iPadOS 26 để nhường chỗ cho hệ thống cửa sổ mới, đã chính thức được Apple mang trở lại, mình thích cái này hơn cái hệ thống cửa sổ mới. Mình thực sự đã quen với việc truy cập nhanh một ứng dụng phụ mà không làm gián đoạn công việc chính, Slide Over làm được chuyện đó.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885136_maxresdefault-4.jpg\" alt=\"maxresdefault-4.jpg\"></span></p><p><br></p><p>Giờ đây, Slide Over sẽ hoạt động song song và đóng vai trò bổ trợ cho hệ thống cửa sổ. Điều này có nghĩa là ae có thể mở nhiều cửa sổ ứng dụng trên màn hình, đồng thời vẫn có thể vuốt từ cạnh phải để truy cập nhanh một ứng dụng đang chạy ở chế độ Slide Over.</p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885137_8859365-ipados-26-1-slide-over.jpg\" alt=\"8859365-ipados-26-1-slide-over.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Để kích hoạt, người dùng chỉ cần nhấn vào nút điều khiển cửa sổ và chọn Enter Slide Over. Dù ở phiên bản hiện tại, người dùng chỉ có thể sử dụng một ứng dụng Slide Over tại một thời điểm, nhưng sự trở lại này đã cho thấy Apple đang tích cực lắng nghe và tìm ra điểm cân bằng tối ưu cho trải nghiệm đa nhiệm trên iPad.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Báo thức và Hẹn giờ: Thao tác \"Trượt để tắt\" thay cho nút bấm</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Một thay đổi nhỏ nhưng cực kỳ hữu ích và mình thấy được nhiều người dùng hoan nghênh chính là cách tương tác mới với báo thức trên Màn hình Khóa. Apple đã thay thế nút Stop bằng một thanh trượt Slide to Stop, trong khi nút Snooze vẫn giữ nguyên dạng nhấn.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885138_8859361-ios-26-1-slide-to-stop.jpg\" alt=\"8859361-ios-26-1-slide-to-stop.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Sự thay đổi này giải quyết triệt để một vấn đề mà rất nhiều người gặp phải vào mỗi buổi sáng: vô tình nhấn nhầm nút Dừng thay vì Báo lại trong lúc còn ngái ngủ, đặc biệt là những người ngủ xấu như&nbsp;</span><a href=\"https://tinhte.vn/profile/nha-cua-cao.1418508/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">@Nhà Của Cáo</a><span style=\"background-color: initial; color: inherit;\">.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Giờ đây, để tắt hoàn toàn báo thức, người dùng sẽ cần một thao tác trượt có chủ đích hơn, giảm thiểu đáng kể khả năng tắt nhầm. Thay đổi này cũng được áp dụng tương tự cho tính năng Hẹn giờ.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Nâng cấp toàn diện cho CarPlay: Giao diện mới, Widget, Live Activities và AirPlay</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">CarPlay có thể xem là nền tảng nhận được nhiều nâng cấp nhất trên iOS 26.1. Toàn bộ giao diện giờ đây được áp dụng hiệu ứng Liquid Glass, mang lại một vẻ ngoài đồng bộ và hiện đại. Người dùng có thể trả lời tin nhắn bằng các Tapback, xem các cuộc hội thoại đã ghim và nhận thông báo cuộc gọi trong một giao diện nhỏ gọn hơn để không che mất bản đồ.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885139_CarPlay-Messages-Tapbacks.jpg\" alt=\"CarPlay-Messages-Tapbacks.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Hai bổ sung lớn nhất là việc đưa Live Activities và Widget lên CarPlay. Màn hình Dashboard giờ đây có thể hiển thị các Live Activities để theo dõi thông tin thời gian thực, trong khi một màn hình widget riêng cho phép truy cập nhanh vào lịch, điều khiển thiết bị HomeKit.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885140_64001-133195-Live-Activity-in-CarPlay-xl.jpg\" alt=\"64001-133195-Live-Activity-in-CarPlay-xl.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Đặc biệt, iOS 26.1 còn mang tính năng AirPlay lên CarPlay, cho phép truyền phát video không dây từ&nbsp;</span><a href=\"https://tinhte.vn/tag/iphone\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iPhone</a><span style=\"background-color: initial; color: inherit;\">&nbsp;lên màn hình của xe khi đang đỗ, một tính năng rất được mong chờ.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Các tinh chỉnh nhỏ nhưng đáng giá khác</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Bên cạnh những thay đổi lớn, iOS 26.1 còn mang đến hàng loạt các cải tiến nhỏ trên toàn hệ thống. Trong ứng dụng Cài đặt, toàn bộ các tiêu đề mục như Cài đặt chung, Bluetooth, Wi-Fi... giờ đây đã được căn lề trái đồng bộ để tạo sự nhất quán. Hiệu ứng khúc xạ ánh sáng của Liquid Glass xung quanh các biểu tượng ứng dụng cũng được làm cho tinh tế và nhẹ nhàng hơn.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885141_8859363-ios-26-1-left-aligned-settings.jpg\" alt=\"8859363-ios-26-1-left-aligned-settings.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Ứng dụng Apple Music có thêm cử chỉ vuốt mới để chuyển bài hát, ae chỉ cần muốn thanh phat nhạc là dược. Trên Apple Music, tính năng Crossfade cũ đã được thay thế bằng AutoMix, giúp tự động tạo ra các đoạn chuyển tiếp giữa các bài hát, riêng mình thì thấy tính năng này hơi xàm. À à, thông qua bản cập nhật này Airpods cũng được cập nhật tính năng dịch trực tiếp.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885142_apple-music-automix-ios-26.jpg\" alt=\"apple-music-automix-ios-26.jpg\"></span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Kết luận: Một bản cập nhật đáng nâng cấp</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">iOS 26.1 không phải là một cuộc cách mạng hay gì đó quá ghê gớm. Nó đã biến những ý tưởng của iOS 26 trở nên hoàn thiện, thực tế và thân thiện hơn với người dùng. Apple mang trở lại các tính năng được cộng đồng yêu thích như Slide Over, hay giải quyết các vấn đề nhỏ nhưng gây khó chịu như nút tắt báo thức.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885143_8860852-tinhte-tu-review-ios-26-3.jpg\" alt=\"8860852-tinhte-tu-review-ios-26-3.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Trên hết, việc Apple Intelligence chính thức hỗ trợ tiếng Việt đã mở ra một điều gì đó hay ho cho người dùng iPhone tại Việt Nam. Dù vẫn còn một vài tính năng cần được cải thiện, nhưng những gì iOS 26.1 mang lại ở thời điểm hiện tại đã là quá đủ để nói đây là một bản cập nhật rất đáng giá, giúp trải nghiệm iOS trở nên trọn vẹn hơn, mình đang chạy beta thấy vẫn ngon lành cành đào...</span></p><p>ẩm mới...</p>', 'Tóm tắt về sản phẩm mới', 'Admin', 'Tin tức', 'PUBLISHED', 'f40e0038-70de-4459-8d39-13dfaefbd2ce_0b021a98-99b1-458f-add3-6464701ce854_giay-adidas-adifom-superstar-white-black-10-800x650.jpg', 176, '2025-11-04 18:00:12', '2025-11-04 11:30:34', '2025-11-04 18:00:33', NULL),
+(2, 'Hướng dẫn sử dụng', 'Hướng dẫn chi tiết cách sử dụng sản phẩm...', 'Tóm tắt hướng dẫn', 'Admin', 'Hướng dẫn', 'ARCHIVED', '0a348d98-7cb3-4f96-9530-9b80f9c859f3_giay-mlb-chunky-liner-mid-denim-boston-red-sox-dblue-auth-5-300x300.jpg.jpg', 134, '2025-11-04 11:30:34', '2025-11-04 11:30:34', '2025-11-04 17:59:55', NULL),
+(3, 'Chương trình khuyến mãi', 'Thông tin về chương trình khuyến mãi...', 'Tóm tắt khuyến mãi', 'Admin', 'Khuyến mãi', 'ARCHIVED', 'news3.jpg', 200, '2025-11-04 11:30:34', '2025-11-04 11:30:34', '2025-11-04 17:59:54', NULL),
+(5, 'Ra mắt Khóa vân tay Samsung SHP-DH538', '<h2><strong style=\"background-color: initial;\"><em>Khóa vân tay Samsung SHP-DH538:</em></strong></h2><p>- Mở bằng: vân tay, mã số, chìa cơ (dự phòng)</p><h4><strong style=\"background-color: initial; color: rgb(204, 0, 0);\"><em>- Giá: 5.490.000 đồng</em></strong></h4><iframe class=\"ql-video\" frameborder=\"0\" allowfullscreen=\"true\" src=\"https://www.youtube.com/embed/4ldAlQJer5w?showinfo=0\"></iframe><p class=\"ql-align-center\"><br></p><p><strong style=\"color: rgb(119, 119, 119);\">1. Chức năng cơ bản</strong></p><p>Khóa cửa điện tử Samsung SHP DH538 với thiết kế màu đỏ đồng phù hợp với các căn hộ sang trọng. Công nghệ quét vân tay quang học và mã số ngẫu nhiên, cùng hệ thống cảnh báo đột nhập sẽ đem lại sự an toàn và tiện lợi đến căn hộ của bạn.</p><p><br></p><p><span style=\"background-color: initial; color: rgb(0, 0, 238);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEitN1ag8THMYP6RRfGExIy4WoW215YjBgcVtmZKXS0naO-aen-OLqV6EdzrBLHgH32co26LxCr-pmaRPXV290CI7uL46Z1dcVZOZSzOlK_qiMl26AbCdnsUPha_V3roELfwKVysRErqigeB/w640-h212/Screenshot-365-1024x340.png\" height=\"212\" width=\"640\"></span></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhyqgdga_-zcWFx6gF5igT7FBpefisGLWYKv4PHxkkXU5M4OG64dlEEf_H0qvOucwXmBUaB1-50LY2vFWbcK5qazfIO1YO98vG9cMiNnSpX7Vi2oXMJhAXYRr2Pi44LmSp9yFmVNTi2WNgD/s1024/Screenshot-362-2-1024x496-1.jpg\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhyqgdga_-zcWFx6gF5igT7FBpefisGLWYKv4PHxkkXU5M4OG64dlEEf_H0qvOucwXmBUaB1-50LY2vFWbcK5qazfIO1YO98vG9cMiNnSpX7Vi2oXMJhAXYRr2Pi44LmSp9yFmVNTi2WNgD/w640-h310/Screenshot-362-2-1024x496-1.jpg\" height=\"310\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh9WfkszxYZICvwC_HcVI2n3nxg9fQ1gr2tyTtM3wX45onDY_fo6nz5Ez83t47N9f1laxixaBYxJQaltsL25PUDIixk7St5jHFFyM0NRnjTJNEEiNJB4G_YqHvphGrkqvQ52mFb11g12FRn/s1024/Screenshot-366-3-1024x587.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh9WfkszxYZICvwC_HcVI2n3nxg9fQ1gr2tyTtM3wX45onDY_fo6nz5Ez83t47N9f1laxixaBYxJQaltsL25PUDIixk7St5jHFFyM0NRnjTJNEEiNJB4G_YqHvphGrkqvQ52mFb11g12FRn/w640-h366/Screenshot-366-3-1024x587.png\" height=\"366\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgMTvZvsaQXjXVTTqpimFXvMsx0Rz9V1U-N2c3ymxYWx2mp5qDGTLsNHC-DrRjznpDuYTDNPTBI8SOfHh9hPwI4CFYCxq9QZY-wUGZ_OCLehXWYbRtpEFn4TNgBTtvAKX1OdRH4Y51HwBRt/s1024/Screenshot-368-2-1024x620.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgMTvZvsaQXjXVTTqpimFXvMsx0Rz9V1U-N2c3ymxYWx2mp5qDGTLsNHC-DrRjznpDuYTDNPTBI8SOfHh9hPwI4CFYCxq9QZY-wUGZ_OCLehXWYbRtpEFn4TNgBTtvAKX1OdRH4Y51HwBRt/w640-h388/Screenshot-368-2-1024x620.png\" height=\"388\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDXBiy2-BavdmqssMDSnpFlAAvHdVvwsH0AnOUd06mmiARCHuIZrhuP-3ajV4S_iPnxr4hasItAVRCU7IQwXQQpisbPZfFDjehnYk2LKddUp7fW87qhaocfqlUJqehR1oWjqqmVN3Xd-Za/s1024/Screenshot-370-2-1024x577-1.jpg\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDXBiy2-BavdmqssMDSnpFlAAvHdVvwsH0AnOUd06mmiARCHuIZrhuP-3ajV4S_iPnxr4hasItAVRCU7IQwXQQpisbPZfFDjehnYk2LKddUp7fW87qhaocfqlUJqehR1oWjqqmVN3Xd-Za/w640-h360/Screenshot-370-2-1024x577-1.jpg\" height=\"360\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCAKCrUustusR9ei3Dkafz-uMnbDkpt2yf-RGTN3TZmgcM5Ma8OR3rv5BDh0iX72R4ff886tGGrfnIVuti1ud_5uMP1_mo1uwzsQ1VOyIT1nBCCAQIk4RVeWgUaVRATAfkGZpK6zN0cspa/s510/Screenshot-372-1-510x289.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCAKCrUustusR9ei3Dkafz-uMnbDkpt2yf-RGTN3TZmgcM5Ma8OR3rv5BDh0iX72R4ff886tGGrfnIVuti1ud_5uMP1_mo1uwzsQ1VOyIT1nBCCAQIk4RVeWgUaVRATAfkGZpK6zN0cspa/w640-h362/Screenshot-372-1-510x289.png\" height=\"362\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg7aGYa-7BxFJ_i3xbGuG5tDPs2Fg9kuNChMiAXvvfWg6VNcX7ijXzzX7Z3ZShGir2RAvcjqSnCdEtF23hIQhePo32CE3DU3hI7rA8aNtf4ZFq-hzKSEUCqf7oWczpE-qBOxWpJAipZbmmp/s1024/Screenshot-372-2-1024x580.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg7aGYa-7BxFJ_i3xbGuG5tDPs2Fg9kuNChMiAXvvfWg6VNcX7ijXzzX7Z3ZShGir2RAvcjqSnCdEtF23hIQhePo32CE3DU3hI7rA8aNtf4ZFq-hzKSEUCqf7oWczpE-qBOxWpJAipZbmmp/w640-h362/Screenshot-372-2-1024x580.png\" height=\"362\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgP9DpsDZpw9k5BhdFCFPDXzo9azB3feYl4ML5WZl8ooLoyNHeNPySwcEY_OWrcJdwrsjG6mPW_Eli1Pc7wdDqzFOIBUSJu04fQScdWmUqCpagcB-6zlRc9SCLnpQownCipdDP0a7wWAJGa/s1024/Screenshot-374-2-1024x591.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgP9DpsDZpw9k5BhdFCFPDXzo9azB3feYl4ML5WZl8ooLoyNHeNPySwcEY_OWrcJdwrsjG6mPW_Eli1Pc7wdDqzFOIBUSJu04fQScdWmUqCpagcB-6zlRc9SCLnpQownCipdDP0a7wWAJGa/w640-h370/Screenshot-374-2-1024x591.png\" height=\"370\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh0fNo5Qbq5wt4Ovq1TBq_9gk0QxqUrFgO1MbZLsqO73_N-ZLr5Z6rBUutmyr0xOivrNv_Q9SoAOCDLSLmygysVuGXor9p-1D8h91EVKEKNL3dH20enL4F4t8Lyj2djR94GSh3NzeEOTZWS/s1024/Screenshot-376-2-1024x552.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh0fNo5Qbq5wt4Ovq1TBq_9gk0QxqUrFgO1MbZLsqO73_N-ZLr5Z6rBUutmyr0xOivrNv_Q9SoAOCDLSLmygysVuGXor9p-1D8h91EVKEKNL3dH20enL4F4t8Lyj2djR94GSh3NzeEOTZWS/w640-h344/Screenshot-376-2-1024x552.png\" height=\"344\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh82Bf9-6POfLFXfOr1E2rkmbN-pJ5hXLnsl0fhnAPkWsH8FVxT-kr7zBP-d0qvxct_SzbW2eLpDQKqSwSvG2L2m93zVZbjE9c7vu67HNIMqT0yhYhAZflMrGItf7-0irZTlSwXK-cGWBno/s1024/Screenshot-380-2-1024x580.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh82Bf9-6POfLFXfOr1E2rkmbN-pJ5hXLnsl0fhnAPkWsH8FVxT-kr7zBP-d0qvxct_SzbW2eLpDQKqSwSvG2L2m93zVZbjE9c7vu67HNIMqT0yhYhAZflMrGItf7-0irZTlSwXK-cGWBno/w640-h362/Screenshot-380-2-1024x580.png\" height=\"362\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhdu4zX0mrI7mdyJNcHkFC4QhtztqNiNd04qLX6cXo2eTsHW5XwAkZS3kPP0ocSg01dSQgSnoNXxs40SJ9jNQDT0mazvGXOQSNkbZE3IiKcjHmBEhIoKpPGfi0mSpsWFRNu5Et-Ismlbves/s1024/Screenshot-385-2-1024x587.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhdu4zX0mrI7mdyJNcHkFC4QhtztqNiNd04qLX6cXo2eTsHW5XwAkZS3kPP0ocSg01dSQgSnoNXxs40SJ9jNQDT0mazvGXOQSNkbZE3IiKcjHmBEhIoKpPGfi0mSpsWFRNu5Et-Ismlbves/w640-h366/Screenshot-385-2-1024x587.png\" height=\"366\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFYFoEpvedT4hh3XkWGNOs6HyxbOPS5dk-RcMHQhTFKIPYm25nskOjUPDmx1IcoAFKIjnpb3YrN27LVoCU10kQFpu_4e7BW6zzDzudC-4GDpDtWZMEUav1h0SCasTsND40LqQAYAlloL_w/s1024/Screenshot-386-2-1024x536.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFYFoEpvedT4hh3XkWGNOs6HyxbOPS5dk-RcMHQhTFKIPYm25nskOjUPDmx1IcoAFKIjnpb3YrN27LVoCU10kQFpu_4e7BW6zzDzudC-4GDpDtWZMEUav1h0SCasTsND40LqQAYAlloL_w/w640-h336/Screenshot-386-2-1024x536.png\" height=\"336\" width=\"640\"></a></p><p><br></p><p><strong style=\"background-color: initial;\">2. Thông số kĩ thuật&nbsp;khóa Samsung&nbsp;SHP-DH538</strong></p><p><strong style=\"background-color: initial;\">Vân tay và mã số</strong>Mã số: 4~12 ký tự điện tử</p><p>Công nghệ cảm ứng điện dung</p><p><strong style=\"background-color: initial;\">Bộ nhớ vân tay tối đa</strong>100<strong style=\"background-color: initial;\">Kích thướcThân ngoài</strong>81.8(W) X 320(H) X 66.8(D)mm<strong style=\"background-color: initial;\">Thân trong</strong>79(W) X 290(H) X 80.3(D)mm<strong style=\"background-color: initial;\">Độ dày cửa thích hợp</strong>40~80mm<strong style=\"background-color: initial;\">Nguồn</strong>8 viên pin AA Alkaline Batteries<strong style=\"background-color: initial;\">Thời gian cần thay pin</strong>Xấp xỉ 12 tháng<strong style=\"background-color: initial;\">Màu</strong>Đen, đỏ đồng</p>', '- Mở bằng: vân tay, mã số, chìa cơ (dự phòng)\n\n- Giá: 5.490.000 đồng', NULL, 'Tin tức', 'PUBLISHED', '38a51683-a41c-4740-a173-a8ceac011b7a_SHS-P718_3-4.png', 15, '2025-11-04 18:00:04', '2025-11-04 13:50:37', '2025-11-04 18:00:04', NULL),
+(6, 'Các công nghệ Khoá cửa mới ứng dụng Trí tuệ nhân tạo', '<h1><br></h1><h2>Mở đầu</h2><p>Trong kỷ nguyên số hóa không ngừng, sự tiến bộ của <strong>công nghệ</strong> đã và đang định hình lại mọi khía cạnh của cuộc sống, từ cách chúng ta giao tiếp đến cách chúng ta bảo vệ không gian riêng tư. Đặc biệt, lĩnh vực an ninh gia đình đã chứng kiến một cuộc cách mạng mạnh mẽ với sự xuất hiện của các thiết bị <strong>khóa điện tử</strong> và <strong>smart lock</strong>. Tuy nhiên, nếu chỉ dừng lại ở việc mở khóa bằng vân tay, mã số hay thẻ từ thì đó mới chỉ là bước khởi đầu. Ngày nay, với sự tích hợp của <strong>Trí tuệ nhân tạo (AI)</strong>, các hệ thống khóa cửa đã vượt xa giới hạn thông thường, mang đến một cấp độ <strong>bảo mật</strong>, tiện lợi và thông minh hoàn toàn mới.</p><p>Bài viết này sẽ đi sâu vào khám phá cách AI đang cách mạng hóa ngành khóa cửa, từ việc tăng cường khả năng nhận diện sinh trắc học, phân tích hành vi người dùng, đến việc tích hợp liền mạch vào hệ sinh thái nhà thông minh. Chúng ta cũng sẽ tìm hiểu những lợi ích vượt trội mà công nghệ này mang lại, cũng như những thách thức cần đối mặt và những lời khuyên hữu ích để người dùng có thể đưa ra lựa chọn sáng suốt nhất cho ngôi nhà của mình.</p><p><br></p><h2>Nội dung chính</h2><h3>1. AI nâng tầm bảo mật và tiện ích của Khóa thông minh</h3><p>Ban đầu, các loại <strong>khóa điện tử</strong> và <strong>smart lock</strong> đã gây ấn tượng với khả năng mở khóa không cần chìa vật lý, điều khiển từ xa và ghi nhận lịch sử ra vào. Nhưng khi AI được đưa vào, chúng không chỉ còn là thiết bị thực hiện lệnh đơn thuần mà đã trở thành \"người gác cổng\" thông minh, có khả năng học hỏi, thích nghi và thậm chí là dự đoán. AI giúp nâng cao đáng kể độ chính xác và tốc độ của các phương thức xác thực sinh trắc học như <strong>nhận diện vân tay</strong> và <strong>nhận diện khuôn mặt</strong>. Các thuật toán AI có thể phân tích hàng triệu điểm dữ liệu từ vân tay hay đặc điểm khuôn mặt, giúp phân biệt giữa người thật và các hành vi giả mạo một cách hiệu quả hơn bao giờ hết, ngay cả trong điều kiện ánh sáng yếu hoặc khi có sự thay đổi nhỏ trên khuôn mặt.</p><p>Hơn nữa, AI còn cho phép khóa cửa học hỏi các thói quen và lịch trình của người dùng. Ví dụ, nếu bạn thường xuyên về nhà vào một giờ cố định, khóa có thể tự động chuẩn bị mở khóa khi bạn đến gần. Khả năng này không chỉ tăng cường tiện ích mà còn là nền tảng cho các hệ thống an ninh chủ động hơn. Với <strong>xu hướng công nghệ IoT</strong> phát triển mạnh mẽ, các <strong>khóa thông minh AI</strong> trở thành một mắt xích quan trọng trong hệ sinh thái <strong>smart home</strong>, kết nối với các thiết bị khác như camera an ninh, đèn chiếu sáng, và hệ thống báo động để tạo ra một mạng lưới an ninh đồng bộ và thông minh.</p><h3>2. Các ứng dụng AI đột phá trong công nghệ khóa cửa</h3><p>Sự tích hợp của AI mang đến nhiều ứng dụng vượt trội, biến khóa cửa không chỉ là một thiết bị bảo vệ mà còn là một phần của hệ thống quản lý an ninh toàn diện:</p><ul><li><strong>Nhận diện sinh trắc học thông minh thích ứng:</strong> AI cho phép các cảm biến vân tay và camera nhận diện khuôn mặt \"học\" và thích nghi với sự thay đổi. Chẳng hạn, cảm biến vân tay có thể nhận diện chính xác ngay cả khi tay bạn hơi ướt, bẩn, hoặc có vết thương nhỏ. Công nghệ <strong>nhận diện khuôn mặt</strong> được hỗ trợ bởi AI có thể phân biệt người thật với hình ảnh hoặc mặt nạ 3D, thậm chí còn có khả năng nhận diện cảm xúc để phát hiện các hành vi đáng ngờ.</li><li><strong>Phân tích hành vi và phát hiện bất thường:</strong> Đây là một trong những ứng dụng mạnh mẽ nhất của AI. Khóa AI có thể theo dõi và học hỏi các mô hình truy cập thông thường của bạn và gia đình. Khi có bất kỳ hành vi nào lệch khỏi mô hình này (ví dụ: cố gắng mở khóa vào những thời điểm bất thường, số lần nhập sai mã PIN liên tục vượt quá mức cho phép), hệ thống sẽ tự động gửi cảnh báo đến điện thoại của bạn hoặc kích hoạt các biện pháp an ninh khác như bật còi báo động, ghi hình qua camera.</li><li><strong>Quản lý truy cập tự động và thông minh:</strong> AI tối ưu hóa việc cấp quyền truy cập. Thay vì phải cài đặt thủ công từng quyền cho từng người, AI có thể gợi ý hoặc tự động cấp quyền tạm thời dựa trên lịch trình đã định sẵn (ví dụ: cho nhân viên dọn dẹp, người giao hàng). Nó cũng có thể tự động khóa cửa khi phát hiện không có ai ở nhà, hoặc mở cửa khi bạn về mà không cần thao tác.</li><li><strong>Tích hợp sâu rộng với hệ sinh thái nhà thông minh:</strong> Với AI, khóa cửa trở thành trung tâm điều khiển an ninh. Khi bạn mở cửa, AI có thể ra lệnh cho đèn bật sáng, điều hòa khởi động và rèm cửa mở ra. Ngược lại, khi bạn khóa cửa đi ra ngoài, toàn bộ hệ thống sẽ chuyển sang chế độ an ninh, tắt các thiết bị điện không cần thiết và kích hoạt camera giám sát.</li></ul><h3>3. Lợi ích và những cân nhắc khi lựa chọn khóa cửa AI</h3><p>Việc ứng dụng AI vào khóa cửa mang lại những lợi ích vượt trội:</p><ul><li><strong>An ninh vượt trội:</strong> Khả năng phân tích và dự đoán của AI giúp phát hiện và ngăn chặn các mối đe dọa sớm hơn, hiệu quả hơn các hệ thống truyền thống.</li><li><strong>Tiện lợi tối đa:</strong> Tự động hóa quá trình khóa/mở, quản lý truy cập linh hoạt, giảm bớt gánh nặng về chìa khóa vật lý hay nhớ mã số.</li><li><strong>Trải nghiệm cá nhân hóa:</strong> Hệ thống học hỏi thói quen để cung cấp trải nghiệm mượt mà, phù hợp với từng thành viên gia đình.</li><li><strong>Tăng cường hiệu quả năng lượng:</strong> Kết hợp với các thiết bị smart home khác, AI có thể tối ưu hóa việc sử dụng năng lượng khi không có người ở nhà.</li></ul><p>Tuy nhiên, cũng có một số cân nhắc quan trọng:</p><ul><li><strong>Vấn đề quyền riêng tư và bảo mật dữ liệu:</strong> Khóa AI thu thập nhiều dữ liệu cá nhân (dữ liệu sinh trắc học, lịch sử ra vào). Điều quan trọng là phải chọn sản phẩm từ các nhà cung cấp uy tín, có chính sách bảo mật dữ liệu rõ ràng.</li><li><strong>Chi phí đầu tư ban đầu:</strong> Công nghệ AI thường đi kèm với chi phí cao hơn so với các loại khóa thông minh cơ bản.</li><li><strong>Phụ thuộc vào kết nối mạng và nguồn điện:</strong> Hầu hết các tính năng thông minh yêu cầu kết nối internet ổn định. Cần có giải pháp dự phòng nguồn điện để đảm bảo hoạt động liên tục khi mất điện.</li><li><strong>Rủi ro an ninh mạng:</strong> Như bất kỳ thiết bị IoT nào, khóa AI cũng có thể là mục tiêu của các cuộc tấn công mạng. Cần đảm bảo thiết bị được cập nhật phần mềm thường xuyên và có các lớp bảo mật vững chắc.</li></ul><blockquote><em>\"AI không chỉ là một tính năng bổ sung; nó là yếu tố cốt lõi thay đổi cách chúng ta tương tác với an ninh, biến khóa cửa từ một vật cản tĩnh thành một người bảo vệ chủ động và thông minh.\"</em></blockquote><h3>4. Tư vấn chọn mua và sử dụng khóa cửa AI hiệu quả</h3><p>Để tận dụng tối đa lợi ích của khóa cửa AI, người tiêu dùng cần lưu ý một số điểm sau:</p><ul><li><strong>Xác định nhu cầu:</strong> Đánh giá mức độ an ninh mong muốn, các tính năng cụ thể cần thiết (nhận diện khuôn mặt, vân tay, tích hợp smart home), và ngân sách của bạn.</li><li><strong>Nghiên cứu kỹ sản phẩm:</strong> Tìm hiểu về các công nghệ AI mà khóa sử dụng, độ tin cậy của thuật toán, và khả năng tương thích với các thiết bị smart home khác trong gia đình bạn.</li><li><strong>Ưu tiên các nhà sản xuất uy tín:</strong> Chọn những thương hiệu có tiếng trong lĩnh vực an ninh, cung cấp chính sách bảo hành rõ ràng và hỗ trợ kỹ thuật tốt.</li><li><strong>Kiểm tra các chứng nhận bảo mật:</strong> Đảm bảo khóa có các chứng nhận về an toàn dữ liệu và chống tấn công mạng từ các tổ chức uy tín.</li><li><strong>Thường xuyên cập nhật phần mềm (firmware):</strong> Các bản cập nhật không chỉ thêm tính năng mới mà còn vá lỗi bảo mật, nâng cao hiệu suất của AI.</li><li><strong>Thiết lập mật khẩu mạnh và sử dụng xác thực đa yếu tố (MFA):</strong> Nếu có, hãy kích hoạt MFA cho tài khoản quản lý khóa để tăng cường lớp bảo mật.</li><li><strong>Bảo vệ dữ liệu cá nhân:</strong> Hiểu rõ cách dữ liệu của bạn được thu thập và sử dụng. Đọc kỹ chính sách quyền riêng tư.</li><li><strong>Lên kế hoạch dự phòng:</strong> Đảm bảo có nguồn điện dự phòng (pin hoặc sạc khẩn cấp) và một phương pháp mở khóa cơ bản (chìa khóa vật lý, mã PIN) trong trường hợp khẩn cấp.</li></ul><h2>Kết luận</h2><p>Sự kết hợp giữa <strong>khóa điện tử</strong>, <strong>smart lock</strong> và <strong>Trí tuệ nhân tạo</strong> đang mở ra một kỷ nguyên mới cho <strong>an ninh gia đình</strong>. Khóa cửa không còn là một thiết bị đơn thuần để khóa và mở, mà đã trở thành một hệ thống bảo vệ thông minh, chủ động, có khả năng học hỏi và thích nghi. Mặc dù vẫn còn những thách thức về quyền riêng tư và an ninh mạng, nhưng tiềm năng mà AI mang lại là vô cùng to lớn, hứa hẹn một tương lai nơi ngôi nhà của chúng ta không chỉ an toàn hơn mà còn thông minh và tiện nghi hơn bao giờ hết.</p><p>Việc đầu tư vào một hệ thống khóa cửa AI thông minh là một quyết định đáng giá cho bất kỳ ai muốn nâng cấp an ninh và trải nghiệm sống trong ngôi nhà hiện đại. Hãy là người tiêu dùng thông thái, tìm hiểu kỹ lưỡng và chọn lựa sản phẩm phù hợp nhất để bảo vệ tổ ấm của mình.</p><p>```</p>', NULL, NULL, NULL, 'PUBLISHED', '85526858-1561-42f0-a38b-8ab16bb49dcc_SHS-2920_1.jpg', 3, '2025-11-04 17:32:50', '2025-11-04 17:32:50', '2025-11-04 17:53:21', NULL);
 
 -- --------------------------------------------------------
 
@@ -98,98 +194,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `user_id`, `fullname`, `email`, `phone_number`, `address`, `note`, `order_date`, `status`, `total_money`, `shipping_method`, `shipping_date`, `payment_method`, `active`, `voucher_id`, `discount_amount`, `payment_intent_id`, `vnp_txn_ref`, `vnp_transaction_no`) VALUES
-(1, 1, 'Trần Đức Em', 'ducanh21112003@gmail.com', '0865247233', 'Hanoi', '', NULL, NULL, 1000000, 'express', NULL, 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(2, 1, 'Lưu Thuỳ Linh', 'chill@gmail.com', '0123456789', 'Hanoi', 'Hàng dễ vỡ xin nhẹ tay', '2024-02-19 10:30:00', 'shipped', 1000001, 'express', '2024-02-19', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(3, 1, 'Hà Quang Dương', 'duong2032003@gmail.com', '0123456789', 'Hanoi', '', '2024-02-18 14:15:30', 'pending', 1000000, 'express', '2024-02-18', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(4, 1, 'Hà Quang Dương', 'duong2032003@gmail.com', '0123456789', 'Hanoi', '', '2024-02-18 16:45:22', 'pending', 1000000, 'express', '2024-02-18', 'cod', 0, NULL, 0, NULL, NULL, NULL),
-(5, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', NULL, 'shipped', 123, 'express', NULL, 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(6, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-19 09:20:15', 'pending', 123, 'express', '2024-03-19', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(7, 13, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-20 11:05:42', 'pending', 149633200, 'express', '2024-03-20', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(8, 13, 'Nguyễn Vũ Bảo Long', 'nvxx@yahoo.com', '0113355779', 'Nhà a ngõ B, ngách D', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-21 15:30:10', 'pending', 123, 'express', '2024-03-21', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(9, 14, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27 13:25:55', 'pending', 1081170816, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(10, 14, 'Đức Anh', 'ducanh@gmail.com', '0865247233', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27 08:40:20', 'delivered', 209694496, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(11, 14, 'Bảo Long', 'baolong@gmail.com', '0113355779', 'nhà x ngõ y', 'dễ vỡ', '2024-03-27 17:10:05', 'pending', 0, 'express', '2024-03-27', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(12, 14, 'Trần Đức Anh', 'ducanh@yahoo.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-03-29 09:15:45', 'pending', 3000000, 'express', '2024-03-29', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(13, 14, 'Trần Đức Anh', 'ducanh@gmail.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-02 11:20:30', 'pending', 3000000, 'express', '2024-04-02', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(14, 14, 'Trần Đức Anh', 'ducanh@gmail.com', '0865247234', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05 14:35:12', 'pending', 3000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(15, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05 16:50:22', 'delivered', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(16, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 0, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(17, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 0, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(18, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 0, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(19, 15, 'Hà Quang Dương', 'quangduong@gmail.com', '0911725756', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 0, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(20, 14, 'Trần Đức Anh', 'anhduc21112003@gmail.com', '0865247233', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(21, 14, 'Trần Đức Anh', 'anhduc2111gjfjgbnf2003@gmail.com', '0865247233', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(22, 14, 'Trần Đức Anh', 'anhduc21112003@gmail.com', '0865247233', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(23, 14, 'Trần Đức Anh', 'anhduc21112003@gmail.com', '0865247233', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(24, 14, 'Hà Quang Dương', 'qduong2032003@gmail.com', '0865247233', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(25, 14, 'Hà Quang Dương', 'quangduong2032003@gmail.com', '0865247233', 'Sn 22, ngách 108, ngõ 68', 'Hàng dễ vỡ xin nhẹ tay', '2024-04-05', 'pending', 5000000, 'express', '2024-04-08', 'cod', 1, NULL, 0, NULL, NULL, NULL),
-(26, 18, 'ádasdas', 'sadasdasdas', '123213123', 'sadasdasdas', 'adasdasdasd', '2025-06-10', 'delivered', 3030000, 'Tiêu chuẩn', '2025-06-13', 'Thanh toán khi nhận hàng', 1, NULL, 0, NULL, NULL, NULL),
-(27, 18, 'ádasdas', 'sadasdasdas', '123213123', 'sadasdasdas', 'adasdasdasd', '2025-06-10', 'delivered', 3030000, 'Tiêu chuẩn', '2025-06-13', 'Thanh toán khi nhận hàng', 1, NULL, 0, NULL, NULL, NULL),
-(28, 18, 'sdfasdfsd', 'secroramot123@gmail.com', '35254323', 'sadfsdsdafsf', 'dsgdfgdsgdgfs', '2025-06-10', 'delivered', 3030000, 'Tiêu chuẩn', '2025-06-13', 'Thanh toán khi nhận hàng', 1, NULL, 0, NULL, NULL, NULL),
-(29, 18, 'lapduynh72@gmail.com', 'lapduynh72@gmail.com', '3212312312', 'Lap', 'adsdasdasdsadas', '2025-06-10', 'delivered', 3030000, 'Tiêu chuẩn', '2025-06-13', 'Thanh toán khi nhận hàng', 1, NULL, 0, NULL, NULL, NULL),
-(30, 18, 'lapduynh72@gmail.com', 'lapduynh72@gmail.com', '435234234', 'Truong Quang Lap', 'ấdfdsfasfd', '2025-06-09', 'pending', 27841032, 'Tiêu chuẩn', '2025-06-12', 'Thanh toán khi nhận hàng', 1, 8, 18540688, NULL, NULL, NULL),
-(31, 18, 'fsdfsdfsd', 'lapduynh72@gmail.com', '23432432423', 'sfdfsdfsdfsd', 'sdfsdfsdfsdfsd', '2025-06-10', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(32, 18, 'ádasdasdasd', 'lapduynh72@gmail.com', '123213213', '3113123213dsasdasd', 'ádasdasdas', '2025-06-10', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(33, 18, 'ádasdasdasd', 'lapduynh72@gmail.com', '123213213', '3113123213dsasdasd', 'ádasdasdas', '2025-06-10', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(34, 18, 'ádasdasdas', 'secroramot123@gmail.com', '1232321321', 'ádasdadsd', 'ádasdasdasd', '2025-06-10', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(35, 18, 'lapduynh72@gmail.com', 'lapduynh72@gmail.com', '423423432', 'Lap', 'sfsdfsfsdf', '2025-06-10', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(36, 18, 'secroramot123@gmail.com', 'lapduynh72@gmail.com', '13123123123', 'Truong Quang Lap', 'dấdadsadasd', '2025-06-10', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(37, 18, 'secroramot123@gmail.com', 'lapduynh72@gmail.com', '13123123123', 'Truong Quang Lap', 'dấdadsadasd', '2025-06-10', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(38, 18, 'lapduynh72@gmail.com', 'lapduynh72@gmail.com', '234234324234', 'sdfsafsfd', 'sdfsfsdfsdfsdf', '2025-06-10', 'pending', 828000, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(39, 18, 'fasfsdfa', 'lapduynh72@gmail.com', '234234324', 'sdfsdfsd', 'sdafsfasdfsdaf', '2025-06-10', 'pending', 828000, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(40, 18, 'sadfadsfsd', 'lapduynh72@gmail.com', '342432423432', 'Truong Quang Lap', 'sadfsadsdfsdf', '2025-06-10', 'delivered', 828000, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(41, 18, 'lapduynh72@gmail.com', 'secroramot123@gmail.com', '32344234234', 'secroramot123@gmail.com', 'fadfsfsfsfsf', '2025-06-10', 'pending', 39054180, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(42, 18, 'sadfsfsfasdf', 'lapduynh72@gmail.com', '2423423', 'lapduynh72@gmail.com', 'sdfasd', '2025-06-10', 'pending', 39054180, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(43, 18, 'secroramot123@gmail.com', 'secroramot123@gmail.com', '23423432432', '232dfsdfsdfsd', 'adasdasdadasdasdas', '2025-06-10', 'processing', 32221804, 'Tiêu chuẩn', '2025-06-13', 'Thanh toán thẻ thành công', 1, NULL, 0, NULL, NULL, NULL),
-(44, 18, 'fasdfasdfsaf', 'secroramot123@gmail.com', '24324324324', 'fsafsdfsda', 'sadfsafsdf', '2025-06-10', 'pending', 39054180, 'Tiêu chuẩn', '2025-06-13', 'Pending MoMo Payment', 1, NULL, 0, NULL, NULL, NULL),
-(45, 18, 'fasdfasdfsaf', 'secroramot123@gmail.com', '24324324324', 'fsafsdfsda', 'sadfsafsdf', '2025-06-10', 'pending', 39054180, 'Tiêu chuẩn', '2025-06-13', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(46, 18, 'ádfsfsfs', 'secroramot123@gmail.com', '32423423423', 'sfsafsdf', 'safasfd', '2025-06-10', 'processing', 39054180, 'Tiêu chuẩn', '2025-06-13', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RYG41RoKh7pvaZe1y4qgWHh', NULL, NULL),
-(47, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'sdfsdfsdf', '2025-06-13', 'canceled', 3030000, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZQmXRoKh7pvaZe0MX0gICp', NULL, NULL),
-(48, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'p;;lk;jkl;kl', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán khi nhận hàng', 1, NULL, 0, NULL, NULL, NULL),
-(49, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'p;;lk;jkl;kl', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(50, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'p;;lk;jkl;kl', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán khi nhận hàng', 1, NULL, 0, NULL, NULL, NULL),
-(51, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdasd', '2025-06-13', 'pending', 48284256, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán khi nhận hàng', 1, 9, 50000, NULL, NULL, NULL),
-(52, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdasd', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán khi nhận hàng', 1, NULL, 0, NULL, NULL, NULL),
-(53, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdasd', '2025-06-13', 'pending', 39084180, 'Tiêu chuẩn', '2025-06-16', 'Cash', 1, NULL, 0, NULL, NULL, NULL),
-(54, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'ádfsdafsafsd', '2025-06-13', 'pending', 7734946, 'Tiêu chuẩn', '2025-06-16', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(55, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'ádfsdafsafsd', '2025-06-13', 'pending', 7734946, 'Tiêu chuẩn', '2025-06-16', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(56, 18, 'Truong Quang Lap', '', '0854768836', 'Minh Thinh', 'sàdsasafsfd', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(57, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdsa', '2025-06-13', 'delivered', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZRBWRoKh7pvaZe0A6riFPZ', NULL, NULL),
-(58, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'đasadsadasd', '2025-06-13', 'delivered', 858000, 'Tiêu chuẩn', '2025-06-16', 'Cash', 1, NULL, 0, NULL, NULL, NULL),
-(59, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'zxcxzczxczx', '2025-06-13', 'payment_failed', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Pending Stripe Payment', 1, NULL, 0, NULL, NULL, NULL),
-(60, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'cdfdfsdafsdf', '2025-06-13', 'processing', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZRVSRoKh7pvaZe0AmkQ0O2', NULL, NULL),
-(61, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdas', '2025-06-13', 'pending', 24136756, 'Tiêu chuẩn', '2025-06-16', 'Cash', 1, NULL, 0, NULL, NULL, NULL),
-(62, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdas', '2025-06-13', 'payment_failed', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(63, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'xzczxczxcxzczx', '2025-06-13', 'paid', 3153123, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZRaZRoKh7pvaZe0a7ywXSa', NULL, NULL),
-(64, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'fdsfggfdsgsdfgsdfgfds', '2025-06-13', 'payment_failed', 188508147, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(65, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'fdsfggfdsgsdfgsdfgfds', '2025-06-13', 'pending', 188508147, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(66, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'fdsfggfdsgsdfgsdfgfds', '2025-06-13', 'pending', 188508147, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(67, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'fdsfggfdsgsdfgsdfgfds', '2025-06-13', 'pending', 188508147, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(68, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'khjkkhkjhkh', '2025-06-13', 'pending', 164431391, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(69, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdasd', '2025-06-13', 'pending', 160578918, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(70, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'đâsdasdasd', '2025-06-13', 'pending', 96195310, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(71, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'sadasdasdas', '2025-06-13', 'pending', 31811702, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZRfcRoKh7pvaZe0KZtS27s', NULL, NULL),
-(72, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'dgdgdgdfgdf', '2025-06-13', 'pending', 28501420, 'Tiêu chuẩn', '2025-06-16', 'Cash', 1, NULL, 0, NULL, NULL, NULL),
-(73, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'dfgfdgdfg', '2025-06-13', 'canceled', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZSirRoKh7pvaZe1ab4xy4b', NULL, NULL),
-(74, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'etretrete', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, NULL, NULL),
-(75, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'dfgdfg', '2025-06-13', 'paid', 39054180, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZUSjRoKh7pvaZe1tGssfui', NULL, NULL),
-(76, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'qeqweqweqeqwee', '2025-06-13', 'delivered', 37381720, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, NULL, NULL),
-(77, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'qeqweqweqeqwee', '2025-06-13', 'delivered', 37381720, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, NULL, NULL),
-(78, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'fsdfsdfsdfdsfssd', '2025-06-13', 'canceled', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '89531972', NULL),
-(79, 18, 'Truong Quang Lap', '', '0854768836', 'Minh Thinh', 'đâsdsdsad', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '73156346', NULL),
-(80, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'adasdasdas', '2025-06-13', 'pending', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '36512777', NULL),
-(81, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'saddasdasd', '2025-06-13', 'delivered', 3266612, 'Tiêu chuẩn', '2025-06-16', 'Cash', 1, NULL, 0, NULL, NULL, NULL),
-(82, 18, 'Truong Quang Lap', '', '0854768836', 'Minh Thinh', 'ádasdasdasda', '2025-06-13', 'delivered', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZUptRoKh7pvaZe1qwSCqj8', NULL, NULL),
-(83, 18, 'Truong Quang Lap', '', '0854768836', 'Minh Thinh', 'adasdasdasdas', '2025-06-13', 'delivered', 29030000, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '15438940', NULL),
-(84, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'sdfsdfsdfsdf', '2025-06-13', 'pending', 3882473, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '61946290', NULL),
-(85, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'fsdfsdfsd', '2025-06-13', 'cancelled', 3882473, 'Tiêu chuẩn', '2025-06-16', 'Stripe', 1, NULL, 0, NULL, NULL, NULL),
-(86, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'adasdasdasdasd', '2025-06-13', 'delivered', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '26238230', '15016804'),
-(87, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'sadasdasd', '2025-06-13', 'delivered', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '50113457', '15016857'),
-(88, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'sadfsadfsdafasdfs', '2025-06-13', 'delivered', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '62245295', '15016863'),
-(89, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'ấdfsdfsdfsa', '2025-06-13', 'canceled', 24106756, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZVqgRoKh7pvaZe1Fgp3eMe', NULL, NULL),
-(90, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdasdasd', '2025-06-13', 'canceled', 3882473, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '75486148', '15016872'),
-(91, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdasdasd', '2025-06-13', 'canceled', 24106756, 'Tiêu chuẩn', '2025-06-16', 'VNPAY', 1, NULL, 0, NULL, '68195344', '15016882'),
-(92, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'ádasdasdasd', '2025-06-13', 'canceled', 29030000, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZW4FRoKh7pvaZe1sbaN2MH', NULL, NULL);
+(92, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'àdasfadsfdsafsadfasdf', '2025-06-13 00:00:00', 'canceled', 29030000, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZW4FRoKh7pvaZe1sbaN2MH', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -206,165 +211,6 @@ CREATE TABLE `order_details` (
   `total_money` bigint DEFAULT NULL,
   `size` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Đang đổ dữ liệu cho bảng `order_details`
---
-
-INSERT INTO `order_details` (`id`, `order_id`, `product_id`, `price`, `number_of_products`, `total_money`, `size`) VALUES
-(1, 2, 1, 798000, 2, 1596000, 43),
-(2, 1, 3, 990000, 1, 3000000, 44),
-(3, 1, 5, 999000, 3, 1890000, 42),
-(4, 5, 5, 39024200, 7, NULL, 0),
-(5, 5, 1, 798000, 2, NULL, 0),
-(6, 5, 3, 24076800, 3, NULL, 0),
-(7, 6, 5, 39024200, 7, NULL, 0),
-(8, 6, 1, 798000, 2, NULL, 0),
-(9, 6, 3, 24076800, 3, NULL, 0),
-(10, 7, 6, 32191800, 3, NULL, 0),
-(11, 7, 4, 53057800, 1, NULL, 0),
-(12, 8, 5, 39024200, 7, NULL, 0),
-(13, 8, 1, 798000, 2, NULL, 0),
-(14, 8, 3, 24076800, 3, NULL, 0),
-(15, 9, 2, 63044700, 12, NULL, 0),
-(16, 9, 3, 24076800, 7, NULL, 0),
-(17, 9, 5, 39024200, 4, NULL, 0),
-(18, 10, 2, 63044700, 1, NULL, 0),
-(19, 10, 7, 73324896, 2, NULL, 0),
-(20, 12, 5, 39024200, 1, 39024200, 43),
-(21, 12, 6, 32191800, 2, 64383600, 43),
-(22, 12, 7, 73324896, 3, 219974688, 43),
-(23, 13, 1, 798000, 2, 1596000, 43),
-(24, 13, 2, 3000000, 3, 9000000, 43),
-(25, 13, 3, 24076800, 4, 96307200, 43),
-(26, 14, 2, 3000000, 4, 12000000, 43),
-(27, 14, 3, 24076800, 6, 144460800, 43),
-(28, 14, 4, 53057800, 8, 424462400, 43),
-(29, 15, 2, 3000000, 4, 12000000, 43),
-(30, 15, 3, 24076800, 6, 144460800, 43),
-(31, 15, 4, 53057800, 8, 424462400, 43),
-(32, 16, 2, 3000000, 1, 3000000, 43),
-(33, 16, 1, 798000, 1, 798000, 43),
-(34, 16, 3, 24076800, 2, 48153512, 43),
-(35, 17, 2, 3000000, 1, 3000000, 43),
-(36, 17, 1, 798000, 1, 798000, 43),
-(37, 17, 3, 24076800, 2, 48153512, 43),
-(38, 18, 2, 3000000, 1, 3000000, 43),
-(39, 18, 1, 798000, 1, 798000, 43),
-(40, 18, 3, 24076800, 2, 48153512, 43),
-(41, 19, 2, 3000000, 1, 3000000, 43),
-(42, 19, 1, 798000, 1, 798000, 43),
-(43, 19, 3, 24076800, 2, 48153512, 43),
-(44, 20, 2, 3000000, 4, 12000000, 43),
-(45, 20, 3, 24076800, 6, 144460536, 43),
-(46, 20, 4, 53057800, 8, 424462720, 43),
-(47, 21, 2, 3000000, 4, 12000000, 43),
-(48, 21, 3, 24076800, 6, 144460536, 43),
-(49, 21, 4, 53057800, 8, 424462720, 43),
-(50, 22, 2, 3000000, 4, 12000000, 43),
-(51, 22, 3, 24076800, 6, 144460536, 43),
-(52, 22, 4, 53057800, 8, 424462720, 43),
-(53, 23, 2, 3000000, 4, 12000000, 43),
-(54, 23, 3, 24076800, 6, 144460536, 43),
-(55, 23, 4, 53057800, 8, 424462720, 43),
-(56, 24, 2, 3000000, 4, 12000000, 43),
-(57, 24, 3, 24076800, 6, 144460536, 43),
-(58, 24, 4, 53057800, 8, 424462720, 43),
-(59, 25, 2, 3000000, 4, 12000000, 43),
-(60, 25, 3, 24076800, 6, 144460536, 43),
-(61, 25, 4, 53057800, 8, 424462720, 43),
-(62, 26, 2, 3000000, 1, 3000000, 36),
-(63, 27, 2, 3000000, 1, 3000000, 36),
-(64, 28, 2, 3000000, 1, 3000000, 36),
-(65, 29, 2, 3000000, 1, 3000000, 36),
-(66, 30, 2, 3000000, 3, 9000000, 36),
-(67, 30, 13, 37351700, 1, 37351720, 36),
-(68, 31, 3, 24076800, 1, 24076756, 36),
-(69, 32, 3, 24076800, 1, 24076756, 36),
-(70, 33, 3, 24076800, 1, 24076756, 36),
-(71, 34, 3, 24076800, 1, 24076756, 36),
-(72, 35, 3, 24076800, 1, 24076756, 36),
-(73, 38, 1, 798000, 1, 798000, 36),
-(74, 39, 1, 798000, 1, 798000, 36),
-(75, 40, 1, 798000, 1, 798000, 36),
-(76, 41, 5, 39024200, 1, 39024180, 36),
-(77, 42, 5, 39024200, 1, 39024180, 36),
-(78, 43, 6, 32191800, 1, 32191804, 36),
-(79, 44, 5, 39024200, 1, 39024180, 36),
-(80, 45, 5, 39024200, 1, 39024180, 36),
-(81, 46, 5, 39024200, 1, 39024180, 36),
-(82, 47, 2, 3000000, 1, 3000000, 40),
-(83, 48, 3, 24076756, 1, 24076756, 39),
-(84, 49, 3, 24076756, 1, 24076756, 39),
-(85, 50, 3, 24076756, 1, 24076756, 39),
-(86, 51, 8, 48354256, 1, 48354256, 38),
-(87, 52, 3, 24076756, 1, 24076756, 36),
-(88, 53, 5, 39024180, 1, 39024180, 36),
-(89, 54, 14, 3852473, 2, 7704946, 39),
-(90, 55, 14, 3852473, 2, 7704946, 39),
-(91, 56, 3, 24076756, 1, 24076756, 41),
-(92, 57, 3, 24076756, 1, 24076756, 40),
-(93, 58, 1, 798000, 1, 798000, 39),
-(94, 59, 3, 24076756, 1, 24076756, 36),
-(95, 60, 3, 24076756, 1, 24076756, 36),
-(96, 61, 3, 24076756, 1, 24076756, 39),
-(97, 62, 3, 24076756, 1, 24076756, 41),
-(98, 63, 5783, 3123123, 1, 3123123, 36),
-(99, 64, 3, 24076756, 1, 24076756, 40),
-(100, 64, 3, 24076756, 1, 24076756, 36),
-(101, 64, 14, 3852473, 3, 11557419, 36),
-(102, 64, 6, 32191804, 4, 128767216, 36),
-(103, 71, 3, 24076756, 1, 24076756, 36),
-(104, 71, 14, 3852473, 2, 7704946, 36),
-(105, 72, 9, 28441420, 1, 28441420, 41),
-(106, 73, 3, 24076756, 1, 24076756, 40),
-(107, 74, 3, 24076756, 1, 24076756, 39),
-(108, 75, 5, 39024180, 1, 39024180, 36),
-(109, 76, 13, 37351720, 1, 37351720, 36),
-(110, 77, 13, 37351720, 1, 37351720, 36),
-(111, 78, 3, 24076756, 1, 24076756, 36),
-(112, 79, 3, 24076756, 1, 24076756, 36),
-(113, 80, 3, 24076756, 1, 24076756, 36),
-(114, 81, 17, 3206612, 1, 3206612, 36),
-(115, 82, 3, 24076756, 1, 24076756, 36),
-(116, 83, 5784, 29000000, 1, 29000000, 36),
-(117, 84, 14, 3852473, 1, 3852473, 36),
-(118, 85, 14, 3852473, 1, 3852473, 36),
-(119, 86, 3, 24076756, 1, 24076756, 39),
-(120, 87, 3, 24076756, 1, 24076756, 36),
-(121, 88, 3, 24076756, 1, 24076756, 36),
-(122, 89, 3, 24076756, 1, 24076756, 36),
-(123, 90, 14, 3852473, 1, 3852473, 36),
-(124, 91, 3, 24076756, 1, 24076756, 41),
-(125, 92, 5784, 29000000, 1, 29000000, 36);
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `lock_features`
---
-
-CREATE TABLE `lock_features` (
-  `id` bigint NOT NULL,
-  `name` varchar(100) NOT NULL COMMENT 'Tên chức năng',
-  `description` text COMMENT 'Mô tả chức năng',
-  `is_active` tinyint(1) DEFAULT '1' COMMENT 'Trạng thái hoạt động',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Đang đổ dữ liệu cho bảng `lock_features`
---
-
-INSERT INTO `lock_features` (`id`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Mở khóa vân tay', 'Nhận diện và mở khóa bằng vân tay', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
-(2, 'Mở khóa mã PIN', 'Nhập mã PIN để mở khóa', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
-(3, 'Mở khóa thẻ từ', 'Quẹt thẻ từ để mở khóa', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
-(4, 'Kết nối Bluetooth', 'Kết nối và điều khiển qua Bluetooth', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
-(5, 'Kết nối WiFi', 'Kết nối và điều khiển qua WiFi', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
-(6, 'Chống nước', 'Có khả năng chống nước', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00'),
-(7, 'Cảnh báo an ninh', 'Cảnh báo khi có xâm nhập', 1, '2025-06-13 12:00:00', '2025-06-13 12:00:00');
 
 -- --------------------------------------------------------
 
@@ -390,127 +236,78 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `thumbnail`, `description`, `created_at`, `updated_at`, `category_id`, `discount`, `quantity`) VALUES
-(1, 'Nike Air Force 1 Full White', 798000, '64baf7b5-635b-4a9e-aec7-03d0fedac82f_nike-air-force-1-low-replica-800x600.jpg', 'Đây là mô tả', '2024-02-16 16:46:58', '2025-06-13 06:34:32', 1, 30, 51),
-(2, 'Adidas Superstar trắng sọc đen', 3000000, '68c9641a-df79-440d-a7a3-2249e64685db_adidas-superstar-white-replica.jpg', 'Giày adidas Superstar ra đời trên sân bóng rổ nhưng đã trở thành quán quân của phong cách đường phố. Bất kể bạn đang chơi bóng rổ hay chỉ đơn giản là xuống phố, đôi giày này sẽ mang đến cho bạn phong cách đơn giản mà cực cool, một item must-have thường ngày suốt năm thập kỷ qua.', '2024-02-17 07:35:46', '2025-06-13 06:07:57', 2, 20, 4),
-(3, 'Nike Air Force 1 Low Cream Black Swoosh', 24076756, 'ef350705-89f2-4e37-a293-cec3ec4bf069_af1-cream-black-swoosh-800x600.jpg', 'Ab velit laborum.', '2024-02-17 07:35:46', '2025-06-13 11:41:35', 1, 60, 8),
-(4, 'Air Force 1 G-Dragon Peaceminusone Para-noise', 53057840, 'ef20dd75-5f3d-4540-aebd-d3a34211e716_Nike-Air-Force-1-Low-G-Dragon-Peaceminusone-Para-Noise-replica-800x600.jpg', 'Cupiditate voluptatem corrupti et fugit quia.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(5, 'Nike Air Force 1 Gucci', 39024180, '3fdcde54-b611-45ea-b693-e94b6dca086d_af1-gucci-nike-1-800x600.jpg', 'Sed est iusto sed voluptatem rerum maxime.', '2024-02-17 07:35:46', '2025-06-13 10:03:43', 1, 60, 48),
-(6, 'Nike Air Force 1 Low Valentines Day 2024', 32191804, 'dd4e2fcd-9b54-4d89-988a-df9cfda47f55_giay-nike-air-force-1-low-valentines-day-2024-like-auth.jpg', 'Id dolorum nihil dolor neque voluptatem.', '2024-02-17 07:35:46', '2025-06-13 07:07:29', 1, 5, 333),
-(7, 'Air Jordan 1 Mid Chicago White Toe', 73324944, 'cd721569-4060-4f22-b63e-6a4fbf3a2d95_Giay-Nike-Air-Jordan-1-Mid-Chicago-White-Toe-800x600.jpg', 'Tempora laudantium natus.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 50),
-(8, 'Air Jordan 1 Mid Panda', 48354256, '75b77e09-5ddb-445f-9456-c0d10ac84acb_Air-Jordan-1-Mid-Panda.jpg', 'Rerum placeat dignissimos blanditiis sint quis.', '2024-02-17 07:35:46', '2025-06-13 06:20:04', 1, 80, 2),
-(9, 'Air Jordan 1 Light Smoke Grey', 28441420, '96a4724d-6df3-488c-9ec5-55cb525a921c_Jordan-1-Mid-Light-Smoke-Grey-80.jpg', 'Voluptas esse dolorum iure veritatis a.', '2024-02-17 07:35:46', '2025-06-13 08:11:55', 1, 20, 0),
-(10, 'Air Jordan 1 Mid Tuxedo', 58791932, 'c2b778a5-4ad6-45c6-a8b4-47f779d23dad_Jordan-1-Mid-Tuxedo-White-Black-800x600.jpg', 'Officia quis doloremque.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(11, 'Adidas Samba Classic White', 53477832, '0ce3ac5f-fc54-4b7b-afc4-a67be12d06ef_adidas-adidas-samba-classic-white-800x650.jpg', 'Repellat consequuntur laudantium ut laboriosam vel aliquam cumque.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(12, 'Adidas Stan Smith', 66280032, '85c00f76-5962-480e-80b2-cec0bf541a33_adidas-stan-smith-xanh-navy-replica-800x650.jpg', 'Voluptas distinctio ab.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(13, 'Synergistic Plastic Computer', 37351720, 'a7499a61-81c2-4529-a812-2be0822ff38b_Giay-New-Balance-550-White-Green-800x650.jpg', 'Dolores vitae assumenda.', '2024-02-17 07:35:46', '2025-06-13 10:04:39', 4, 4, 465),
-(14, 'Practical Granite Hat', 3852473, '96266a3a-d330-40d3-98e3-563a295b65b5_converse-chuck-70-plus-black-800x650.jpg', 'Quaerat sunt libero deleniti repudiandae voluptates.', '2024-02-17 07:35:46', '2025-06-13 11:34:06', 4, 60, 7),
-(15, 'Lightweight Iron Coat', 78859080, 'c4d381c4-eb63-4bdf-9526-0120403af008_A-BATHING-APE-BAPE-STA-LOW-BLACK-800x650.jpg', 'Quisquam voluptas amet.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(16, 'Lightweight Copper Keyboard', 23045898, 'cdc20a3c-1ffd-4cad-8e24-f9241ab21fe0_adidas-ultraboost-light-2023.jpg', 'Excepturi qui placeat cupiditate aperiam eum in.', '2024-02-17 07:35:46', '2025-06-13 07:07:51', 3, 28, 234),
-(17, 'Lightweight Paper Watch', 3206612, '254a91ae-3e90-4240-83c4-8f60538d4f26_Giay-New-Balance-CRT-300-Beige-Navy-800x650.jpg', '🌿 Lightweight Paper Watch – Khi Thời Trang Gặp Gỡ Sự Tối Giản\nBạn đang tìm kiếm một món phụ kiện vừa độc đáo, nhẹ nhàng, lại thân thiện với môi trường? Hãy khám phá Lightweight Paper Watch – chiếc đồng hồ phá cách mang đậm tinh thần eco-friendly và minimalism.\n\n✨ Thiết Kế Tối Giản, Ấn Tượng Tối Đa\nLightweight Paper Watch được thiết kế với kiểu dáng cực kỳ tối giản, lấy cảm hứng từ nghệ thuật gấp giấy origami Nhật Bản. Với lớp vỏ ngoài trông như giấy nhưng được cấu tạo từ tyvek – một loại vật liệu không thấm nước, khó rách nhưng cực kỳ nhẹ, chiếc đồng hồ này tạo nên cảm giác đeo như không đeo.\n\n🌍 Thân Thiện Với Môi Trường\nKhông giống các loại đồng hồ truyền thống sử dụng kim loại hay nhựa, Lightweight Paper Watch hướng đến bảo vệ môi trường. Với phần dây và vỏ được làm từ vật liệu tái chế, sản phẩm không chỉ bền mà còn giúp giảm thiểu lượng rác thải nhựa.\n\n🕒 Đơn Giản Nhưng Đầy Đủ Tính Năng\nDù mang hình dáng \"giấy\", chiếc đồng hồ này vẫn đảm bảo các tính năng cơ bản như:\n\nHiển thị giờ điện tử rõ ràng\n\nKháng nước nhẹ (phù hợp đi mưa nhỏ, rửa tay)\n\nDễ dàng thay pin\n\nNhiều mẫu họa tiết độc đáo, cá tính\n\n🎨 Phụ Kiện Cá Tính Cho Người Sáng Tạo\nBạn có thể chọn cho mình một mẫu với màu sắc và họa tiết riêng, thậm chí còn có thể tự vẽ, dán sticker hoặc cá nhân hóa theo sở thích. Đây không chỉ là một chiếc đồng hồ, mà còn là tuyên ngôn phong cách của bạn.\n\n🛍️ Dành Cho Ai?\nNgười yêu thích thời trang tối giản\n\nNgười quan tâm đến môi trường\n\nHọc sinh, sinh viên hoặc dân văn phòng thích sự nhẹ nhàng, tiện lợi\n\nNhững ai yêu sáng tạo và cá tính riêng\n\n📦 Giá Thành Hợp Lý – Quà Tặng Ý Nghĩa\nVới mức giá cực kỳ phải chăng, Lightweight Paper Watch là món quà tặng sáng tạo cho bạn bè, người thân – đặc biệt là những ai yêu thích sự độc lạ và thân thiện với môi trường.\n\nLightweight Paper Watch – không chỉ là một chiếc đồng hồ, mà là biểu tượng của lối sống thông minh, tối giản và đầy trách nhiệm với hành tinh.\n\nBạn đã sẵn sàng để sở hữu một chiếc chưa?', '2024-02-17 07:35:46', '2025-06-13 10:27:31', 4, 73, 31),
-(18, 'Heavy Duty Aluminum Bag', 10693008, '96b64f11-3539-4538-9399-69ff17a2a688_vans-vault-checkerbroad-og-replica-800x650.jpg', 'Ut doloremque praesentium sit.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(19, 'Mediocre Concrete Gloves', 5684965, '0d0f026a-342b-42a7-9309-43d79f88a253_vans-vault-2021-og-old-skool-800x650.jpg', 'Veniam non sit enim repudiandae ipsa.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(20, 'Gorgeous Plastic Computer', 69469328, '5446f87d-d7aa-40d3-9cc0-0404b993720c_converse-run-star-hike-high-black-800x650.jpg', 'Deserunt sed iure dolor animi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(21, 'Sleek Granite Computer', 87038152, '8e4978dc-4a4f-42a3-846a-c27d51caa195_nike-air-max-1-white-black.jpg', 'Qui ab asperiores tempore ut.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(22, 'Gorgeous Iron Gloves', 4301644, '4953d163-90b9-4f38-aaac-d5e6438eb8ec_Adidas-adiFOM-Superstar-White-Black-800x650.jpg', 'Molestias et vel.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(23, 'Rustic Paper Car', 79689840, '8f1f0861-b5e7-4de1-804e-b6777382458b_Giay-New-Balance-2002-‘Grey-Like-Auth.jpg', 'Velit distinctio ea.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(24, 'Practical Wool Table', 20798064, 'f4a3cd3d-898f-4aff-8aa3-41965631bb3e_converse-1970s-navy-high-replica-800x650.jpg', 'Repudiandae accusantium ratione.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(25, 'Enormous Aluminum Coat', 33274068, NULL, 'Consequatur enim doloremque sunt ut qui.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(26, 'Ergonomic Granite Bench', 38703544, NULL, 'Ipsa facere cum.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(27, 'Fantastic Marble Keyboard', 23380620, NULL, 'Neque nisi sequi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(28, 'Small Bronze Bag', 66643840, NULL, 'Quia facere ut.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(29, 'Durable Wooden Wallet', 21104148, NULL, 'Vel qui vero unde qui exercitationem quo.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(30, 'Awesome Plastic Shoes', 28321924, NULL, 'Rem qui quis quibusdam.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(31, 'Ergonomic Concrete Gloves', 5260309, NULL, 'Dolor neque similique et.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(32, 'Intelligent Marble Hat', 52122144, NULL, 'Ut repellat eius.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(33, 'Intelligent Copper Bag', 77494112, NULL, 'Et laborum dolore asperiores.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(34, 'Small Plastic Bottle', 33854840, NULL, 'Est ut maxime reprehenderit necessitatibus.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(35, 'Fantastic Concrete Bench', 88142232, NULL, 'Placeat omnis quasi commodi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(36, 'Practical Plastic Wallet', 75324408, NULL, 'Voluptate saepe dolorem aliquam.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(37, 'Incredible Plastic Coat', 67569048, NULL, 'Repudiandae dignissimos et.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(38, 'Ergonomic Cotton Bottle', 20882042, NULL, 'Dicta nobis necessitatibus et aut eaque.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(39, 'Lightweight Paper Keyboard', 60993720, NULL, 'Aut dignissimos necessitatibus provident magni odio accusamus.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(40, 'Sleek Silk Plate', 56475920, NULL, 'Nulla aliquam velit ratione officia harum.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(41, 'Enormous Leather Bag', 27524410, NULL, 'Cumque cumque necessitatibus consequatur sed nisi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(42, 'Fantastic Granite Table', 38910772, NULL, 'Est aliquid debitis tenetur veniam cumque omnis accusamus.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(43, 'Practical Linen Coat', 66935716, NULL, 'Maiores enim porro ut qui ea necessitatibus.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(44, 'Aerodynamic Aluminum Pants', 9016117, NULL, 'Magnam quo sunt ducimus quo et.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(45, 'Lightweight Granite Hat', 45929112, NULL, 'Odit fugit maiores aut dolorem voluptatem molestiae nisi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(46, 'Heavy Duty Wool Plate', 74831960, NULL, 'Vel asperiores qui corporis ut.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(47, 'Aerodynamic Silk Lamp', 5330651, NULL, 'Sed dolore corrupti.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(48, 'Heavy Duty Linen Hat', 49988880, NULL, 'Placeat qui sed aperiam animi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(49, 'Lightweight Rubber Shirt', 20385770, NULL, 'Rerum sunt quia.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(50, 'Rustic Silk Hat', 66315392, NULL, 'Eveniet qui qui officiis aut.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(51, 'Sleek Granite Table', 9968519, NULL, 'In porro velit omnis totam adipisci nihil.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(52, 'Enormous Granite Computer', 44591172, NULL, 'Ducimus possimus alias sunt.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(53, 'Gorgeous Iron Bottle', 27065076, NULL, 'Sit eligendi quas voluptatem error ut aut.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(55, 'Gorgeous Steel Bottle', 77264720, NULL, 'Quidem quibusdam voluptates placeat amet est est porro.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(56, 'Rustic Wooden Plate', 62771196, NULL, 'Ut explicabo molestiae officiis sit beatae.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(57, 'Sleek Aluminum Watch', 61454252, NULL, 'Qui quam modi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(58, 'Incredible Steel Gloves', 11536107, NULL, 'Sed dolorem accusantium sed.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(59, 'Intelligent Wooden Bottle', 58425652, NULL, 'Atque eius quod occaecati odit quia ea dolore.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(60, 'Small Steel Table', 83065000, NULL, 'Nobis a omnis non ratione sed aut iste.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(61, 'Practical Wooden Shoes', 50643632, NULL, 'Et harum autem sed.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(62, 'Durable Leather Plate', 47783032, NULL, 'Quasi et numquam mollitia aperiam odio incidunt.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(63, 'Awesome Plastic Car', 60682548, NULL, 'Et dicta tempora mollitia eaque ipsa.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(64, 'Heavy Duty Cotton Shoes', 60319384, NULL, 'Sed perspiciatis id deserunt consequatur deserunt.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(65, 'Awesome Rubber Pants', 78853464, NULL, 'Et ipsum cupiditate velit omnis exercitationem omnis et.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(66, 'Durable Wool Shirt', 27238244, NULL, 'Dolor recusandae beatae sed ducimus corporis mollitia aliquid.', '2024-02-17 07:35:46', '2025-06-09 19:16:20', 1, 30, 1000),
-(67, 'Enormous Iron Clock', 64429900, NULL, 'Sunt voluptate repudiandae qui qui dolore neque.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(68, 'Mediocre Steel Pants', 85343056, NULL, 'Qui itaque veritatis quas minima.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(69, 'Lightweight Silk Hat', 40069976, NULL, 'Cumque officia vel eaque.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(70, 'Aerodynamic Cotton Lamp', 59510440, NULL, 'Voluptatum non nemo nulla.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(71, 'Intelligent Iron Watch', 41494440, NULL, 'Iste asperiores maiores iste illo.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(72, 'Durable Leather Hat', 26727920, NULL, 'Quaerat nam qui ducimus natus.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(73, 'Gorgeous Steel Shirt', 24593364, NULL, 'Iure in aspernatur consequatur.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(74, 'Rustic Copper Watch', 40940792, NULL, 'Qui placeat tenetur quisquam distinctio minima.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(75, 'Intelligent Aluminum Wallet', 52022784, NULL, 'Velit sunt deleniti exercitationem eum unde vitae nesciunt.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(76, 'Synergistic Iron Coat', 37888832, NULL, 'Molestiae beatae eos rerum.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(77, 'Practical Silk Lamp', 30118240, NULL, 'Amet explicabo et quia in error distinctio beatae.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(78, 'Awesome Bronze Table', 86918192, NULL, 'Dolore et ut nam.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(79, 'Intelligent Rubber Shirt', 81148728, NULL, 'Molestiae cum blanditiis veniam quae ipsum esse.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(80, 'Fantastic Plastic Keyboard', 83707680, NULL, 'Odit hic esse.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(81, 'Small Copper Coat', 5389248, NULL, 'Cupiditate voluptatem consectetur a voluptas quo.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(82, 'Ergonomic Steel Computer', 35189380, NULL, 'Exercitationem consequuntur quibusdam.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(83, 'Incredible Aluminum Bottle', 69581488, NULL, 'Et voluptas dignissimos.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(84, 'Aerodynamic Rubber Keyboard', 5559953, NULL, 'Est minus dolor voluptatem iste quidem.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(85, 'Lightweight Wooden Chair', 68947216, NULL, 'Deserunt asperiores officiis.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(86, 'Gorgeous Bronze Watch', 77173048, NULL, 'Dicta eum qui dolor voluptas molestias dolorum non.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(87, 'Lightweight Cotton Knife', 81758480, NULL, 'Ratione nesciunt assumenda temporibus ex veniam odio.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(88, 'Heavy Duty Bronze Chair', 39723232, NULL, 'Labore dolorum impedit rerum deleniti.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(89, 'Small Steel Bench', 1285710, NULL, 'Occaecati aut assumenda aut voluptatibus dolorem doloremque exercitationem.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(90, 'Mediocre Rubber Knife', 41811740, NULL, 'Blanditiis quis quisquam qui ipsam magni exercitationem rerum.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
-(91, 'Incredible Wool Wallet', 2997334, NULL, 'Odit distinctio rerum doloribus eum tenetur laboriosam molestias.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
-(92, 'Sleek Paper Hat', 79087280, NULL, 'Blanditiis temporibus placeat quia facere.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(93, 'Ergonomic Granite Coat', 1857657, NULL, 'Modi molestias ipsam consequuntur minima quaerat.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
-(94, 'Fantastic Granite Clock', 69395472, NULL, 'At dolores repellat.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
-(95, 'Incredible Copper Bench', 34700032, NULL, 'Cumque recusandae rem dolorum corrupti.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 4, NULL, 0),
-(96, 'Ergonomic Granite Keyboard', 58491888, NULL, 'Aliquid omnis pariatur non sit assumenda.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 4, NULL, 0),
-(97, 'Intelligent Copper Shoes', 72822424, NULL, 'Tempora aut iste quia modi facilis.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 2, NULL, 0),
-(98, 'Aerodynamic Bronze Plate', 55969484, NULL, 'Quia aliquam consequuntur.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 3, NULL, 0),
-(99, 'Fantastic Granite Plate', 13102122, NULL, 'Ex autem reiciendis nihil omnis dolores dolorem.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 1, NULL, 0),
-(100, 'Ergonomic Cotton Knife', 33194718, NULL, 'Cum non itaque odio iusto ipsam natus.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 3, NULL, 0),
-(101, 'Awesome Linen Hat', 10559578, NULL, 'Quia assumenda animi.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 3, NULL, 0),
-(102, 'Awesome Silk Gloves', 1691930, NULL, 'Distinctio aspernatur nulla quae.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 2, NULL, 0),
-(103, 'Incredible Linen Wallet', 3881953, NULL, 'Veritatis in ratione quia veritatis.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 3, NULL, 0),
-(104, 'Intelligent Silk Computer', 19828304, NULL, 'Quas veritatis minus beatae ut est.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 2, NULL, 0),
-(105, 'Sleek Aluminum Computer', 37022548, NULL, 'Quis consequatur ut molestias quia.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 2, NULL, 0),
-(106, 'Awesome Wooden Bench', 66119288, NULL, 'Ullam rerum qui.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 2, NULL, 0),
-(107, 'Enormous Linen Wallet', 6575077, NULL, 'Voluptatum qui laudantium.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 1, NULL, 0),
-(108, 'Lightweight Linen Car', 55781504, NULL, 'Esse consequatur perspiciatis natus sed et non.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 1, NULL, 0),
-(109, 'Fantastic Bronze Gloves', 14015924, NULL, 'Distinctio enim tempora est.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 4, NULL, 0),
-(110, 'Lightweight Iron Bag', 22425374, NULL, 'Nemo neque magni.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 3, NULL, 0),
-(111, 'Small Plastic Pants', 81604720, NULL, 'Minima sed similique.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 1, NULL, 0),
-(112, 'Incredible Steel Knife', 22070576, NULL, 'Debitis minima quaerat.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 3, NULL, 0),
-(113, 'Heavy Duty Linen Shoes', 41412544, NULL, 'Quaerat occaecati repellendus est qui aut.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 4, NULL, 0),
-(114, 'Practical Iron Bag', 35211472, NULL, 'Dolore ullam nisi doloremque reprehenderit placeat expedita quos.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 1, NULL, 0),
-(115, 'Small Rubber Wallet', 17314388, NULL, 'Dolorem asperiores ipsam.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 2, NULL, 0),
-(116, 'Small Leather Table', 67185376, NULL, 'Rerum possimus sapiente at omnis aut doloribus.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 4, NULL, 0),
-(117, 'Lightweight Plastic Shirt', 3690756, NULL, 'Et sed maxime eaque libero est distinctio.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 3, NULL, 0),
-(118, 'Ergonomic Rubber Shoes', 77476704, NULL, 'Aut dolorem temporibus expedita.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 4, NULL, 0),
-(119, 'Small Leather Bottle', 26855136, NULL, 'Architecto quia et sed distinctio suscipit eos.', '2024-02-17 07:35:47', '2024-02-17 07:35:47', 2, NULL, 0),
-(5783, 'OPPO A5 Pro', 3123123, '6b656043-19b1-42e2-939d-baffbc6ff433_bLFFInnB4BxFNr4iFDXtM9_k3nKHyR6Ffv0WmXh8jUrffnjdkfUURbOJSWWUF7Y9XnnooqOac4Jm9kmGSXZn_vZ_9BMzisxFuXvow-hl--ghwgxQJWtHnYPna1uBsIUQ942eKRfdJcC6PC1IbJ0Fx1DwJ28sWJMZXiWezWc7I8YqiZBigbXf671XV9mJ6GwqC8P9E29nwcCXEo8sDlyhQV.png', 'sdfsdfsdfsdfsdf', '2025-06-13 06:58:41', '2025-06-13 06:59:32', 3, 54, 0),
+(1, 'Khóa vân tay GATEMAN FINGUS (WF-20)', 6500000, 'WF20_1 3-4.jpg', 'Khóa vân tay GATEMAN WF-20 - Mở khóa bằng vân tay hoặc mật mã. Cài đặt 20 vân tay, 03 mã số.', '2024-02-16 16:46:58', '2025-06-13 06:34:32', 1, 30, 51),
+(2, 'Khóa vân tay Samsung SHP-DH538', 5490000, 'DH538_co 3-4.jpg', 'Khóa vân tay Samsung SHP-DH538 - Mở bằng vân tay, mã số, chìa cơ dự phòng. Chống nước, thiết kế hiện đại.', '2024-02-17 07:35:46', '2025-11-04 15:43:33', 2, 20, 3),
+(3, 'Khóa vân tay SamSung SHS P718', 8500000, 'SHS-P718_3-4.png', 'Khóa vân tay Samsung SHS P718 với công nghệ cảm biến vân tay tiên tiến, thiết kế hiện đại.', '2024-02-17 07:35:46', '2025-06-13 11:41:35', 2, 60, 8),
+(4, 'Khóa SAMSUNG SHS-2920', 4200000, 'SHS-2920_1.jpg', 'Khóa SAMSUNG SHS-2920 - Khóa điện tử mã số, thiết kế đơn giản, phù hợp mọi loại cửa.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
+(5, 'Khóa điện tử SAMSUNG SHP-DS700', 3290000, 'SHP-DS700_1.jpg', 'Khóa điện tử Samsung SHP-DS700 cao cấp, mở khóa bằng thẻ từ và mã số.', '2024-02-17 07:35:46', '2025-06-13 10:03:43', 2, 60, 48),
+(6, 'Khóa điện tử SAMSUNG SHS 1321', 3480000, '1321-1-3-4.jpg', 'Khóa điện tử Samsung SHS 1321 với thiết kế thanh lịch, bảo mật cao.', '2024-02-17 07:35:46', '2025-06-13 07:07:29', 2, 5, 333),
+(7, 'Khóa vân tay SAMSUNG SHP-DP930', 12000000, 'SAMSUNG DP920.jpg', 'Khóa vân tay Samsung SHP-DP930 premium, màn hình cảm ứng, kết nối WiFi.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 50),
+(8, 'Khóa vân tay Samsung SHS-H700', 9500000, '700_mat ngoaiw.png', 'Khóa vân tay Samsung SHS-H700 cao cấp, thiết kế sang trọng, hỗ trợ vân tay 360 độ.', '2024-02-17 07:35:46', '2025-06-13 06:20:04', 2, 80, 2),
+(9, 'Chuông cửa hình SAMSUNG SHT-3517NT', 4200000, 'sht-3517nt-1.jpg', 'Chuông cửa video Samsung SHT-3517NT với màn hình 7 inch, camera HD, tính năng hai chiều.', '2024-02-17 07:35:46', '2025-06-13 08:11:55', 11, 20, 0),
+(11, 'Khóa điện tử GATEMAN WG-200', 4190000, 'wg-200 3-4.jpg', 'Khóa điện tử GATEMAN WG-200 - Mở bằng mã số và thẻ từ. Kiểu dáng thanh lịch, vật liệu siêu bền.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
+(12, 'Khóa vân tay GATEMAN WF200', 6990000, 'wf-200_34.jpg', 'Khóa vân tay GATEMAN WF200 - Mở bằng vân tay, mật mã. Bàn phím cảm ứng chất liệu đặc biệt, bền, sang trọng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
+(13, 'Khóa vân tay GATEMAN Z10-IH', 5600000, 'Z10_3 3-4.jpg', 'Khóa vân tay GATEMAN Z10-IH với công nghệ mới nhất, mở khóa nhanh 0.3 giây.', '2024-02-17 07:35:46', '2025-06-13 06:19:12', 4, 4, 465),
+(14, 'GATEMAN F300-FH', 7950000, 'Gateman F300-FH.jpg', 'Khóa vân tay GATEMAN F300-FH kết nối WiFi, điều khiển từ xa, báo động chống trộm.', '2024-02-17 07:35:46', '2025-06-13 11:34:06', 1, 60, 7),
+(15, 'Khóa vân tay GATEMAN F50-FH', 5250000, 'Gateman F50-FH.jpg', 'Khóa vân tay GATEMAN F50-FH thiết kế cổ điển hiện đại, chống nước IP54, tuổi thọ pin lên đến 12 tháng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 1, NULL, 0),
+(16, 'Khóa vân tay H-Gang TR812', 3350000, 'TR812_3-4.png', 'Khóa vân tay H-Gang TR812 thông minh cao cấp từ Hàn Quốc. Công nghệ hiện đại, bảo mật cao, thiết kế sang trọng.', '2024-02-17 07:35:46', '2025-06-13 07:07:51', 3, 28, 234),
+(17, 'Khóa cửa kính H-Gang Sync TG330', 3800000, 'TG330_1.jpg', 'Khóa cửa kính H-Gang Sync TG330 với thiết kế tinh tế cho cửa kính cường lực.', '2024-02-17 07:35:46', '2025-06-13 10:27:31', 10, 73, 31),
+(18, 'Khóa điện tử H-Gang TR100', 2150000, 'TR812_3-4.png', 'Khóa điện tử H-Gang TR100 - Giải pháp bảo mật kinh tế, phù hợp cho gia đình.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
+(19, 'Khóa vân tay H-Gang TM902-KV', 5850000, 'TM700_3-4.png', 'Khóa vân tay H-Gang TM902-KV với tính năng báo động, mở khóa từ xa.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
+(20, 'Khóa điện tử H-Gang Sync TM700', 3590000, 'TM700_3-4.png', 'Khóa điện tử H-Gang Sync TM700 - Mở khóa bằng mã số, thẻ từ và chìa cơ.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
+(21, 'Khóa điện tử H-Gang Sync TR700', 2890000, 'TR700_3-4.png', 'Khóa điện tử H-Gang Sync TR700 - Thiết kế tối giản, dễ lắp đặt và sử dụng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
+(22, 'Khóa điện tử H-Gang Sync TS700', 3590000, 'TS700_3_4.png', 'Khóa điện tử H-Gang Sync TS700 - Công nghệ mới nhất, bảo mật cao cấp.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
+(23, 'Khóa vân tay H-Gang TM901', 5500000, 'TM700_3-4.png', 'Khóa vân tay H-Gang TM901 - Vân tay, mật mã, thẻ từ. Thiết kế sang trọng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 3, NULL, 0),
+(24, 'Khóa vân tay EPIC ES-F700G', 6250000, 'ES-F700G-3-4.png', 'Khóa vân tay EPIC ES-F700G với công nghệ nhận diện vân tay tiên tiến.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
+(25, 'Khóa vân tay EPIC ES F300D', 4650000, 'ES-F300D_3-4.jpg', 'Khóa vân tay EPIC ES F300D - Thiết kế hiện đại, bảo mật cao, dễ sử dụng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
+(26, 'EPIC 100D', 2400000, 'ES-100-1_3-4.jpg', 'EPIC 100D - Khóa điện tử giá rẻ, phù hợp cho mọi loại cửa.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
+(27, 'Khóa vân tay EPIC EF-8000L', 6100000, 'EPIC 8000L.jpg', 'Khóa vân tay EPIC EF-8000L cao cấp, thiết kế sang trọng, chống nước IP65.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
+(28, 'EPIC ES-303 GR: Khóa cửa kính', 3450000, 'EPIC ES-303 G (2).jpg', 'EPIC ES-303 GR - Khóa cửa kính với thiết kế tinh tế, bảo mật cao.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 10, NULL, 0),
+(29, 'EPIC POPScan M', 4290000, 'EPIC POPScan M.jpg', 'EPIC POPScan M - Khóa vân tay thông minh với công nghệ POPScan độc quyền.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
+(30, 'EPIC ES 303 G: Khóa cửa kính', 3450000, 'EPIC ES-303 G (2).jpg', 'EPIC ES 303 G - Khóa cửa kính cao cấp, thiết kế hiện đại, sang trọng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 10, NULL, 0),
+(31, 'Khóa điện tử EPIC N-Touch', 2250000, 'ES-100-1_3-4.jpg', 'Khóa điện tử EPIC N-Touch - Màn hình cảm ứng, dễ sử dụng, giá cả phải chăng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
+(32, 'EPIC 809 L/LR', 5200000, 'ES-809L.jpg', 'EPIC 809 L/LR - Khóa vân tay cao cấp với nhiều tính năng hiện đại.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 4, NULL, 0),
+(33, 'Khóa WELKOM WAT 310', 4200000, 'WAT31dd_0.jpg', 'Khóa WELKOM WAT 310 - Khóa điện tử cao cấp, thiết kế đẹp mắt.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 5, NULL, 0),
+(34, 'WELKOM WSP-2500B', 4800000, 'WDP-2500B_1 3-4.png', 'WELKOM WSP-2500B - Khóa vân tay với công nghệ bảo mật tiên tiến.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 5, NULL, 0),
+(35, 'WELKOM WGT330', 2590000, 'WGT300_1 3-4.png', 'WELKOM WGT330 - Khóa điện tử giá rẻ, chất lượng tốt.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 5, NULL, 0),
+(36, 'WELKOM WRT300', 3800000, 'WRT300_1 3-4.PNG', 'WELKOM WRT300 - Khóa điện tử cao cấp, thiết kế hiện đại.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 5, NULL, 0),
+(37, 'Khóa vân tay KAISER+ M-1190S', 4150000, 'M-1190S_detail 3-4.png', 'Khóa vân tay KAISER+ M-1190S - Công nghệ vân tay tiên tiến, bảo mật cao.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 7, NULL, 0),
+(38, 'Khóa vân tay KAISER+ 7090', 7950000, 'Kaiser 3_4.jpg', 'Khóa vân tay KAISER+ 7090 - Khóa cao cấp, thiết kế sang trọng, nhiều tính năng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 7, NULL, 0),
+(39, 'Khóa vân tay cửa kính KAISER+ HG-1390', 3850000, 'Kaiser 3_4.jpg', 'Khóa vân tay cửa kính KAISER+ HG-1390 - Thiết kế đẹp cho cửa kính.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 10, NULL, 0),
+(40, 'Khóa vân tay UNICOR UN-7200B', 4690000, '7200B_5 3-4.png', 'Khóa vân tay UNICOR UN-7200B - Công nghệ hiện đại, bảo mật cao cấp.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 8, NULL, 0),
+(41, 'Khóa điện tử Unicor ZEUS 6700sk', 4650000, 'JM6700sk_34.jpg', 'Khóa điện tử Unicor ZEUS 6700sk - Thiết kế sang trọng, dễ sử dụng.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 8, NULL, 0),
+(42, 'Khóa điện tử HiOne+ M-1100S', 2450000, 'img_m1100s_detail 3-4.png', 'Khóa điện tử HiOne+ M-1100S - Giải pháp bảo mật kinh tế cho gia đình.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 9, NULL, 0),
+(43, 'Khóa điện tử HiOne+ H-3400SK', 3450000, 'H-3400SK_3-4.png', 'Khóa điện tử HiOne+ H-3400SK - Thiết kế hiện đại, bảo mật cao.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 9, NULL, 0),
+(44, 'Khóa vân tay HiOne+ H-5490SK', 5890000, 'H-5490SK_3-4.png', 'Khóa vân tay HiOne+ H-5490SK - Công nghệ vân tay tiên tiến, thiết kế đẹp.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 9, NULL, 0),
+(45, 'Bộ chuông cửa có hình KOCOM KCV-434 + KC-C60', 3890000, 'kocom-kcv434.jpg', 'Bộ chuông cửa có hình KOCOM KCV-434 + KC-C60 - Màn hình 4.3 inch, camera HD.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 11, NULL, 0),
+(46, 'Khóa cửa kính TANK GT330', 3290000, 'tank-gt330.jpg', 'Khóa cửa kính TANK GT330 - Thiết kế chuyên dụng cho cửa kính cường lực.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 10, NULL, 0),
+(47, 'Khóa cửa kính Sync Auto 2-way TG310', 3590000, 'sync-tg310.jpg', 'Khóa cửa kính Sync Auto 2-way TG310 - Tự động khóa 2 chiều, an toàn tuyệt đối.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 10, NULL, 0),
 (5784, 'Samsung Galaxy S25 Ultra', 29000000, '17b301fe-dbd0-4c8a-a990-5edef383e497_bsb004501__2__36b648ff5dfb4a0fbc909605f1dc7d53_grande.jpg', 'ádffafas', '2025-06-13 08:28:22', '2025-06-13 11:46:35', 4, 43, 1339),
-(5785, 'Mercedes GLE 350', 6990000000, '58760ad5-7ea7-4bc6-a8e6-4c02af90c8cf_images.jpg', 'ádasdasd', '2025-06-13 08:29:52', '2025-06-13 08:29:52', 5, 10, 1);
+(5785, 'Mercedes GLE 350', 6990000000, '58760ad5-7ea7-4bc6-a8e6-4c02af90c8cf_images.jpg', 'ádasdasd', '2025-06-13 08:29:52', '2025-11-04 12:42:12', 5, 55, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `product_features`
+--
+
+CREATE TABLE `product_features` (
+  `id` bigint NOT NULL,
+  `product_id` int NOT NULL COMMENT 'ID sản phẩm',
+  `feature_id` bigint NOT NULL COMMENT 'ID chức năng',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `product_features`
+--
+
+INSERT INTO `product_features` (`id`, `product_id`, `feature_id`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, '2025-06-13 12:00:00', '2025-11-04 11:30:34'),
+(2, 1, 3, '2025-06-13 12:00:00', '2025-11-04 11:30:34'),
+(3, 2, 1, '2025-06-13 12:00:00', '2025-11-04 11:30:34'),
+(4, 2, 2, '2025-06-13 12:00:00', '2025-11-04 11:30:34');
 
 -- --------------------------------------------------------
 
@@ -531,153 +328,37 @@ CREATE TABLE `product_images` (
 INSERT INTO `product_images` (`id`, `product_id`, `image_url`) VALUES
 (2, 1, '64baf7b5-635b-4a9e-aec7-03d0fedac82f_nike-air-force-1-low-replica-800x600.jpg'),
 (3, 1, '6e7c3444-2475-4880-847d-e6754557316e_af1-full-white-like-auth-6-650x650.jpg'),
-(4, 1, '9a59a80f-44b5-457b-8092-7bc20833520d_Nike-AF1-like-auth-650x650.jpg'),
-(5, 1, 'b59ee515-1c87-4e56-a858-00eb37327f86_af1-full-white-like-auth-11-650x650.jpg'),
-(6, 1, 'cd1c656d-c0e4-45aa-be3e-d6be65593b6a_af1-full-white-like-auth-13-650x650.jpg'),
-(7, 2, '68c9641a-df79-440d-a7a3-2249e64685db_adidas-superstar-white-replica.jpg'),
-(8, 2, '5f4d5357-cd0d-44a3-b13b-e3a14fccd2ba_giay-adidas-superstar-trang-soc-djen-best-quality-1-650x650.jpg'),
-(9, 2, '5477277c-4d91-4609-b801-f94a49b4fa8e_giay-adidas-superstar-trang-soc-djen-best-quality-2-650x650.jpg'),
-(10, 2, 'b0e1bca8-86b5-4357-83b4-9f7266fcfba7_giay-adidas-superstar-trang-soc-djen-best-quality-3-650x650.jpg'),
-(11, 2, '1a3d4f41-8d90-4462-a329-08d75157d5f8_giay-adidas-superstar-trang-soc-djen-best-quality-5-650x650.jpg'),
-(12, 3, 'ef350705-89f2-4e37-a293-cec3ec4bf069_af1-cream-black-swoosh-800x600.jpg'),
-(13, 3, '80255d83-91f8-4207-9f18-4d466447be63_air-force-1-low-cream-black-swoosh-6-800x600.jpg'),
-(14, 3, '237a0e0d-26c8-4efe-93c2-4814c58e8ab0_air-force-1-low-cream-black-swoosh-7-800x600.jpg'),
-(15, 3, 'f7bf9bfb-6355-4729-9e36-213bcc171297_air-force-1-low-cream-black-swoosh-8-800x600.jpg'),
-(16, 3, 'a00bbd3b-372b-4658-9c62-06f15f304101_air-force-1-low-cream-black-swoosh-9-800x600.jpg'),
-(17, 4, 'ef20dd75-5f3d-4540-aebd-d3a34211e716_Nike-Air-Force-1-Low-G-Dragon-Peaceminusone-Para-Noise-replica-800x600.jpg'),
-(18, 4, 'c0fdd184-f0ef-4f99-a80f-0aea9ea4f095_giay-nike-air-force-1-dragon-paranoise-replica-3-800x600.jpg'),
-(19, 4, 'bd283865-9f4e-42cd-b984-bb3ed0081162_giay-nike-air-force-1-dragon-paranoise-replica-4-800x600.jpg'),
-(20, 4, '1f01daad-f0c9-4ee8-89da-29efe6c120a2_giay-nike-air-force-1-dragon-paranoise-replica-7-800x600.jpg'),
-(21, 4, '260aad88-82c5-4f70-9b1d-cd3fa3b6466e_giay-nike-air-force-1-dragon-paranoise-replica-2-800x599.jpg'),
-(22, 5, '3fdcde54-b611-45ea-b693-e94b6dca086d_af1-gucci-nike-1-800x600.jpg'),
-(23, 5, '88260575-0f02-4fbb-b042-4f2f89b40ca7_Air-Force-1-Gucci-650x650.jpg'),
-(24, 5, '7e641f86-6f13-4fd4-b97c-966c48c82861_Air-Force-1-Low-By-You-Custom–Gucci-650x650.jpg'),
-(25, 5, '40deee30-a722-42f6-b844-3ce398bf13e1_Nike-Air-Force-1-Gucci-650x650.jpg'),
-(26, 5, 'acba9374-bca0-4c34-9672-92e3267c3f78_Nike-Air-Force-1-Low-By-You-Custom-Gucci-650x650.jpg'),
-(27, 6, 'dd4e2fcd-9b54-4d89-988a-df9cfda47f55_giay-nike-air-force-1-low-valentines-day-2024-like-auth.jpg'),
-(28, 6, '907f9d48-362f-4a4f-80c2-91832c5e0b89_giay-nike-air-force-1-low-valentines-day-2024-like-auth-1-650x650.jpg'),
-(29, 6, '0672d45d-a0ee-4d83-941f-64382f7bdcf6_giay-nike-air-force-1-low-valentines-day-2024-like-auth-2-650x650.jpg'),
-(30, 6, '2236231e-19a4-4434-8600-4b918fd23e27_giay-nike-air-force-1-low-valentines-day-2024-like-auth-7-650x650.jpg'),
-(31, 6, 'e148e7da-8c87-496f-890c-d8b4c760ba68_giay-nike-air-force-1-low-valentines-day-2024-like-auth-8-650x650.jpg'),
-(32, 7, 'cd721569-4060-4f22-b63e-6a4fbf3a2d95_Giay-Nike-Air-Jordan-1-Mid-Chicago-White-Toe-800x600.jpg'),
-(33, 7, 'e07b51e7-176d-433d-bf0b-6fa2d1b14781_mid-chicago-white-toe-2-800x600.jpg'),
-(34, 7, '0db85c7a-72c9-4b9b-a20c-d39462d4e1a5_mid-chicago-white-toe-6-800x600.jpg'),
-(35, 7, 'b832e93e-45ae-412e-ab2b-e2ee70c09159_mid-chicago-white-toe-7-800x600.jpg'),
-(36, 7, '0ac185a4-aad3-4ef1-91a6-b6bed5c6c244_mid-chicago-white-toe-rep11-800x600.jpg'),
-(37, 8, '75b77e09-5ddb-445f-9456-c0d10ac84acb_Air-Jordan-1-Mid-Panda.jpg'),
-(38, 8, '189b8181-89b1-4f70-a20e-2f58b8af7a99_giay-nike-air-jordan-1-mid-panda-like-auth-4-650x650.jpg'),
-(39, 8, '5774e376-59cd-41ab-80b3-746dd64c6c45_giay-nike-air-jordan-1-mid-panda-like-auth-5-650x650.jpg'),
-(40, 8, '68ef9789-384b-4c23-8917-b205a85ed0de_giay-nike-air-jordan-1-mid-panda-like-auth-6-650x650.jpg'),
-(41, 8, 'f7926cf6-fd53-4a0e-8a09-571fe45868a9_giay-nike-air-jordan-1-mid-panda-like-auth-7-650x650.jpg'),
-(42, 9, '96a4724d-6df3-488c-9ec5-55cb525a921c_Jordan-1-Mid-Light-Smoke-Grey-80.jpg'),
-(43, 9, 'a2fd96b8-0555-4392-aec0-0855a626e105_giay-nike-air-jordan-1-mid-light-smoke-grey-best-quality-3-650x650.jpg'),
-(44, 9, 'e5def09d-c338-41e2-a176-60deda8638b3_giay-nike-air-jordan-1-mid-light-smoke-grey-best-quality-5-650x650.jpg'),
-(45, 9, '57966fb4-f843-4ef1-b7cb-b87363a628b0_giay-nike-air-jordan-1-mid-light-smoke-grey-best-quality-6-650x650.jpg'),
-(46, 9, '560432b9-51b4-489c-90ad-853672374304_giay-nike-air-jordan-1-mid-light-smoke-grey-best-quality-1-650x650.jpg'),
-(47, 10, 'c2b778a5-4ad6-45c6-a8b4-47f779d23dad_Jordan-1-Mid-Tuxedo-White-Black-800x600.jpg'),
-(48, 10, '0d382d74-a604-495b-8c43-fb9117886661_Air-Jordan-1-Mid-Tuxedo-White-Black-650x650.jpg'),
-(49, 10, 'fbf8ba07-4bc3-4806-828c-a13ba8fca86d_Nike-Air-Jordan-1-Mid-Tuxedo-White-Black-11-650x650.jpg'),
-(50, 10, '2dfb1117-216d-4377-8d90-ccbf8954c428_Nike-Air-Jordan-1-Mid-Tuxedo-White-Black-650x650.jpg'),
-(51, 10, '6eb1969d-c2df-41dc-810a-b3da32afa2f0_Nike-Air-Jordan-1-Mid-Tuxedo-White-Black-rep-650x650.jpg'),
-(52, 11, '0ce3ac5f-fc54-4b7b-afc4-a67be12d06ef_adidas-adidas-samba-classic-white-800x650.jpg'),
-(53, 11, '3fd6dd5f-17e0-43ce-948d-880977072e8e_adidas-samba-classic-white-3-800x650.jpg'),
-(54, 11, '110722cd-3ce5-4ed4-b1ad-af9e189372a7_adidas-samba-classic-white-6-800x650.jpg'),
-(55, 11, '04117523-9f4a-4e1c-a455-35f0213dabf0_adidas-samba-classic-white-9-800x650.jpg'),
-(56, 11, '0e1413f8-1d56-4e68-a337-e32c685b8874_adidas-samba-classic-white-10-800x650.jpg'),
-(57, 12, '85c00f76-5962-480e-80b2-cec0bf541a33_adidas-stan-smith-xanh-navy-replica-800x650.jpg'),
-(58, 12, '0f8e8aca-e673-4d8e-8f85-558f3c04c5f5_adidas-stan-smith-got-xanh-navy-replica-3-800x650.jpg'),
-(59, 12, '19cdb9c3-c478-48d8-b921-6abc80778341_adidas-stan-smith-got-xanh-navy-replica-4-800x650.jpg'),
-(60, 12, '742eb45b-6e52-4a32-8076-57ab92567f81_adidas-stan-smith-got-xanh-navy-replica-7-800x650.jpg'),
-(61, 12, 'd01597a6-f2bd-439e-b834-bf142b22bbc2_adidas-stan-smith-got-xanh-navy-replica-2-800x650.jpg'),
-(62, 13, 'a7499a61-81c2-4529-a812-2be0822ff38b_Giay-New-Balance-550-White-Green-800x650.jpg'),
-(63, 13, '2802882d-c61b-4f90-916c-22ae39c5003a_new-balance-550-white-green-2-800x650.jpg'),
-(64, 13, '6af637ab-075c-4aa1-900e-f6c1ac6506b6_new-balance-550-white-green-3-800x650.jpg'),
-(65, 13, '78033707-92f5-4aa1-a0d2-e6469c411d66_new-balance-550-white-green-10-800x650.jpg'),
-(66, 13, '1c6d9a52-f49e-40be-a703-8dd7e07fb729_new-balance-550-white-green-12-800x650.jpg'),
-(67, 14, '96266a3a-d330-40d3-98e3-563a295b65b5_converse-chuck-70-plus-black-800x650.jpg'),
-(68, 14, 'f2d18780-36a8-4e4f-b730-5585783ce1c8_converse-chuck-70-plus-black-3-800x650.jpg'),
-(69, 14, '8c219a39-70e3-4986-a4c3-10bdb8794c9e_converse-chuck-70-plus-black-9-800x650.jpg'),
-(70, 14, '49d2fc24-c595-47c2-b671-627dd44c8a92_converse-chuck-70-plus-black-10-800x650.jpg'),
-(71, 14, 'ae1aeed5-a9dc-46b6-94ad-d972ba96d1e7_converse-chuck-70-plus-black-1-800x650.jpg'),
-(72, 15, 'c4d381c4-eb63-4bdf-9526-0120403af008_A-BATHING-APE-BAPE-STA-LOW-BLACK-800x650.jpg'),
-(73, 15, '91d16360-0484-4ea7-8f94-edf094c8720d_giay-a-bathing-ape-bape-sta-low-black-best-quality-5-800x650.jpg'),
-(74, 15, '47214cdc-3496-4b6c-883b-6ceb74f2b6aa_giay-a-bathing-ape-bape-sta-low-black-best-quality-6-800x650.jpg'),
-(75, 15, '907db361-d184-4cce-b5a6-b67baaf8749a_giay-a-bathing-ape-bape-sta-low-black-best-quality-16-800x650.jpg'),
-(76, 15, '52525f44-c3db-4673-bc5b-11a281d3fc62_giay-a-bathing-ape-bape-sta-low-black-best-quality-17-800x650.jpg'),
-(77, 16, 'cdc20a3c-1ffd-4cad-8e24-f9241ab21fe0_adidas-ultraboost-light-2023.jpg'),
-(78, 16, 'e6e73f42-3ba9-4cde-b0c8-561e4105ceed_giay-adidas-wmns-ultraboost-23-light-white-solar-red-like-auth-3-800x650.jpg'),
-(79, 16, 'eb0434ef-1b63-42e0-bcbd-ca2fc5b6eced_giay-adidas-wmns-ultraboost-23-light-white-solar-red-like-auth-5-800x650.jpg'),
-(80, 16, '3f96932b-8e45-4246-9bda-757ff4287e0d_giay-adidas-wmns-ultraboost-23-light-white-solar-red-like-auth-9-800x650.jpg'),
-(81, 16, '86b874dc-d323-4439-9ef9-d05e6da4119e_giay-adidas-wmns-ultraboost-23-light-white-solar-red-like-auth-10-800x650.jpg'),
-(82, 17, '254a91ae-3e90-4240-83c4-8f60538d4f26_Giay-New-Balance-CRT-300-Beige-Navy-800x650.jpg'),
-(83, 17, 'ccdc2000-3f4b-4ed2-96c1-10d508ad0d5a_giay-new-balance-crt-300-beige-navy-7-800x650.jpg'),
-(84, 17, '1cafbebd-0d9d-44af-84d5-e2c40b146f89_giay-new-balance-crt-300-beige-navy-8-800x650.jpg'),
-(85, 17, '74431bf2-f679-4807-8e34-bb9076789644_giay-new-balance-crt-300-beige-navy-9-800x650.jpg'),
-(86, 17, '71c848f7-0597-40ff-861c-d9e709924984_giay-new-balance-crt-300-beige-navy-1-800x650.jpg'),
-(87, 18, '96b64f11-3539-4538-9399-69ff17a2a688_vans-vault-checkerbroad-og-replica-800x650.jpg'),
-(88, 18, 'a5a44d79-2e62-4b10-ad14-d9d172b15599_Vans-Vault-OG-Classic-Slip-On-LX-Checkerboard-replica-2-800x650.jpg'),
-(89, 18, '42129f68-eea5-427d-88af-7862befd3e94_Vans-Vault-OG-Classic-Slip-On-LX-Checkerboard-replica-3-800x650.jpg'),
-(90, 18, '7d6e79e3-5467-4978-9e87-02b935912e11_Vans-Vault-OG-Classic-Slip-On-LX-Checkerboard-replica-5-800x650.jpg'),
-(91, 18, 'bc3e7960-fe4c-4b85-ab05-ff95cb41b39f_Vans-Vault-OG-Classic-Slip-On-LX-Checkerboard-replica-6-800x650.jpg'),
-(92, 19, '0d0f026a-342b-42a7-9309-43d79f88a253_vans-vault-2021-og-old-skool-800x650.jpg'),
-(93, 19, '4cebfa6a-12cd-4699-b992-35f7b003c878_vans-vault-2021-6-800x650.jpg'),
-(94, 19, '5d3ae5a3-7942-4b4b-a694-340f014c8183_vans-vault-2021-7-800x650.jpg'),
-(95, 19, '7fe20439-97a2-4af7-8ff6-62ebf8bab270_vans-vault-2021-10-800x650.jpg'),
-(96, 19, '1df708d1-be27-4a74-bf99-50420c5ec818_vans-vault-2021-3-800x650.jpg'),
-(97, 20, '5446f87d-d7aa-40d3-9cc0-0404b993720c_converse-run-star-hike-high-black-800x650.jpg'),
-(98, 20, 'b01a7219-a228-443d-992e-c255133db0b4_converse-run-star-hike-high-black-2-800x650.jpg'),
-(99, 20, '44bb6282-8602-4ff6-8582-46bbc99361cf_converse-run-star-hike-high-black-5-800x650.jpg'),
-(100, 20, 'e736bc5c-045c-434d-a20b-86228d7de192_converse-run-star-hike-high-black-7-800x650.jpg'),
-(101, 20, '1d13885d-5fa4-40e2-831c-885ff46f6c9e_converse-run-star-hike-high-black-1-800x650.jpg'),
-(102, 21, '8e4978dc-4a4f-42a3-846a-c27d51caa195_nike-air-max-1-white-black.jpg'),
-(103, 21, '5ebabd97-ae1b-416e-b425-e1dc051a5cd0_Giay-Nike-Air-Max-1-‘White-Black-Like-Auth-8-800x650.jpg'),
-(104, 21, 'ba9abbd5-84d9-4d48-9332-a09e5aacf29d_Giay-Nike-Air-Max-1-‘White-Black-Like-Auth-9-800x650.jpg'),
-(105, 21, 'f52f1f40-20fd-4e54-9f25-00784598ca68_Giay-Nike-Air-Max-1-‘White-Black-Like-Auth-11-800x650.jpg'),
-(106, 21, 'e472f863-0a13-4f91-8e4d-7be54681fae6_Giay-Nike-Air-Max-1-‘White-Black-Like-Auth-5-800x650.jpg'),
-(107, 22, '4953d163-90b9-4f38-aaac-d5e6438eb8ec_Adidas-adiFOM-Superstar-White-Black-800x650.jpg'),
-(108, 22, '6db02ec9-ca67-42b5-984f-65464072c895_giay-adidas-adifom-superstar-white-black-1-800x650.jpg'),
-(109, 22, 'bdc6c2db-db5c-4901-83a0-72ee5f4cc05a_giay-adidas-adifom-superstar-white-black-3-800x650.jpg'),
-(110, 22, '6417f2b9-4cf3-4e64-a6dd-b853c1101e7a_giay-adidas-adifom-superstar-white-black-5-800x650.jpg'),
-(111, 22, '0b021a98-99b1-458f-add3-6464701ce854_giay-adidas-adifom-superstar-white-black-10-800x650.jpg'),
-(112, 23, '8f1f0861-b5e7-4de1-804e-b6777382458b_Giay-New-Balance-2002-‘Grey-Like-Auth.jpg'),
-(113, 23, 'e68303b3-52cf-491f-a99a-6762bd094096_giay-new-balance-2002-grey-like-auth-1-800x650.jpg'),
-(114, 23, '979323bb-812e-4d09-82ff-7018d745fcd2_giay-new-balance-2002-grey-like-auth-10-800x650.jpg'),
-(115, 23, '68fbbaa6-d75a-400d-965a-8d7b492e0a69_giay-new-balance-2002-grey-like-auth-11-800x650.jpg'),
-(116, 23, '57d57b99-6948-401c-a50c-ab355ead89ca_giay-new-balance-2002-grey-like-auth-12-800x650.jpg'),
-(117, 24, 'f4a3cd3d-898f-4aff-8aa3-41965631bb3e_converse-1970s-navy-high-replica-800x650.jpg'),
-(118, 24, '58c1b56c-7df4-4536-adc5-9b0973ec2c85_converse-1970s-xanh-navy-co-cao-replica-4-800x650.jpg'),
-(119, 24, '40d50a7a-0763-41f8-8ebe-b528829c9e63_converse-1970s-xanh-navy-co-cao-replica-5-800x650.jpg'),
-(120, 24, '56936385-c732-47e7-9230-714d184d0eda_converse-1970s-xanh-navy-co-cao-replica-6-800x650.jpg'),
-(121, 24, 'ea828b0e-f447-4fbe-976b-6188ec2ac186_converse-1970s-xanh-navy-co-cao-replica-7-800x650.jpg'),
-(122, 5783, '6b656043-19b1-42e2-939d-baffbc6ff433_bLFFInnB4BxFNr4iFDXtM9_k3nKHyR6Ffv0WmXh8jUrffnjdkfUURbOJSWWUF7Y9XnnooqOac4Jm9kmGSXZn_vZ_9BMzisxFuXvow-hl--ghwgxQJWtHnYPna1uBsIUQ942eKRfdJcC6PC1IbJ0Fx1DwJ28sWJMZXiWezWc7I8YqiZBigbXf671XV9mJ6GwqC8P9E29nwcCXEo8sDlyhQV.png'),
-(123, 5783, '426ba754-8c7b-4e4d-be91-dfb6a43c1d29_oppo-a5-pro-pink-thumbai-600x600.jpg'),
-(124, 5783, 'cd762e47-6c7b-40e6-99ec-efea184a25fd_bsb004501__2__36b648ff5dfb4a0fbc909605f1dc7d53_grande.jpg'),
 (125, 5784, '17b301fe-dbd0-4c8a-a990-5edef383e497_bsb004501__2__36b648ff5dfb4a0fbc909605f1dc7d53_grande.jpg'),
-(126, 5785, '58760ad5-7ea7-4bc6-a8e6-4c02af90c8cf_images.jpg');
+(126, 5785, '58760ad5-7ea7-4bc6-a8e6-4c02af90c8cf_images.jpg'),
+(132, 1, '2af2e2f9-692c-4209-9b6b-c0ce1da22d87_Nike-Air-Jordan-1-Retro-Low-OG-SP-Travis-ScottT-8-300x300.jpg.jpg'),
+(133, 1, 'ebbf7fd1-b659-4dab-bca3-33691e9d661d_Nike-Air-Jordan-1-Retro-Low-OG-SP-Travis-ScottT-8-300x300.jpg.jpg'),
+(134, 1, 'bfbbf398-6f57-4b27-8f90-0c61c46be7e5_Nike-Air-Jordan-1-Retro-Low-OG-SP-Travis-ScottT-8-300x300.jpg.jpg'),
+(135, 1, '1bc170c9-2706-4a4e-8992-875a05e15314_alexander-mcqueen-trang-got-den-sieu-cap-1-300x300.jpg.jpg');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `product_features`
+-- Cấu trúc bảng cho bảng `return_requests`
 --
 
-CREATE TABLE `product_features` (
+CREATE TABLE `return_requests` (
   `id` bigint NOT NULL,
-  `product_id` int NOT NULL COMMENT 'ID sản phẩm',
-  `feature_id` bigint NOT NULL COMMENT 'ID chức năng',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `order_id` int NOT NULL,
+  `reason` text NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'REQUESTED',
+  `refund_amount` decimal(10,2) DEFAULT NULL,
+  `admin_notes` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `product_features`
+-- Đang đổ dữ liệu cho bảng `return_requests`
 --
 
-INSERT INTO `product_features` (`id`, `product_id`, `feature_id`, `created_at`) VALUES
-(1, 1, 1, '2025-06-13 12:00:00'),
-(2, 1, 3, '2025-06-13 12:00:00'),
-(3, 2, 1, '2025-06-13 12:00:00'),
-(4, 2, 2, '2025-06-13 12:00:00');
+INSERT INTO `return_requests` (`id`, `order_id`, `reason`, `status`, `refund_amount`, `admin_notes`, `created_at`, `updated_at`) VALUES
+(1, 47, 'sdfdsafsdfsdf', 'REFUNDED', 3030000.00, 'Refunded via Stripe. kml;\'ko\'k\'l;\'', '2025-06-12 23:11:01', '2025-06-12 23:12:46'),
+(12, 92, 'àdasfadsfdsafsadfasdf', 'REFUNDED', 29030000.00, 'Refunded via Stripe. àasdfsfds', '2025-06-13 04:47:09', '2025-06-13 04:47:23');
 
 -- --------------------------------------------------------
 
@@ -704,41 +385,6 @@ INSERT INTO `reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `crea
 (2, 1, 14, 4, 'Tốt, giá hợp lý', '2025-06-13 16:00:00', '2025-06-13 16:00:00'),
 (3, 2, 18, 5, 'Rất hài lòng với sản phẩm', '2025-06-13 17:00:00', '2025-06-13 17:00:00'),
 (4, 3, 15, 3, 'Tạm được', '2025-06-13 18:00:00', '2025-06-13 18:00:00');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `return_requests`
---
-
-CREATE TABLE `return_requests` (
-  `id` bigint NOT NULL,
-  `order_id` int NOT NULL,
-  `reason` text NOT NULL,
-  `status` varchar(50) NOT NULL DEFAULT 'REQUESTED',
-  `refund_amount` decimal(10,2) DEFAULT NULL,
-  `admin_notes` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Đang đổ dữ liệu cho bảng `return_requests`
---
-
-INSERT INTO `return_requests` (`id`, `order_id`, `reason`, `status`, `refund_amount`, `admin_notes`, `created_at`, `updated_at`) VALUES
-(1, 47, 'sdfdsafsdfsdf', 'REFUNDED', 3030000.00, 'Refunded via Stripe. kml;\'ko\'k\'l;\'', '2025-06-12 23:11:01', '2025-06-12 23:12:46'),
-(2, 73, 'Sản phẩm này rất đểu ', 'REFUNDED', 24106756.00, 'Refunded via Stripe. OK', '2025-06-13 01:34:03', '2025-06-13 01:34:27'),
-(3, 78, 'ádasdasdasd', 'REFUNDED', 24106756.00, 'Refund successfully processed via VNPAY.', '2025-06-13 03:11:52', '2025-06-13 03:12:08'),
-(4, 77, 'Lỏ quá xá vui', 'APPROVED', 37381720.00, 'Approved for VNPAY refund. sadasdasd', '2025-06-13 03:31:01', '2025-06-13 03:32:45'),
-(5, 83, 'gsdfgdfsgdsfgdfg', 'APPROVED', 29030000.00, 'Approved for VNPAY refund. sdfsdfsdfsdfsdf', '2025-06-13 03:34:41', '2025-06-13 03:35:18'),
-(6, 86, 'adsdasdasdasdasdas', 'APPROVED', 24106756.00, 'Approved for VNPAY refund. đâsdasdasdasdas', '2025-06-13 04:00:09', '2025-06-13 04:00:21'),
-(7, 87, 'sfdfsdaffasfsaddfsa', 'APPROVED', 24106756.00, 'Approved for VNPAY refund. ádfsadfasdfasdf', '2025-06-13 04:23:19', '2025-06-13 04:23:27'),
-(8, 88, 'ÁDasdADASDFASDFSDAF', 'APPROVED', 24106756.00, 'Approved for VNPAY refund. dsfgdsfgdsgsdfgsdfghfghddfgf', '2025-06-13 04:30:10', '2025-06-13 04:30:28'),
-(9, 89, 'jhjgkhgkjghjghjkgkg', 'REFUNDED', 24106756.00, 'Refunded via Stripe. fdgafdsfdsfasdfsasadfasdf', '2025-06-13 04:33:07', '2025-06-13 04:33:21'),
-(10, 90, 'sđsádfadsfasdfasdfsd', 'REFUNDED', 3882473.00, 'Refund successfully processed via VNPAY.', '2025-06-13 04:34:56', '2025-06-13 04:39:51'),
-(11, 91, 'ấdfasdfsdafasfasdfsda', 'REFUNDED', 24106756.00, 'Refund successfully processed via VNPAY.', '2025-06-13 04:42:28', '2025-06-13 04:42:42'),
-(12, 92, 'àdasfadsfdsafsadfasdf', 'REFUNDED', 29030000.00, 'Refunded via Stripe. àasdfsfds', '2025-06-13 04:47:09', '2025-06-13 04:47:23');
 
 -- --------------------------------------------------------
 
@@ -818,24 +464,9 @@ CREATE TABLE `users` (
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `fullname`, `phone_number`, `email`, `address`, `password`, `created_at`, `updated_at`, `is_active`, `date_of_birth`, `facebook_account_id`, `google_account_id`, `role_id`) VALUES
-(1, 'Trần Đức Anh', '0865247233', 'tran.duc.anh@gmail.com', 'Hanoi', '21112003', NULL, '2025-06-13 06:07:14', 1, '2003-11-21 00:00:00.000000', 0, 0, 1),
-(3, 'ADMIN 1', '0111222333', 'admin.1@gmail.com', 'Hanoi', '$2a$10$zgJgPl51rJQGl8xlznCKgOGipZjbaPMXiF/Zv/03ri1mA1iN1Z.su', '2024-02-21 09:00:03', '2024-02-21 09:00:03', 1, '2003-11-12 00:00:00.000000', 0, 0, 2),
-(4, 'Nguyễn Văn A', '0197252343', 'nguyen.van.a@gmail.com', 'Thái Nguyên', '$2a$10$EaQ4vkmvqt.cTdgfq7WLN.wyhDnD3iEm4CNKWK75pQLImwFod1Flm', '2024-02-23 10:45:57', '2024-02-23 10:45:57', 1, '2006-02-23 00:00:00.000000', 0, 0, 1),
-(5, 'Đỗ Tùng Lâm', '0456123789', 'do.tung.lam@gmail.com', 'Thái Nguyên', '$2a$10$Q2vfr2lGKvN2u8VzfaZeJurW0AiKdhm3xTzKeNu7XoYEqzqQUk8l2', '2024-02-23 15:02:28', '2024-02-23 15:02:28', 1, '2006-02-23 00:00:00.000000', 0, 0, 1),
-(6, 'Hà Quang Dương', '0967854321', 'ha.quang.duong@gmail.com', 'Thái Nguyên', '$2a$10$yah7HFxQ652PAOaxXOXHfulu4ML1PidYvYAa8.m..pLIO/SiK4nti', '2024-02-23 15:59:41', '2024-02-23 15:59:41', 1, '2005-02-23 00:00:00.000000', 0, 0, 1),
-(7, 'Hà Quang Dương', '0967854321', 'ha.quang.duong2@gmail.com', 'Thái Nguyên', '$2a$10$cHyGqlu9q5VHC0zNTsDXmu/jFiT.ZmK3Rz1jwKL785mja7/irc2fS', '2024-02-23 16:35:24', '2024-02-23 16:35:24', 1, '2005-02-23 00:00:00.000000', 0, 0, 1),
-(8, 'Long ăn cứt', '0678123459', 'long.an.cut@gmail.com', 'Hà Nội', '$2a$10$aWgT6VW6M/hU4Lnreu6f7.v8UyvuRWU0Z7t/DU2Is541rGzFwSIpG', '2024-02-24 07:46:00', '2024-02-24 07:46:00', 1, '2005-02-24 00:00:00.000000', 0, 0, 1),
-(9, 'Long ăn cứt', '0678123459', 'long.an.cut2@gmail.com', 'Hà Nội', '$2a$10$xCyTUzu/7myRDS/Aa67s/uA6nYF3UdfMD/vrwASyPMzvBscBOcRP6', '2024-02-24 07:46:00', '2024-02-24 07:46:00', 1, '2005-02-24 00:00:00.000000', 0, 0, 1),
-(10, 'Long ăn cứt', '0678123459', 'long.an.cut3@gmail.com', 'Hà Nội', '$2a$10$GI9/NYptwgzaSzkZH5LaaueSZLbga0WbbST8smzca/ufe.n0yqv7C', '2024-02-24 07:46:00', '2024-02-24 07:46:00', 1, '2005-02-24 00:00:00.000000', 0, 0, 1),
-(11, 'Long ăn cứt', '0678123459', 'long.an.cut4@gmail.com', 'Hà Nội', '$2a$10$DJesTEN3ThvfZjl4tvmBbeIE8vAHIj0Hus5/L8A163CiNeXkDHR0m', '2024-02-24 07:46:00', '2024-02-24 07:46:00', 1, '2005-02-24 00:00:00.000000', 0, 0, 1),
-(12, 'Nguyễn Phương Mai', '0865211203', 'nguyen.phuong.mai@gmail.com', 'Hà Nội', '$2a$10$ihJRuUH5BsZ0PJ1LPqUMCuXFI0u4QFMkN5byGadeKOguCyjgdzNOW', '2024-02-25 15:36:49', '2024-02-25 15:36:49', 1, '2005-02-25 00:00:00.000000', 0, 0, 1),
-(13, 'Nguyễn Vũ Bảo Long', '0113355779', 'nguyen.vu.bao.long@gmail.com', 'Hà Nội', '$2a$10$0p4m7/W1QVDZG2ui5aPytujxppt4xK2C8S.OMJKlurjovveRvnzqm', '2024-03-19 10:09:29', '2024-03-23 08:41:48', 1, '2003-09-13 00:00:00.000000', 0, 0, 1),
-(14, 'Trần Đức Anh', '0865247234', 'tran.duc.anh2@gmail.com', 'Hà Nội', '$2a$10$yjh/pZGtFpeyfaPSCb0IceZfG8sIS3H.7OmmV.dQq7GQ3WefLFADO', '2024-03-21 06:43:07', '2024-03-21 06:43:07', 1, '2003-11-21 00:00:00.000000', 0, 0, 1),
-(15, 'Hà Quang Dương', '0911725756', 'ha.quang.duong3@gmail.com', 'Thái Nguyên', '$2a$10$PPWS5r60c0pvkeWlVSeGlucfqBnJwtHQ7/FBgeRKx05ixVmg6fhlC', '2024-03-28 15:55:14', '2024-03-28 15:55:14', 1, '2003-03-20 00:00:00.000000', 0, 0, 1),
-(16, 'Hoàng Ngọc Hà', '0911123456', 'hoang.ngoc.ha@gmail.com', 'Hà Nội', '$2a$10$wzTu2DbgN6MLTrcDdDkQE.jqiIl4ySdr/RZzEEKDlyxkqI6DihlLi', '2024-03-28 15:56:02', '2024-03-28 15:56:02', 1, '2003-10-15 00:00:00.000000', 0, 0, 1),
-(17, 'Trần Đức Anh', '0123786457', 'tran.duc.anh3@gmail.com', 'Hà Nội', '$2a$10$J4/bvTOHxOT2DiAg.ga81.vvoFdrSKbNuQ20lFaoOQI4zLHAfl7IO', '2024-03-28 16:09:07', '2024-03-28 16:09:07', 1, '2003-11-21 00:00:00.000000', 0, 0, 1),
-(18, 'lap', '0854768836', 'secroramot123@gmail.com', 'lap', '$2a$10$vagQjcnWTqYMU8mxtWsl.uF8DY3te0JzO6ObqVMkA9TfdMBa1mZEi', '2025-06-09 19:33:13', '2025-06-13 08:31:20', 1, '2003-10-26 00:00:00.000000', 0, 0, 1);
+INSERT INTO `users` (`id`, `fullname`, `phone_number`, `email`, `address`, `password`, `created_at`, `updated_at`, `is_active`, `date_of_birth`, `facebook_account_id`, `google_account_id`, `role_id`, `reset_password_token`, `reset_password_token_expiry`) VALUES
+(3, 'ADMIN 1', '0111222333', 'admin.1@gmail.com', 'Hanoi', '$2a$10$zgJgPl51rJQGl8xlznCKgOGipZjbaPMXiF/Zv/03ri1mA1iN1Z.su', '2024-02-21 09:00:03', '2024-02-21 09:00:03', 1, '2003-11-12 00:00:00.000000', 0, 0, 2, NULL, NULL),
+(18, 'lap', '0854768836', 'secroramot123@gmail.com', 'lap', '$2a$10$vagQjcnWTqYMU8mxtWsl.uF8DY3te0JzO6ObqVMkA9TfdMBa1mZEi', '2025-06-09 19:33:13', '2025-06-13 08:31:20', 1, '2003-10-26 00:00:00.000000', 0, 0, 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -866,14 +497,6 @@ CREATE TABLE `vouchers` (
 
 INSERT INTO `vouchers` (`id`, `code`, `name`, `description`, `discount_percentage`, `min_order_value`, `max_discount_amount`, `quantity`, `remaining_quantity`, `valid_from`, `valid_to`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'SALE66', 'Sale 6/6', 'Giảm giá nhân dịp 6/6', 20, 500000, 100000, 100, 100, '2024-06-01 00:00:00', '2024-06-30 23:59:59', 1, '2025-06-09 18:19:46', '2025-06-09 18:19:46'),
-(2, 'SALE77', 'Sale 7/7', 'Giảm giá nhân dịp 7/7', 15, 300000, 50000, 50, 50, '2024-07-01 00:00:00', '2024-07-31 23:59:59', 1, '2025-06-09 18:19:46', '2025-06-09 18:19:46'),
-(3, 'WELCOME10', 'Welcome New User', 'Giảm 10% cho khách hàng mới', 10, 0, 30000, 200, 200, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 1, '2025-06-09 18:19:46', '2025-06-09 18:19:46'),
-(4, 'SUMMER25', 'Summer Sale', 'Giảm giá mùa hè', 25, 1000000, 200000, 30, 30, '2024-05-01 00:00:00', '2024-08-31 23:59:59', 1, '2025-06-09 18:19:46', '2025-06-09 18:19:46'),
-(5, 'EXPIRED20', 'Expired Voucher', 'Voucher đã hết hạn', 20, 0, NULL, 10, 10, '2023-01-01 00:00:00', '2023-12-31 23:59:59', 1, '2025-06-09 18:19:46', '2025-06-09 18:19:46'),
-(6, 'INACTIVE15', 'Inactive Voucher', 'Voucher không hoạt động', 15, 0, NULL, 20, 20, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 0, '2025-06-09 18:19:46', '2025-06-09 18:19:46'),
-(7, 'OUTOFSTOCK', 'Out of Stock', 'Voucher đã hết số lượng', 30, 0, NULL, 5, 0, '2024-01-01 00:00:00', '2024-12-31 23:59:59', 1, '2025-06-09 18:19:46', '2025-06-09 18:19:46'),
-(8, 'LOL', 'Liên Minh', 'Liên Minh', 40, 0, NULL, 1, 0, '2025-06-09 13:50:42', '2025-07-09 13:50:42', 1, '2025-06-09 20:51:03', '2025-06-09 21:07:04'),
-(9, '8XBET', '8xbet ', 'nhà cái đến từ châu ÂU', 90, 1000000, 50000, 1, 4, '2025-06-11 19:18:34', '2025-07-11 19:18:34', 0, '2025-06-13 06:19:12', '2025-06-13 08:13:57'),
 (10, '156SUPERSALE', 'Sale cực sốc 15/6', 'Giảm giá sốc, số lượng có hạn', 20, 1000000, 700000, 10, 10, '2025-06-13 01:14:00', '2025-06-15 01:14:00', 1, '2025-06-13 08:15:04', '2025-06-13 08:15:04');
 
 -- --------------------------------------------------------
@@ -904,6 +527,15 @@ INSERT INTO `voucher_usage` (`id`, `voucher_id`, `order_id`, `user_id`, `discoun
 --
 
 --
+-- Chỉ mục cho bảng `banners`
+--
+ALTER TABLE `banners`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_is_active` (`is_active`),
+  ADD KEY `idx_display_order` (`display_order`),
+  ADD KEY `idx_date_range` (`start_date`,`end_date`);
+
+--
 -- Chỉ mục cho bảng `carts`
 --
 ALTER TABLE `carts`
@@ -918,6 +550,22 @@ ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Chỉ mục cho bảng `lock_features`
+--
+ALTER TABLE `lock_features`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_is_active` (`is_active`);
+
+--
+-- Chỉ mục cho bảng `news`
+--
+ALTER TABLE `news`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_category` (`category`),
+  ADD KEY `idx_published_at` (`published_at`);
+
+--
 -- Chỉ mục cho bảng `orders`
 --
 ALTER TABLE `orders`
@@ -925,13 +573,6 @@ ALTER TABLE `orders`
   ADD KEY `user_id` (`user_id`),
   ADD KEY `orders_voucher_fk` (`voucher_id`),
   ADD KEY `idx_orders_payment_intent_id` (`payment_intent_id`);
-
---
--- Chỉ mục cho bảng `lock_features`
---
-ALTER TABLE `lock_features`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_is_active` (`is_active`);
 
 --
 -- Chỉ mục cho bảng `order_details`
@@ -947,6 +588,15 @@ ALTER TABLE `order_details`
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
   ADD KEY `category_id` (`category_id`);
+
+--
+-- Chỉ mục cho bảng `product_features`
+--
+ALTER TABLE `product_features`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `feature_id` (`feature_id`),
+  ADD KEY `created_at` (`created_at`);
 
 --
 -- Chỉ mục cho bảng `product_images`
@@ -1020,29 +670,26 @@ ALTER TABLE `voucher_usage`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Chỉ mục cho bảng `product_features`
---
-ALTER TABLE `product_features`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `product_id` (`product_id`),
-  ADD KEY `feature_id` (`feature_id`),
-  ADD KEY `created_at` (`created_at`);
-
---
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
+
+--
+-- AUTO_INCREMENT cho bảng `banners`
+--
+ALTER TABLE `banners`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT cho bảng `lock_features`
@@ -1051,16 +698,22 @@ ALTER TABLE `lock_features`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
+-- AUTO_INCREMENT cho bảng `news`
+--
+ALTER TABLE `news`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
 
 --
 -- AUTO_INCREMENT cho bảng `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT cho bảng `products`
@@ -1069,10 +722,16 @@ ALTER TABLE `products`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5787;
 
 --
+-- AUTO_INCREMENT cho bảng `product_features`
+--
+ALTER TABLE `product_features`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT cho bảng `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
 
 --
 -- AUTO_INCREMENT cho bảng `return_requests`
@@ -1123,12 +782,6 @@ ALTER TABLE `voucher_usage`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT cho bảng `product_features`
---
-ALTER TABLE `product_features`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
 -- Ràng buộc đối với các bảng kết xuất
 --
 
@@ -1158,6 +811,13 @@ ALTER TABLE `order_details`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
+
+--
+-- Ràng buộc cho bảng `product_features`
+--
+ALTER TABLE `product_features`
+  ADD CONSTRAINT `product_features_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `product_features_ibfk_2` FOREIGN KEY (`feature_id`) REFERENCES `lock_features` (`id`) ON DELETE CASCADE;
 
 --
 -- Ràng buộc cho bảng `product_images`
@@ -1203,15 +863,8 @@ ALTER TABLE `voucher_usage`
   ADD CONSTRAINT `voucher_usage_ibfk_1` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`),
   ADD CONSTRAINT `voucher_usage_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
   ADD CONSTRAINT `voucher_usage_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Ràng buộc cho bảng `product_features`
---
-ALTER TABLE `product_features`
-  ADD CONSTRAINT `product_features_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `product_features_ibfk_2` FOREIGN KEY (`feature_id`) REFERENCES `lock_features` (`id`) ON DELETE CASCADE;
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
