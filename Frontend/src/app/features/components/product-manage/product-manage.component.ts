@@ -66,6 +66,7 @@ interface ProductUploadReq {
 export class ProductManageComponent implements OnInit {
   products: ProductDto[] = [];
   allProducts: ProductDto[] = []; // Store all products
+  filteredProducts: ProductDto[] = []; // Filtered products for display
   displayDialog: boolean = false;
   productForm!: FormGroup;
   isEditMode: boolean = false;
@@ -85,6 +86,22 @@ export class ProductManageComponent implements OnInit {
   categoriesOptions: any[] = [];
   featuresOptions: any[] = [];
   selectedFeatures: number[] = [];
+  
+  // Filter properties
+  filterCategory: number | null = null;
+  filterStockStatus: string | null = null;
+  filterFeatures: number[] = [];
+  filterMinPrice: number | null = null;
+  filterMaxPrice: number | null = null;
+  showFilters: boolean = false;
+  
+  // Stock status options
+  stockStatusOptions = [
+    { label: 'Tất cả', value: null },
+    { label: 'Còn hàng', value: 'available' },
+    { label: 'Sắp hết', value: 'low' },
+    { label: 'Hết hàng', value: 'out' }
+  ];
 
   constructor(
     private productService: ProductService,
@@ -124,8 +141,7 @@ export class ProductManageComponent implements OnInit {
     this.productService.getAllProduct().subscribe({
       next: (response: AllProductDto) => {
         this.allProducts = response.products;
-        this.totalRecords = this.allProducts.length;
-        this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+        this.applyFilters();
         
         console.log('=== LOAD PRODUCTS ===');
         console.log('Total products:', this.allProducts.length);
@@ -144,10 +160,13 @@ export class ProductManageComponent implements OnInit {
   loadCategories(): void {
     this.categoriesService.getCategories().subscribe({
       next: (response: any) => {
-        this.categoriesOptions = response.map((cat: any) => ({
-          label: cat.name,
-          value: cat.id
-        }));
+        this.categoriesOptions = [
+          { label: 'Tất cả danh mục', value: null },
+          ...response.map((cat: any) => ({
+            label: cat.name,
+            value: cat.id
+          }))
+        ];
         this.cdr.markForCheck();
       },
       error: (error: any) => {
@@ -177,8 +196,7 @@ export class ProductManageComponent implements OnInit {
       this.productService.searchProduct(this.searchKeyword).subscribe({
         next: (response: AllProductDto) => {
           this.allProducts = response.products;
-          this.totalRecords = this.allProducts.length;
-          this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+          this.applyFilters();
           this.isLoading = false;
         },
         error: (error: any) => {
@@ -189,6 +207,65 @@ export class ProductManageComponent implements OnInit {
     } else {
       this.loadProducts();
     }
+  }
+
+  applyFilters(): void {
+    let filtered = [...this.allProducts];
+
+    // Filter by category
+    if (this.filterCategory !== null) {
+      filtered = filtered.filter(p => p.category_id === this.filterCategory);
+    }
+
+    // Filter by stock status
+    if (this.filterStockStatus) {
+      filtered = filtered.filter(p => {
+        if (this.filterStockStatus === 'available') {
+          return p.quantity >= 10;
+        } else if (this.filterStockStatus === 'low') {
+          return p.quantity > 0 && p.quantity < 10;
+        } else if (this.filterStockStatus === 'out') {
+          return p.quantity === 0;
+        }
+        return true;
+      });
+    }
+
+    // Filter by features
+    if (this.filterFeatures.length > 0) {
+      filtered = filtered.filter(p => {
+        if (!p.features || p.features.length === 0) return false;
+        return this.filterFeatures.some(featureId => 
+          p.features!.some(f => f.id === featureId)
+        );
+      });
+    }
+
+    // Filter by price range
+    if (this.filterMinPrice !== null && this.filterMinPrice > 0) {
+      filtered = filtered.filter(p => p.price >= this.filterMinPrice!);
+    }
+    if (this.filterMaxPrice !== null && this.filterMaxPrice > 0) {
+      filtered = filtered.filter(p => p.price <= this.filterMaxPrice!);
+    }
+
+    this.filteredProducts = filtered;
+    this.totalRecords = this.filteredProducts.length;
+    this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+    this.cdr.markForCheck();
+  }
+
+  clearFilters(): void {
+    this.filterCategory = null;
+    this.filterStockStatus = null;
+    this.filterFeatures = [];
+    this.filterMinPrice = null;
+    this.filterMaxPrice = null;
+    this.applyFilters();
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
   }
 
   openNewDialog(): void {

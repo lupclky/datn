@@ -15,6 +15,12 @@
                placeholder="Tìm kiếm sản phẩm..." 
                class="search-input" />
       </span>
+      <p-button label="Bộ lọc" 
+                icon="pi pi-filter" 
+                (click)="toggleFilters()"
+                [outlined]="!showFilters"
+                styleClass="p-button-secondary">
+      </p-button>
       <p-button label="Thêm sản phẩm" 
                 icon="pi pi-plus" 
                 (click)="openNewDialog()"
@@ -23,8 +29,96 @@
     </div>
   </div>
 
+  <!-- Filter Panel -->
+  <div class="filter-panel" *ngIf="showFilters">
+    <div class="filter-header">
+      <h3><i class="pi pi-filter"></i> Bộ lọc tìm kiếm</h3>
+      <p-button label="Xóa bộ lọc" 
+                icon="pi pi-times" 
+                (click)="clearFilters()"
+                styleClass="p-button-text p-button-sm">
+      </p-button>
+    </div>
+    
+    <div class="filter-content">
+      <div class="grid">
+        <!-- Category Filter -->
+        <div class="col-12 md:col-3">
+          <label for="filterCategory" class="filter-label">Danh mục</label>
+          <p-dropdown id="filterCategory"
+                      [(ngModel)]="filterCategory"
+                      [options]="categoriesOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      placeholder="Chọn danh mục"
+                      (onChange)="applyFilters()"
+                      [style]="{'width':'100%'}">
+          </p-dropdown>
+        </div>
+
+        <!-- Stock Status Filter -->
+        <div class="col-12 md:col-3">
+          <label for="filterStock" class="filter-label">Trạng thái kho</label>
+          <p-dropdown id="filterStock"
+                      [(ngModel)]="filterStockStatus"
+                      [options]="stockStatusOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      placeholder="Chọn trạng thái"
+                      (onChange)="applyFilters()"
+                      [style]="{'width':'100%'}">
+          </p-dropdown>
+        </div>
+
+        <!-- Min Price Filter -->
+        <div class="col-12 md:col-3">
+          <label for="filterMinPrice" class="filter-label">Giá từ</label>
+          <p-inputNumber id="filterMinPrice"
+                         [(ngModel)]="filterMinPrice"
+                         mode="currency"
+                         currency="VND"
+                         locale="vi-VN"
+                         [minFractionDigits]="0"
+                         placeholder="Giá tối thiểu"
+                         (onInput)="applyFilters()"
+                         [style]="{'width':'100%'}">
+          </p-inputNumber>
+        </div>
+
+        <!-- Max Price Filter -->
+        <div class="col-12 md:col-3">
+          <label for="filterMaxPrice" class="filter-label">Giá đến</label>
+          <p-inputNumber id="filterMaxPrice"
+                         [(ngModel)]="filterMaxPrice"
+                         mode="currency"
+                         currency="VND"
+                         locale="vi-VN"
+                         [minFractionDigits]="0"
+                         placeholder="Giá tối đa"
+                         (onInput)="applyFilters()"
+                         [style]="{'width':'100%'}">
+          </p-inputNumber>
+        </div>
+
+        <!-- Features Filter -->
+        <div class="col-12">
+          <label for="filterFeatures" class="filter-label">Tính năng khóa</label>
+          <p-multiSelect id="filterFeatures"
+                         [(ngModel)]="filterFeatures"
+                         [options]="featuresOptions"
+                         optionLabel="label"
+                         optionValue="value"
+                         placeholder="Chọn tính năng"
+                         (onChange)="applyFilters()"
+                         [style]="{'width':'100%'}">
+          </p-multiSelect>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Product Table -->
-  <p-table [value]="allProducts" 
+  <p-table [value]="filteredProducts" 
            [loading]="isLoading"
            [paginator]="true" 
            [rows]="pageSize"
