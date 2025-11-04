@@ -1,0 +1,55 @@
+<!-- Full Card Mode -->
+<div *ngIf="!compact" class="link-preview-card" (click)="openLink()">
+  <!-- Image -->
+  <div *ngIf="linkData.image" class="card-image">
+    <img [src]="linkData.image" 
+         [alt]="linkData.title || 'Preview'" 
+         (error)="$any($event.target).src = getDefaultImage()">
+  </div>
+
+  <!-- Content -->
+  <div class="card-content">
+    <!-- Favicon + Site Name -->
+    <div class="card-meta">
+      <img *ngIf="linkData.favicon" 
+           [src]="linkData.favicon" 
+           class="favicon"
+           [alt]="linkData.siteName || 'Site icon'">
+      <span class="site-name">{{ linkData.siteName || getDomain(linkData.url) }}</span>
+    </div>
+
+    <!-- Title -->
+    <h3 class="card-title" *ngIf="linkData.title">
+      {{ linkData.title }}
+    </h3>
+
+    <!-- Description -->
+    <p class="card-description" *ngIf="linkData.description">
+      {{ linkData.description.substring(0, 150) }}{{ linkData.description.length > 150 ? '...' : '' }}
+    </p>
+
+    <!-- URL -->
+    <div class="card-url">
+      <i class="pi pi-external-link"></i>
+      <span>{{ getDomain(linkData.url) }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Compact Mode -->
+<div *ngIf="compact" class="link-preview-compact" (click)="openLink()">
+  <div class="compact-image" *ngIf="linkData.image">
+    <img [src]="linkData.image" 
+         [alt]="linkData.title || 'Preview'"
+         (error)="$any($event.target).src = getDefaultImage()">
+  </div>
+  
+  <div class="compact-content">
+    <h4 class="compact-title">{{ linkData.title || linkData.url }}</h4>
+    <span class="compact-url">
+      <i class="pi pi-link"></i>
+      {{ getDomain(linkData.url) }}
+    </span>
+  </div>
+</div>
+

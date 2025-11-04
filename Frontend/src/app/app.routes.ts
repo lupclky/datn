@@ -5,6 +5,8 @@ import { LoginComponent } from './features/auth/components/login/login.component
 import { RegisterComponent } from './features/register/register.component';
 import { IntroductionComponent } from './features/components/introduction/introduction.component';
 import { NewsComponent } from './features/components/news/news.component';
+import { NewsDetailComponent } from './features/components/news-detail/news-detail.component';
+import { NewsManageComponent } from './features/components/news-manage/news-manage.component';
 import { ShoppingCartComponent } from './features/components/shopping-cart/shopping-cart.component';
 import { DetailProductComponent } from './features/components/detail-product/detail-product.component';
 import { AuthGuard } from './features/auth/authInterceptor/auth.guard';
@@ -20,6 +22,7 @@ import { RoleGuard } from './features/auth/authInterceptor/role.guard';
 import { CategoryManageComponent } from './features/components/category-manage/category-manage.component';
 import { UserManageComponent } from './features/components/user-manage/user-manage.component';
 import { OrderManageComponent } from './features/components/order-manage/order-manage.component';
+import { ProductManageComponent } from './features/components/product-manage/product-manage.component';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 // import { VoucherManageComponent } from './features/components/voucher-manage/voucher-manage.component';
 import { VoucherManageComponent } from './features/components/voucher-manage/voucher-manage.component';
@@ -62,6 +65,15 @@ export const routes: Routes = [
       {
         path: 'news',
         component: NewsComponent
+      },
+      {
+        path: 'news/:id',
+        component: NewsDetailComponent
+      },
+      {
+        path: 'newsManage',
+        component: NewsManageComponent,
+        canActivate: [RoleGuard]
       },
       {
         path: 'shoppingCart',
@@ -108,6 +120,11 @@ export const routes: Routes = [
       {
         path: 'uploadProduct',
         component: UploadProductComponent,
+        canActivate: [RoleGuard]
+      },
+      {
+        path: 'productManage',
+        component: ProductManageComponent,
         canActivate: [RoleGuard]
       },
       {

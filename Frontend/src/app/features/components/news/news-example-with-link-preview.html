@@ -1,0 +1,44 @@
+<!-- 
+  ĐÂY LÀ VÍ DỤ SỬ DỤNG LINK PREVIEW CARD TRONG NEWS COMPONENT
+  Bạn có thể thêm vào bất kỳ vị trí nào trong news.component.html
+-->
+
+<!-- Ví dụ 1: Hiển thị link preview dạng compact trong danh sách tin tức -->
+<div class="row mt-5">
+  <div class="col-12">
+    <h3 class="mb-4">Tin tức dạng Link Preview (Compact)</h3>
+  </div>
+  <div *ngFor="let news of newsList" class="col-12 col-md-6 col-lg-4 mb-3">
+    <app-link-preview-card 
+      [linkData]="getNewsLinkPreview(news)" 
+      [compact]="true">
+    </app-link-preview-card>
+  </div>
+</div>
+
+<!-- Ví dụ 2: Hiển thị link preview dạng full trong sidebar -->
+<div class="sidebar">
+  <h4 class="mb-3">Tin nổi bật</h4>
+  <div *ngFor="let news of latestNews" class="mb-3">
+    <app-link-preview-card [linkData]="getNewsLinkPreview(news)">
+    </app-link-preview-card>
+  </div>
+</div>
+
+<!-- Ví dụ 3: Trong modal chia sẻ -->
+<div class="modal-share">
+  <h5>Chia sẻ tin tức này:</h5>
+  <app-link-preview-card 
+    *ngIf="selectedNews" 
+    [linkData]="getNewsLinkPreview(selectedNews)">
+  </app-link-preview-card>
+  <div class="share-buttons mt-3">
+    <button class="btn btn-primary">
+      <i class="pi pi-facebook"></i> Facebook
+    </button>
+    <button class="btn btn-info">
+      <i class="pi pi-twitter"></i> Twitter
+    </button>
+  </div>
+</div>
+

@@ -14,8 +14,16 @@ export class ToastService {
     this.messageService.add({ severity: 'success', summary: 'Thành công', detail: content});
   }
 
+  showSuccess(summary: string, detail: string) {
+    this.messageService.add({ severity: 'success', summary: summary, detail: detail});
+  }
+
   fail(content : string){
     this.messageService.add({ severity: 'error', summary: 'Thất bại', detail: content});
+  }
+
+  showError(summary: string, detail: string) {
+    this.messageService.add({ severity: 'error', summary: summary, detail: detail});
   }
 
   warn(content: string) {

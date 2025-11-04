@@ -1,0 +1,111 @@
+<section class="news-detail py-5">
+  <div class="container">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center my-5">
+      <div class="spinner-border text-danger" role="status">
+        <span class="visually-hidden">Đang tải...</span>
+      </div>
+    </div>
+
+    <!-- News Content -->
+    <div *ngIf="!isLoading && news" class="row">
+      <div class="col-lg-8 mx-auto">
+        <!-- Back Button -->
+        <button class="btn btn-outline-secondary mb-4" (click)="goBack()">
+          <i class="pi pi-arrow-left"></i> Quay lại
+        </button>
+
+        <!-- News Header -->
+        <div class="news-header mb-4">
+          <h1 class="fw-bold mb-3">{{ news.title }}</h1>
+          <div class="news-meta text-muted mb-3">
+            <span *ngIf="news.author"><i class="pi pi-user"></i> {{ news.author }}</span>
+            <span class="mx-2">|</span>
+            <span *ngIf="news.published_at"><i class="pi pi-calendar"></i> {{ formatDate(news.published_at) }}</span>
+            <span class="mx-2">|</span>
+            <span><i class="pi pi-eye"></i> {{ news.views }} lượt xem</span>
+            <span *ngIf="news.category" class="mx-2">|</span>
+            <span *ngIf="news.category"><i class="pi pi-tag"></i> {{ news.category }}</span>
+          </div>
+        </div>
+
+        <!-- Featured Image -->
+        <div *ngIf="news.featured_image" class="news-featured-image mb-4">
+          <img [src]="getImageUrl(news.featured_image)" 
+               [alt]="news.title" 
+               class="img-fluid rounded w-100"
+               style="max-height: 500px; object-fit: cover;">
+        </div>
+
+        <!-- Summary -->
+        <div *ngIf="news.summary" class="news-summary mb-4 p-3 bg-light rounded">
+          <p class="lead mb-0">{{ news.summary }}</p>
+        </div>
+
+        <!-- Content -->
+        <div class="news-content" [innerHTML]="news.content">
+        </div>
+
+        <!-- Share Section -->
+        <div class="news-share mt-5 pt-4 border-top">
+          <h5 class="mb-3">Chia sẻ bài viết:</h5>
+          
+          <!-- Link Preview Card -->
+          <div class="mb-4">
+            <app-link-preview-card 
+              *ngIf="getNewsLinkPreview()" 
+              [linkData]="getNewsLinkPreview()!">
+            </app-link-preview-card>
+          </div>
+
+          <!-- Social Share Buttons -->
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary btn-sm" (click)="copyLinkToClipboard()">
+              <i class="pi pi-copy"></i> Sao chép link
+            </button>
+            <button class="btn btn-primary btn-sm">
+              <i class="pi pi-facebook"></i> Facebook
+            </button>
+            <button class="btn btn-info btn-sm text-white">
+              <i class="pi pi-twitter"></i> Twitter
+            </button>
+            <button class="btn btn-success btn-sm">
+              <i class="pi pi-whatsapp"></i> WhatsApp
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related News -->
+    <div *ngIf="!isLoading && relatedNews.length > 0" class="row mt-5">
+      <div class="col-12">
+        <h3 class="mb-4">Bài viết liên quan</h3>
+      </div>
+      <div *ngFor="let relNews of relatedNews" class="col-md-4 mb-4">
+        <div class="card h-100" style="cursor: pointer;" (click)="viewRelatedNews(relNews.id)">
+          <img [src]="getImageUrl(relNews.featured_image)" 
+               [alt]="relNews.title" 
+               class="card-img-top"
+               style="height: 200px; object-fit: cover;">
+          <div class="card-body">
+            <h5 class="card-title">{{ relNews.title }}</h5>
+            <p class="card-text text-muted">
+              {{ relNews.summary ? relNews.summary.substring(0, 100) : '' }}{{ relNews.summary && relNews.summary.length > 100 ? '...' : '' }}
+            </p>
+            <small class="text-muted">
+              <i class="pi pi-eye"></i> {{ relNews.views }} lượt xem
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!isLoading && !news" class="text-center my-5">
+      <h3>Không tìm thấy bài viết</h3>
+      <button class="btn btn-danger mt-3" (click)="goBack()">Quay lại danh sách tin tức</button>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,278 @@
+<div class="container-fluid py-4">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Quản lý Tin tức</h3>
+      <button pButton type="button" label="Thêm tin tức" icon="pi pi-plus" 
+              class="p-button-success" (click)="openNewDialog()"></button>
+    </div>
+
+    <div class="card-body">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <p-table *ngIf="!isLoading" 
+               [value]="newsList" 
+               [paginator]="true" 
+               [rows]="pageSize"
+               [totalRecords]="totalPages * pageSize"
+               [lazy]="true"
+               (onLazyLoad)="onPageChange($event)"
+               [showCurrentPageReport]="true"
+               currentPageReportTemplate="Hiển thị {first} đến {last} trong tổng số {totalRecords} tin tức"
+               styleClass="p-datatable-gridlines">
+        
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 5%">ID</th>
+            <th style="width: 25%">Tiêu đề</th>
+            <th style="width: 10%">Tác giả</th>
+            <th style="width: 10%">Danh mục</th>
+            <th style="width: 10%">Trạng thái</th>
+            <th style="width: 8%">Lượt xem</th>
+            <th style="width: 12%">Ngày tạo</th>
+            <th style="width: 20%">Thao tác</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-news>
+          <tr>
+            <td>{{ news.id }}</td>
+            <td>
+              <div class="text-truncate" style="max-width: 300px;" [title]="news.title">
+                {{ news.title }}
+              </div>
+            </td>
+            <td>{{ news.author || 'N/A' }}</td>
+            <td>{{ news.category || 'N/A' }}</td>
+            <td>
+              <span [ngClass]="getStatusClass(news.status)">
+                {{ getStatusLabel(news.status) }}
+              </span>
+            </td>
+            <td>{{ news.views }}</td>
+            <td>{{ formatDate(news.created_at) }}</td>
+            <td>
+              <div class="d-flex gap-1">
+                <button pButton type="button" icon="pi pi-pencil" 
+                        class="p-button-rounded p-button-warning p-button-sm"
+                        (click)="openEditDialog(news)"
+                        pTooltip="Chỉnh sửa" tooltipPosition="top"></button>
+                
+                <button *ngIf="news.status === 'DRAFT'" 
+                        pButton type="button" icon="pi pi-check" 
+                        class="p-button-rounded p-button-success p-button-sm"
+                        (click)="publishNews(news.id)"
+                        pTooltip="Xuất bản" tooltipPosition="top"></button>
+                
+                <button *ngIf="news.status === 'PUBLISHED'" 
+                        pButton type="button" icon="pi pi-inbox" 
+                        class="p-button-rounded p-button-secondary p-button-sm"
+                        (click)="archiveNews(news.id)"
+                        pTooltip="Lưu trữ" tooltipPosition="top"></button>
+                
+                <button pButton type="button" icon="pi pi-trash" 
+                        class="p-button-rounded p-button-danger p-button-sm"
+                        (click)="deleteNews(news.id)"
+                        pTooltip="Xóa" tooltipPosition="top"></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <p class="text-muted">Không có tin tức nào</p>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+  <!-- Create/Edit Dialog -->
+  <p-dialog [(visible)]="displayDialog" 
+            [header]="isEditMode ? 'Chỉnh sửa tin tức' : 'Thêm tin tức mới'"
+            [modal]="true" 
+            [style]="{width: '80vw', maxWidth: '900px'}"
+            [draggable]="false"
+            [resizable]="false">
+    
+    <form [formGroup]="newsForm" (ngSubmit)="saveNews()">
+      <div class="row g-3">
+        <!-- Title -->
+        <div class="col-12">
+          <label for="title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+          <input type="text" 
+                 id="title"
+                 class="form-control" 
+                 formControlName="title"
+                 placeholder="Nhập tiêu đề tin tức">
+          <small *ngIf="newsForm.get('title')?.invalid && newsForm.get('title')?.touched" 
+                 class="text-danger">
+            Tiêu đề là bắt buộc
+          </small>
+        </div>
+
+        <!-- Author and Category -->
+        <div class="col-md-6">
+          <label for="author" class="form-label">Tác giả</label>
+          <input type="text" 
+                 id="author"
+                 class="form-control" 
+                 formControlName="author"
+                 placeholder="Nhập tên tác giả">
+        </div>
+
+        <div class="col-md-6">
+          <label for="category" class="form-label">Danh mục</label>
+          <input type="text" 
+                 id="category"
+                 class="form-control" 
+                 formControlName="category"
+                 placeholder="Nhập danh mục">
+        </div>
+
+        <!-- Status -->
+        <div class="col-12">
+          <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+          <p-dropdown id="status"
+                      [options]="statusOptions" 
+                      formControlName="status"
+                      placeholder="Chọn trạng thái"
+                      optionLabel="label"
+                      optionValue="value"
+                      [style]="{'width':'100%'}">
+          </p-dropdown>
+        </div>
+
+        <!-- Featured Image -->
+        <div class="col-12">
+          <label for="featured_image" class="form-label">Ảnh đại diện</label>
+          
+          <!-- Image Preview -->
+          <div *ngIf="imagePreview" class="mb-3">
+            <img [src]="imagePreview" alt="Preview" class="img-thumbnail" style="max-height: 200px; object-fit: cover;">
+          </div>
+
+          <!-- File Upload -->
+          <div class="input-group">
+            <input type="file" 
+                   class="form-control" 
+                   id="featured_image"
+                   accept="image/*"
+                   (change)="onFileSelected($event)">
+            <button *ngIf="imagePreview" 
+                    class="btn btn-outline-secondary" 
+                    type="button"
+                    (click)="imagePreview = null; selectedFile = null">
+              <i class="pi pi-times"></i> Xóa
+            </button>
+          </div>
+          <small class="text-muted">Chọn ảnh (JPG, PNG, GIF. Tối đa 5MB)</small>
+          
+          <!-- Loading spinner -->
+          <div *ngIf="isUploading" class="mt-2">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Đang upload...</span>
+            </div>
+            <span class="ms-2">Đang upload ảnh...</span>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="col-12">
+          <label for="summary" class="form-label">Tóm tắt</label>
+          <textarea id="summary"
+                    class="form-control" 
+                    formControlName="summary"
+                    rows="3"
+                    placeholder="Nhập tóm tắt nội dung"></textarea>
+        </div>
+
+        <!-- Content -->
+        <div class="col-12">
+          <label for="content" class="form-label">Nội dung</label>
+          
+          <!-- Rich Text Editor for Browser -->
+          <p-editor *ngIf="isBrowser" 
+                    formControlName="content" 
+                    [style]="{'height':'400px'}">
+            <ng-template pTemplate="header">
+              <span class="ql-formats">
+                <select class="ql-header">
+                  <option value="1">Heading 1</option>
+                  <option value="2">Heading 2</option>
+                  <option value="3">Heading 3</option>
+                  <option selected>Normal</option>
+                </select>
+                <select class="ql-font">
+                  <option selected>Sans Serif</option>
+                  <option value="serif">Serif</option>
+                  <option value="monospace">Monospace</option>
+                </select>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-bold" aria-label="Bold" type="button"></button>
+                <button class="ql-italic" aria-label="Italic" type="button"></button>
+                <button class="ql-underline" aria-label="Underline" type="button"></button>
+                <button class="ql-strike" aria-label="Strike" type="button"></button>
+              </span>
+              <span class="ql-formats">
+                <select class="ql-color"></select>
+                <select class="ql-background"></select>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-list" value="ordered" aria-label="Ordered List" type="button"></button>
+                <button class="ql-list" value="bullet" aria-label="Unordered List" type="button"></button>
+                <select class="ql-align">
+                  <option selected></option>
+                  <option value="center"></option>
+                  <option value="right"></option>
+                  <option value="justify"></option>
+                </select>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-link" aria-label="Insert Link" type="button"></button>
+                <button class="ql-image" aria-label="Insert Image" type="button"></button>
+                <button class="ql-video" aria-label="Insert Video" type="button"></button>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-code-block" aria-label="Insert Code Block" type="button"></button>
+                <button class="ql-blockquote" aria-label="Blockquote" type="button"></button>
+              </span>
+              <span class="ql-formats">
+                <button class="ql-clean" aria-label="Remove Styles" type="button"></button>
+              </span>
+            </ng-template>
+          </p-editor>
+          
+          <!-- Fallback textarea for SSR -->
+          <textarea *ngIf="!isBrowser" 
+                    id="content"
+                    class="form-control" 
+                    formControlName="content"
+                    rows="10"
+                    placeholder="Nhập nội dung chi tiết"></textarea>
+        </div>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Hủy" icon="pi pi-times" 
+              class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton type="button" label="Lưu" icon="pi pi-check" 
+              class="p-button-success" (click)="saveNews()"
+              [disabled]="newsForm.invalid"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
