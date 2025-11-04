@@ -74,7 +74,7 @@ export class NewsDetailComponent implements OnInit {
   }
 
   getSafeHtml(content: string): SafeHtml {
-    return this.sanitizer.sanitize(1, content) || '';
+    return this.sanitizer.bypassSecurityTrustHtml(content);
   }
 
   formatDate(dateString: string): string {

@@ -204,9 +204,9 @@
             <label for="content" class="form-label mb-0">Nội dung</label>
             <button pButton 
                     type="button" 
-                    label="✨ Tạo nội dung bằng AI" 
+                    label="Tạo nội dung bằng KVK Intelligence" 
                     icon="pi pi-sparkles" 
-                    class="p-button-sm p-button-info"
+                    class="p-button-sm kvk-ai-button"
                     [disabled]="isGenerating || !newsForm.get('title')?.value"
                     [loading]="isGenerating"
                     (click)="generateContent()"

@@ -277,10 +277,10 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     this.httpClient.get<{success: boolean; status: string; documentCount: number}>(`${apiUrl}/ai/initialize/status`)
       .subscribe({
         next: (response) => {
-          if (response.success && response.status === 'not_initialized') {
-            this.addMessage('💡 Mẹo: Yêu cầu admin khởi tạo database AI để có kết quả tìm kiếm sản phẩm tốt hơn. Click vào icon database ở góc trên bên phải.', 'bot');
-          } else if (response.success && response.status === 'initialized') {
+          if (response.success && response.status === 'initialized') {
             console.log(`AI database đã sẵn sàng với ${response.documentCount} sản phẩm`);
+          } else if (response.success && response.status === 'not_initialized') {
+            console.warn('AI database chưa được khởi tạo');
           }
         },
         error: (error: any) => {

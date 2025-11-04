@@ -26,7 +26,7 @@ spring:
     ai:
       project-id: first-strength-460610-i4 # Replace with your Google Cloud project ID
       location: us-central1
-      model: gemini-2.0-flash-001
+      model: gemini-2.5-flash
   autoconfigure:
     exclude:
       - org.springframework.ai.autoconfigure.vectorstore.chroma.ChromaVectorStoreAutoConfiguration

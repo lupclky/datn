@@ -43,7 +43,7 @@
         </div>
 
         <!-- Content -->
-        <div class="news-content" [innerHTML]="news.content">
+        <div class="news-content" [innerHTML]="getSafeHtml(news.content)">
         </div>
 
         <!-- Share Section -->
