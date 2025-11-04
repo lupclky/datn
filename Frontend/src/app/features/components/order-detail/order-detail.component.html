@@ -7,7 +7,9 @@
             <!-- Invoice Header -->
             <div class="invoice-header">
               <div class="invoice-branding">
-                <img src="assets/images/logo.jpg" alt="Sneaker Store Logo" class="invoice-logo">
+                <img src="assets/images/hvmlogo.gif" alt="Korea Lock Store Logo" class="invoice-logo">
+                <h3 class="store-name">Korea Lock Store</h3>
+                <p class="store-tagline">Chuyên cung cấp khóa vân tay cao cấp</p>
               </div>
               <div class="invoice-actions">
                 <button (click)="printInvoice()" class="print-btn">
@@ -48,7 +50,7 @@
                 <thead>
                   <tr>
                     <th>Sản phẩm</th>
-                    <th>Kích cỡ</th>
+                    <th>Đơn giá</th>
                     <th>Số lượng</th>
                     <th class="text-end">Tổng cộng</th>
                   </tr>
@@ -59,10 +61,15 @@
                       <td>
                         <div class="product-info">
                           <img [src]="apiImage + item.product?.thumbnail" alt="{{ item.product?.name }}" class="product-thumbnail">
-                          <span class="product-name">{{ item.product?.name }}</span>
+                          <div class="product-details">
+                            <span class="product-name">{{ item.product?.name }}</span>
+                            @if(item.product?.brand) {
+                              <small class="product-brand text-muted">Thương hiệu: {{ item.product?.brand }}</small>
+                            }
+                          </div>
                         </div>
                       </td>
-                      <td>{{ item.size }}</td>
+                      <td>{{ item.price | currency:'VND':'symbol':'1.0-0' }}</td>
                       <td>{{ item.number_of_products }}</td>
                       <td class="text-end">{{ item.total_money | currency:'VND':'symbol':'1.0-0' }}</td>
                     </tr>
@@ -104,8 +111,12 @@
                 </div>
               }
               <div class="thank-you-message">
-                <p>Cảm ơn bạn đã mua hàng tại Sneaker Store!</p>
+                <p>Cảm ơn bạn đã tin tưởng và lựa chọn Korea Lock Store!</p>
                 <p>Chúng tôi đã gửi thông tin xác nhận đến email của bạn.</p>
+                <p class="support-info">
+                  <strong>Hotline hỗ trợ:</strong> 1900-xxxx | 
+                  <strong>Email:</strong> support&#64;korealock.vn
+                </p>
               </div>
             </div>
           </div>

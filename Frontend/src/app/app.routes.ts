@@ -32,6 +32,7 @@ import { UserProfileComponent } from './features/components/user-profile/user-pr
 import { BannerManageComponent } from './features/components/banner-manage/banner-manage.component';
 import { NewsManageComponent } from './features/components/news-manage/news-manage.component';
 import { NewsDetailComponent } from './features/components/news-detail/news-detail.component';
+import { ProductManageComponent } from './features/components/product-manage/product-manage.component';
 
 export const routes: Routes = [
   {
@@ -120,6 +121,11 @@ export const routes: Routes = [
       {
         path: 'uploadProduct',
         component: UploadProductComponent,
+        canActivate: [RoleGuard]
+      },
+      {
+        path: 'productManage',
+        component: ProductManageComponent,
         canActivate: [RoleGuard]
       },
       {
