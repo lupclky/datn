@@ -11,41 +11,28 @@
   </div>
 
   <!-- content -->
-  <div class=" news-content d-flex justify-content-center">
+  <div class="news-content d-flex justify-content-center">
     <div class="container" style="margin: 0; width: 100%">
       <div class="row justify-content-between align-items-start">
-        <!-- left -->
-        <div class="col-md-3 col-lg-3 d-sm-none d-md-block d-flex news-content-post">
-          <!-- search bar -->
-          <div class="input-group justify-content-start mt-4" style="width: 100%; margin-top: 30px !important;">
-            <div class="form-outline" data-mdb-input-init style="width: 85%;">
-              <input type="search" id="form1" class="form-control" placeholder="Tìm kiếm..." 
+        <!-- left (hidden on mobile) -->
+        <div class="col-md-3 d-none d-md-block news-sidebar">
+          <div class="search-box mt-4">
+            <div class="input-group">
+              <input type="search" class="form-control" placeholder="Tìm kiếm..." 
                      [(ngModel)]="searchKeyword" (keyup.enter)="searchNews()" />
+              <button type="button" class="btn btn-danger" (click)="searchNews()">
+                <i class="pi pi-search"></i>
+              </button>
             </div>
-            <button type="button" class="btn btn-danger" data-mdb-ripple-init (click)="searchNews()">
-              <i class="pi pi-search"></i>
-            </button>
           </div>
-          <!-- post recommendation -->
-          <div class="my-4">
+          <div class="latest-list my-4">
             <h4 class="text-dark text-start">BÀI VIẾT MỚI NHẤT</h4>
-            <div class="news-content-post_table my-4">
-              <div class="container">
-                <div *ngFor="let news of latestNews" 
-                     class="row my-2 g-5 align-items-center justify-content-center news-content-post_table-item"
-                     style="cursor: pointer;" (click)="viewNewsDetail(news.id)">
-                  <div class="col-4">
-                    <img [src]="getImageUrl(news.featured_image)" 
-                         [alt]="news.title" 
-                         class="img-fluid rounded-circle"
-                         style="margin-left: 10px; width: 60px; height:60px; object-fit: cover;">
-                  </div>
-
-                  <div class="col-8">
-                    <p class="lead card-title text-dark child-content-post-item">
-                      {{ getTruncatedTitle(news.title, 60) }}
-                    </p>
-                  </div>
+            <div class="latest-items">
+              <div *ngFor="let news of latestNews" 
+                   class="latest-item" (click)="viewNewsDetail(news.id)" style="cursor:pointer;">
+                <img [src]="getImageUrl(news.featured_image)" [alt]="news.title" />
+                <div class="latest-content">
+                  <p class="title">{{ getTruncatedTitle(news.title, 60) }}</p>
                 </div>
               </div>
             </div>
@@ -53,7 +40,7 @@
         </div>
 
         <!-- right -->
-        <div class="col-md-8 col-lg-8 news-content-shoes">
+        <div class="col-12 col-md-9 news-content-shoes">
           <div *ngIf="isLoading" class="text-center my-5">
             <div class="spinner-border text-danger" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -64,35 +51,22 @@
             <p class="text-muted">Không tìm thấy tin tức nào.</p>
           </div>
 
-          <div *ngIf="!isLoading && newsList.length > 0" class="row my-5 d-flex align-items-stretch justify-content-center g-5">
-            <div *ngFor="let news of newsList" class="col-6 col-lg-4">
-              <div class="card h-100" style="cursor: pointer;" (click)="viewNewsDetail(news.id)">
-                <div class="card-body py-3 position-relative">
-                  <img [src]="getImageUrl(news.featured_image)" 
-                       [alt]="news.title" 
-                       class="img-fluid"
-                       style="height: 200px; object-fit: cover; width: 100%;">
-                  <span *ngIf="news.published_at" 
-                        class="position-absolute top-10 start-0 translate-middle badge rounded-circle bg-danger"
-                        style="width: 60px; height: 60px">
-                    <div class="card-body__date">
-                      <p style="font-size: 16px; line-height: 0px;">{{ formatDate(news.published_at).day }}</p>
-                      <p style="font-size: 12px;">Th<span style="font-size: 16px;">{{ formatDate(news.published_at).month }}</span></p>
-                    </div>
-                  </span>
+          <div *ngIf="!isLoading && newsList.length > 0" class="row my-4 g-4 news-grid">
+            <div *ngFor="let news of newsList" class="col-12 col-sm-6 col-lg-4">
+              <article class="news-card" (click)="viewNewsDetail(news.id)">
+                <div class="thumb">
+                  <img [src]="getImageUrl(news.featured_image)" [alt]="news.title" loading="lazy" />
+                  <div *ngIf="news.published_at" class="date-badge">
+                    <span class="day">{{ formatDate(news.published_at).day }}</span>
+                    <span class="month">Th{{ formatDate(news.published_at).month }}</span>
+                  </div>
                 </div>
-                <div class="card-footer text-center tw-bold border-0">
-                  <h2 class="lead card-title text-dark fw-bold">
-                    {{ getTruncatedTitle(news.title, 60) }}
-                  </h2>
-                  <p class="my-2 text-secondary">
-                    {{ getTruncatedSummary(news.summary, 100) }}
-                  </p>
-                  <small class="text-muted">
-                    <i class="pi pi-eye"></i> {{ news.views }} lượt xem
-                  </small>
+                <div class="content">
+                  <h3 class="title">{{ getTruncatedTitle(news.title, 80) }}</h3>
+                  <p class="summary">{{ getTruncatedSummary(news.summary, 120) }}</p>
+                  <div class="meta"><i class="pi pi-eye"></i> {{ news.views }} lượt xem</div>
                 </div>
-              </div>
+              </article>
             </div>
           </div>
 

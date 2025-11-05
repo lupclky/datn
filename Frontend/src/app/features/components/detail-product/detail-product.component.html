@@ -191,7 +191,18 @@
             <div class="article-container">
               <h2 class="article-title">Đặc điểm nổi bật của {{mainProduct.name}}</h2>
               
-              <div class="article-content" [innerHTML]="getSafeHtml(mainProduct.description || '')"></div>
+              <div class="article-content" 
+                   [class.collapsed]="!isDescriptionExpanded && showExpandToggle"
+                   [innerHTML]="getSafeHtml(mainProduct.description || '')"></div>
+
+              @if (showExpandToggle) {
+                <div class="article-expand-toggle">
+                  <button type="button" class="expand-button" (click)="toggleDescription()">
+                    {{ isDescriptionExpanded ? 'Thu gọn' : 'Xem thêm' }}
+                    <i class="pi" [ngClass]="isDescriptionExpanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                  </button>
+                </div>
+              }
               
               @if(mainProduct.features && mainProduct.features.length > 0) {
                 <div class="features-accordion mt-5">
@@ -425,6 +436,38 @@
               <p>Sản phẩm chưa có ảnh</p>
             </div>
           </p-card>
+
+          <!-- Admin: Reviews & Comments Viewer under images column -->
+          <p-card styleClass="mt-3">
+            <ng-template pTemplate="header">
+              <h3>Đánh giá & Bình luận</h3>
+            </ng-template>
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <p-rating [(ngModel)]="averageRating" [readonly]="true" [cancel]="false"></p-rating>
+              <span class="text-muted">{{averageRating | number:'1.1-1'}} / 5 ({{totalReviews}} đánh giá)</span>
+            </div>
+            <div class="reviews-list">
+              @if(reviews.length > 0) {
+                @for(review of reviews; track review.id) {
+                  <div class="review-item border rounded p-3 mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="pi pi-user"></i>
+                        <strong>{{review.userName || 'Khách hàng'}}</strong>
+                      </div>
+                      <span class="text-muted">{{review.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                    </div>
+                    <div class="mb-2">
+                      <p-rating [(ngModel)]="review.rating" [readonly]="true" [cancel]="false"></p-rating>
+                    </div>
+                    <p class="mb-0">{{review.comment}}</p>
+                  </div>
+                }
+              } @else {
+                <p class="text-muted mb-0">Chưa có đánh giá nào cho sản phẩm này.</p>
+              }
+            </div>
+          </p-card>
         </div>
 
         <!-- Right Column - Edit Form -->
@@ -588,5 +631,6 @@
         </div>
       </div>
     </div>
+    
   }
   @else if (mainProduct && roleId == 100) {}

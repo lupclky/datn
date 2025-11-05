@@ -1122,6 +1122,23 @@
         color: #495057;
         margin-bottom: 3rem;
 
+        &.collapsed {
+          max-height: 420px; // roughly ~6-8 paragraphs depending on content
+          overflow: hidden;
+          position: relative;
+        }
+
+        &.collapsed::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 120px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, #fff 60%);
+          pointer-events: none;
+        }
+
         // Rich text formatting
         ::ng-deep {
           h1, h2, h3, h4, h5, h6 {
@@ -1242,6 +1259,30 @@
             tr:hover {
               background: #f8f9fa;
             }
+          }
+        }
+      }
+
+      .article-expand-toggle {
+        text-align: center;
+        margin-top: -1.5rem;
+        margin-bottom: 2rem;
+
+        .expand-button {
+          background: transparent;
+          border: 1px solid #e9ecef;
+          padding: 0.5rem 1rem;
+          border-radius: 999px;
+          color: #2c3e50;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all .2s ease-in-out;
+
+          i { margin-left: .35rem; font-size: .9rem; }
+
+          &:hover {
+            background: #f8f9fa;
+            border-color: #dee2e6;
           }
         }
       }

@@ -96,6 +96,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public hasUserReviewed: boolean = false;
   public accordionStates: { [key: number]: boolean } = {};
   public isGeneratingDescription: boolean = false;
+  public isDescriptionExpanded: boolean = false;
+  public showExpandToggle: boolean = false;
 
   // Quill editor configuration
   quillModules = {
@@ -194,6 +196,12 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
           if (product.features && product.features.length > 0) {
             this.selectedFeatures = product.features.map(f => f.id);
           }
+
+          // Decide whether to show expand/collapse for description
+          const plainTextLength = this.stripHtml(product.description || '').length;
+          // Threshold: show toggle when description is long
+          this.showExpandToggle = plainTextLength > 800;
+          this.isDescriptionExpanded = false;
         }),
         switchMap(() => {
           return this.categoriesService.getCategoryById(parseInt(this.categoryId)).pipe(
@@ -535,6 +543,15 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
 
   getSafeHtml(content: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(content);
+  }
+
+  private stripHtml(html: string): string {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  toggleDescription(): void {
+    this.isDescriptionExpanded = !this.isDescriptionExpanded;
   }
 
   toggleAccordion(index: number): void {
