@@ -118,6 +118,22 @@
                                 <button pButton 
                                         pRipple 
                                         type="button" 
+                                        icon="pi pi-shopping-cart"
+                                        class="p-button-rounded p-button-text p-button-secondary"
+                                        pTooltip="Lịch sử đơn hàng" 
+                                        (click)="viewOrderHistory(user)">
+                                </button>
+                                <button pButton 
+                                        pRipple 
+                                        type="button" 
+                                        icon="pi pi-comment"
+                                        class="p-button-rounded p-button-text p-button-warning"
+                                        pTooltip="Lịch sử bình luận" 
+                                        (click)="viewCommentHistory(user)">
+                                </button>
+                                <button pButton 
+                                        pRipple 
+                                        type="button" 
                                         icon="pi pi-pencil"
                                         class="p-button-rounded p-button-text p-button-info"
                                         pTooltip="Chỉnh sửa" 
@@ -205,6 +221,103 @@
         <ng-template pTemplate="footer">
             <button pButton pRipple type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="closeAddDialog()"></button>
             <button pButton pRipple type="button" label="Thêm" icon="pi pi-check" class="p-button-raised" (click)="addUserF()"></button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Order History Dialog -->
+    <p-dialog header="Lịch sử đơn hàng - {{selectedUser?.fullname}}" [(visible)]="showOrderHistoryDialog" [modal]="true" [style]="{width: '90vw', 'max-width': '1200px'}" [draggable]="false" [resizable]="false">
+        <div *ngIf="loadingOrderHistory" class="text-center py-5">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+            <p>Đang tải...</p>
+        </div>
+        <div *ngIf="!loadingOrderHistory">
+            <p-table [value]="userOrderHistory" 
+                    [paginator]="true"
+                    [rows]="10"
+                    [rowsPerPageOptions]="[10, 20, 50]"
+                    styleClass="p-datatable-striped">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Trạng thái</th>
+                        <th>Tổng tiền</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-order>
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.order_date | date:'dd/MM/yyyy HH:mm' }}</td>
+                        <td>
+                            <p-tag [value]="order.status" 
+                                   [severity]="getOrderStatusSeverity(order.status)">
+                            </p-tag>
+                        </td>
+                        <td>{{ order.total_money | currency:'VND':'symbol':'1.0-0' }}</td>
+                        <td>
+                            <button pButton 
+                                    pRipple 
+                                    type="button" 
+                                    icon="pi pi-eye"
+                                    class="p-button-sm p-button-text"
+                                    pTooltip="Xem chi tiết"
+                                    (click)="viewOrderDetails(order)">
+                            </button>
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="5" class="text-center py-5">Không có đơn hàng nào</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple type="button" label="Đóng" icon="pi pi-times" class="p-button-text" (click)="showOrderHistoryDialog = false"></button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Comment History Dialog -->
+    <p-dialog header="Lịch sử bình luận - {{selectedUser?.fullname}}" [(visible)]="showCommentHistoryDialog" [modal]="true" [style]="{width: '90vw', 'max-width': '1000px'}" [draggable]="false" [resizable]="false">
+        <div *ngIf="loadingCommentHistory" class="text-center py-5">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+            <p>Đang tải...</p>
+        </div>
+        <div *ngIf="!loadingCommentHistory">
+            <p-table [value]="userComments" 
+                    [paginator]="true"
+                    [rows]="10"
+                    [rowsPerPageOptions]="[10, 20, 50]"
+                    styleClass="p-datatable-striped">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Đánh giá</th>
+                        <th>Bình luận</th>
+                        <th>Ngày đánh giá</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-review>
+                    <tr>
+                        <td>{{ review.productName || 'N/A' }}</td>
+                        <td>
+                            <p-rating [(ngModel)]="review.rating" [readonly]="true" [cancel]="false"></p-rating>
+                        </td>
+                        <td>{{ review.comment || 'Không có bình luận' }}</td>
+                        <td>{{ review.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="4" class="text-center py-5">Không có bình luận nào</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple type="button" label="Đóng" icon="pi pi-times" class="p-button-text" (click)="showCommentHistoryDialog = false"></button>
         </ng-template>
     </p-dialog>
 </div>

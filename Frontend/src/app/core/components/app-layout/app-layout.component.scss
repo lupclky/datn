@@ -27,9 +27,23 @@
 
 .layout-main-content {
   flex: 1;
-  margin-top: 30px; /* actual header height */
+  margin-top: 80px; /* header height */
   background: #f8f9fa;
-  min-height: calc(100vh - 30px);
+  min-height: calc(100vh - 80px);
+  transition: margin-left 0.3s ease;
+}
+
+/* When admin sidebar exists, add left margin to content */
+:host:has(.admin-sidebar) .layout-main-content,
+.layout-header-section:has(.admin-sidebar) ~ .layout-main-content {
+  margin-left: 260px;
+}
+
+/* Alternative: use ng-deep if :has() doesn't work in all browsers */
+:ng-deep {
+  body:has(.admin-sidebar) .layout-main-content {
+    margin-left: 260px;
+  }
 }
 
 /* Remove any default margins and ensure seamless connection */

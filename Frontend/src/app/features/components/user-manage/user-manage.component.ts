@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import { BaseComponent } from '../../../core/commonComponent/base.component';
 import { UserService } from '../../../core/services/user.service';
-import { catchError, filter, of, tap } from 'rxjs';
+import { catchError, filter, forkJoin, of, takeUntil, tap } from 'rxjs';
 import { UserDto } from '../../../core/dtos/user.dto';
 import { registerReq } from '../../../core/types/registerReq';
 
@@ -20,7 +20,16 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { CalendarModule } from 'primeng/calendar';
 import { InputTextareaModule } from 'primeng/inputtextarea';
+import { RatingModule } from 'primeng/rating';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { OrderService } from '../../../core/services/order.service';
+import { ReviewService, Review } from '../../../core/services/review.service';
+import { ProductService } from '../../../core/services/product.service';
+import { HistoryOrderDto } from '../../../core/dtos/HistoryOrder.dto';
+import { ProductDto } from '../../../core/dtos/product.dto';
+import { AllProductDto } from '../../../core/dtos/AllProduct.dto';
+import { switchMap } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export interface UserOption {
   label: string;
@@ -45,7 +54,8 @@ export interface UserOption {
     TagModule,
     TooltipModule,
     CalendarModule,
-    InputTextareaModule
+    InputTextareaModule,
+    RatingModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './user-manage.component.html',
@@ -83,6 +93,15 @@ export class UserManageComponent extends BaseComponent implements OnInit {
   public editingUser: UserDto = {} as UserDto;
   public originalUser: UserDto = {} as UserDto;
   public addUser: registerReq = {} as registerReq;
+
+  // Order and Comment History
+  public showOrderHistoryDialog = false;
+  public showCommentHistoryDialog = false;
+  public selectedUser: UserDto | null = null;
+  public userOrderHistory: HistoryOrderDto[] = [];
+  public userComments: any[] = [];
+  public loadingOrderHistory = false;
+  public loadingCommentHistory = false;
 
   displayedColumns: string[] = [
     'fullname',
@@ -136,6 +155,9 @@ export class UserManageComponent extends BaseComponent implements OnInit {
 
   constructor(
     private userService: UserService,
+    private orderService: OrderService,
+    private reviewService: ReviewService,
+    private productService: ProductService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -416,5 +438,155 @@ export class UserManageComponent extends BaseComponent implements OnInit {
     }
 
     return errors;
+  }
+
+  // View Order History
+  viewOrderHistory(user: UserDto): void {
+    this.selectedUser = user;
+    this.showOrderHistoryDialog = true;
+    this.loadingOrderHistory = true;
+    this.userOrderHistory = [];
+
+    // Get all orders and filter by matching email or phone
+    this.orderService.getAllOrders().pipe(
+      tap((orders: HistoryOrderDto[]) => {
+        // Filter orders by matching email or phone_number
+        this.userOrderHistory = orders.filter(order => 
+          (order.email && user.email && order.email.toLowerCase() === user.email.toLowerCase()) ||
+          (order.phone_number && user.phone_number && order.phone_number === user.phone_number)
+        );
+        this.loadingOrderHistory = false;
+      }),
+      catchError(err => {
+        this.loadingOrderHistory = false;
+        this.showErrorMessage('Không thể tải lịch sử đơn hàng');
+        return of([]);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  // View Comment History
+  viewCommentHistory(user: UserDto): void {
+    if (!user.id) {
+      this.showErrorMessage('Không xác định được ID người dùng');
+      return;
+    }
+
+    const userId: number = user.id; // Type guard: ensure userId is number
+
+    this.selectedUser = user;
+    this.showCommentHistoryDialog = true;
+    this.loadingCommentHistory = true;
+    this.userComments = [];
+
+    // Get user's orders first to get product names
+    this.orderService.getAllOrders().pipe(
+      switchMap((orders: HistoryOrderDto[]) => {
+        // Get user's orders to map product names
+        const userOrders = orders.filter(order => 
+          (order.email && user.email && order.email.toLowerCase() === user.email.toLowerCase()) ||
+          (order.phone_number && user.phone_number && order.phone_number === user.phone_number)
+        );
+        
+        // Extract product names from orders (simplified - HistoryOrderDto has product_name)
+        const productNameMap = new Map<string, string>();
+        userOrders.forEach(order => {
+          if (order.product_name) {
+            productNameMap.set(order.product_name, order.product_name);
+          }
+        });
+
+        // Get all products to get their IDs for reviews
+        // Since we don't have product IDs in HistoryOrderDto, we need to get all reviews
+        // and filter by userId. This is not efficient but works with current API structure.
+        
+        // For now, we'll need to get reviews from all products
+        // This is a simplified approach - ideally should have an API endpoint to get reviews by userId
+        return this.getAllReviewsForUser(userId, productNameMap);
+      }),
+      tap((reviews: any[]) => {
+        this.userComments = reviews;
+        this.loadingCommentHistory = false;
+      }),
+      catchError(err => {
+        this.loadingCommentHistory = false;
+        this.showErrorMessage('Không thể tải lịch sử bình luận. Vui lòng thử lại sau.');
+        return of([]);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  // Helper method to get all reviews for a user
+  // Note: This is not efficient - ideally should have an API endpoint for this
+  private getAllReviewsForUser(userId: number, productNameMap: Map<string, string>): Observable<any[]> {
+    // Get all products first
+    return this.productService.getAllProduct().pipe(
+      switchMap((productResponse: AllProductDto) => {
+        const products = productResponse.products || [];
+        
+        if (products.length === 0) {
+          return of([]);
+        }
+
+        // Get reviews for all products
+        const reviewObservables = products.map((product: ProductDto) =>
+          this.reviewService.getReviewsByProduct(product.id).pipe(
+            catchError(() => of([])),
+            tap((reviews: Review[]) => {
+              // Map product name to reviews
+              reviews.forEach((review: any) => {
+                review.productName = product.name;
+              });
+            })
+          )
+        );
+
+        return forkJoin(reviewObservables);
+      }),
+      switchMap((reviewArrays: Review[][]) => {
+        // Flatten and filter by userId
+        const allReviews = reviewArrays.flat();
+        const userReviews = allReviews
+          .filter((review: any) => review.userId === userId)
+          .map((review: any) => ({
+            ...review,
+            productName: review.productName || 'N/A',
+            createdAt: review.createdAt ? new Date(review.createdAt) : new Date()
+          }))
+          .sort((a, b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime());
+        
+        return of(userReviews);
+      }),
+      catchError(() => {
+        return of([]);
+      })
+    );
+  }
+
+  getOrderStatusSeverity(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+      case 'chờ xử lý':
+        return 'warning';
+      case 'processing':
+      case 'đang xử lý':
+        return 'info';
+      case 'completed':
+      case 'hoàn thành':
+        return 'success';
+      case 'cancelled':
+      case 'đã hủy':
+        return 'danger';
+      default:
+        return '';
+    }
+  }
+
+  viewOrderDetails(order: HistoryOrderDto): void {
+    // Navigate to order detail page or show in dialog
+    this.showSuccessMessage(`Chi tiết đơn hàng #${order.id}`);
+    // You can implement detailed view here
   }
 }

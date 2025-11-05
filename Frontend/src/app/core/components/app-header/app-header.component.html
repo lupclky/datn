@@ -128,7 +128,87 @@
   </div>
   <p-toast></p-toast>
 </header>
-<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+
+<!-- Admin Sidebar -->
+@if(roleId == 2) {
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <h3>KVK Admin</h3>
+    </div>
+    <nav class="sidebar-nav">
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="pi pi-home"></i>
+            <span>Trang chủ</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/admin/dashboard']" routerLinkActive="active">
+            <i class="pi pi-chart-bar"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/userManage']" routerLinkActive="active">
+            <i class="pi pi-users"></i>
+            <span>Người dùng</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/orderManage']" routerLinkActive="active">
+            <i class="pi pi-shopping-cart"></i>
+            <span>Đơn hàng</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/productManage']" routerLinkActive="active">
+            <i class="pi pi-list"></i>
+            <span>Quản lý SP</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/categoryManage']" routerLinkActive="active">
+            <i class="pi pi-tags"></i>
+            <span>Danh mục</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/voucherManage']" routerLinkActive="active">
+            <i class="pi pi-ticket"></i>
+            <span>Voucher</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/newsManage']" routerLinkActive="active">
+            <i class="pi pi-book"></i>
+            <span>Tin tức</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/bannerManage']" routerLinkActive="active">
+            <i class="pi pi-images"></i>
+            <span>Banner</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/admin/returns']" routerLinkActive="active">
+            <i class="pi pi-replay"></i>
+            <span>Trả hàng</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/admin/features']" routerLinkActive="active">
+            <i class="pi pi-cog"></i>
+            <span>Chức năng</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+}
+
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark" [class.hidden]="roleId == 2">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" (click)="toggleMenu()">
       <span class="navbar-toggler-icon"></span>

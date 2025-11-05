@@ -36,20 +36,56 @@ export class AppLayoutComponent extends BaseComponent implements AfterViewInit, 
   public blockedUi: boolean = false;
   private lastScrollTop = 0;
   public isHeaderHidden = false;
+  public roleId: number = 0;
 
   constructor(
     private loadingService: LoadingService,
     private router: Router
   ) {
     super();
+    // Get roleId from localStorage
+    if (typeof localStorage !== 'undefined') {
+      const userInfo = localStorage.getItem('userInfor');
+      if (userInfo) {
+        try {
+          const parsed = JSON.parse(userInfo);
+          this.roleId = parseInt(parsed.role_id || parsed.role?.id || '0');
+        } catch (e) {
+          this.roleId = 0;
+        }
+      }
+    }
   }
 
   ngOnInit(): void {
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      window.scrollTo(0, 0);
-    });
+      filter(event => event instanceof NavigationEnd),
+      tap(() => {
+        window.scrollTo(0, 0);
+        // Update roleId on navigation
+        this.updateRoleId();
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+    
+    // Also update on init
+    this.updateRoleId();
+  }
+
+  private updateRoleId(): void {
+    if (typeof localStorage !== 'undefined') {
+      const userInfo = localStorage.getItem('userInfor');
+      if (userInfo) {
+        try {
+          const parsed = JSON.parse(userInfo);
+          this.roleId = parseInt(parsed.role_id || parsed.role?.id || '0');
+        } catch (e) {
+          this.roleId = 0;
+        }
+      } else {
+        this.roleId = 0;
+      }
+    }
   }
 
   ngAfterViewInit(): void {
@@ -63,6 +99,12 @@ export class AppLayoutComponent extends BaseComponent implements AfterViewInit, 
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll() {
+    // Don't hide header for admin users (roleId == 2)
+    if (this.roleId === 2) {
+      this.isHeaderHidden = false;
+      return;
+    }
+
     const st = window.pageYOffset || document.documentElement.scrollTop;
     // Hide header only when scrolling down and past the header's height
     if (st > this.lastScrollTop && st > 150) {
