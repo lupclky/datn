@@ -4,11 +4,21 @@
 
     <div class="order-header">
         <h2>Quản lý đơn hàng</h2>
-        <div class="header-search-container" (click)="showSearchDialog = true" pTooltip="Tìm kiếm & Lọc nâng cao" tooltipPosition="bottom">
-            <span class="p-input-icon-left">
-                <i class="pi pi-search"></i>
-                <input type="text" pInputText placeholder="Tìm kiếm & lọc..." readonly class="p-inputtext-sm">
-            </span>
+        <div class="header-actions">
+            <button pButton 
+                    pRipple 
+                    type="button" 
+                    label="Tạo đơn hàng mới" 
+                    icon="pi pi-plus" 
+                    class="p-button-success p-button-sm"
+                    (click)="openCreateOrderDialog()">
+            </button>
+            <div class="header-search-container" (click)="showSearchDialog = true" pTooltip="Tìm kiếm & Lọc nâng cao" tooltipPosition="bottom">
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input type="text" pInputText placeholder="Tìm kiếm & lọc..." readonly class="p-inputtext-sm">
+                </span>
+            </div>
         </div>
     </div>
 
@@ -134,4 +144,350 @@
             </p-table>
         </div>
     </p-card>
+
+    <!-- Create New Order Dialog -->
+    <p-dialog 
+        header="Tạo đơn hàng mới" 
+        [(visible)]="showCreateOrderDialog" 
+        [modal]="true" 
+        [style]="{width: '90vw', maxWidth: '1200px'}" 
+        [draggable]="false" 
+        [resizable]="true"
+        [closable]="true">
+        
+        <div [formGroup]="createOrderForm" class="create-order-dialog">
+            <!-- Product Selection Section -->
+            <div class="product-selection-section">
+                <h3 class="section-title">
+                    <i class="pi pi-shopping-cart"></i> Chọn sản phẩm
+                </h3>
+                
+                <div class="product-search">
+                    <label for="productSearch">Tìm kiếm sản phẩm</label>
+                    <p-autoComplete 
+                        id="productSearch"
+                        formControlName="productSearch"
+                        [suggestions]="filteredProducts"
+                        (completeMethod)="searchProducts($event)"
+                        (onSelect)="onProductSelect($event)"
+                        [dropdown]="true"
+                        placeholder="Nhập tên hoặc mã sản phẩm..."
+                        field="name"
+                        [minLength]="0"
+                        [showEmptyMessage]="true"
+                        emptyMessage="Không tìm thấy sản phẩm"
+                        [style]="{width: '100%'}">
+                        <ng-template let-product pTemplate="item">
+                            <div class="product-suggestion-item">
+                                <img [src]="getProductImageUrl(product)" [alt]="product.name" class="product-thumb">
+                                <div class="product-info">
+                                    <div class="product-name">{{ product.name }}</div>
+                                    <div class="product-price">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</div>
+                                    <div class="product-stock">Tồn kho: {{ product.quantity }}</div>
+                                </div>
+                                <div class="product-actions">
+                                    <button pButton 
+                                            pRipple 
+                                            type="button" 
+                                            icon="pi pi-plus" 
+                                            class="p-button-sm p-button-success p-button-text"
+                                            pTooltip="Thêm 1 sản phẩm"
+                                            (click)="addProductToOrder(product, 1); $event.stopPropagation()">
+                                    </button>
+                                    <button pButton 
+                                            pRipple 
+                                            type="button" 
+                                            icon="pi pi-plus-circle" 
+                                            class="p-button-sm p-button-info p-button-text"
+                                            pTooltip="Chọn số lượng"
+                                            (click)="addProductWithQuantity(product); $event.stopPropagation()">
+                                    </button>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </p-autoComplete>
+                </div>
+
+                <!-- Selected Products List -->
+                <div class="selected-products-list" *ngIf="selectedProducts.length > 0">
+                    <div class="selected-header">
+                        <h4>Sản phẩm đã chọn ({{ selectedProducts.length }})</h4>
+                        <button pButton 
+                                pRipple 
+                                type="button" 
+                                label="Thêm sản phẩm khác" 
+                                icon="pi pi-plus" 
+                                class="p-button-sm p-button-outlined"
+                                (click)="createOrderForm.patchValue({ productSearch: '' })">
+                        </button>
+                    </div>
+                    <div class="products-table">
+                        <div class="product-item" *ngFor="let item of selectedProducts; let i = index">
+                            <img [src]="getProductImageUrl(item.product)" [alt]="item.product.name" class="product-image">
+                            <div class="product-details">
+                                <div class="product-name">{{ item.product.name }}</div>
+                                <div class="product-price">{{ item.product.price | currency:'VND':'symbol':'1.0-0' }} / sản phẩm</div>
+                                <div class="product-stock">Tồn kho: {{ item.product.quantity }}</div>
+                            </div>
+                            <div class="product-quantity">
+                                <label>Số lượng:</label>
+                                <div class="quantity-controls">
+                                    <button pButton 
+                                            pRipple 
+                                            type="button" 
+                                            icon="pi pi-minus" 
+                                            class="p-button-rounded p-button-text p-button-sm"
+                                            [disabled]="item.quantity <= 1"
+                                            (click)="updateProductQuantity(i, item.quantity - 1)">
+                                    </button>
+                                    <p-inputNumber 
+                                        [(ngModel)]="item.quantity"
+                                        [ngModelOptions]="{standalone: true}"
+                                        [min]="1"
+                                        [max]="item.product.quantity"
+                                        (onInput)="updateProductQuantity(i, $event.value)"
+                                        [style]="{width: '100px'}">
+                                    </p-inputNumber>
+                                    <button pButton 
+                                            pRipple 
+                                            type="button" 
+                                            icon="pi pi-plus" 
+                                            class="p-button-rounded p-button-text p-button-sm"
+                                            [disabled]="item.quantity >= item.product.quantity"
+                                            (click)="updateProductQuantity(i, item.quantity + 1)">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="product-total">
+                                <strong>{{ (item.product.price * item.quantity) | currency:'VND':'symbol':'1.0-0' }}</strong>
+                            </div>
+                            <button pButton 
+                                    pRipple 
+                                    type="button" 
+                                    icon="pi pi-times" 
+                                    class="p-button-rounded p-button-danger p-button-text"
+                                    (click)="removeProductFromOrder(i)"
+                                    pTooltip="Xóa sản phẩm">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="empty-products-message" *ngIf="selectedProducts.length === 0">
+                    <i class="pi pi-shopping-cart" style="font-size: 3rem; color: #dee2e6;"></i>
+                    <p>Chưa có sản phẩm nào. Hãy tìm kiếm và thêm sản phẩm vào đơn hàng.</p>
+                </div>
+            </div>
+
+            <!-- Customer Information Section -->
+            <div class="customer-info-section">
+                <h3 class="section-title">
+                    <i class="pi pi-user"></i> Thông tin khách hàng
+                </h3>
+                
+                <div class="p-fluid grid">
+                    <div class="field col-12 md:col-6">
+                        <label for="fullname">Họ và tên <span class="required">*</span></label>
+                        <input type="text" 
+                               pInputText 
+                               id="fullname" 
+                               formControlName="fullname"
+                               [class.ng-invalid]="createOrderForm.get('fullname')?.invalid && createOrderForm.get('fullname')?.touched">
+                        <small class="p-error" *ngIf="createOrderForm.get('fullname')?.invalid && createOrderForm.get('fullname')?.touched">
+                            Họ và tên là bắt buộc
+                        </small>
+                    </div>
+                    
+                    <div class="field col-12 md:col-6">
+                        <label for="email">Email <span class="required">*</span></label>
+                        <input type="email" 
+                               pInputText 
+                               id="email" 
+                               formControlName="email"
+                               [class.ng-invalid]="createOrderForm.get('email')?.invalid && createOrderForm.get('email')?.touched">
+                        <small class="p-error" *ngIf="createOrderForm.get('email')?.invalid && createOrderForm.get('email')?.touched">
+                            Email không hợp lệ
+                        </small>
+                    </div>
+                    
+                    <div class="field col-12 md:col-6">
+                        <label for="phone_number">Số điện thoại <span class="required">*</span></label>
+                        <input type="text" 
+                               pInputText 
+                               id="phone_number" 
+                               formControlName="phone_number"
+                               [class.ng-invalid]="createOrderForm.get('phone_number')?.invalid && createOrderForm.get('phone_number')?.touched">
+                        <small class="p-error" *ngIf="createOrderForm.get('phone_number')?.invalid && createOrderForm.get('phone_number')?.touched">
+                            Số điện thoại tối thiểu 5 ký tự
+                        </small>
+                    </div>
+                    
+                    <div class="field col-12">
+                        <label for="address">Địa chỉ giao hàng <span class="required">*</span></label>
+                        <textarea pInputTextarea 
+                                  id="address" 
+                                  formControlName="address"
+                                  rows="3"
+                                  [class.ng-invalid]="createOrderForm.get('address')?.invalid && createOrderForm.get('address')?.touched">
+                        </textarea>
+                        <small class="p-error" *ngIf="createOrderForm.get('address')?.invalid && createOrderForm.get('address')?.touched">
+                            Địa chỉ là bắt buộc
+                        </small>
+                    </div>
+                    
+                    <div class="field col-12">
+                        <label for="note">Ghi chú</label>
+                        <textarea pInputTextarea 
+                                  id="note" 
+                                  formControlName="note"
+                                  rows="2"
+                                  placeholder="Ghi chú thêm cho đơn hàng...">
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping & Payment Section -->
+            <div class="shipping-payment-section">
+                <div class="grid">
+                    <div class="field col-12 md:col-6">
+                        <h3 class="section-title">
+                            <i class="pi pi-truck"></i> Phương thức vận chuyển
+                        </h3>
+                        <div class="shipping-options">
+                            <div *ngFor="let method of shippingMethods" class="shipping-option">
+                                <p-radioButton 
+                                    [inputId]="'shipping_' + method.name"
+                                    [value]="method.name"
+                                    formControlName="shipping_method">
+                                </p-radioButton>
+                                <label [for]="'shipping_' + method.name" class="shipping-label">
+                                    <span class="method-name">{{ method.name }}</span>
+                                    <span class="method-price">{{ method.price | currency:'VND':'symbol':'1.0-0' }}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="field col-12 md:col-6">
+                        <h3 class="section-title">
+                            <i class="pi pi-credit-card"></i> Phương thức thanh toán
+                        </h3>
+                        <div class="payment-options">
+                            <div *ngFor="let method of paymentMethods" class="payment-option">
+                                <p-radioButton 
+                                    [inputId]="'payment_' + method.key"
+                                    [value]="method.key"
+                                    formControlName="payment_method">
+                                </p-radioButton>
+                                <label [for]="'payment_' + method.key" class="payment-label">
+                                    {{ method.name }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary-section">
+                <h3 class="section-title">
+                    <i class="pi pi-calculator"></i> Tóm tắt đơn hàng
+                </h3>
+                <div class="summary-details">
+                    <div class="summary-line">
+                        <span>Tổng phụ:</span>
+                        <span class="amount">{{ calculateSubTotal() | currency:'VND':'symbol':'1.0-0' }}</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Phí vận chuyển:</span>
+                        <span class="amount">{{ getShippingCost() | currency:'VND':'symbol':'1.0-0' }}</span>
+                    </div>
+                    <div class="summary-line total">
+                        <span>Tổng cộng:</span>
+                        <span class="total-amount">{{ calculateTotal() | currency:'VND':'symbol':'1.0-0' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <button pButton 
+                    pRipple 
+                    type="button" 
+                    label="Hủy" 
+                    icon="pi pi-times" 
+                    class="p-button-text"
+                    (click)="showCreateOrderDialog = false"
+                    [disabled]="isCreatingOrder">
+            </button>
+            <button pButton 
+                    pRipple 
+                    type="button" 
+                    label="Tạo đơn hàng" 
+                    icon="pi pi-check" 
+                    class="p-button-success"
+                    (click)="createOrder()"
+                    [disabled]="isCreatingOrder || selectedProducts.length === 0 || createOrderForm.invalid">
+                <i class="pi pi-spin pi-spinner" *ngIf="isCreatingOrder" style="margin-right: 0.5rem;"></i>
+            </button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Quantity Selection Dialog -->
+    <p-dialog 
+        header="Chọn số lượng" 
+        [(visible)]="showQuantityDialog" 
+        [modal]="true" 
+        [style]="{width: '400px'}" 
+        [draggable]="false" 
+        [resizable]="false">
+        
+        <div class="quantity-dialog-content" *ngIf="selectedProductForQuantity">
+            <div class="product-preview">
+                <img [src]="getProductImageUrl(selectedProductForQuantity)" [alt]="selectedProductForQuantity.name" class="preview-image">
+                <div class="preview-info">
+                    <h4>{{ selectedProductForQuantity.name }}</h4>
+                    <p class="price">{{ selectedProductForQuantity.price | currency:'VND':'symbol':'1.0-0' }} / sản phẩm</p>
+                    <p class="stock">Tồn kho: {{ selectedProductForQuantity.quantity }}</p>
+                </div>
+            </div>
+            
+            <div class="quantity-input">
+                <label>Số lượng muốn thêm:</label>
+                <p-inputNumber 
+                    [(ngModel)]="quantityToAdd"
+                    [min]="1"
+                    [max]="selectedProductForQuantity.quantity"
+                    [style]="{width: '100%'}"
+                    [showButtons]="true"
+                    buttonLayout="horizontal"
+                    incrementButtonIcon="pi pi-plus"
+                    decrementButtonIcon="pi pi-minus">
+                </p-inputNumber>
+            </div>
+            
+            <div class="quantity-summary">
+                <p>Tổng tiền: <strong>{{ (selectedProductForQuantity.price * quantityToAdd) | currency:'VND':'symbol':'1.0-0' }}</strong></p>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <button pButton 
+                    pRipple 
+                    type="button" 
+                    label="Hủy" 
+                    icon="pi pi-times" 
+                    class="p-button-text"
+                    (click)="showQuantityDialog = false">
+            </button>
+            <button pButton 
+                    pRipple 
+                    type="button" 
+                    label="Thêm vào đơn" 
+                    icon="pi pi-check" 
+                    class="p-button-success"
+                    (click)="confirmAddProductWithQuantity()">
+            </button>
+        </ng-template>
+    </p-dialog>
 </div>

@@ -225,7 +225,8 @@
           </div>
           
           <!-- Rich Text Editor for Browser -->
-          <p-editor *ngIf="isBrowser" 
+          <p-editor #editor
+                    *ngIf="isBrowser" 
                     formControlName="content" 
                     [style]="{'height':'400px'}">
             <ng-template pTemplate="header">

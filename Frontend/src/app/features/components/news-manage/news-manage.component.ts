@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, PLATFORM_ID, Inject, ViewChild, AfterViewChecked } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NewsService } from '../../../core/services/news.service';
@@ -13,7 +13,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastService } from '../../../core/services/toast.service';
-import { EditorModule } from 'primeng/editor';
+import { EditorModule, Editor } from 'primeng/editor';
 import { environment } from '../../../../environments/environment.development';
 import { AiService } from '../../../core/services/ai.service';
 import { finalize } from 'rxjs/operators';
@@ -40,7 +40,9 @@ import { finalize } from 'rxjs/operators';
   styleUrl: './news-manage.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NewsManageComponent implements OnInit {
+export class NewsManageComponent implements OnInit, AfterViewChecked {
+  @ViewChild('editor') editor!: Editor;
+  
   newsList: NewsDto[] = [];
   displayDialog: boolean = false;
   newsForm!: FormGroup;
@@ -55,6 +57,7 @@ export class NewsManageComponent implements OnInit {
   imagePreview: string | null = null;
   isUploading: boolean = false;
   isGenerating: boolean = false;
+  pendingContent: string | null = null;
 
   statusOptions = [
     { label: 'Nháp', value: 'DRAFT' },
@@ -116,6 +119,7 @@ export class NewsManageComponent implements OnInit {
     this.selectedNewsId = null;
     this.selectedFile = null;
     this.imagePreview = null;
+    this.pendingContent = null;
     this.newsForm.reset({ status: 'DRAFT' });
     this.displayDialog = true;
     this.cdr.markForCheck();
@@ -126,16 +130,154 @@ export class NewsManageComponent implements OnInit {
     this.selectedNewsId = news.id;
     this.selectedFile = null;
     this.imagePreview = news.featured_image ? `${environment.apiUrl}/news/images/${news.featured_image}` : null;
+    
+    // Store content to set later after editor is ready
+    this.pendingContent = news.content || '';
+    
     this.newsForm.patchValue({
       title: news.title,
-      content: news.content,
+      content: '', // Set empty first, will set after editor ready
       summary: news.summary,
       author: news.author,
       category: news.category,
       status: news.status,
       featured_image: news.featured_image
     });
+    
     this.displayDialog = true;
+    this.cdr.markForCheck();
+    
+    // Wait for editor to initialize then set content
+    if (this.isBrowser && this.pendingContent) {
+      setTimeout(() => {
+        if (this.pendingContent) {
+          this.setEditorContent(this.pendingContent);
+        }
+      }, 100);
+    }
+  }
+  
+  ngAfterViewChecked(): void {
+    // Set content when editor is ready (only once)
+    if (this.pendingContent && this.editor && this.displayDialog && this.editor.quill) {
+      const content = this.pendingContent;
+      this.pendingContent = null; // Clear immediately to prevent multiple calls
+      
+      setTimeout(() => {
+        this.setEditorContent(content);
+      }, 50);
+    }
+  }
+  
+  private setEditorContentWithRetry(content: string, attempt: number, maxAttempts: number): void {
+    if (!content) return;
+    
+    // Clean and validate HTML content
+    let cleanedContent = content.trim();
+    
+    // Check if editor is ready
+    if (this.editor && this.editor.quill && this.editor.quill.root) {
+      try {
+        console.log('Setting editor content, attempt:', attempt + 1, 'Content length:', cleanedContent.length);
+        
+        // Method 1: Set via formControl - PrimeNG Editor should sync automatically
+        // Use emitEvent: true to trigger change detection
+        this.newsForm.patchValue({ content: cleanedContent }, { emitEvent: true });
+        this.cdr.detectChanges();
+        
+        // Method 2: Set directly to Quill root
+        // Clear first, then set new content
+        this.editor.quill.setText('');
+        this.editor.quill.root.innerHTML = cleanedContent;
+        
+        // Method 3: Use Quill's clipboard to paste HTML (most reliable)
+        try {
+          const delta = this.editor.quill.clipboard.convert({ html: cleanedContent });
+          this.editor.quill.setContents(delta, 'api');
+        } catch (e) {
+          console.log('Delta conversion failed, using innerHTML');
+        }
+        
+        // Force update
+        this.editor.quill.update();
+        this.editor.quill.focus();
+        
+        // Verify content was set
+        const formControlValue = this.newsForm.get('content')?.value || '';
+        const quillContent = this.editor.quill.root.innerHTML || '';
+        const quillText = this.editor.quill.getText() || '';
+        
+        console.log('After setting - Form control length:', formControlValue.length);
+        console.log('After setting - Quill HTML length:', quillContent.length);
+        console.log('After setting - Quill text length:', quillText.length);
+        
+        // If content is set in any form, consider it successful
+        if ((formControlValue && formControlValue.trim().length > 0) || 
+            (quillContent && quillContent.trim().length > 0) ||
+            (quillText && quillText.trim().length > 10)) {
+          console.log('✓ Content set successfully to editor');
+          this.cdr.markForCheck();
+          return;
+        } else {
+          console.warn('Content not visible in editor, will retry');
+        }
+      } catch (error) {
+        console.error('Error setting editor content:', error);
+      }
+    } else {
+      console.log('Editor not ready yet, editor:', !!this.editor, 'quill:', !!(this.editor?.quill), 'root:', !!(this.editor?.quill?.root));
+    }
+    
+    // Retry if editor not ready and haven't exceeded max attempts
+    if (attempt < maxAttempts) {
+      setTimeout(() => {
+        this.setEditorContentWithRetry(content, attempt + 1, maxAttempts);
+      }, 300);
+    } else {
+      // Last resort: set form control and try to sync manually
+      console.warn('Editor not ready after max attempts, setting form control only');
+      this.newsForm.patchValue({ content: cleanedContent }, { emitEvent: true });
+      
+      // Try one more time to set to Quill if it's now available
+      if (this.editor && this.editor.quill && this.editor.quill.root) {
+        this.editor.quill.root.innerHTML = cleanedContent;
+        this.editor.quill.update();
+      }
+      
+      this.cdr.markForCheck();
+    }
+  }
+
+  private setEditorContent(content: string): void {
+    if (!content) return;
+    
+    // Clean and validate HTML content
+    let cleanedContent = content.trim();
+    
+    // Set form control first (PrimeNG Editor binds to this)
+    this.newsForm.patchValue({ content: cleanedContent }, { emitEvent: false });
+    
+    // Then set directly to Quill if available
+    if (this.editor && this.editor.quill && this.editor.quill.root) {
+      try {
+        // Set HTML directly - PrimeNG Editor handles this well
+        this.editor.quill.root.innerHTML = cleanedContent;
+        // Trigger update to ensure UI refreshes
+        this.editor.quill.update();
+        console.log('Content set to editor via innerHTML');
+      } catch (error) {
+        console.error('Error setting editor content via innerHTML:', error);
+        // Try alternative method
+        try {
+          const delta = this.editor.quill.clipboard.convert({ html: cleanedContent });
+          this.editor.quill.setContents(delta, 'silent');
+          console.log('Content set to editor via Delta');
+        } catch (deltaError) {
+          console.error('Error setting editor content via Delta:', deltaError);
+        }
+      }
+    }
+    
     this.cdr.markForCheck();
   }
 
@@ -352,12 +494,37 @@ export class NewsManageComponent implements OnInit {
       }))
       .subscribe({
         next: (response) => {
-          if (response.success && response.content) {
-            this.newsForm.patchValue({ content: response.content });
-            this.toastService.showSuccess('Thành công', 'Đã tạo nội dung bằng AI');
-            this.cdr.markForCheck();
+          console.log('AI Response:', response);
+          
+          // Check if response has content
+          const content = response?.content || '';
+          
+          if (response && response.success && content && content.trim() !== '') {
+            // Get word count from response or calculate it
+            const wordCount = response.wordCount || content.trim().split(/\s+/).length;
+            const minWords = 800; // Minimum words for news content
+            
+            // Show warning if content is too short or if backend sent warning
+            if (response.warning || wordCount < minWords) {
+              const warningMsg = response.warning || `Cảnh báo: Nội dung chỉ có ${wordCount} từ, có thể chưa đủ chi tiết (tối thiểu: ${minWords} từ).`;
+              this.toastService.warn(warningMsg);
+            }
+            
+            // Use setEditorContent to set both form control and Quill editor
+            // Wait a bit for dialog to fully render, then set content
+            setTimeout(() => {
+              this.setEditorContentWithRetry(content, 0, 5);
+              
+              const successMsg = wordCount >= minWords 
+                ? `Đã tạo nội dung bằng AI (${wordCount} từ)`
+                : `Đã tạo nội dung bằng AI (${wordCount} từ - có thể cần mở rộng thêm)`;
+              this.toastService.showSuccess('Thành công', successMsg);
+              this.cdr.markForCheck();
+            }, 300);
           } else {
-            this.toastService.showError('Lỗi', 'Không thể tạo nội dung');
+            console.error('Invalid response or empty content:', response);
+            const errorMsg = response?.error || 'Không thể tạo nội dung hoặc nội dung trống';
+            this.toastService.showError('Lỗi', errorMsg);
           }
         },
         error: (error) => {

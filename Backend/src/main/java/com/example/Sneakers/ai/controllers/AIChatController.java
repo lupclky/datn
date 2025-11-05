@@ -161,9 +161,39 @@ public class AIChatController {
             String prompt = createNewsGenerationPrompt(title, topic, keywords);
             
             var response = geminiChatModel.chat(UserMessage.from(prompt));
+            String content = response.aiMessage().text();
+            
+            // Validate content
+            if (content == null || content.trim().isEmpty()) {
+                log.warn("Generated content is empty for title: {}", title);
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Generated content is empty. Please try again.");
+                errorResponse.put("success", false);
+                return ResponseEntity.ok(errorResponse);
+            }
+            
+            // Validate content length (minimum 800 words)
+            String trimmedContent = content.trim();
+            int wordCount = trimmedContent.split("\\s+").length;
+            int minWords = 800;
+            
+            if (wordCount < minWords) {
+                log.warn("Generated content is too short: {} words (minimum: {}) for title: {}", 
+                        wordCount, minWords, title);
+                // Still return content but with warning
+                Map<String, Object> result = new HashMap<>();
+                result.put("content", trimmedContent);
+                result.put("success", true);
+                result.put("warning", String.format("Nội dung chỉ có %d từ, có thể chưa đủ chi tiết (tối thiểu: %d từ)", wordCount, minWords));
+                result.put("wordCount", wordCount);
+                result.put("timestamp", System.currentTimeMillis());
+                return ResponseEntity.ok(result);
+            }
+            
+            log.info("Successfully generated content, length: {} chars, words: {}", content.length(), wordCount);
             
             Map<String, Object> result = new HashMap<>();
-            result.put("content", response.aiMessage().text());
+            result.put("content", content);
             result.put("success", true);
             result.put("timestamp", System.currentTimeMillis());
 
@@ -181,7 +211,7 @@ public class AIChatController {
     private String createNewsGenerationPrompt(String title, String topic, String keywords) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("Bạn là một biên tập viên chuyên nghiệp về khóa điện tử và công nghệ an ninh.\n\n");
-        prompt.append("Hãy viết một bài báo chi tiết và chuyên nghiệp với:\n");
+        prompt.append("Hãy viết một bài báo CHI TIẾT và CHUYÊN NGHIỆP với:\n");
         prompt.append("Tiêu đề: ").append(title).append("\n");
         
         if (topic != null && !topic.trim().isEmpty()) {
@@ -192,25 +222,37 @@ public class AIChatController {
             prompt.append("Từ khóa cần đề cập: ").append(keywords).append("\n");
         }
         
-        prompt.append("\nYêu cầu:\n");
+        prompt.append("\nYÊU CẦU BẮT BUỘC:\n");
         prompt.append("1. Viết bài bằng tiếng Việt chuyên nghiệp, dễ hiểu\n");
-        prompt.append("2. Cấu trúc rõ ràng với các phần: Mở bài, Nội dung chính (3-4 đoạn), Kết luận\n");
-        prompt.append("3. Độ dài: 800-1200 từ\n");
-        prompt.append("4. Sử dụng HTML formatting:\n");
-        prompt.append("   - <h2> cho tiêu đề phụ\n");
-        prompt.append("   - <p> cho đoạn văn\n");
-        prompt.append("   - <strong> cho từ khóa quan trọng\n");
-        prompt.append("   - <ul><li> cho danh sách\n");
-        prompt.append("   - <blockquote> cho trích dẫn (nếu có)\n");
-        prompt.append("5. Nội dung liên quan đến:\n");
+        prompt.append("2. Cấu trúc rõ ràng với các phần:\n");
+        prompt.append("   - Mở bài: 1-2 đoạn giới thiệu (150-200 từ)\n");
+        prompt.append("   - Nội dung chính: TỐI THIỂU 4-5 đoạn, mỗi đoạn 150-200 từ\n");
+        prompt.append("   - Kết luận: 1-2 đoạn tổng kết (150-200 từ)\n");
+        prompt.append("3. ĐỘ DÀI BẮT BUỘC: TỐI THIỂU 1000 từ, khuyến nghị 1200-1500 từ\n");
+        prompt.append("   - Phải đếm số từ và đảm bảo đạt ít nhất 1000 từ\n");
+        prompt.append("   - Nếu chưa đủ, hãy mở rộng nội dung chi tiết hơn\n");
+        prompt.append("4. Sử dụng HTML formatting ĐÚNG CÚ PHÁP:\n");
+        prompt.append("   - Mỗi đoạn phải được bọc trong thẻ <p>...</p>\n");
+        prompt.append("   - Tiêu đề phụ dùng <h2>...</h2>\n");
+        prompt.append("   - Từ khóa quan trọng dùng <strong>...</strong>\n");
+        prompt.append("   - Danh sách dùng <ul><li>...</li></ul>\n");
+        prompt.append("   - Trích dẫn dùng <blockquote>...</blockquote>\n");
+        prompt.append("   - KHÔNG được dùng các thẻ HTML không hợp lệ\n");
+        prompt.append("   - Đảm bảo tất cả thẻ HTML được đóng đúng cách\n");
+        prompt.append("5. Nội dung phải chi tiết và liên quan đến:\n");
         prompt.append("   - Khóa điện tử, khóa vân tay, công nghệ smart lock\n");
         prompt.append("   - An ninh gia đình, công nghệ bảo mật\n");
         prompt.append("   - Xu hướng công nghệ IoT, smart home\n");
         prompt.append("   - Tư vấn chọn mua và sử dụng\n");
+        prompt.append("   - So sánh, đánh giá, ưu nhược điểm\n");
         prompt.append("6. Giọng văn chuyên nghiệp nhưng thân thiện, dễ tiếp cận\n");
-        prompt.append("7. Đưa ra thông tin hữu ích, tips thực tế cho người đọc\n");
-        prompt.append("8. KHÔNG đề cập đến thương hiệu cụ thể trừ khi có trong tiêu đề\n\n");
-        prompt.append("Hãy viết bài báo hoàn chỉnh với HTML formatting:");
+        prompt.append("7. Đưa ra thông tin hữu ích, tips thực tế, ví dụ cụ thể cho người đọc\n");
+        prompt.append("8. KHÔNG đề cập đến thương hiệu cụ thể trừ khi có trong tiêu đề\n");
+        prompt.append("9. PHẢI kiểm tra lại:\n");
+        prompt.append("   - Độ dài đã đạt ít nhất 1000 từ chưa?\n");
+        prompt.append("   - Tất cả thẻ HTML đã đóng đúng chưa?\n");
+        prompt.append("   - Nội dung đã đủ chi tiết và hữu ích chưa?\n\n");
+        prompt.append("QUAN TRỌNG: Hãy viết bài báo HOÀN CHỈNH, CHI TIẾT, ĐỦ DÀI (tối thiểu 1000 từ) với HTML formatting đúng chuẩn. Bắt đầu viết ngay:");
         
         return prompt.toString();
     }
@@ -233,11 +275,35 @@ public class AIChatController {
             String prompt = createProductDescriptionPrompt(productName, category, features);
             
             var response = geminiChatModel.chat(UserMessage.from(prompt));
+            String content = response.aiMessage().text();
+            
+            // Validate content
+            if (content == null || content.trim().isEmpty()) {
+                log.warn("Generated product description is empty for: {}", productName);
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Generated content is empty. Please try again.");
+                errorResponse.put("success", false);
+                return ResponseEntity.ok(errorResponse);
+            }
+            
+            // Validate content length (minimum 600 words)
+            String trimmedContent = content.trim();
+            int wordCount = trimmedContent.split("\\s+").length;
+            int minWords = 600;
             
             Map<String, Object> result = new HashMap<>();
-            result.put("content", response.aiMessage().text());
+            result.put("content", trimmedContent);
             result.put("success", true);
+            result.put("wordCount", wordCount);
+            
+            if (wordCount < minWords) {
+                log.warn("Generated product description is short: {} words (minimum: {}) for: {}", 
+                        wordCount, minWords, productName);
+                result.put("warning", String.format("Nội dung chỉ có %d từ, có thể chưa đủ chi tiết (tối thiểu: %d từ)", wordCount, minWords));
+            }
+            
             result.put("timestamp", System.currentTimeMillis());
+            log.info("Successfully generated product description, length: {} chars, words: {}", content.length(), wordCount);
 
             return ResponseEntity.ok(result);
 
@@ -253,7 +319,7 @@ public class AIChatController {
     private String createProductDescriptionPrompt(String productName, String category, String features) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("Bạn là chuyên gia viết mô tả sản phẩm chuyên nghiệp cho Locker Korea - cửa hàng khóa điện tử hàng đầu.\n\n");
-        prompt.append("Hãy viết mô tả chi tiết và hấp dẫn cho sản phẩm:\n");
+        prompt.append("Hãy viết mô tả CHI TIẾT và HẤP DẪN cho sản phẩm:\n");
         prompt.append("Tên sản phẩm: ").append(productName).append("\n");
         
         if (category != null && !category.trim().isEmpty() && !"N/A".equals(category)) {
@@ -264,22 +330,26 @@ public class AIChatController {
             prompt.append("Tính năng: ").append(features).append("\n");
         }
         
-        prompt.append("\nYêu cầu:\n");
+        prompt.append("\nYÊU CẦU BẮT BUỘC:\n");
         prompt.append("1. Viết bằng tiếng Việt chuyên nghiệp, hấp dẫn, thuyết phục\n");
         prompt.append("2. Cấu trúc bài viết gồm:\n");
-        prompt.append("   - Mở đầu: Giới thiệu tổng quan sản phẩm (50-80 từ)\n");
-        prompt.append("   - Đặc điểm nổi bật: 4-6 điểm mạnh chính\n");
-        prompt.append("   - Công nghệ & Chất liệu: Chi tiết kỹ thuật\n");
-        prompt.append("   - Ứng dụng: Phù hợp với ai, dùng cho đâu\n");
-        prompt.append("   - Kết luận: Tại sao nên chọn sản phẩm này\n");
-        prompt.append("3. Độ dài: 600-900 từ\n");
-        prompt.append("4. Sử dụng HTML formatting:\n");
-        prompt.append("   - <h2> cho tiêu đề chính\n");
-        prompt.append("   - <h3> cho tiêu đề phụ\n");
-        prompt.append("   - <p> cho đoạn văn\n");
-        prompt.append("   - <strong> cho từ khóa quan trọng\n");
-        prompt.append("   - <ul><li> cho danh sách tính năng\n");
-        prompt.append("   - <blockquote> cho highlights đặc biệt\n");
+        prompt.append("   - Mở đầu: Giới thiệu tổng quan sản phẩm (100-150 từ)\n");
+        prompt.append("   - Đặc điểm nổi bật: 5-7 điểm mạnh chính, mỗi điểm 80-120 từ\n");
+        prompt.append("   - Công nghệ & Chất liệu: Chi tiết kỹ thuật (200-250 từ)\n");
+        prompt.append("   - Ứng dụng: Phù hợp với ai, dùng cho đâu (150-200 từ)\n");
+        prompt.append("   - Kết luận: Tại sao nên chọn sản phẩm này (100-150 từ)\n");
+        prompt.append("3. ĐỘ DÀI BẮT BUỘC: TỐI THIỂU 800 từ, khuyến nghị 900-1200 từ\n");
+        prompt.append("   - Phải đếm số từ và đảm bảo đạt ít nhất 800 từ\n");
+        prompt.append("   - Nếu chưa đủ, hãy mở rộng chi tiết từng phần\n");
+        prompt.append("4. Sử dụng HTML formatting ĐÚNG CÚ PHÁP:\n");
+        prompt.append("   - Mỗi đoạn phải được bọc trong thẻ <p>...</p>\n");
+        prompt.append("   - Tiêu đề chính dùng <h2>...</h2>\n");
+        prompt.append("   - Tiêu đề phụ dùng <h3>...</h3>\n");
+        prompt.append("   - Từ khóa quan trọng dùng <strong>...</strong>\n");
+        prompt.append("   - Danh sách tính năng dùng <ul><li>...</li></ul>\n");
+        prompt.append("   - Highlights đặc biệt dùng <blockquote>...</blockquote>\n");
+        prompt.append("   - KHÔNG được dùng các thẻ HTML không hợp lệ\n");
+        prompt.append("   - Đảm bảo tất cả thẻ HTML được đóng đúng cách\n");
         prompt.append("5. Nội dung tập trung vào:\n");
         prompt.append("   - Tính năng bảo mật vượt trội\n");
         prompt.append("   - Chất liệu cao cấp, bền bỉ\n");
@@ -287,9 +357,13 @@ public class AIChatController {
         prompt.append("   - Dễ sử dụng, phù hợp mọi lứa tuổi\n");
         prompt.append("   - Thiết kế sang trọng, đẳng cấp\n");
         prompt.append("6. Giọng văn thuyết phục nhưng không quảng cáo quá lố\n");
-        prompt.append("7. Nhấn mạnh lợi ích người dùng thực tế\n");
-        prompt.append("8. Tạo cảm giác tin cậy và chuyên nghiệp\n\n");
-        prompt.append("Hãy viết mô tả sản phẩm hoàn chỉnh với HTML formatting:");
+        prompt.append("7. Nhấn mạnh lợi ích người dùng thực tế, ví dụ cụ thể\n");
+        prompt.append("8. Tạo cảm giác tin cậy và chuyên nghiệp\n");
+        prompt.append("9. PHẢI kiểm tra lại:\n");
+        prompt.append("   - Độ dài đã đạt ít nhất 800 từ chưa?\n");
+        prompt.append("   - Tất cả thẻ HTML đã đóng đúng chưa?\n");
+        prompt.append("   - Nội dung đã đủ chi tiết và thuyết phục chưa?\n\n");
+        prompt.append("QUAN TRỌNG: Hãy viết mô tả sản phẩm HOÀN CHỈNH, CHI TIẾT, ĐỦ DÀI (tối thiểu 800 từ) với HTML formatting đúng chuẩn. Bắt đầu viết ngay:");
         
         return prompt.toString();
     }

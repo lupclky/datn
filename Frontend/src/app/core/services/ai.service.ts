@@ -85,27 +85,28 @@ export class AiService {
   }
 
   // Generate news content
-  generateNewsContent(title: string, topic?: string, keywords?: string): Observable<{content: string; success: boolean; timestamp: number}> {
+  generateNewsContent(title: string, topic?: string, keywords?: string): Observable<{content?: string; success: boolean; timestamp?: number; error?: string; warning?: string; wordCount?: number}> {
     const payload: any = { title };
     if (topic) payload.topic = topic;
     if (keywords) payload.keywords = keywords;
     
-    return this.httpClient.post<{content: string; success: boolean; timestamp: number}>(
+    return this.httpClient.post<{content?: string; success: boolean; timestamp?: number; error?: string; warning?: string; wordCount?: number}>(
       `${this.apiUrl}/ai/chat/generate-news`,
       payload
     );
   }
 
-  generateProductDescription(productName: string, category?: string, features?: string): Observable<{content: string}> {
+  generateProductDescription(productName: string, category?: string, features?: string): Observable<{content: string; success?: boolean; warning?: string; wordCount?: number}> {
     const payload: any = { productName };
     if (category) payload.category = category;
     if (features) payload.features = features;
     
-    return this.httpClient.post<{content: string}>(
+    return this.httpClient.post<{content: string; success?: boolean; warning?: string; wordCount?: number}>(
       `${this.apiUrl}/ai/chat/generate-product-description`,
       payload
     );
   }
+
 
   // Warranty advice
   warrantyAdvice(query: string): Observable<ChatResponse> {
