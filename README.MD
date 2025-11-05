@@ -7,9 +7,11 @@
 docker compose -f ./deployment.yaml up -d mysql8-container
 docker compose -f ./deployment.yaml up -d phpmyadmin8-container
 docker compose -f ./deployment.yaml up -d chroma-container
+
 ```
 
-- Go to localhost:8100 and import database
+- Go to localhost:8100 and import database name: shopsneaker3
+
 
 ## BACKEND
 
