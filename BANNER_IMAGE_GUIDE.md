@@ -60,3 +60,4 @@ Nếu banner có text hoặc nút bấm, đảm bảo chúng nằm trong vùng a
 - [ ] Định dạng file: WebP, JPG hoặc PNG
 - [ ] Đã test preview trên nhiều kích thước màn hình
 
+

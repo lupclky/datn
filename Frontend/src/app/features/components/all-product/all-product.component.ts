@@ -460,17 +460,25 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
 
   getProductImageUrl(product: ProductDto): string {
     // If product has a thumbnail, use it
-    if (product.thumbnail && product.thumbnail.trim() !== '') {
-      return this.apiImage + product.thumbnail;
+    if (product.thumbnail && product.thumbnail.trim() !== '' && product.thumbnail !== 'null') {
+      const url = this.apiImage + product.thumbnail;
+      console.log(`[Product ${product.id}] Using thumbnail:`, url);
+      return url;
     }
     
     // If no thumbnail but has product_images, use the first one
-    if (product.product_images && product.product_images.length > 0) {
-      return this.apiImage + product.product_images[0].image_url;
+    if (product.product_images && product.product_images.length > 0 && product.product_images[0]?.image_url) {
+      const url = this.apiImage + product.product_images[0].image_url;
+      console.log(`[Product ${product.id}] Using first image:`, url);
+      return url;
     }
     
     // Default image if no images available
-    return this.apiImage + 'notfound.jpg';
+    console.warn(`[Product ${product.id}] No images found. Using placeholder.`, {
+      thumbnail: product.thumbnail,
+      product_images: product.product_images
+    });
+    return 'assets/images/no-image.png';
   }
 
   // Pagination methods

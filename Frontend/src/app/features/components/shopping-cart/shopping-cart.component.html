@@ -22,7 +22,9 @@
               <div class="cart-item" [class.selected]="isProductSelected(item.id)">
                 <!-- Product Image -->
                 <div class="item-image">
-                  <img [src]="apiImage + item.products.thumbnail" [alt]="item.products.name">
+                  <img [src]="getProductImageUrl(item)" 
+                       [alt]="item.products.name"
+                       (error)="$any($event.target).src = 'assets/images/no-image.png'">
                 </div>
                 
                 <!-- Product Info -->

@@ -13,3 +13,4 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
             LocalDateTime currentDate1, LocalDateTime currentDate2);
 }
 
+

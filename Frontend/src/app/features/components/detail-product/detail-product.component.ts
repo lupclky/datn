@@ -35,6 +35,9 @@ import { RatingModule } from 'primeng/rating';
 import { TooltipModule } from 'primeng/tooltip';
 import { LockFeatureService } from '../../../core/services/lock-feature.service';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { QuillModule } from 'ngx-quill';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AiService } from '../../../core/services/ai.service';
 
 
 @Component({
@@ -58,7 +61,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
     TabViewModule,
     RatingModule,
     TooltipModule,
-    MultiSelectModule
+    MultiSelectModule,
+    QuillModule
   ],
   templateUrl: './detail-product.component.html',
   styleUrl: './detail-product.component.scss'
@@ -90,6 +94,21 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public newReviewComment: string = '';
   public isSubmittingReview: boolean = false;
   public hasUserReviewed: boolean = false;
+  public accordionStates: { [key: number]: boolean } = {};
+  public isGeneratingDescription: boolean = false;
+
+  // Quill editor configuration
+  quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['link', 'image', 'video'],
+      ['clean']
+    ]
+  };
 
   constructor(
     private readonly fb: FormBuilder,
@@ -105,7 +124,9 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     private loadingService: LoadingService,
     private categoriesService: CategoriesService,
     private reviewService: ReviewService,
-    private lockFeatureService: LockFeatureService
+    private lockFeatureService: LockFeatureService,
+    private sanitizer: DomSanitizer,
+    private aiService: AiService
   ) {
     super();
     if (typeof localStorage != 'undefined'){
@@ -510,5 +531,68 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
 
   getStarArray(rating: number): number[] {
     return Array(5).fill(0).map((_, i) => i < rating ? 1 : 0);
+  }
+
+  getSafeHtml(content: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(content);
+  }
+
+  toggleAccordion(index: number): void {
+    this.accordionStates[index] = !this.accordionStates[index];
+  }
+
+  getProductImageUrl(product: ProductDto): string {
+    // If product has a thumbnail, use it
+    if (product.thumbnail && product.thumbnail.trim() !== '' && product.thumbnail !== 'null') {
+      return this.apiImage + product.thumbnail;
+    }
+    
+    // If no thumbnail but has product_images, use the first one
+    if (product.product_images && product.product_images.length > 0 && product.product_images[0]?.image_url) {
+      return this.apiImage + product.product_images[0].image_url;
+    }
+    
+    // Default image if no images available
+    return 'assets/images/no-image.png';
+  }
+
+  generateProductDescription(): void {
+    const productName = this.productForm.get('productName')?.value;
+    const categoryId = this.mainProduct?.category_id;
+
+    if (!productName) {
+      this.toastService.warn('Vui lòng nhập tên sản phẩm trước');
+      return;
+    }
+
+    // Get category name
+    const categoryName = categoryId 
+      ? this.categoriesOptions.find(cat => cat['value'] === categoryId.toString())?.['label'] 
+      : undefined;
+
+    // Get feature names
+    const featureNames = this.selectedFeatures
+      .map(id => this.featuresOptions.find(f => f['value'] === id)?.['label'])
+      .filter(name => name)
+      .join(', ');
+
+    this.isGeneratingDescription = true;
+
+    this.aiService.generateProductDescription(
+      productName,
+      categoryName,
+      featureNames || undefined
+    ).pipe(
+      finalize(() => this.isGeneratingDescription = false)
+    ).subscribe({
+      next: (response: { content: string }) => {
+        this.productForm.patchValue({ description: response.content });
+        this.toastService.success('KVK Intelligence đã tạo mô tả sản phẩm thành công!');
+      },
+      error: (error: any) => {
+        console.error('Error generating product description:', error);
+        this.toastService.fail('Không thể tạo mô tả sản phẩm. Vui lòng thử lại.');
+      }
+    });
   }
 }

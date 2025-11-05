@@ -93,11 +93,6 @@
                 }
               </div>
               
-              <!-- Product Description -->
-              <div class="product-description">
-                <p>{{mainProduct.description}}</p>
-              </div>
-              
               <!-- Size selection removed for lock products -->
               
               <!-- Quantity Selection -->
@@ -188,6 +183,41 @@
       </div>
     }
   
+    <!-- Product Detail Description Section (Like News Article) -->
+    <div class="product-description-article-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto">
+            <div class="article-container">
+              <h2 class="article-title">Đặc điểm nổi bật của {{mainProduct.name}}</h2>
+              
+              <div class="article-content" [innerHTML]="getSafeHtml(mainProduct.description || '')"></div>
+              
+              @if(mainProduct.features && mainProduct.features.length > 0) {
+                <div class="features-accordion mt-5">
+                  <h3 class="accordion-title">Nội dung chính</h3>
+                  <div class="accordion-items">
+                    @for (feature of mainProduct.features; track feature.id; let idx = $index) {
+                      <div class="accordion-item">
+                        <div class="accordion-header" (click)="toggleAccordion(idx)">
+                          <span class="accordion-number">{{idx + 1}}.</span>
+                          <span class="accordion-text">{{ feature.name }}</span>
+                          <i class="pi" [ngClass]="accordionStates[idx] ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                        </div>
+                        <div class="accordion-content" [ngClass]="{'show': accordionStates[idx]}">
+                          <p>{{ feature.description }}</p>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Related Products Section -->
     <div class="related-products-section">
       <div class="container">
@@ -201,7 +231,9 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                   <div class="related-product-card" (click)="goToDetail(product.id)">
                     <div class="product-image">
-                      <img [src]="apiImage + product.thumbnail" [alt]="product.name">
+                      <img [src]="getProductImageUrl(product)" 
+                           [alt]="product.name"
+                           (error)="$any($event.target).src = 'assets/images/no-image.png'">
                       @if(product.discount > 0) {
                         <span class="discount-badge">-{{product.discount}}%</span>
                       }
@@ -484,13 +516,33 @@
                 </div>
   
                 <div class="field">
-                  <label for="description">Mô tả sản phẩm</label>
-                  <textarea id="description" 
-                            rows="4" 
-                            pInputTextarea 
-                            formControlName="description"
-                            placeholder="Nhập mô tả chi tiết về sản phẩm...">
-                  </textarea>
+                  <label for="description">Mô tả sản phẩm (HTML)</label>
+                  
+                  <!-- AI Generate Button -->
+                  <div class="ai-generate-section mb-3">
+                    <button pButton 
+                            type="button"
+                            label="Tạo mô tả bằng KVK Intelligence" 
+                            icon="pi pi-sparkles"
+                            class="kvk-ai-button"
+                            (click)="generateProductDescription()"
+                            [disabled]="isGeneratingDescription || !productForm.get('productName')?.value"
+                            [loading]="isGeneratingDescription">
+                    </button>
+                  </div>
+
+                  <!-- Loading Message -->
+                  <div *ngIf="isGeneratingDescription" class="ai-loading-message">
+                    <i class="pi pi-spin pi-spinner"></i>
+                    <span>KVK Intelligence đang tạo mô tả chuyên nghiệp cho sản phẩm...</span>
+                  </div>
+
+                  <quill-editor 
+                    formControlName="description"
+                    [modules]="quillModules"
+                    placeholder="Nhập mô tả chi tiết về sản phẩm hoặc sử dụng KVK Intelligence để tự động tạo..."
+                    [styles]="{'min-height': '400px'}">
+                  </quill-editor>
                 </div>
   
                 <div class="field">

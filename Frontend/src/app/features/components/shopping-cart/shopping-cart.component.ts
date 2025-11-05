@@ -291,4 +291,20 @@ constructor(
       this.toastService.fail("Có lỗi xảy ra, vui lòng thử lại");
     }
   }
+
+  getProductImageUrl(product: ProductsInCartDto): string {
+    const productDto = product.products;
+    // If product has a thumbnail, use it
+    if (productDto.thumbnail && productDto.thumbnail.trim() !== '') {
+      return `${this.apiImage}${productDto.thumbnail}`;
+    }
+    
+    // If no thumbnail but has product_images, use the first one
+    if (productDto.product_images && productDto.product_images.length > 0) {
+      return `${this.apiImage}${productDto.product_images[0].image_url}`;
+    }
+    
+    // Default image if no images available
+    return 'assets/images/no-image.png';
+  }
 }

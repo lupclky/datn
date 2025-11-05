@@ -37,7 +37,10 @@
             *ngFor="let product of searchSuggestions"
             (mousedown)="selectProduct(product)"
           >
-            <img [src]="apiImage + product.thumbnail" [alt]="product.name" class="suggestion-image">
+            <img [src]="getProductImageUrl(product)" 
+                 [alt]="product.name" 
+                 class="suggestion-image"
+                 (error)="$any($event.target).src = 'assets/images/no-image.png'">
             <div class="suggestion-info">
               <div class="suggestion-name">{{ product.name }}</div>
               <div class="suggestion-price">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</div>
@@ -95,7 +98,10 @@
                     title="Xóa sản phẩm">
                     <i class="pi pi-times"></i>
                   </button>
-                  <img [src]="apiImage + item.products.thumbnail" [alt]="item.products.name" class="item-image" />
+                  <img [src]="getProductImageUrl(item.products)" 
+                       [alt]="item.products.name" 
+                       class="item-image"
+                       (error)="$any($event.target).src = 'assets/images/no-image.png'" />
                   <div class="item-info">
                     <span class="item-name">{{ item.products.name }}</span>
                     <div class="item-details">

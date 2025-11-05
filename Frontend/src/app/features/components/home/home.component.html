@@ -150,7 +150,10 @@
             <div class="col-lg-4 col-md-6">
               <div class="product-card-featured" (click)="navigateToDetail(product.id)">
                 <div class="product-image-wrapper">
-                   <img [src]="getProductImageUrl(product)" [alt]="product.name" class="img-fluid">
+                   <img [src]="getProductImageUrl(product)" 
+                        [alt]="product.name" 
+                        class="img-fluid"
+                        (error)="$any($event.target).src = 'assets/images/no-image.png'">
                   @if(product.discount > 0) {
                     <span class="discount-badge">-{{product.discount}}%</span>
                   }

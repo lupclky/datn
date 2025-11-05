@@ -215,6 +215,85 @@ public class AIChatController {
         return prompt.toString();
     }
 
+    @PostMapping("/generate-product-description")
+    public ResponseEntity<Map<String, Object>> generateProductDescription(@RequestBody Map<String, String> request) {
+        try {
+            String productName = request.get("productName");
+            String category = request.get("category");
+            String features = request.get("features");
+            
+            if (productName == null || productName.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Product name is required"));
+            }
+
+            log.info("Generating product description for: {}", productName);
+
+            // Create prompt for product description
+            String prompt = createProductDescriptionPrompt(productName, category, features);
+            
+            var response = geminiChatModel.chat(UserMessage.from(prompt));
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("content", response.aiMessage().text());
+            result.put("success", true);
+            result.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Error generating product description", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+    
+    private String createProductDescriptionPrompt(String productName, String category, String features) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Bạn là chuyên gia viết mô tả sản phẩm chuyên nghiệp cho Locker Korea - cửa hàng khóa điện tử hàng đầu.\n\n");
+        prompt.append("Hãy viết mô tả chi tiết và hấp dẫn cho sản phẩm:\n");
+        prompt.append("Tên sản phẩm: ").append(productName).append("\n");
+        
+        if (category != null && !category.trim().isEmpty() && !"N/A".equals(category)) {
+            prompt.append("Danh mục: ").append(category).append("\n");
+        }
+        
+        if (features != null && !features.trim().isEmpty()) {
+            prompt.append("Tính năng: ").append(features).append("\n");
+        }
+        
+        prompt.append("\nYêu cầu:\n");
+        prompt.append("1. Viết bằng tiếng Việt chuyên nghiệp, hấp dẫn, thuyết phục\n");
+        prompt.append("2. Cấu trúc bài viết gồm:\n");
+        prompt.append("   - Mở đầu: Giới thiệu tổng quan sản phẩm (50-80 từ)\n");
+        prompt.append("   - Đặc điểm nổi bật: 4-6 điểm mạnh chính\n");
+        prompt.append("   - Công nghệ & Chất liệu: Chi tiết kỹ thuật\n");
+        prompt.append("   - Ứng dụng: Phù hợp với ai, dùng cho đâu\n");
+        prompt.append("   - Kết luận: Tại sao nên chọn sản phẩm này\n");
+        prompt.append("3. Độ dài: 600-900 từ\n");
+        prompt.append("4. Sử dụng HTML formatting:\n");
+        prompt.append("   - <h2> cho tiêu đề chính\n");
+        prompt.append("   - <h3> cho tiêu đề phụ\n");
+        prompt.append("   - <p> cho đoạn văn\n");
+        prompt.append("   - <strong> cho từ khóa quan trọng\n");
+        prompt.append("   - <ul><li> cho danh sách tính năng\n");
+        prompt.append("   - <blockquote> cho highlights đặc biệt\n");
+        prompt.append("5. Nội dung tập trung vào:\n");
+        prompt.append("   - Tính năng bảo mật vượt trội\n");
+        prompt.append("   - Chất liệu cao cấp, bền bỉ\n");
+        prompt.append("   - Công nghệ thông minh hiện đại\n");
+        prompt.append("   - Dễ sử dụng, phù hợp mọi lứa tuổi\n");
+        prompt.append("   - Thiết kế sang trọng, đẳng cấp\n");
+        prompt.append("6. Giọng văn thuyết phục nhưng không quảng cáo quá lố\n");
+        prompt.append("7. Nhấn mạnh lợi ích người dùng thực tế\n");
+        prompt.append("8. Tạo cảm giác tin cậy và chuyên nghiệp\n\n");
+        prompt.append("Hãy viết mô tả sản phẩm hoàn chỉnh với HTML formatting:");
+        
+        return prompt.toString();
+    }
+
     @PostMapping("/product-assistant/by-category")
     public ResponseEntity<Map<String, Object>> productAssistantByCategory(@RequestBody Map<String, String> request) {
         try {

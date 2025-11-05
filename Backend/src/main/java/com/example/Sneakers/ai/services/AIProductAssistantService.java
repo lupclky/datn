@@ -318,7 +318,13 @@ public class AIProductAssistantService {
                 7. Độ dài: 100-200 từ, ngắn gọn, rõ ràng
                 8. Nếu không chắc chắn, khuyên khách liên hệ hotline hoặc cửa hàng để được tư vấn chi tiết
                 
-                Hãy trả lời cụ thể, hữu ích và khuyến khích khách hàng liên hệ nếu cần hỗ trợ thêm.
+                ⚠️ NGHIÊM CẤM:
+                - KHÔNG giới thiệu hoặc đề xuất sản phẩm khác
+                - KHÔNG đề cập đến các model khóa cụ thể
+                - KHÔNG khuyến khích mua sản phẩm mới hoặc nâng cấp
+                - ĐÂY LÀ HỖ TRỢ BẢO HÀNH, KHÔNG PHẢI BÁN HÀNG
+                
+                Chỉ tập trung vào trả lời câu hỏi về chính sách bảo hành và hướng dẫn khách hàng thực hiện quyền bảo hành.
                 """, query);
     }
 
@@ -348,7 +354,14 @@ public class AIProductAssistantService {
                 6. Độ dài: 150-250 từ, tập trung vào giải pháp thực tế
                 7. Nếu lỗi phức tạp, khuyên khách liên hệ kỹ thuật viên
                 
-                Hãy chẩn đoán chính xác và đưa ra giải pháp rõ ràng, dễ thực hiện.
+                ⚠️ NGHIÊM CẤM:
+                - KHÔNG giới thiệu hoặc đề xuất mua sản phẩm khác
+                - KHÔNG đề xuất "nâng cấp" hoặc "thay thế" bằng model mới
+                - KHÔNG đề cập đến các sản phẩm cụ thể đang bán
+                - ĐÂY LÀ HỖ TRỢ KỸ THUẬT, KHÔNG PHẢI BÁN HÀNG
+                - Chỉ tập trung vào KHẮC PHỤC LỖI của sản phẩm hiện tại
+                
+                Hãy chẩn đoán chính xác và đưa ra giải pháp rõ ràng để khách hàng có thể sửa được lỗi của sản phẩm hiện có.
                 """, issueDescription);
     }
 }

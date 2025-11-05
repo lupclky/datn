@@ -25,3 +25,4 @@ export interface BannerListResponse {
   total: number;
 }
 
+

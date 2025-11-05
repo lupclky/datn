@@ -55,16 +55,27 @@ public class ProductResponse extends BaseResponse{
                     .build())
                 .collect(Collectors.toList()) : new ArrayList<>();
 
+        // Get product images - ensure we have the list even if lazy loaded
+        List<ProductImage> productImages = product.getProductImages() != null ? 
+            product.getProductImages() : new ArrayList<>();
+        
+        // If no thumbnail but has product_images, set first image as thumbnail
+        String thumbnail = product.getThumbnail();
+        if ((thumbnail == null || thumbnail.trim().isEmpty() || "null".equals(thumbnail)) 
+            && !productImages.isEmpty() && productImages.get(0) != null) {
+            thumbnail = productImages.get(0).getImageUrl();
+        }
+
         ProductResponse productResponse = ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .price(product.getPrice())
-                .thumbnail(product.getThumbnail())
+                .thumbnail(thumbnail)
                 .description(product.getDescription())
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .discount(product.getDiscount())
                 .quantity(product.getQuantity())
-                .productImages(product.getProductImages())
+                .productImages(productImages)
                 .features(features)
                 .build();
         productResponse.setCreatedAt(product.getCreatedAt());

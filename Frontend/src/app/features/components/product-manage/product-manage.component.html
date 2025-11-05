@@ -152,7 +152,8 @@
           <img [src]="getProductImage(product)" 
                [alt]="product.name" 
                class="product-thumbnail"
-               style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" />
+               style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;"
+               (error)="$any($event.target).src = 'assets/images/no-image.png'" />
         </td>
         <td>
           <div class="product-name">{{ product.name }}</div>
@@ -300,14 +301,33 @@
 
         <!-- Description -->
         <div class="col-12">
-          <label for="description" class="form-label">Mô tả</label>
-          <textarea id="description"
-                    pInputTextarea
-                    formControlName="description"
-                    rows="4"
-                    placeholder="Nhập mô tả sản phẩm"
-                    class="w-full">
-          </textarea>
+          <label for="description" class="form-label">Mô tả sản phẩm (HTML)</label>
+          
+          <!-- AI Generate Button -->
+          <div class="ai-generate-section mb-3">
+            <button pButton 
+                    type="button"
+                    label="Tạo mô tả bằng KVK Intelligence" 
+                    icon="pi pi-sparkles"
+                    class="kvk-ai-button"
+                    (click)="generateProductDescription()"
+                    [disabled]="isGeneratingDescription || !productForm.get('name')?.value"
+                    [loading]="isGeneratingDescription">
+            </button>
+          </div>
+
+          <!-- Loading Message -->
+          <div *ngIf="isGeneratingDescription" class="ai-loading-message">
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>KVK Intelligence đang tạo mô tả chuyên nghiệp cho sản phẩm...</span>
+          </div>
+
+          <quill-editor 
+            formControlName="description"
+            [modules]="quillModules"
+            placeholder="Nhập mô tả chi tiết về sản phẩm hoặc sử dụng KVK Intelligence để tự động tạo..."
+            [styles]="{'min-height': '300px'}">
+          </quill-editor>
         </div>
 
         <!-- Image Upload -->

@@ -96,6 +96,17 @@ export class AiService {
     );
   }
 
+  generateProductDescription(productName: string, category?: string, features?: string): Observable<{content: string}> {
+    const payload: any = { productName };
+    if (category) payload.category = category;
+    if (features) payload.features = features;
+    
+    return this.httpClient.post<{content: string}>(
+      `${this.apiUrl}/ai/chat/generate-product-description`,
+      payload
+    );
+  }
+
   // Warranty advice
   warrantyAdvice(query: string): Observable<ChatResponse> {
     return this.httpClient.post<ChatResponse>(

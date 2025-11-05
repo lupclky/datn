@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -153,21 +155,92 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/images/{imageName}")
+    @GetMapping("/images/{imageName:.+}")
     public ResponseEntity<?> viewImage(@PathVariable String imageName) {
         try {
-            Path imagePath = Paths.get("uploads/" + imageName);
-            UrlResource resource = new UrlResource(imagePath.toUri());
-
-            if (resource.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG).body(resource);
-            } else {
+            // URL decode the image name
+            String decodedImageName = URLDecoder.decode(imageName, StandardCharsets.UTF_8);
+            
+            // Remove any path prefixes like "image-uploads/" or "uploads/" if present
+            String cleanImageName = decodedImageName;
+            if (decodedImageName.contains("/")) {
+                cleanImageName = decodedImageName.substring(decodedImageName.lastIndexOf("/") + 1);
+            }
+            
+            // Get absolute path to Backend directory
+            String userDir = System.getProperty("user.dir");
+            Path currentDir = Paths.get(userDir).toAbsolutePath();
+            Path backendRoot = currentDir;
+            
+            // Auto-detect Backend folder: if current dir is project root, go to Backend
+            // Check if uploads folder exists in current directory, if not, check parent/Backend
+            Path uploadsInCurrent = currentDir.resolve("uploads");
+            if (!Files.exists(uploadsInCurrent)) {
+                // Try going to Backend folder
+                Path backendDir = currentDir.resolve("Backend");
+                if (Files.exists(backendDir.resolve("uploads"))) {
+                    backendRoot = backendDir;
+                } else if (currentDir.getParent() != null) {
+                    // Maybe running from Backend folder, check if uploads exists
+                    Path parentBackend = currentDir.getParent().resolve("Backend");
+                    if (Files.exists(parentBackend.resolve("uploads"))) {
+                        backendRoot = parentBackend;
+                    }
+                }
+            }
+            
+            logger.info("Loading image: original={}, clean={}, backendRoot={}, currentDir={}", 
+                    decodedImageName, cleanImageName, backendRoot.toAbsolutePath(), currentDir);
+            
+            // Try multiple possible locations (order matters - try most common first)
+            Path[] possiblePaths = {
+                backendRoot.resolve("uploads").resolve(cleanImageName),
+                backendRoot.resolve("image-uploads").resolve(cleanImageName),
+                backendRoot.resolve("uploads").resolve(decodedImageName),
+                backendRoot.resolve("image-uploads").resolve(decodedImageName),
+                currentDir.resolve("uploads").resolve(cleanImageName), // Current dir uploads
+                currentDir.resolve("image-uploads").resolve(cleanImageName),
+                Paths.get("uploads").resolve(cleanImageName).toAbsolutePath(), // Relative to working dir
+                Paths.get("image-uploads").resolve(cleanImageName).toAbsolutePath()
+            };
+            
+            UrlResource resource = null;
+            for (Path imagePath : possiblePaths) {
+                try {
+                    Path absolutePath = imagePath.toAbsolutePath();
+                    logger.debug("Trying path: {}", absolutePath);
+                    
+                    if (Files.exists(absolutePath) && Files.isReadable(absolutePath)) {
+                        resource = new UrlResource(absolutePath.toUri());
+                        logger.info("Found image at: {}", absolutePath);
+                        return ResponseEntity.ok()
+                                .contentType(MediaType.IMAGE_JPEG)
+                                .body(resource);
+                    }
+                } catch (Exception e) {
+                    logger.debug("Path not accessible: {} - {}", imagePath, e.getMessage());
+                    continue;
+                }
+            }
+            
+            // If no image found, return notfound.jpg from uploads
+            Path notFoundPath = backendRoot.resolve("uploads").resolve("notfound.jpg");
+            if (!Files.exists(notFoundPath)) {
+                notFoundPath = Paths.get("uploads/notfound.jpg");
+            }
+            
+            if (Files.exists(notFoundPath)) {
+                logger.warn("Image not found: {}, returning notfound.jpg from {}", 
+                        imageName, notFoundPath.toAbsolutePath());
                 return ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_JPEG)
-                        .body(new UrlResource(Paths.get("uploads/notfound.jpg").toUri()));
+                        .body(new UrlResource(notFoundPath.toAbsolutePath().toUri()));
             }
+            
+            logger.error("Image not found and notfound.jpg also missing: {}", imageName);
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
+            logger.error("Error loading image: {}", imageName, e);
             return ResponseEntity.notFound().build();
         }
     }

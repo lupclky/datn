@@ -25,3 +25,4 @@ INSERT INTO banners (title, description, image_url, button_text, button_link, bu
 ('Khóa thông minh Samsung', 'Công nghệ tiên tiến từ Hàn Quốc', 'banner1.jpg', 'Xem ngay', '/allProduct', 'primary', 1, TRUE, '2024-01-01 00:00:00', '2025-12-31 23:59:59', NOW(), NOW()),
 ('Khuyến mãi đặc biệt', 'Giảm giá lên đến 30%', 'banner2.jpg', 'Mua ngay', '/allProduct', 'danger', 2, TRUE, '2024-01-01 00:00:00', '2025-12-31 23:59:59', NOW(), NOW());
 
+

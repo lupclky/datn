@@ -97,7 +97,7 @@ public class ProductService implements IProductService {
 
     @Override
     public List<Product> allProducts() {
-        return productRepository.findAll();
+        return productRepository.findAllWithImages();
     }
 
     @Override

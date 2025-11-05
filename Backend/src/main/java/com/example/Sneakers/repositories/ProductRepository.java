@@ -14,6 +14,9 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product,Long> {
     Page<Product> findAll(Pageable pageable); //Phân trang
+    
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages")
+    List<Product> findAllWithImages();
 
     boolean existsByName(String name);
 
@@ -22,7 +25,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     @Query("SELECT SUM(p.quantity) FROM Product p")
     Long sumTotalQuantity();
 
-    @Query("SELECT p FROM Product p WHERE " +
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages WHERE " +
             "(:categoryId IS NULL OR :categoryId = 0 OR p.category.id = :categoryId) " +
             "AND (:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword% OR p.description LIKE %:keyword%)")
     Page<Product> searchProducts(
@@ -31,22 +34,22 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             Pageable pageable);
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
     Optional<Product> getDetailProduct(@Param("productId") Long productId);
-    @Query("SELECT p FROM Product p WHERE p.id IN :productIds")
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id IN :productIds")
     List<Product> findProductsByIds(@Param("productIds") List<Long> productIds);
     long count();
-    @Query("SELECT p FROM Product p " +
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages " +
             "WHERE (:minPrice IS NULL OR p.price >= :minPrice) " +
             "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
     List<Product> getProductsByPrice(
             @Param("minPrice") Long minPrice,
             @Param("maxPrice") Long maxPrice);
 
-    @Query("SELECT p FROM Product p " +
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages " +
                 "WHERE (:keyword IS NULL OR :keyword = '' " +
                     "OR p.name LIKE %:keyword% OR p.description LIKE %:keyword%)")
     List<Product> getProductsByKeyword(
             @Param("keyword") String keyword);
             
-    @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId")
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.category.id = :categoryId")
     List<Product> getProductsByCategory(@Param("categoryId") Long categoryId);
 }

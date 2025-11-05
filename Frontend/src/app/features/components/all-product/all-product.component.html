@@ -156,7 +156,10 @@
                         @if(item.quantity === 0){
                           <p-badge value="Hết hàng" severity="warning"></p-badge>
                         }
-                        <img [src]="getProductImageUrl(item)" [alt]="item.name" class="img-fluid">
+                        <img [src]="getProductImageUrl(item)" 
+                             [alt]="item.name" 
+                             class="img-fluid"
+                             (error)="$any($event.target).src = 'assets/images/no-image.png'">
                       </div>
                       <div class="product-info">
                         <h3 class="product-name" (click)="navigateToDetail(item.id)">{{item.name}}</h3>

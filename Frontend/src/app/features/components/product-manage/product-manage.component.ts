@@ -17,13 +17,16 @@ import { TagModule } from 'primeng/tag';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TooltipModule } from 'primeng/tooltip';
+import { QuillModule } from 'ngx-quill';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoriesService } from '../../../core/services/categories.service';
 import { LockFeatureService, LockFeature } from '../../../core/services/lock-feature.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AiService } from '../../../core/services/ai.service';
 import { ProductDto } from '../../../core/dtos/product.dto';
 import { AllProductDto } from '../../../core/dtos/AllProduct.dto';
 import { environment } from '../../../../environments/environment.development';
+import { finalize } from 'rxjs';
 
 interface ProductUploadReq {
   name: string;
@@ -55,7 +58,8 @@ interface ProductUploadReq {
     TagModule,
     MultiSelectModule,
     FileUploadModule,
-    TooltipModule
+    TooltipModule,
+    QuillModule
   ],
   providers: [MessageService, ToastService, ConfirmationService],
   templateUrl: './product-manage.component.html',
@@ -82,6 +86,20 @@ export class ProductManageComponent implements OnInit {
   imagePreviews: string[] = [];
   isUploading: boolean = false;
   apiImage: string = environment.apiImage;
+  isGeneratingDescription: boolean = false;
+
+  // Quill editor configuration
+  quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['link', 'image', 'video'],
+      ['clean']
+    ]
+  };
 
   categoriesOptions: any[] = [];
   featuresOptions: any[] = [];
@@ -112,7 +130,8 @@ export class ProductManageComponent implements OnInit {
     private toastService: ToastService,
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private aiService: AiService
   ) {
     this.initForm();
   }
@@ -408,9 +427,17 @@ export class ProductManageComponent implements OnInit {
   }
 
   getProductImage(product: ProductDto): string {
-    if (product.thumbnail) {
+    // If product has a thumbnail, use it
+    if (product.thumbnail && product.thumbnail.trim() !== '') {
       return `${this.apiImage}${product.thumbnail}`;
     }
+    
+    // If no thumbnail but has product_images, use the first one
+    if (product.product_images && product.product_images.length > 0) {
+      return `${this.apiImage}${product.product_images[0].image_url}`;
+    }
+    
+    // Default image if no images available
     return 'assets/images/no-image.png';
   }
 
@@ -435,8 +462,51 @@ export class ProductManageComponent implements OnInit {
 
   getCategoryName(categoryId: number | null): string {
     if (!categoryId) return 'N/A';
-    const category = this.categoriesOptions.find(cat => cat.value === categoryId);
-    return category ? category.label : 'N/A';
+    const category = this.categoriesOptions.find(cat => cat['value'] === categoryId);
+    return category ? category['label'] : 'N/A';
+  }
+
+  generateProductDescription(): void {
+    const productName = this.productForm.get('name')?.value;
+    const categoryId = this.productForm.get('category_id')?.value;
+    const featureIds = this.productForm.get('featureIds')?.value || [];
+
+    if (!productName) {
+      this.toastService.warn('Vui lòng nhập tên sản phẩm trước');
+      return;
+    }
+
+    // Get category name
+    const categoryName = this.getCategoryName(categoryId);
+
+    // Get feature names
+    const featureNames = featureIds
+      .map((id: number) => this.featuresOptions.find(f => f['value'] === id)?.['label'])
+      .filter((name: string | undefined) => name)
+      .join(', ');
+
+    this.isGeneratingDescription = true;
+
+    this.aiService.generateProductDescription(
+      productName,
+      categoryName !== 'N/A' ? categoryName : undefined,
+      featureNames || undefined
+    ).pipe(
+      finalize(() => {
+        this.isGeneratingDescription = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: (response: { content: string }) => {
+        this.productForm.patchValue({ description: response.content });
+        this.toastService.success('KVK Intelligence đã tạo mô tả sản phẩm thành công!');
+        this.cdr.markForCheck();
+      },
+      error: (error: any) => {
+        console.error('Error generating product description:', error);
+        this.toastService.showError('Lỗi', 'Không thể tạo mô tả sản phẩm. Vui lòng thử lại.');
+      }
+    });
   }
 }
 
