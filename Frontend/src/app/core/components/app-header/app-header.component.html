@@ -3,16 +3,15 @@
     <!-- Left Section: Logo + Brand Name -->
     <div class="header-left">
       <div class="brand-section">
-        <img src="../../../../assets/images/hvmlogo.gif" alt="Khoá vân tay Korea" class="logo-img">
-        <h1 class="brand-name">
-          <a [routerLink]="['/']">Khoá vân tay Korea</a>
-        </h1>
+        <a [routerLink]="['/']">
+          <img src="../../../../assets/images/hvmlogo.gif" alt="Trang chủ" class="logo-img">
+        </a>
       </div>
+      
     </div>
 
-    <!-- Right Section: Search, User & Cart -->
-    <div class="header-right">
-      <!-- Search -->
+    <!-- Center Section: Search -->
+    <div class="header-search">
       <div class="search-container">
         <div class="search-input-wrapper">
           <input 
@@ -52,11 +51,17 @@
           <div class="no-results">Không tìm thấy sản phẩm nào</div>
         </div>
       </div>
+    </div>
+
+    <!-- Right Section: User & Cart -->
+    <div class="header-right">
+
+      
 
       <!-- User Section -->
       @if(token == null) {
         <div class="auth-links">
-          <a [routerLink]="['/auth-login']" class="auth-link">Đăng nhập</a>
+          <a [routerLink]="['/auth-login']" class="auth-link pill-strong">Đăng nhập</a>
           <span class="divider">|</span>
           <a [routerLink]="['/register']" class="auth-link">Đăng ký</a>
         </div>

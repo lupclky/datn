@@ -4,7 +4,7 @@
   flex-direction: column;
   margin: 0;
   padding: 0;
-  background: #1a1a1a;
+  background: #f8f9fa; /* match page background to avoid dark gap */
 }
 
 .layout-topbar {
@@ -27,9 +27,9 @@
 
 .layout-main-content {
   flex: 1;
-  margin-top: 125px; // Header (65px) + Navbar (60px)
+  margin-top: 30px; /* actual header height */
   background: #f8f9fa;
-  min-height: calc(100vh - 125px);
+  min-height: calc(100vh - 30px);
 }
 
 /* Remove any default margins and ensure seamless connection */
@@ -44,7 +44,7 @@
   body {
     margin: 0;
     padding: 0;
-    background: #1a1a1a;
+    background: #f8f9fa; /* keep consistent */
   }
   
   * {
