@@ -3,14 +3,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AiService, ChatResponse } from '../../services/ai.service';
-import { finalize } from 'rxjs/operators';
+import { ChatService, ChatMessage as StaffChatMessage } from '../../services/chat.service';
+import { UserService } from '../../services/user.service';
+import { finalize, catchError, tap, takeUntil } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 import { PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { BaseComponent } from '../../commonComponent/base.component';
+import { ToastService } from '../../services/toast.service';
 
 interface ChatMessage {
   content: string;
-  sender: 'user' | 'bot';
+  sender: 'user' | 'bot' | 'staff';
   timestamp: Date;
   isError?: boolean;
   image?: string; // Base64 image data
@@ -21,31 +26,58 @@ interface ChatMessage {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './ai-chatbot.component.html',
-  styleUrls: ['./ai-chatbot.component.scss']
+  styleUrls: ['./ai-chatbot.component.scss'],
+  providers: [ToastService]
 })
-export class AiChatbotComponent implements OnInit {
+export class AiChatbotComponent extends BaseComponent implements OnInit {
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   isOpen = signal(false);
+  chatMode = signal<'ai' | 'staff'>('ai'); // 'ai' or 'staff'
   messages = signal<ChatMessage[]>([]);
+  staffMessages = signal<StaffChatMessage[]>([]);
   userInput = signal('');
   isLoading = signal(false);
   selectedImage = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
+  selectedFile = signal<File | null>(null); // For staff chat file attachments
+  filePreview = signal<string | null>(null); // For staff chat file preview
+  currentUserId: number = 0;
 
   // Computed properties
-  hasMessages = computed(() => this.messages().length > 0);
-  canSend = computed(() => this.userInput().trim().length > 0 || this.selectedImage() !== null);
+  hasMessages = computed(() => this.messages().length > 0 || this.staffMessages().length > 0);
+  canSend = computed(() => {
+    const hasText = this.userInput().trim().length > 0;
+    const hasImage = this.selectedImage() !== null;
+    const hasFile = this.selectedFile() !== null;
+    return hasText || hasImage || hasFile;
+  });
 
   constructor(
     private aiService: AiService,
+    private chatService: ChatService,
+    private userService: UserService,
+    private toastService: ToastService,
     private httpClient: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) {
+    super();
+    if (isPlatformBrowser(this.platformId) && typeof localStorage !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        this.userService.getInforUser(token).pipe(
+          tap(user => {
+            this.currentUserId = user.id || 0;
+          }),
+          takeUntil(this.destroyed$)
+        ).subscribe();
+      }
+    }
+  }
 
   ngOnInit(): void {
-    // Add welcome message with examples
+    // Add welcome message with examples for AI mode
     const welcomeMessage = `Xin chào! 👋 Tôi là trợ lý AI tư vấn khóa điện tử của Locker Korea. Tôi có quyền truy cập vào toàn bộ database sản phẩm khóa vân tay, khóa điện tử của cửa hàng.
 
 Bạn có thể hỏi tôi những câu như:
@@ -62,6 +94,44 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     
     // Check if AI is initialized
     this.checkAIStatus();
+    
+    // Load staff messages if in staff mode
+    this.loadStaffMessages();
+    
+    // Auto refresh staff messages every 5 seconds
+    if (isPlatformBrowser(this.platformId)) {
+      setInterval(() => {
+        if (this.chatMode() === 'staff') {
+          this.loadStaffMessages();
+        }
+      }, 5000);
+    }
+  }
+  
+  switchMode(mode: 'ai' | 'staff'): void {
+    this.chatMode.set(mode);
+    if (mode === 'staff') {
+      this.loadStaffMessages();
+    }
+  }
+  
+  loadStaffMessages(): void {
+    // Load messages even if user is not logged in (guest user)
+    const hasToken = typeof localStorage !== 'undefined' && localStorage.getItem('token') !== null;
+    
+    // Load messages (will return public messages for guest users)
+    this.chatService.getMessages().pipe(
+      catchError(err => {
+        console.error('Failed to load staff messages:', err);
+        return of([]);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe(messages => {
+      // Messages from backend are sorted by createdAt ASC (oldest first)
+      // Keep this order for display (oldest at top, newest at bottom)
+      this.staffMessages.set(messages);
+      this.scrollToBottom();
+    });
   }
 
   toggleChat(): void {
@@ -73,7 +143,120 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
 
     const message = this.userInput().trim();
     const image = this.selectedImage();
+    const mode = this.chatMode();
 
+    if (mode === 'staff') {
+      // Send staff chat message
+      if (!message.trim() && !this.selectedImage() && !this.selectedFile()) return;
+      
+      const hasToken = typeof localStorage !== 'undefined' && localStorage.getItem('token') !== null;
+      
+      // If file is selected, send as file
+      if (this.selectedFile()) {
+        const file = this.selectedFile();
+        if (file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('receiverId', '');
+          formData.append('message', message.trim() || '');
+          
+          // Determine message type based on file type
+          const messageType = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+          formData.append('messageType', messageType);
+          formData.append('isStaffMessage', 'false');
+
+          const headers: any = {};
+          if (hasToken) {
+            headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+          } else {
+            // Add guest session ID for guest users
+            let guestSessionId = localStorage.getItem('guestSessionId');
+            if (!guestSessionId) {
+              guestSessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+              localStorage.setItem('guestSessionId', guestSessionId);
+            }
+            headers['X-Guest-Session-Id'] = guestSessionId;
+          }
+
+          this.chatService.sendFileMessage(formData, headers).pipe(
+            tap(() => {
+              this.userInput.set('');
+              this.clearImage();
+              this.clearFile();
+              this.loadStaffMessages();
+            }),
+            catchError(err => {
+              this.toastService.fail('Không thể gửi file');
+              return of(null);
+            }),
+            takeUntil(this.destroyed$)
+          ).subscribe();
+          return;
+        }
+      }
+      
+      // If image is selected (legacy support), send as image
+      if (this.selectedImage()) {
+        const imageFile = this.selectedImage();
+        if (imageFile) {
+          const formData = new FormData();
+          formData.append('file', imageFile);
+          formData.append('receiverId', '');
+          formData.append('message', message.trim() || '');
+          formData.append('messageType', 'IMAGE');
+          formData.append('isStaffMessage', 'false');
+
+          const headers: any = {};
+          if (hasToken) {
+            headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+          } else {
+            // Add guest session ID for guest users
+            let guestSessionId = localStorage.getItem('guestSessionId');
+            if (!guestSessionId) {
+              guestSessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+              localStorage.setItem('guestSessionId', guestSessionId);
+            }
+            headers['X-Guest-Session-Id'] = guestSessionId;
+          }
+
+          this.chatService.sendFileMessage(formData, headers).pipe(
+            tap(() => {
+              this.userInput.set('');
+              this.clearImage();
+              this.clearFile();
+              this.loadStaffMessages();
+            }),
+            catchError(err => {
+              this.toastService.fail('Không thể gửi hình ảnh');
+              return of(null);
+            }),
+            takeUntil(this.destroyed$)
+          ).subscribe();
+          return;
+        }
+      }
+      
+      // Send text message only
+      this.chatService.sendMessage({
+        receiverId: null,
+        message: message.trim(),
+        messageType: 'TEXT',
+        isStaffMessage: false
+      }, hasToken).pipe(
+        tap(() => {
+          this.userInput.set('');
+          this.loadStaffMessages();
+        }),
+        catchError(err => {
+          this.toastService.fail('Không thể gửi tin nhắn');
+          return of(null);
+        }),
+        takeUntil(this.destroyed$)
+      ).subscribe();
+      return;
+    }
+
+    // AI mode
     if (message && !image) {
       this.addMessage(message, 'user');
     }
@@ -232,8 +415,58 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     }
   }
 
+  clearFile(): void {
+    this.selectedFile.set(null);
+    this.filePreview.set(null);
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
   triggerFileInput(): void {
     this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: Event): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Validate file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+          this.toastService.fail('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 10MB.');
+          return;
+        }
+
+        this.selectedFile.set(file);
+
+        // Create preview for images
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.filePreview.set(e.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          // For non-image files, just set the file name as preview
+          this.filePreview.set(file.name);
+        }
+      }
+    }
+  }
+
+  onFileInputChange(event: Event): void {
+    if (this.chatMode() === 'staff') {
+      this.onFileSelected(event);
+    } else {
+      this.onImageSelected(event);
+    }
+  }
+
+  removeFile(): void {
+    this.clearFile();
   }
 
   onKeyPress(event: KeyboardEvent): void {
@@ -255,8 +488,12 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   clearChat(): void {
-    this.messages.set([]);
-    const welcomeMessage = `Xin chào! 👋 Tôi là trợ lý AI tư vấn khóa điện tử của Locker Korea. Tôi có quyền truy cập vào toàn bộ database sản phẩm khóa vân tay, khóa điện tử của cửa hàng.
+    if (this.chatMode() === 'staff') {
+      this.staffMessages.set([]);
+      this.loadStaffMessages();
+    } else {
+      this.messages.set([]);
+      const welcomeMessage = `Xin chào! 👋 Tôi là trợ lý AI tư vấn khóa điện tử của Locker Korea. Tôi có quyền truy cập vào toàn bộ database sản phẩm khóa vân tay, khóa điện tử của cửa hàng.
 
 Bạn có thể hỏi tôi những câu như:
 • "Cho tôi xem khóa vân tay cho cửa nhà dưới 5 triệu VND"
@@ -267,8 +504,9 @@ Bạn có thể hỏi tôi những câu như:
 • "Gợi ý khóa điện tử cho cửa kính"
 
 Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
-    
-    this.addMessage(welcomeMessage, 'bot');
+      
+      this.addMessage(welcomeMessage, 'bot');
+    }
   }
 
   private checkAIStatus(): void {
@@ -324,5 +562,43 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
           this.addMessage(errorMessage, 'bot', true);
         }
       });
+  }
+
+  openImagePreview(imageUrl: string): void {
+    window.open(imageUrl, '_blank');
+  }
+
+  getFileUrl(fileUrl: string): string {
+    if (!fileUrl) {
+      return '';
+    }
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+      return fileUrl;
+    }
+    
+    // Remove duplicate /api/v1 if fileUrl already contains it
+    // Backend returns: /api/v1/chat/files/...
+    // environment.apiUrl: http://localhost:8089/api/v1
+    // We need to avoid duplication
+    let normalizedUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+    
+    // If fileUrl already starts with /api/v1, remove it since apiUrl already contains it
+    if (normalizedUrl.startsWith('/api/v1/')) {
+      normalizedUrl = normalizedUrl.substring('/api/v1'.length);
+    }
+    
+    // Ensure apiUrl doesn't have trailing slash and normalizedUrl starts with /
+    const baseUrl = environment.apiUrl.endsWith('/') 
+      ? environment.apiUrl.slice(0, -1) 
+      : environment.apiUrl;
+    
+    return `${baseUrl}${normalizedUrl}`;
+  }
+
+  handleImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    console.error('Failed to load image:', img.src);
+    // Optionally show a placeholder or error message
+    img.style.display = 'none';
   }
 } 

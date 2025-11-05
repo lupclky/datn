@@ -241,12 +241,14 @@ public class OrderService implements IOrderService {
         String extractedToken = token.substring(7);
         User user = userService.getUserDetailsFromToken(extractedToken);
 
-        if (user.getRole().getName().equals(Role.ADMIN)) {
+        // Allow ADMIN and STAFF to view any order
+        if (user.getRole() != null && 
+            (user.getRole().getName().equals(Role.ADMIN) || user.getRole().getName().equals(Role.STAFF))) {
             return OrderResponse.fromOrder(orderRepository.findByIdWithDetails(orderId)
                     .orElseThrow(() -> new Exception("Cannot find order with id = " + orderId)));
-
         }
 
+        // Regular users can only view their own orders
         Order order = orderRepository.findByIdWithDetails(orderId).orElse(null);
         if (order == null) {
             throw new Exception("Cannot find order with id = " + orderId);

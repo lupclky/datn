@@ -51,6 +51,7 @@ public class OrderController {
         }
     }
     @GetMapping("/admin")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getALlOrders(
             @RequestHeader("Authorization") String token){
         try {
@@ -97,6 +98,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateOrder(
             @Valid @PathVariable Long id,
             @Valid @RequestBody OrderDTO orderDTO){
@@ -110,6 +112,7 @@ public class OrderController {
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateOrderStatus(
             @PathVariable("id") Long id,
             @RequestBody StatusDTO statusDTO,
@@ -128,6 +131,7 @@ public class OrderController {
     }
 
     @PutMapping("/status/{id}")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateOrderStatus(
             @PathVariable Long id,
             @RequestBody Map<String, String> body,
@@ -145,6 +149,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteOrder(@PathVariable Long id) {
         //xoa mem => Cập nhật active = false
         orderService.deleteOrder(id);

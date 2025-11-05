@@ -1,6 +1,7 @@
 package com.example.Sneakers.services;
 
 import com.example.Sneakers.dtos.ReviewDTO;
+import com.example.Sneakers.dtos.ReviewReplyDTO;
 import com.example.Sneakers.exceptions.DataNotFoundException;
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.Review;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,6 +116,118 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new DataNotFoundException("Review not found"));
         return ReviewResponse.fromReview(review);
+    }
+
+    @Transactional
+    public ReviewResponse replyToReview(ReviewReplyDTO replyDTO, Long staffId) throws DataNotFoundException {
+        Review review = reviewRepository.findById(replyDTO.getReviewId())
+                .orElseThrow(() -> new DataNotFoundException("Review not found"));
+        
+        User staff = userRepository.findById(staffId)
+                .orElseThrow(() -> new DataNotFoundException("Staff not found"));
+        
+        // Check if staff has STAFF or ADMIN role
+        if (!staff.getRole().getName().equals("STAFF") && !staff.getRole().getName().equals("ADMIN")) {
+            throw new RuntimeException("Chỉ nhân viên hoặc admin mới có quyền phản hồi đánh giá");
+        }
+        
+        review.setStaffReply(replyDTO.getReply());
+        review.setStaffReplyBy(staff);
+        review.setStaffReplyAt(LocalDateTime.now());
+        
+        Review updatedReview = reviewRepository.save(review);
+        return ReviewResponse.fromReview(updatedReview);
+    }
+
+    public Page<ReviewResponse> getAllReviews(int page, int size, String keyword, Long productId) {
+        // Use a custom query that handles missing users gracefully
+        // We'll use findAll with JOIN FETCH to load user, but handle missing users
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Review> reviewsPage;
+        
+        if (productId != null) {
+            // Filter by productId
+            reviewsPage = reviewRepository.findByProductId(productId, pageable);
+        } else {
+            // Get all reviews with pagination
+            reviewsPage = reviewRepository.findAll(pageable);
+        }
+        
+        // Filter by keyword if provided (in memory after loading)
+        List<Review> filteredReviews = reviewsPage.getContent();
+        
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String keywordLower = keyword.toLowerCase();
+            filteredReviews = filteredReviews.stream()
+                .filter(review -> {
+                    try {
+                        boolean matchesComment = review.getComment() != null && 
+                            review.getComment().toLowerCase().contains(keywordLower);
+                        boolean matchesUserName = review.getUser() != null && 
+                            review.getUser().getFullName() != null &&
+                            review.getUser().getFullName().toLowerCase().contains(keywordLower);
+                        return matchesComment || matchesUserName;
+                    } catch (Exception e) {
+                        // If user is missing, just check comment
+                        return review.getComment() != null && 
+                            review.getComment().toLowerCase().contains(keywordLower);
+                    }
+                })
+                .collect(Collectors.toList());
+        }
+        
+        // Filter out reviews with missing users
+        filteredReviews = filteredReviews.stream()
+            .filter(review -> {
+                try {
+                    // Try to access user - if it throws exception, user is missing
+                    if (review.getUser() == null) {
+                        return false; // Skip reviews with null user
+                    }
+                    // Try to access user id to trigger lazy loading and catch missing user
+                    review.getUser().getId();
+                    return true;
+                } catch (Exception e) {
+                    // User doesn't exist, skip this review
+                    System.err.println("ReviewService.getAllReviews() - Skipping review ID " + review.getId() + 
+                        " due to missing user: " + e.getMessage());
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
+        
+        // Apply pagination to filtered results
+        int total = filteredReviews.size();
+        int start = page * size;
+        int end = Math.min(start + size, total);
+        
+        List<Review> pageContent = start < total ? filteredReviews.subList(start, end) : new java.util.ArrayList<>();
+        
+        Page<Review> reviewPage = new org.springframework.data.domain.PageImpl<>(pageContent, pageable, total);
+        
+        return reviewPage.map(review -> {
+            try {
+                return ReviewResponse.fromReview(review);
+            } catch (Exception e) {
+                System.err.println("ReviewService.getAllReviews() - Error converting review ID " + review.getId() + ": " + e.getMessage());
+                // Return a response with null user info
+                ReviewResponse response = ReviewResponse.builder()
+                    .id(review.getId())
+                    .productId(review.getProduct() != null ? review.getProduct().getId() : null)
+                    .userId(null)
+                    .userName("Người dùng đã xóa")
+                    .rating(review.getRating())
+                    .comment(review.getComment())
+                    .createdAt(review.getCreatedAt())
+                    .updatedAt(review.getUpdatedAt())
+                    .staffReply(review.getStaffReply())
+                    .staffReplyBy(null)
+                    .staffReplyByName(null)
+                    .staffReplyAt(review.getStaffReplyAt())
+                    .build();
+                return response;
+            }
+        });
     }
 }
 

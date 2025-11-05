@@ -65,6 +65,7 @@ export class UserManageComponent extends BaseComponent implements OnInit {
   public userOptions: UserOption[] = [
     { label: 'Người dùng', value: 1 },
     { label: 'Quản trị viên', value: 2 },
+    { label: 'Nhân viên', value: 3 },
   ];
 
   public statusOptions = [
@@ -82,6 +83,7 @@ export class UserManageComponent extends BaseComponent implements OnInit {
   public roleMap = [
     'Người dùng',
     'Quản trị viên',
+    'Nhân viên',
   ];
 
   public userId!: number;
@@ -92,7 +94,7 @@ export class UserManageComponent extends BaseComponent implements OnInit {
   public showAddDialog = false;
   public editingUser: UserDto = {} as UserDto;
   public originalUser: UserDto = {} as UserDto;
-  public addUser: registerReq = {} as registerReq;
+  public addUser: registerReq & { role_id?: number } = {} as registerReq & { role_id?: number };
 
   // Order and Comment History
   public showOrderHistoryDialog = false;
@@ -375,6 +377,16 @@ export class UserManageComponent extends BaseComponent implements OnInit {
 
   onRoleChange(event: any, userId: number) {
     this.onCategoryChange(userId, event);
+  }
+
+  onEditRoleChange(roleId: number): void {
+    const selectedOption = this.userOptions.find(o => o.value === roleId);
+    if (selectedOption) {
+      this.editingUser.role = {
+        id: roleId,
+        name: selectedOption.label
+      };
+    }
   }
 
   changeActiveStatus(user: UserDto) {

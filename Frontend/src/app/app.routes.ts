@@ -19,6 +19,7 @@ import { RoleGuard } from './features/auth/authInterceptor/role.guard';
 import { CategoryManageComponent } from './features/components/category-manage/category-manage.component';
 import { UserManageComponent } from './features/components/user-manage/user-manage.component';
 import { OrderManageComponent } from './features/components/order-manage/order-manage.component';
+import { ReviewManageComponent } from './features/components/review-manage/review-manage.component';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 // import { VoucherManageComponent } from './features/components/voucher-manage/voucher-manage.component';
 import { VoucherManageComponent } from './features/components/voucher-manage/voucher-manage.component';
@@ -33,6 +34,8 @@ import { BannerManageComponent } from './features/components/banner-manage/banne
 import { NewsManageComponent } from './features/components/news-manage/news-manage.component';
 import { NewsDetailComponent } from './features/components/news-detail/news-detail.component';
 import { ProductManageComponent } from './features/components/product-manage/product-manage.component';
+import { StaffChatComponent } from './features/components/staff-chat/staff-chat.component';
+import { StaffGuard } from './features/auth/authInterceptor/staff.guard';
 
 export const routes: Routes = [
   {
@@ -144,6 +147,11 @@ export const routes: Routes = [
         canActivate: [RoleGuard]
       },
       {
+        path: 'reviewManage',
+        component: ReviewManageComponent,
+        canActivate: [RoleGuard]
+      },
+      {
         path: 'admin',
         children: ADMIN_ROUTES,
         canActivate: [RoleGuard]
@@ -185,6 +193,11 @@ export const routes: Routes = [
         path: 'user-profile',
         component: UserProfileComponent,
         canActivate: [AuthGuard]
+      },
+      {
+        path: 'staff/chat',
+        component: StaffChatComponent,
+        canActivate: [StaffGuard]
       }
     ]
   },

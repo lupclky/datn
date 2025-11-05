@@ -12,6 +12,7 @@ import { LoadingService } from '../../services/loading.service';
 import { takeUntil, tap, filter } from 'rxjs';
 import { AiChatbotComponent } from '../ai-chatbot/ai-chatbot.component';
 import { ScrollToTopComponent } from '../../../shared/components/scroll-to-top/scroll-to-top.component';
+import { CustomerChatComponent } from '../../../features/components/customer-chat/customer-chat.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -27,7 +28,8 @@ import { CommonModule } from '@angular/common';
     ProgressSpinnerModule,
     BlockUIModule,
     AiChatbotComponent,
-    ScrollToTopComponent
+    ScrollToTopComponent,
+    CustomerChatComponent
   ],
   templateUrl: './app-layout.component.html',
   styleUrl: './app-layout.component.scss'
@@ -99,8 +101,8 @@ export class AppLayoutComponent extends BaseComponent implements AfterViewInit, 
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll() {
-    // Don't hide header for admin users (roleId == 2)
-    if (this.roleId === 2) {
+    // Don't hide header for admin or staff users (roleId == 2 or 3)
+    if (this.roleId === 2 || this.roleId === 3) {
       this.isHeaderHidden = false;
       return;
     }

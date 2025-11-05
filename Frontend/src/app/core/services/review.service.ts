@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -12,6 +12,15 @@ export interface Review {
   comment?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  staffReply?: string;
+  staffReplyBy?: number;
+  staffReplyByName?: string;
+  staffReplyAt?: Date;
+}
+
+export interface ReviewReplyRequest {
+  reviewId: number;
+  reply: string;
 }
 
 export interface ReviewStats {
@@ -59,6 +68,40 @@ export class ReviewService {
 
   getReviewById(id: number): Observable<Review> {
     return this.http.get<Review>(`${this.apiUrl}/${id}`);
+  }
+
+  replyToReview(reply: ReviewReplyRequest): Observable<Review> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.post<Review>(`${this.apiUrl}/reply`, reply, { headers });
+  }
+
+  getAllReviews(page: number = 0, size: number = 15, keyword?: string, productId?: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    console.log('ReviewService.getAllReviews() - Token from localStorage:', token ? 'exists' : 'null');
+    
+    if (!token) {
+      console.error('ReviewService.getAllReviews() - No token found!');
+      throw new Error('No authentication token found');
+    }
+    
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+    let url = `${this.apiUrl}/admin/all?page=${page}&size=${size}`;
+    if (keyword) {
+      url += `&keyword=${encodeURIComponent(keyword)}`;
+    }
+    if (productId) {
+      url += `&productId=${productId}`;
+    }
+    console.log('ReviewService.getAllReviews() - Request URL:', url);
+    console.log('ReviewService.getAllReviews() - Headers:', headers.keys());
+    return this.http.get<any>(url, { headers });
   }
 }
 

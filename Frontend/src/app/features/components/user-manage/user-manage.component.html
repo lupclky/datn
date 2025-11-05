@@ -183,6 +183,17 @@
                 <label for="editDateOfBirth">Ngày sinh</label>
                 <p-calendar id="editDateOfBirth" [(ngModel)]="editingUser.date_of_birth" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
             </div>
+            <div class="field">
+                <label for="editRole">Vai trò</label>
+                <p-dropdown id="editRole"
+                            [options]="userOptions"
+                            [ngModel]="editingUser.role ? editingUser.role.id : null"
+                            (ngModelChange)="onEditRoleChange($event)"
+                            placeholder="Chọn vai trò"
+                            optionLabel="label"
+                            optionValue="value">
+                </p-dropdown>
+            </div>
         </div>
         <ng-template pTemplate="footer">
             <button pButton pRipple type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="closeEditDialog()"></button>
@@ -216,6 +227,16 @@
             <div class="field">
                 <label for="addDateOfBirth">Ngày sinh</label>
                 <p-calendar id="addDateOfBirth" [(ngModel)]="addUser.date_of_birth" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
+            </div>
+            <div class="field">
+                <label for="addRole">Vai trò</label>
+                <p-dropdown id="addRole"
+                            [options]="userOptions"
+                            [(ngModel)]="addUser.role_id"
+                            placeholder="Chọn vai trò"
+                            optionLabel="label"
+                            optionValue="value">
+                </p-dropdown>
             </div>
         </div>
         <ng-template pTemplate="footer">

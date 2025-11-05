@@ -1,0 +1,97 @@
+<!-- Floating Chat Button -->
+<button 
+  class="customer-chat-button"
+  (click)="toggleChat()"
+  [class.active]="isOpen"
+  title="Chat với nhân viên">
+  <i class="pi pi-comments"></i>
+  <span>Chat với nhân viên</span>
+</button>
+
+<!-- Chat Window -->
+<div class="customer-chat-window" [class.open]="isOpen">
+  <div class="chat-header">
+    <h3>Chat với nhân viên</h3>
+    <button class="close-button" (click)="toggleChat()">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
+
+  <div class="messages-container" #scrollContainer>
+    @if(messages.length === 0 && !isLoading) {
+      <div class="empty-state">
+        <p>Chưa có tin nhắn nào. Hãy gửi tin nhắn để bắt đầu!</p>
+      </div>
+    }
+    @for(message of messages; track message.id) {
+      <div class="message" [class.staff]="message.isStaffMessage" [class.customer]="!message.isStaffMessage">
+        <div class="message-bubble">
+          @if(message.messageType === 'IMAGE' && message.fileUrl) {
+            <img [src]="getFileUrl(message.fileUrl)" alt="Image" class="message-image" (click)="openImagePreview(getFileUrl(message.fileUrl))">
+            @if(message.message) {
+              <p>{{ message.message }}</p>
+            }
+          } @else if(message.messageType === 'FILE' && message.fileUrl) {
+            <div class="file-attachment">
+              <i class="pi pi-file"></i>
+              <a [href]="getFileUrl(message.fileUrl)" target="_blank" download>{{ message.fileName || message.message || 'Download file' }}</a>
+            </div>
+          } @else {
+            <p>{{ message.message }}</p>
+          }
+          <span class="message-time">{{ message.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    }
+    @if(isLoading) {
+      <div class="loading-indicator">
+        <i class="pi pi-spin pi-spinner"></i>
+      </div>
+    }
+  </div>
+
+  <div class="chat-input-area">
+    @if(filePreview) {
+      <div class="file-preview">
+        <img [src]="filePreview" alt="Preview" *ngIf="selectedFile && selectedFile.type.startsWith('image/')">
+        <div class="file-info" *ngIf="selectedFile && !selectedFile.type.startsWith('image/')">
+          <i class="pi pi-file"></i>
+          <span>{{ selectedFile.name }}</span>
+        </div>
+        <button type="button" class="remove-file-btn" (click)="removeFile()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    }
+    <div class="input-row">
+      <input 
+        type="file" 
+        #fileInput
+        (change)="onFileSelected($event)"
+        style="display: none;"
+        accept="image/*,.pdf,.doc,.docx,.txt,.zip,.rar">
+      <button 
+        type="button"
+        pButton 
+        icon="pi pi-paperclip" 
+        (click)="fileInput.click()"
+        class="attach-button"
+        [pTooltip]="'Đính kèm file'">
+      </button>
+      <input 
+        type="text" 
+        [(ngModel)]="newMessage"
+        (keyup.enter)="sendMessage()"
+        placeholder="Nhập tin nhắn..."
+        class="message-input">
+      <button 
+        pButton 
+        icon="pi pi-send" 
+        (click)="sendMessage()"
+        [disabled]="!newMessage.trim() && !selectedFile"
+        class="send-button">
+      </button>
+    </div>
+  </div>
+</div>
+

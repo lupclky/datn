@@ -1,6 +1,7 @@
 package com.example.Sneakers.controllers;
 
 import com.example.Sneakers.dtos.ReviewDTO;
+import com.example.Sneakers.dtos.ReviewReplyDTO;
 import com.example.Sneakers.exceptions.DataNotFoundException;
 import com.example.Sneakers.models.User;
 import com.example.Sneakers.repositories.UserRepository;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -104,6 +106,44 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> getReviewById(@PathVariable Long id) throws DataNotFoundException {
         ReviewResponse review = reviewService.getReviewById(id);
         return ResponseEntity.ok(review);
+    }
+
+    @PostMapping("/reply")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> replyToReview(
+            @Valid @RequestBody ReviewReplyDTO replyDTO) {
+        try {
+            Long staffId = getCurrentUserId();
+            ReviewResponse response = reviewService.replyToReview(replyDTO, staffId);
+            return ResponseEntity.ok(response);
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Page<ReviewResponse>> getAllReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long productId) {
+        try {
+            System.out.println("ReviewController.getAllReviews() - Request received");
+            System.out.println("ReviewController.getAllReviews() - Authentication: " + 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+            Page<ReviewResponse> reviews = reviewService.getAllReviews(page, size, keyword, productId);
+            System.out.println("ReviewController.getAllReviews() - Returning " + reviews.getTotalElements() + " reviews");
+            return ResponseEntity.ok(reviews);
+        } catch (Exception e) {
+            System.err.println("ReviewController.getAllReviews() - Error: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private Long getCurrentUserId() {

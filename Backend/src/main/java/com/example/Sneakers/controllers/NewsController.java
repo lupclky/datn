@@ -183,7 +183,7 @@ public class NewsController {
      * Get all news (for admin)
      */
     @GetMapping("/admin/all")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewsListResponse> getAllNewsForAdmin(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int limit) {
@@ -214,7 +214,7 @@ public class NewsController {
      * Get news by ID (for admin)
      */
     @GetMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<NewsResponse> getNewsById(@PathVariable Long id) {
         try {
             News news = newsService.getNewsById(id);
@@ -231,7 +231,7 @@ public class NewsController {
      * Create news (admin only)
      */
     @PostMapping("/admin")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> createNews(
             @Valid @RequestBody NewsDTO newsDTO,
             BindingResult result) {
@@ -257,7 +257,7 @@ public class NewsController {
      * Update news (admin only)
      */
     @PutMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateNews(
             @PathVariable Long id,
             @Valid @RequestBody NewsDTO newsDTO,
@@ -286,7 +286,7 @@ public class NewsController {
      * Delete news (admin only)
      */
     @DeleteMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deleteNews(@PathVariable Long id) {
         try {
             newsService.deleteNews(id);
@@ -303,7 +303,7 @@ public class NewsController {
      * Publish news (admin only)
      */
     @PutMapping("/admin/{id}/publish")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> publishNews(@PathVariable Long id) {
         try {
             News news = newsService.publishNews(id);
@@ -322,7 +322,7 @@ public class NewsController {
      * Archive news (admin only)
      */
     @PutMapping("/admin/{id}/archive")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> archiveNews(@PathVariable Long id) {
         try {
             News news = newsService.archiveNews(id);
@@ -341,7 +341,7 @@ public class NewsController {
      * Upload featured image for news (admin only)
      */
     @PostMapping(value = "/admin/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> uploadFeaturedImage(@RequestParam("file") MultipartFile file) {
         try {
             if (file.isEmpty()) {

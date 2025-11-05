@@ -22,6 +22,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
 import { LoadingService } from '../../../core/services/loading.service';
 import { DropdownModule } from 'primeng/dropdown';
 import { CardModule } from 'primeng/card';
@@ -30,7 +31,7 @@ import { CategoriesDto } from '../../../core/dtos/categories.dto';
 import { RouterModule } from '@angular/router';
 import { TabViewModule } from 'primeng/tabview';
 import { ProductUploadReq } from '../../../core/requestType/UploadProducts';
-import { ReviewService, Review } from '../../../core/services/review.service';
+import { ReviewService, Review, ReviewReplyRequest } from '../../../core/services/review.service';
 import { RatingModule } from 'primeng/rating';
 import { TooltipModule } from 'primeng/tooltip';
 import { LockFeatureService } from '../../../core/services/lock-feature.service';
@@ -62,7 +63,8 @@ import { AiService } from '../../../core/services/ai.service';
     RatingModule,
     TooltipModule,
     MultiSelectModule,
-    QuillModule
+    QuillModule,
+    DialogModule
   ],
   templateUrl: './detail-product.component.html',
   styleUrl: './detail-product.component.scss'
@@ -95,6 +97,10 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public isSubmittingReview: boolean = false;
   public hasUserReviewed: boolean = false;
   public accordionStates: { [key: number]: boolean } = {};
+  public replyDialogVisible: boolean = false;
+  public selectedReview: Review | null = null;
+  public replyText: string = '';
+  public isSubmittingReply: boolean = false;
   public isGeneratingDescription: boolean = false;
   public isDescriptionExpanded: boolean = false;
   public showExpandToggle: boolean = false;
@@ -488,6 +494,51 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       }),
       finalize(() => {
         this.isSubmittingReview = false;
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  openReplyDialog(review: Review): void {
+    if (!review.id) return;
+    this.selectedReview = review;
+    this.replyText = '';
+    this.replyDialogVisible = true;
+  }
+
+  submitReply(): void {
+    if (!this.selectedReview || !this.selectedReview.id) {
+      this.toastService.fail('Không tìm thấy đánh giá');
+      return;
+    }
+
+    if (!this.replyText.trim()) {
+      this.toastService.fail('Vui lòng nhập nội dung phản hồi');
+      return;
+    }
+
+    this.isSubmittingReply = true;
+
+    const replyRequest: ReviewReplyRequest = {
+      reviewId: this.selectedReview.id,
+      reply: this.replyText.trim()
+    };
+
+    this.reviewService.replyToReview(replyRequest).pipe(
+      tap(() => {
+        this.toastService.success('Phản hồi đánh giá thành công!');
+        this.replyDialogVisible = false;
+        this.selectedReview = null;
+        this.replyText = '';
+        this.loadReviews(); // Reload reviews to show the reply
+      }),
+      catchError((err) => {
+        const errorMessage = err.error?.error || err.error?.message || 'Không thể gửi phản hồi. Vui lòng thử lại.';
+        this.toastService.fail(errorMessage);
+        return of(err);
+      }),
+      finalize(() => {
+        this.isSubmittingReply = false;
       }),
       takeUntil(this.destroyed$)
     ).subscribe();

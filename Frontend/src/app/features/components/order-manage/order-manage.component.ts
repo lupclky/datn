@@ -139,29 +139,50 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   }
 
   private checkPermissions(): boolean {
+    console.log('OrderManageComponent.checkPermissions() - Starting permission check');
+    
     if (!isPlatformBrowser(this.platformId)) {
+      console.log('OrderManageComponent.checkPermissions() - Not browser platform, returning false');
       return false;
     }
+    
     const userInfo = localStorage.getItem('userInfor');
+    console.log('OrderManageComponent.checkPermissions() - userInfo from localStorage:', userInfo ? 'exists' : 'null');
+    
     if (!userInfo) {
+      console.log('OrderManageComponent.checkPermissions() - No userInfo, redirecting to login');
       this.toastService.fail('Vui lòng đăng nhập để tiếp tục');
       this.router.navigate(['/auth-login']);
       return false;
     }
+    
     const user = JSON.parse(userInfo);
-    if (!user.role || user.role.id !== 2) { // 2 is admin role
+    console.log('OrderManageComponent.checkPermissions() - User object:', {
+      hasRole: !!user.role,
+      roleId: user.role?.id,
+      roleName: user.role?.name
+    });
+    
+    // Allow both ADMIN (roleId = 2) and STAFF (roleId = 3)
+    if (!user.role || (user.role.id !== 2 && user.role.id !== 3)) {
+      console.log('OrderManageComponent.checkPermissions() - Access denied. User role:', user.role);
+      console.log('OrderManageComponent.checkPermissions() - Expected roleId: 2 (ADMIN) or 3 (STAFF), got:', user.role?.id);
       this.toastService.fail('Bạn không có quyền truy cập trang này');
       this.router.navigate(['/']);
       return false;
     }
+    
+    console.log('OrderManageComponent.checkPermissions() - Access granted for roleId:', user.role.id);
     return true;
   }
 
   ngOnInit(): void {
+    console.log('OrderManageComponent.ngOnInit() - Component initializing');
     if(!this.checkPermissions()) {
+      console.log('OrderManageComponent.ngOnInit() - Permission check failed, exiting');
       return;
     }
-
+    console.log('OrderManageComponent.ngOnInit() - Permission check passed, loading orders');
     this.loadOrders();
 
     this.searchForm.valueChanges.pipe(
@@ -174,7 +195,10 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   }
 
   loadOrders(event?: any) {
+    console.log('OrderManageComponent.loadOrders() - Starting to load orders');
+    
     if(!this.checkPermissions()) {
+      console.log('OrderManageComponent.loadOrders() - Permission check failed, exiting');
       return;
     }
 
@@ -182,6 +206,7 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     let sortOrder = this.sortOrder;
 
     if (event) {
+      console.log('OrderManageComponent.loadOrders() - Event received:', event);
       if (event.first != null && event.rows != null) {
         this.page = event.first / event.rows;
         this.pageSize = event.rows;
@@ -203,6 +228,17 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     
     const safePage = this.page != null ? this.page : 0;
     const safePageSize = this.pageSize != null ? this.pageSize : 15;
+    
+    console.log('OrderManageComponent.loadOrders() - Loading orders with params:', {
+      keyword,
+      status,
+      startDate,
+      endDate,
+      page: safePage,
+      pageSize: safePageSize,
+      sortField,
+      sortOrder
+    });
     const sortDir = sortOrder === -1 ? 'desc' : 'asc';
 
     this.orderService.getOrdersByKeyword(

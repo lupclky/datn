@@ -162,6 +162,12 @@
           </a>
         </li>
         <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/reviewManage']" routerLinkActive="active">
+            <i class="pi pi-star"></i>
+            <span>Quản lý đánh giá</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
           <a class="sidebar-link" [routerLink]="['/productManage']" routerLinkActive="active">
             <i class="pi pi-list"></i>
             <span>Quản lý SP</span>
@@ -203,12 +209,61 @@
             <span>Chức năng</span>
           </a>
         </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/staff/chat']" routerLinkActive="active">
+            <i class="pi pi-comments"></i>
+            <span>Chat với khách hàng</span>
+          </a>
+        </li>
       </ul>
     </nav>
   </aside>
 }
 
-<nav class="navbar navbar-expand-lg bg-dark navbar-dark" [class.hidden]="roleId == 2">
+<!-- Staff Sidebar -->
+@if(roleId == 3) {
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <h3>KVK Staff</h3>
+    </div>
+    <nav class="sidebar-nav">
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="pi pi-home"></i>
+            <span>Trang chủ</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/orderManage']" routerLinkActive="active">
+            <i class="pi pi-shopping-cart"></i>
+            <span>Quản lý đơn hàng</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/reviewManage']" routerLinkActive="active">
+            <i class="pi pi-star"></i>
+            <span>Quản lý đánh giá</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/newsManage']" routerLinkActive="active">
+            <i class="pi pi-book"></i>
+            <span>Quản lý tin tức</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/staff/chat']" routerLinkActive="active">
+            <i class="pi pi-comments"></i>
+            <span>Chat với khách hàng</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+}
+
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark" [class.hidden]="roleId == 2 || roleId == 3">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" (click)="toggleMenu()">
       <span class="navbar-toggler-icon"></span>
@@ -324,7 +379,47 @@
             </a>
           </li>
           
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/staff/chat']" routerLinkActive="active">
+              <i class="pi pi-comments"></i>
+              <span class="nav-text">Chat với khách hàng</span>
+            </a>
+          </li>
           
+          
+        } @else if (roleId == 3) {
+          <li class="nav-item">
+            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+              <i class="pi pi-home"></i>
+              <span class="nav-text">Trang chủ</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/orderManage']" routerLinkActive="active">
+              <i class="pi pi-shopping-cart"></i>
+              <span class="nav-text">Quản lý đơn hàng</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/reviewManage']" routerLinkActive="active">
+              <i class="pi pi-star"></i>
+              <span class="nav-text">Quản lý đánh giá</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/newsManage']" routerLinkActive="active">
+              <i class="pi pi-book"></i>
+              <span class="nav-text">Quản lý tin tức</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" [routerLink]="['/staff/chat']" routerLinkActive="active">
+              <i class="pi pi-comments"></i>
+              <span class="nav-text">Chat với khách hàng</span>
+            </a>
+          </li>
         } @else {}
       </ul>
     </div>

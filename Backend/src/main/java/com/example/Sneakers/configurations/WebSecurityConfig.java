@@ -25,10 +25,9 @@ import java.util.List;
 import static org.springframework.http.HttpMethod.*;
 
 @Configuration
-// @EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 @EnableWebMvc
-// @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class WebSecurityConfig {
         private final JwtTokenFilter jwtTokenFilter;
@@ -46,6 +45,7 @@ public class WebSecurityConfig {
                                                         .requestMatchers(POST, String.format("%s/reviews/**", apiPrefix)).authenticated()
                                                         .requestMatchers(PUT, String.format("%s/reviews/**", apiPrefix)).authenticated()
                                                         .requestMatchers(DELETE, String.format("%s/reviews/**", apiPrefix)).authenticated()
+                                                        .requestMatchers(GET, String.format("%s/reviews/admin/**", apiPrefix)).authenticated()
                                                         // All other requests are permitted
                                                         .anyRequest().permitAll();
 
@@ -59,7 +59,7 @@ public class WebSecurityConfig {
                                 configuration.setAllowedMethods(
                                                 Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                                 configuration.setAllowedHeaders(
-                                                Arrays.asList("authorization", "content-type", "x-auth-token"));
+                                                Arrays.asList("authorization", "content-type", "x-auth-token", "x-guest-session-id"));
                                 configuration.setExposedHeaders(List.of("x-auth-token"));
                                 configuration.setAllowCredentials(true); // Allow credentials
                                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

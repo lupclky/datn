@@ -9,6 +9,13 @@
   <div class="layout-footer">
     <app-app-footer></app-app-footer>
   </div>
-  <app-ai-chatbot></app-ai-chatbot>
+  <!-- KVK Intelligence - chỉ hiển thị cho user thông thường -->
+  @if(roleId == 1 || roleId == 0) {
+    <app-ai-chatbot></app-ai-chatbot>
+  }
+  <!-- Customer Chat - hiển thị cho user thông thường, ẩn vì đã có KVK Intelligence -->
+  <!-- @if(roleId == 1 || roleId == 0) {
+    <app-customer-chat></app-customer-chat>
+  } -->
   <app-scroll-to-top></app-scroll-to-top>
 </div>

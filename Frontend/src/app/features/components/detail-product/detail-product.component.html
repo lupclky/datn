@@ -2,7 +2,7 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-@if (mainProduct && (roleId == 1 || !roleId)){
+@if (mainProduct && (roleId == 1 || roleId == 3 || !roleId)){
   <div class="product-detail-page">
     
     <!-- Breadcrumb -->
@@ -340,6 +340,17 @@
                       <div class="review-body">
                         <p>{{review.comment}}</p>
                       </div>
+                      @if(review.staffReply) {
+                        <div class="staff-reply">
+                          <div class="staff-reply-header">
+                            <i class="pi pi-check-circle"></i>
+                            <strong>Phản hồi từ nhân viên</strong>
+                            <span class="staff-name">{{review.staffReplyByName}}</span>
+                          </div>
+                          <p class="staff-reply-content">{{review.staffReply}}</p>
+                          <span class="staff-reply-date">{{review.staffReplyAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                        </div>
+                      }
                       <div class="review-footer">
                         <span class="review-date">{{review.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
                         @if(review.userId === currentUserId && review.id) {
@@ -349,6 +360,16 @@
                             class="p-button-text p-button-danger p-button-sm" 
                             (click)="deleteReview(review.id)"
                             [pTooltip]="'Xóa đánh giá (ID: ' + review.id + ')'">
+                          </button>
+                        }
+                        @if((roleId === 2 || roleId === 3) && !review.staffReply && review.id) {
+                          <button 
+                            pButton 
+                            icon="pi pi-reply" 
+                            class="p-button-text p-button-sm" 
+                            (click)="openReplyDialog(review)"
+                            [pTooltip]="'Phản hồi đánh giá'">
+                            Phản hồi
                           </button>
                         }
                       </div>
@@ -634,3 +655,46 @@
     
   }
   @else if (mainProduct && roleId == 100) {}
+
+  <!-- Reply Dialog -->
+  <p-dialog 
+    [(visible)]="replyDialogVisible" 
+    [modal]="true" 
+    [style]="{width: '600px'}"
+    header="Phản hồi đánh giá"
+    [closable]="true">
+    <div class="reply-dialog-content">
+      @if(selectedReview) {
+        <div class="review-preview mb-3">
+          <p><strong>{{selectedReview.userName}}</strong></p>
+          <p>{{selectedReview.comment}}</p>
+        </div>
+        <div class="form-group">
+          <label>Nội dung phản hồi:</label>
+          <textarea 
+            [(ngModel)]="replyText" 
+            rows="5" 
+            class="form-control"
+            placeholder="Nhập phản hồi của bạn...">
+          </textarea>
+        </div>
+      }
+    </div>
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Hủy" 
+        icon="pi pi-times" 
+        class="p-button-text" 
+        (click)="replyDialogVisible = false">
+      </button>
+      <button 
+        pButton 
+        label="Gửi phản hồi" 
+        icon="pi pi-send" 
+        (click)="submitReply()"
+        [disabled]="isSubmittingReply || !replyText.trim()"
+        [loading]="isSubmittingReply">
+      </button>
+    </ng-template>
+  </p-dialog>

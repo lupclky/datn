@@ -29,5 +29,15 @@ public class Review extends BaseEntity {
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
+
+    @Column(name = "staff_reply", columnDefinition = "TEXT")
+    private String staffReply;
+
+    @ManyToOne
+    @JoinColumn(name = "staff_reply_by")
+    private User staffReplyBy;
+
+    @Column(name = "staff_reply_at")
+    private java.time.LocalDateTime staffReplyAt;
 }
 

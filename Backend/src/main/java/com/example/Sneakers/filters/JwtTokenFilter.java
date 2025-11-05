@@ -76,6 +76,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         // Get the full request URI for more accurate matching
         String requestURI = request.getRequestURI();
+        
+        // DO NOT bypass admin endpoints - they require authentication
+        if (requestURI != null && requestURI.contains("/reviews/admin/")) {
+            return false;
+        }
+        
         // Bypass for error endpoint
         if (requestPath.equals("/error")) {
             return true;

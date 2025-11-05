@@ -1,0 +1,208 @@
+<div class="review-manage-container">
+  <p-toast></p-toast>
+  
+  <div class="card">
+    <div class="card-header">
+      <h2>Quản lý đánh giá</h2>
+    </div>
+
+    <div class="card-body">
+      <!-- Search Form -->
+      <div class="search-section">
+        <form [formGroup]="searchForm" class="search-form">
+          <div class="search-row">
+            <div class="search-field">
+              <label>Từ khóa:</label>
+              <input 
+                pInputText 
+                formControlName="keyword" 
+                placeholder="Tìm kiếm theo nội dung hoặc tên người dùng..."
+                class="search-input"
+              />
+            </div>
+            <div class="search-field">
+              <label>Mã sản phẩm:</label>
+              <input 
+                pInputText 
+                type="number"
+                formControlName="productId" 
+                placeholder="Nhập mã sản phẩm..."
+                class="search-input"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Reviews Table -->
+      <div class="table-container">
+        <p-table 
+          [value]="allReviews" 
+          [loading]="loading"
+          [paginator]="true"
+          [rows]="pageSize"
+          [totalRecords]="totalRecords"
+          [lazy]="true"
+          (onLazyLoad)="loadReviews($event)"
+          [sortField]="sortField"
+          [sortOrder]="sortOrder"
+          styleClass="p-datatable-striped"
+          [rowsPerPageOptions]="[10, 15, 20, 30, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Hiển thị {first} - {last} trong tổng số {totalRecords} đánh giá">
+          
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 60px">ID</th>
+              <th style="width: 100px">Sản phẩm</th>
+              <th style="width: 120px">Người dùng</th>
+              <th style="width: 100px">Đánh giá</th>
+              <th>Nội dung</th>
+              <th style="width: 150px">Ngày tạo</th>
+              <th style="width: 200px">Phản hồi</th>
+              <th style="width: 120px">Thao tác</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-review>
+            <tr>
+              <td>{{ review.id }}</td>
+              <td>
+                <a [routerLink]="['/detailProduct', review.productId]" target="_blank" class="product-link">
+                  SP#{{ review.productId }}
+                </a>
+              </td>
+              <td>{{ review.userName || 'N/A' }}</td>
+              <td>
+                <div class="rating-display">
+                  <span class="stars">
+                    @for(star of getStars(review.rating); track star; let i = $index) {
+                      <i class="pi pi-star-fill star-filled"></i>
+                    }
+                    @for(star of getStars(5 - review.rating); track star; let i = $index) {
+                      <i class="pi pi-star star-empty"></i>
+                    }
+                  </span>
+                  <span class="rating-number">({{ review.rating }}/5)</span>
+                </div>
+              </td>
+              <td>
+                <div class="comment-text" [title]="review.comment">
+                  {{ review.comment || 'Không có bình luận' }}
+                </div>
+              </td>
+              <td>{{ formatDate(review.createdAt) }}</td>
+              <td>
+                @if(review.staffReply) {
+                  <div class="reply-info">
+                    <div class="reply-text" [title]="review.staffReply">
+                      {{ review.staffReply }}
+                    </div>
+                    <div class="reply-meta">
+                      <small>
+                        @if(review.staffReplyByName) {
+                          <span>Bởi: {{ review.staffReplyByName }}</span>
+                        }
+                        @if(review.staffReplyAt) {
+                          <span> - {{ formatDate(review.staffReplyAt) }}</span>
+                        }
+                      </small>
+                    </div>
+                  </div>
+                } @else {
+                  <span class="no-reply">Chưa có phản hồi</span>
+                }
+              </td>
+              <td>
+                <button 
+                  pButton 
+                  icon="pi pi-reply" 
+                  label="Phản hồi" 
+                  class="p-button-sm p-button-text"
+                  (click)="openReplyDialog(review)"
+                  [pTooltip]="review.staffReply ? 'Sửa phản hồi' : 'Phản hồi đánh giá'">
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="8" class="empty-message">
+                Không có đánh giá nào
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reply Dialog -->
+  <p-dialog 
+    [(visible)]="showReplyDialog" 
+    [modal]="true" 
+    [style]="{width: '600px'}"
+    [header]="selectedReview?.staffReply ? 'Sửa phản hồi đánh giá' : 'Phản hồi đánh giá'"
+    [draggable]="false"
+    [resizable]="false">
+    
+    @if(selectedReview) {
+      <div class="reply-dialog-content">
+        <div class="review-info">
+          <h4>Đánh giá từ: {{ selectedReview.userName }}</h4>
+          <div class="rating-display">
+            <span class="stars">
+              @for(star of getStars(selectedReview.rating); track star; let i = $index) {
+                <i class="pi pi-star-fill star-filled"></i>
+              }
+              @for(star of getStars(5 - selectedReview.rating); track star; let i = $index) {
+                <i class="pi pi-star star-empty"></i>
+              }
+            </span>
+            <span class="rating-number">({{ selectedReview.rating }}/5)</span>
+          </div>
+          <p class="review-comment">{{ selectedReview.comment || 'Không có bình luận' }}</p>
+        </div>
+
+        <form [formGroup]="replyForm" class="reply-form">
+          <div class="form-group">
+            <label for="reply">Phản hồi của bạn:</label>
+            <textarea 
+              pInputTextarea 
+              formControlName="reply" 
+              id="reply"
+              rows="5"
+              placeholder="Nhập phản hồi của bạn..."
+              [autoResize]="true"
+              class="reply-textarea">
+            </textarea>
+            @if(replyForm.get('reply')?.invalid && replyForm.get('reply')?.touched) {
+              <small class="error-message">Vui lòng nhập phản hồi</small>
+            }
+          </div>
+        </form>
+      </div>
+    }
+
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Hủy" 
+        icon="pi pi-times" 
+        class="p-button-text"
+        (click)="closeReplyDialog()"
+        [disabled]="isSubmittingReply">
+      </button>
+      <button 
+        pButton 
+        label="{{ selectedReview?.staffReply ? 'Cập nhật' : 'Gửi phản hồi' }}" 
+        icon="pi pi-check" 
+        (click)="submitReply()"
+        [disabled]="!replyForm.valid || isSubmittingReply"
+        [loading]="isSubmittingReply">
+      </button>
+    </ng-template>
+  </p-dialog>
+</div>
+
