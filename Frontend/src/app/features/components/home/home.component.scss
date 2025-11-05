@@ -3,21 +3,16 @@
   
   // Hero Banner Section
   .hero-banner {
-    margin-top: -20px; // Offset the margin-top from app-main
-    margin-bottom: 0; // Remove bottom margin to connect with recommended section
+    margin-top: 0; // avoid dark gap under header
+    margin-bottom: 0;
     position: relative;
 
+    // remove decorative overlay that caused visual gap on some viewports
     &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 50px;
-      background: linear-gradient(to bottom, transparent, #f8f9fa);
-      pointer-events: none;
+      content: none;
     }
 
+    // normal (full) banner
     .carousel-item {
       aspect-ratio: 16 / 9;
       width: 100%;
@@ -30,6 +25,24 @@
         height: 100%;
         object-fit: cover;
         filter: brightness(0.7);
+      }
+    }
+
+    // compact banner used in 3-column top row
+    .banner-compact {
+      .carousel-item {
+        aspect-ratio: 21 / 9;
+        max-height: 360px;
+        img { filter: none; }
+      }
+      .carousel-caption {
+        bottom: 12%;
+        left: 6%;
+        padding: 1rem 1.25rem;
+        background: rgba(0,0,0,.35);
+        h2 { font-size: 1.5rem; margin: 0 0 .25rem; }
+        p { font-size: .95rem; margin: 0 0 .5rem; }
+        .btn { padding: .35rem .8rem; font-size: .85rem; border-radius: 6px; }
       }
     }
 
@@ -1173,6 +1186,21 @@
     }
   }
 }
+  // News aside (right/left column)
+  .news-aside {
+    .news-mini-card { transition: background .2s ease; border-radius: 8px; padding: .25rem; }
+    .news-mini-card:hover { background: #f3f4f6; }
+    .line-clamp-2 {
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+  }
+
+  // compact tag lists in top row
+  .categories-tags-wrapper.small, .features-tags-wrapper.small {
+    display: flex; flex-wrap: wrap; gap: .5rem; max-height: 160px; overflow: auto;
+    .category-tag, .feature-tag { padding: .25rem .5rem; border: 1px solid #e5e7eb; border-radius: 9999px; background: #fff; cursor: pointer; font-size: .85rem; display: inline-flex; align-items: center; gap: .35rem; }
+    .category-tag:hover, .feature-tag:hover { background: #f8f9fa; }
+  }
 
 // Responsive adjustments
 @media (max-width: 992px) {

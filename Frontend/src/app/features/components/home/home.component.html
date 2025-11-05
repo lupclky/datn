@@ -1,53 +1,105 @@
 <!-- banner -->
 <div class="home">
-    <!-- Hero Banner Section -->
-    <section class="hero-banner">
-      <!-- Loading state -->
-      <div *ngIf="isLoadingBanners" class="text-center py-5">
-        <div class="spinner-border text-danger" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-
-      <!-- Dynamic Banners -->
-      <div *ngIf="!isLoadingBanners && banners.length > 0" id="carouselBanners" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-          <button *ngFor="let banner of banners; let i = index" 
-                  type="button" 
-                  [attr.data-bs-target]="'#carouselBanners'" 
-                  [attr.data-bs-slide-to]="i" 
-                  [class.active]="i === 0"
-                  [attr.aria-current]="i === 0 ? 'true' : null"
-                  [attr.aria-label]="'Slide ' + (i + 1)"></button>
-        </div>
-        <div class="carousel-inner">
-          <div *ngFor="let banner of banners; let i = index" class="carousel-item" [class.active]="i === 0">
-            <img [src]="getBannerImageUrl(banner)" class="d-block w-100" [alt]="banner.title">
-            <div class="carousel-caption d-none d-md-block">
-              <h1 class="display-4 fw-bold">{{ banner.title }}</h1>
-              <p *ngIf="banner.description" class="lead">{{ banner.description }}</p>
-              <button *ngIf="banner.button_text && banner.button_link" 
-                      class="btn btn-{{ banner.button_style || 'primary' }} btn-lg" 
-                      [routerLink]="banner.button_link">
-                {{ banner.button_text }}
-              </button>
+    <!-- Hero Top Row: News | Banner | Categories/Features -->
+    <section class="hero-banner py-3">
+      <div class="container">
+        <div class="row g-3 align-items-stretch">
+          <!-- Left: Categories & Features -->
+          <div class="col-lg-3 d-none d-lg-block">
+            <div class="p-3 bg-light rounded h-100 d-flex flex-column gap-3">
+              <div>
+                <h6 class="mb-2">Danh mục</h6>
+                <div class="categories-tags-wrapper small">
+                  <ng-container *ngFor="let category of categories">
+                    <div class="category-tag" (click)="navigateToCategory(category.id)">
+                      <i class="pi pi-tag"></i>
+                      <span>{{category.name}}</span>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+              <div>
+                <h6 class="mb-2">Chức năng nổi bật</h6>
+                <div class="features-tags-wrapper small">
+                  <ng-container *ngFor="let feature of features">
+                    <div class="feature-tag" (click)="navigateToFeature(feature.id)">
+                      <i [class]="feature.icon"></i>
+                      <span>{{feature.name}}</span>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <button *ngIf="banners.length > 1" class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button *ngIf="banners.length > 1" class="carousel-control-next" type="button" data-bs-target="#carouselBanners" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-      </div>
 
-      <!-- Fallback when no banners -->
-      <div *ngIf="!isLoadingBanners && banners.length === 0" class="carousel-fallback text-center py-5 bg-light">
-        <h3>Chưa có banner nào được hiển thị</h3>
-        <p class="text-muted">Vui lòng liên hệ quản trị viên để thêm banner</p>
+          <!-- Middle: Smaller banner carousel -->
+          <div class="col-lg-6">
+            <!-- Loading state -->
+            <div *ngIf="isLoadingBanners" class="text-center py-5">
+              <div class="spinner-border text-danger" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+
+            <!-- Dynamic Banners -->
+            <div *ngIf="!isLoadingBanners && banners.length > 0" id="carouselBanners" class="carousel slide banner-compact" data-bs-ride="carousel">
+              <div class="carousel-indicators">
+                <button *ngFor="let banner of banners; let i = index" type="button" [attr.data-bs-target]="'#carouselBanners'" [attr.data-bs-slide-to]="i" [class.active]="i === 0" [attr.aria-current]="i === 0 ? 'true' : null" [attr.aria-label]="'Slide ' + (i + 1)"></button>
+              </div>
+              <div class="carousel-inner rounded overflow-hidden">
+                <div *ngFor="let banner of banners; let i = index" class="carousel-item" [class.active]="i === 0">
+                  <img [src]="getBannerImageUrl(banner)" class="d-block w-100" [alt]="banner.title">
+                  <div class="carousel-caption d-none d-md-block text-start">
+                    <h2 class="fw-bold mb-1">{{ banner.title }}</h2>
+                    <p *ngIf="banner.description" class="mb-2">{{ banner.description }}</p>
+                    <button *ngIf="banner.button_text && banner.button_link" class="btn btn-primary btn-sm" [routerLink]="banner.button_link">{{ banner.button_text }}</button>
+                  </div>
+                </div>
+              </div>
+              <button *ngIf="banners.length > 1" class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button *ngIf="banners.length > 1" class="carousel-control-next" type="button" data-bs-target="#carouselBanners" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button>
+            </div>
+
+            <!-- Fallback when no banners -->
+            <div *ngIf="!isLoadingBanners && banners.length === 0" class="carousel-fallback text-center py-5 bg-light rounded">
+              <h5>Chưa có banner nào được hiển thị</h5>
+              <p class="text-muted mb-0">Vui lòng liên hệ quản trị viên để thêm banner</p>
+            </div>
+          </div>
+
+          <!-- Right: News aside -->
+          <div class="col-lg-3 d-none d-lg-block">
+            <aside class="news-aside h-100 p-3 bg-light rounded">
+              <h5 class="mb-3">Tin tức mới</h5>
+              <div *ngIf="isLoadingNews" class="text-center py-3">
+                <div class="spinner-border text-danger" role="status">
+                  <span class="visually-hidden">Đang tải tin tức...</span>
+                </div>
+              </div>
+              <div *ngIf="!isLoadingNews && latestNews.length > 0" class="news-list">
+                <div *ngFor="let news of latestNews | slice:0:5" class="news-mini-card mb-3" (click)="navigateToNews(news.id)" style="cursor:pointer;">
+                  <div class="d-flex gap-2">
+                    <img [src]="getNewsImageUrl(news)" [alt]="news.title" style="width:72px;height:48px;object-fit:cover;border-radius:6px;">
+                    <div class="flex-grow-1">
+                      <div class="small text-muted">{{ news.published_at | date:'dd/MM' }}</div>
+                      <div class="fw-semibold line-clamp-2">{{ news.title }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-center">
+                  <button class="btn btn-outline-danger btn-sm" routerLink="/news">Xem tất cả</button>
+                </div>
+              </div>
+              <div *ngIf="!isLoadingNews && latestNews.length === 0" class="text-muted">Chưa có tin tức.</div>
+            </aside>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -57,227 +109,152 @@
       </div>
     </section>
 
-    <!-- Categories Section -->
-    <section class="categories-section py-4">
+    <!-- Main content with right news sidebar -->
+    <section class="home-main py-4">
       <div class="container">
-        <div class="row text-center mb-4">
-          <div class="col-12">
-            <h2 class="section-title">Danh mục sản phẩm khoá</h2>
-            <p class="section-subtitle">Giải pháp an ninh cho mọi không gian</p>
-          </div>
-        </div>
-        <div class="row justify-content-center mb-4">
-          <div class="col-12">
-            <div class="categories-tags-wrapper">
-              <ng-container *ngFor="let category of categories">
-                <div class="category-tag" (click)="navigateToCategory(category.id)">
-                  <i class="pi pi-tag"></i>
-                  <span>{{category.name}}</span>
-                </div>
-              </ng-container>
-            </div>
-          </div>
-        </div>
-
-        <!-- Features Section -->
-        <div class="row text-center mt-5 mb-3">
-          <div class="col-12">
-            <h3 class="features-title">Chức năng nổi bật</h3>
-          </div>
-        </div>
-        <div class="row justify-content-center">
-          <div class="col-12">
-            <div class="features-tags-wrapper">
-              <ng-container *ngFor="let feature of features">
-                <div class="feature-tag" (click)="navigateToFeature(feature.id)">
-                  <i [class]="feature.icon"></i>
-                  <span>{{feature.name}}</span>
-                </div>
-              </ng-container>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Recommended Products Section -->
-    <section class="recommended-products py-5">
-      <div class="container">
-        <div class="row text-center mb-5">
-          <div class="col-12">
-            <h2 class="section-title">Gợi Ý Cho Bạn</h2>
-            <p class="section-subtitle">Dựa trên sở thích và lịch sử mua sắm của bạn</p>
-          </div>
-        </div>
         <div class="row g-4">
-          <ng-container *ngFor="let product of recommendedProducts">
-            <div class="col-lg-3 col-md-6">
-              <div class="product-card-recommended" (click)="navigateToDetail(product.id)">
-                <div class="product-image">
-                  <img [src]="getProductImageUrl(product)" [alt]="product.name" class="img-fluid">
-                  <span *ngIf="product.discount > 0" class="discount-badge">-{{product.discount}}%</span>
-                </div>
-                <div class="product-info">
-                  <h5 class="product-title">{{product.name}}</h5>
-                  <div *ngIf="product.averageRating && product.averageRating > 0" class="product-rating">
-                    <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
-                    <span class="rating-count">({{product.totalReviews}})</span>
-                  </div>
-                  <div class="product-price">
-                    <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
-                    <span *ngIf="product.discount > 0" class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
-                  </div>
-                  <button class="btn btn-primary btn-sm mt-2">Xem Chi Tiết</button>
+          <!-- Left: main content -->
+          <div class="col-lg-9">
+
+            <!-- Recommended -->
+            <div class="recommended-products py-4">
+              <div class="row text-center mb-4">
+                <div class="col-12">
+                  <h2 class="section-title">Gợi Ý Cho Bạn</h2>
                 </div>
               </div>
-            </div>
-          </ng-container>
-        </div>
-      </div>
-    </section>
-
-    <!-- Featured Products Section -->
-    <section class="featured-products py-5 bg-light">
-      <div class="container">
-        <div class="row text-center mb-5">
-          <div class="col-12">
-            <h2 class="section-title">Khoá nổi bật</h2>
-            <p class="section-subtitle">Mẫu khoá bán chạy, tính năng hiện đại</p>
-          </div>
-        </div>
-        <div class="row g-4">
-          @for(product of productsHighlight; track product){
-            <div class="col-lg-4 col-md-6">
-              <div class="product-card-featured" (click)="navigateToDetail(product.id)">
-                <div class="product-image-wrapper">
-                   <img [src]="getProductImageUrl(product)" 
-                        [alt]="product.name" 
-                        class="img-fluid"
-                        (error)="$any($event.target).src = 'assets/images/no-image.png'">
-                  @if(product.discount > 0) {
-                    <span class="discount-badge">-{{product.discount}}%</span>
-                  }
-                </div>
-                <div class="product-info">
-                  <h5 class="product-title">{{product.name}}</h5>
-                  @if(product.averageRating && product.averageRating > 0) {
-                    <div class="product-rating">
-                      <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
-                      <span class="rating-count">({{product.totalReviews}})</span>
+              <div class="row g-4">
+                <ng-container *ngFor="let product of recommendedProducts">
+                  <div class="col-lg-3 col-md-6">
+                    <div class="product-card-recommended" (click)="navigateToDetail(product.id)">
+                      <div class="product-image">
+                        <img [src]="getProductImageUrl(product)" [alt]="product.name" class="img-fluid">
+                        <span *ngIf="product.discount > 0" class="discount-badge">-{{product.discount}}%</span>
+                      </div>
+                      <div class="product-info">
+                        <h5 class="product-title">{{product.name}}</h5>
+                        <div *ngIf="product.averageRating && product.averageRating > 0" class="product-rating">
+                          <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                          <span class="rating-count">({{product.totalReviews}})</span>
+                        </div>
+                        <div class="product-price">
+                          <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
+                          <span *ngIf="product.discount > 0" class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
+                        </div>
+                        <button class="btn btn-primary btn-sm mt-2">Xem Chi Tiết</button>
+                      </div>
                     </div>
-                  }
-                  <div class="product-price">
-                    <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
-                    @if(product.discount > 0) {
-                      <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
-                    }
                   </div>
-                  <button class="btn btn-primary btn-sm mt-2">Xem Chi Tiết</button>
-                </div>
+                </ng-container>
               </div>
             </div>
-          }
-        </div>
-        <div class="text-center mt-4">
-          <button class="btn btn-outline-primary btn-lg" routerLink="/allProduct">Xem tất cả sản phẩm</button>
-        </div>
-      </div>
-    </section>
 
-    <!-- New Arrivals Section -->
-    <section class="new-arrivals py-5">
-      <div class="container">
-        <div class="row text-center mb-5">
-          <div class="col-12">
-            <h2 class="section-title">Khoá mới về</h2>
-            <p class="section-subtitle">Cập nhật dòng khoá mới nhất từ Hàn Quốc</p>
-          </div>
-        </div>
-        <div class="row g-4">
-          @for(product of productNewest; track product){
-            <div class="col-lg-3 col-md-6">
-              <div class="product-card-new" (click)="navigateToDetail(product.id)">
-                <div class="product-image">
-                   <img [src]="getProductImageUrl(product)" [alt]="product.name" class="img-fluid">
-                  <div class="product-overlay">
-                    <button class="btn btn-white btn-sm">Xem Nhanh</button>
-                  </div>
-                </div>
-                <div class="product-details">
-                  <h6 class="product-name">{{product.name}}</h6>
-                  <p class="product-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</p>
+            <!-- Featured -->
+            <div class="featured-products py-4 bg-light">
+              <div class="row text-center mb-4">
+                <div class="col-12">
+                  <h2 class="section-title">Khoá nổi bật</h2>
                 </div>
               </div>
+              <div class="row g-4">
+                @for(product of productsHighlight; track product){
+                  <div class="col-lg-4 col-md-6">
+                    <div class="product-card-featured" (click)="navigateToDetail(product.id)">
+                      <div class="product-image-wrapper">
+                         <img [src]="getProductImageUrl(product)" 
+                              [alt]="product.name" 
+                              class="img-fluid"
+                              (error)="$any($event.target).src = 'assets/images/no-image.png'">
+                        @if(product.discount > 0) {
+                          <span class="discount-badge">-{{product.discount}}%</span>
+                        }
+                      </div>
+                      <div class="product-info">
+                        <h5 class="product-title">{{product.name}}</h5>
+                        @if(product.averageRating && product.averageRating > 0) {
+                          <div class="product-rating">
+                            <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                            <span class="rating-count">({{product.totalReviews}})</span>
+                          </div>
+                        }
+                        <div class="product-price">
+                          <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
+                          @if(product.discount > 0) {
+                            <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
+                          }
+                        </div>
+                        <button class="btn btn-primary btn-sm mt-2">Xem Chi Tiết</button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="text-center mt-4">
+                <button class="btn btn-outline-primary btn-lg" routerLink="/allProduct">Xem tất cả sản phẩm</button>
+              </div>
             </div>
-          }
+
+            <!-- New Arrivals -->
+            <div class="new-arrivals py-4">
+              <div class="row text-center mb-4">
+                <div class="col-12">
+                  <h2 class="section-title">Khoá mới về</h2>
+                </div>
+              </div>
+              <div class="row g-4">
+                @for(product of productNewest; track product){
+                  <div class="col-lg-3 col-md-6">
+                    <div class="product-card-new" (click)="navigateToDetail(product.id)">
+                      <div class="product-image">
+                         <img [src]="getProductImageUrl(product)" [alt]="product.name" class="img-fluid">
+                        <div class="product-overlay">
+                          <button class="btn btn-white btn-sm">Xem Nhanh</button>
+                        </div>
+                      </div>
+                      <div class="product-details">
+                        <h6 class="product-name">{{product.name}}</h6>
+                        <p class="product-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</p>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: news sidebar -->
+          <div class="col-lg-3">
+            <aside class="news-aside">
+              <h3 class="mb-3">Tin tức mới</h3>
+              <div *ngIf="isLoadingNews" class="text-center py-3">
+                <div class="spinner-border text-danger" role="status">
+                  <span class="visually-hidden">Đang tải tin tức...</span>
+                </div>
+              </div>
+              <div *ngIf="!isLoadingNews && latestNews.length > 0" class="news-list">
+                <div *ngFor="let news of latestNews | slice:0:6" class="news-mini-card mb-3" (click)="navigateToNews(news.id)" style="cursor:pointer;">
+                  <div class="d-flex gap-2">
+                    <img [src]="getNewsImageUrl(news)" [alt]="news.title" style="width:84px;height:56px;object-fit:cover;border-radius:6px;">
+                    <div class="flex-grow-1">
+                      <div class="small text-muted">{{ news.published_at | date:'dd/MM' }}</div>
+                      <div class="fw-semibold">{{ news.title }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-center">
+                  <button class="btn btn-outline-danger btn-sm" routerLink="/news">Xem tất cả</button>
+                </div>
+              </div>
+              <div *ngIf="!isLoadingNews && latestNews.length === 0" class="text-muted">Chưa có tin tức.</div>
+            </aside>
+          </div>
         </div>
       </div>
     </section>
 
     
 
-    <!-- News Section -->
-    <section class="news-section py-5">
-      <div class="container">
-        <div class="row text-center mb-5">
-          <div class="col-12">
-            <h2 class="section-title">Tin Tức & Bài Viết</h2>
-            <p class="section-subtitle">Cập nhật những thông tin mới nhất về sản phẩm và công nghệ khóa thông minh</p>
-          </div>
-        </div>
-
-        <!-- Loading state -->
-        <div *ngIf="isLoadingNews" class="text-center py-5">
-          <div class="spinner-border text-danger" role="status">
-            <span class="visually-hidden">Đang tải tin tức...</span>
-          </div>
-        </div>
-
-        <!-- News Grid -->
-        <div *ngIf="!isLoadingNews && latestNews.length > 0" class="row g-4">
-          <ng-container *ngFor="let news of latestNews">
-            <div class="col-lg-4 col-md-6">
-              <div class="news-card" (click)="navigateToNews(news.id)">
-                <div class="news-card-image">
-                  <img [src]="getNewsImageUrl(news)" [alt]="news.title" class="img-fluid">
-                  <span *ngIf="news.published_at" class="news-date-badge">
-                    <span class="day">{{ formatDate(news.published_at).day }}</span>
-                    <span class="month">Tháng {{ formatDate(news.published_at).month }}</span>
-                  </span>
-                </div>
-                <div class="news-card-body">
-                  <h5 class="news-card-title">{{ news.title }}</h5>
-                  <p *ngIf="news.summary" class="news-card-summary">{{ getTruncatedSummary(news.summary, 120) }}</p>
-                  <div class="news-card-footer">
-                    <div class="news-meta">
-                      <span *ngIf="news.views !== undefined" class="views">
-                        <i class="pi pi-eye"></i> {{ news.views }} lượt xem
-                      </span>
-                    </div>
-                    <button class="btn-read-more">
-                      Đọc thêm <i class="pi pi-arrow-right"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-        </div>
-
-        <!-- Empty state -->
-        <div *ngIf="!isLoadingNews && latestNews.length === 0" class="text-center py-5">
-          <i class="pi pi-inbox" style="font-size: 4rem; color: #ccc;"></i>
-          <p class="text-muted mt-3">Chưa có tin tức nào được đăng</p>
-        </div>
-
-        <!-- View All Button -->
-        <div *ngIf="latestNews.length > 0" class="text-center mt-5">
-          <button class="btn btn-outline-danger btn-lg" routerLink="/news">
-            Xem Tất Cả Tin Tức <i class="pi pi-arrow-right ms-2"></i>
-          </button>
-        </div>
-      </div>
-    </section>
+    
 
     
 
