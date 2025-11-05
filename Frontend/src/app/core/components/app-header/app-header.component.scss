@@ -234,15 +234,21 @@
     
     .p-menuitem-link {
       color: #ffffff !important;
+      text-decoration: none !important;
       
       &:hover {
         background: #3a3a3a !important;
         color: #fff !important;
+        text-decoration: none !important;
       }
     }
     
     .p-menuitem-icon {
       color: #ccc !important;
+    }
+    
+    .p-menuitem-text {
+      text-decoration: none !important;
     }
   }
   
@@ -396,36 +402,16 @@
           text-overflow: ellipsis;
         }
 
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: 3px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 2px;
-          background-color: #fff;
-          transition: width 0.3s ease;
-        }
-
         &:hover {
           background: rgba(255, 255, 255, 0.1);
           color: #fff;
           transform: translateY(-1px);
-
-          &::after {
-            width: 80%;
-          }
         }
 
         &.active {
           color: #fff;
           font-weight: 600;
           background: rgba(255, 255, 255, 0.15);
-          
-          &::after {
-            width: 80%;
-          }
         }
       }
     }

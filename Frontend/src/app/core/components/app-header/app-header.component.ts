@@ -145,7 +145,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
         }
       },
       {
-        label: 'Trả hàng của tôi',
+        label: 'Trả hàng & Hoàn tiền',
         icon: 'pi pi-replay',
         command: () => {
           this.goToMyReturns();
@@ -278,7 +278,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
         }
       },
       {
-        label: 'Trả hàng của tôi',
+        label: 'Trả hàng & Hoàn tiền',
         icon: 'pi pi-replay',
         command: () => {
           this.goToMyReturns();

@@ -138,19 +138,31 @@
       <ul class="navbar-nav w-100 justify-content-center">
         @if(roleId == 1 || !roleId){
           <li class="nav-item">
-            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Trang chủ</a>
+            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+              <i class="pi pi-home"></i>
+              <span class="nav-text">Trang chủ</span>
+            </a>
           </li>
       
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/about']" routerLinkActive="active">Giới thiệu & Liên hệ</a>
+            <a class="nav-link" [routerLink]="['/news']" routerLinkActive="active">
+              <i class="pi pi-book"></i>
+              <span class="nav-text">Tin tức</span>
+            </a>
           </li>
       
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/news']" routerLinkActive="active">Tin tức</a>
+            <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">
+              <i class="pi pi-th-large"></i>
+              <span class="nav-text">Tất cả sản phẩm</span>
+            </a>
           </li>
       
           <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">Tất cả sản phẩm</a>
+            <a class="nav-link" [routerLink]="['/about']" routerLinkActive="active">
+              <i class="pi pi-info-circle"></i>
+              <span class="nav-text">Giới thiệu & Liên hệ</span>
+            </a>
           </li>
         } @else if (roleId == 2) {
           <li class="nav-item">
