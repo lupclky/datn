@@ -63,7 +63,7 @@ public class ReturnController {
     }
 
     @GetMapping("/admin/all")
-    // @PreAuthorize("hasRole('ROLE_ADMIN')") // TODO: Enable this for production
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getAllReturnRequestsForAdmin() {
         List<ReturnRequest> returnRequests = returnService.getAllReturnRequestsForAdmin();
         List<ReturnRequestResponseDTO> response = returnRequests.stream()
@@ -73,7 +73,7 @@ public class ReturnController {
     }
 
     @PutMapping("/admin/{id}/approve")
-    // @PreAuthorize("hasRole('ROLE_ADMIN')") // TODO: Enable this for production
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> approveReturnRequest(
             @PathVariable Long id,
             @Valid @RequestBody AdminReturnActionDTO actionDTO,
@@ -90,7 +90,7 @@ public class ReturnController {
     }
 
     @PutMapping("/admin/{id}/reject")
-    // @PreAuthorize("hasRole('ROLE_ADMIN')") // TODO: Enable this for production
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> rejectReturnRequest(
             @PathVariable Long id,
             @Valid @RequestBody AdminReturnActionDTO actionDTO,
@@ -107,7 +107,7 @@ public class ReturnController {
     }
 
     @PutMapping("/admin/{id}/complete-refund")
-    // @PreAuthorize("hasRole('ROLE_ADMIN')") // TODO: Enable this for production
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> completeRefund(
             @PathVariable Long id,
             @Valid @RequestBody AdminReturnActionDTO actionDTO,

@@ -624,6 +624,12 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     return 'assets/images/no-image.png';
   }
 
+  handleImageError(event: any): void {
+    const target = event.target as HTMLImageElement;
+    target.src = 'assets/images/no-image.png';
+    target.onerror = null; // Prevent infinite loop
+  }
+
   generateProductDescription(): void {
     const productName = this.productForm.get('productName')?.value;
     const categoryId = this.mainProduct?.category_id;

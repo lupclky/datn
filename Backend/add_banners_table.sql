@@ -26,3 +26,4 @@ INSERT INTO banners (title, description, image_url, button_text, button_link, bu
 ('Khuyến mãi đặc biệt', 'Giảm giá lên đến 30%', 'banner2.jpg', 'Mua ngay', '/allProduct', 'danger', 2, TRUE, '2024-01-01 00:00:00', '2025-12-31 23:59:59', NOW(), NOW());
 
 
+

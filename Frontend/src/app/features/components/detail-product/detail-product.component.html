@@ -39,19 +39,6 @@
                 </ng-template>
               </p-galleria>
             </div>
-            @if (((mainProduct.features?.length || 0) > 0)) {
-              <div class="feature-tags">
-                <span class="feature-label">Chức năng:</span>
-                <div class="feature-list">
-                  @for (feature of (mainProduct.features ?? []); track feature.id) {
-                    <span class="feature-tag" [pTooltip]="feature.description || feature.name">
-                      <i class="pi pi-check-circle"></i>
-                      {{ feature.name }}
-                    </span>
-                  }
-                </div>
-              </div>
-            }
           </div>
   
           <!-- Product Information -->
@@ -140,15 +127,11 @@
               <div class="product-features">
                 <div class="feature-item">
                   <i class="pi pi-shield"></i>
-                  <span>Bảo hành chính hãng 6 tháng</span>
-                </div>
-                <div class="feature-item">
-                  <i class="pi pi-truck"></i>
-                  <span>Miễn phí vận chuyển từ 500k</span>
+                  <span>Bảo hành chính hãng 12 tháng</span>
                 </div>
                 <div class="feature-item">
                   <i class="pi pi-refresh"></i>
-                  <span>Đổi trả trong 7 ngày</span>
+                  <span>Đổi trả trong 14 ngày</span>
                 </div>
               </div>
             </div>
@@ -157,125 +140,127 @@
       </div>
     </div>
 
-    <!-- Product Features Section -->
-    @if (mainProduct.features && mainProduct.features.length > 0) {
-      <div class="product-features-section">
-        <div class="container">
-          <div class="row">
-            <div class="col-12">
-              <h3 class="section-title">Chức năng nổi bật</h3>
-              <div class="features-grid">
-                @for (feature of mainProduct.features; track feature.id) {
-                  <div class="feature-card">
-                    <div class="feature-icon">
-                      <i class="pi pi-cog"></i>
+    <!-- Product Tabs Section -->
+    <div class="product-tabs-section">
+      <div class="container">
+        <p-tabView styleClass="product-tabs">
+          <!-- Tab 1: Mô tả -->
+          <p-tabPanel header="Mô tả sản phẩm">
+            <!-- Product Features Section -->
+            @if (mainProduct.features && mainProduct.features.length > 0) {
+              <div class="product-features-section">
+                <h3 class="section-title">Chức năng nổi bật</h3>
+                <div class="features-grid">
+                  @for (feature of mainProduct.features; track feature.id) {
+                    <div class="feature-card">
+                      <div class="feature-icon">
+                        <i class="pi pi-cog"></i>
+                      </div>
+                      <div class="feature-content">
+                        <h5 class="feature-title">{{ feature.name }}</h5>
+                        <p class="feature-description">{{ feature.description }}</p>
+                      </div>
                     </div>
-                    <div class="feature-content">
-                      <h5 class="feature-title">{{ feature.name }}</h5>
-                      <p class="feature-description">{{ feature.description }}</p>
+                  }
+                </div>
+              </div>
+            }
+          
+            <!-- Product Detail Description Section -->
+            <div class="product-description-article-section">
+              <div class="article-container">
+                <h2 class="article-title">Đặc điểm nổi bật của {{mainProduct.name}}</h2>
+                
+                <div class="article-content" 
+                     [class.collapsed]="!isDescriptionExpanded && showExpandToggle"
+                     [innerHTML]="getSafeHtml(mainProduct.description || '')"></div>
+
+                @if (showExpandToggle) {
+                  <div class="article-expand-toggle">
+                    <button type="button" class="expand-button" (click)="toggleDescription()">
+                      {{ isDescriptionExpanded ? 'Thu gọn' : 'Xem thêm' }}
+                      <i class="pi" [ngClass]="isDescriptionExpanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                    </button>
+                  </div>
+                }
+                
+                @if(mainProduct.features && mainProduct.features.length > 0) {
+                  <div class="features-accordion mt-5">
+                    <h3 class="accordion-title">Nội dung chính</h3>
+                    <div class="accordion-items">
+                      @for (feature of mainProduct.features; track feature.id; let idx = $index) {
+                        <div class="accordion-item">
+                          <div class="accordion-header" (click)="toggleAccordion(idx)">
+                            <span class="accordion-number">{{idx + 1}}.</span>
+                            <span class="accordion-text">{{ feature.name }}</span>
+                            <i class="pi" [ngClass]="accordionStates[idx] ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                          </div>
+                          <div class="accordion-content" [ngClass]="{'show': accordionStates[idx]}">
+                            <p>{{ feature.description }}</p>
+                          </div>
+                        </div>
+                      }
                     </div>
                   </div>
                 }
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    }
-  
-    <!-- Product Detail Description Section (Like News Article) -->
-    <div class="product-description-article-section">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 mx-auto">
-            <div class="article-container">
-              <h2 class="article-title">Đặc điểm nổi bật của {{mainProduct.name}}</h2>
-              
-              <div class="article-content" 
-                   [class.collapsed]="!isDescriptionExpanded && showExpandToggle"
-                   [innerHTML]="getSafeHtml(mainProduct.description || '')"></div>
+          </p-tabPanel>
 
-              @if (showExpandToggle) {
-                <div class="article-expand-toggle">
-                  <button type="button" class="expand-button" (click)="toggleDescription()">
-                    {{ isDescriptionExpanded ? 'Thu gọn' : 'Xem thêm' }}
-                    <i class="pi" [ngClass]="isDescriptionExpanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-                  </button>
-                </div>
-              }
-              
-              @if(mainProduct.features && mainProduct.features.length > 0) {
-                <div class="features-accordion mt-5">
-                  <h3 class="accordion-title">Nội dung chính</h3>
-                  <div class="accordion-items">
-                    @for (feature of mainProduct.features; track feature.id; let idx = $index) {
-                      <div class="accordion-item">
-                        <div class="accordion-header" (click)="toggleAccordion(idx)">
-                          <span class="accordion-number">{{idx + 1}}.</span>
-                          <span class="accordion-text">{{ feature.name }}</span>
-                          <i class="pi" [ngClass]="accordionStates[idx] ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+          <!-- Tab 2: Sản phẩm liên quan -->
+          <p-tabPanel header="Sản phẩm liên quan">
+            <div class="related-products-wrapper">
+              @if(relatedProducts.length > 0) {
+                <div class="products-grid">
+                  @for(product of relatedProducts; track product.id){
+                    <div class="product-card-wrapper">
+                      <div class="related-product-card" (click)="goToDetail(product.id)">
+                        <div class="product-image-container">
+                          <div class="product-image">
+                            @if(product.discount > 0) {
+                              <span class="discount-badge">
+                                <span class="badge-text">-{{product.discount}}%</span>
+                              </span>
+                            }
+                            <div class="image-wrapper">
+                              <img [src]="getProductImageUrl(product)" 
+                                   [alt]="product.name"
+                                   (error)="handleImageError($event)"
+                                   loading="lazy">
+                              <div class="image-overlay">
+                                <div class="overlay-content">
+                                  <i class="pi pi-eye"></i>
+                                  <span>Xem chi tiết</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div class="accordion-content" [ngClass]="{'show': accordionStates[idx]}">
-                          <p>{{ feature.description }}</p>
+                        <div class="product-content">
+                          <h5 class="product-name" [title]="product.name">{{product.name}}</h5>
+                          <div class="product-price">
+                            <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
+                            @if(product.discount > 0) {
+                              <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
+                            }
+                          </div>
                         </div>
                       </div>
-                    }
-                  </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="no-products-message">
+                  <i class="pi pi-inbox"></i>
+                  <p>Không có sản phẩm liên quan.</p>
                 </div>
               }
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
+          </p-tabPanel>
 
-    <!-- Related Products Section -->
-    <div class="related-products-section">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Sản phẩm liên quan</h2>
-        </div>
-        <div class="related-products-content">
-          @if(relatedProducts.length > 0) {
-            <div class="row g-4">
-              @for(product of relatedProducts; track product){
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                  <div class="related-product-card" (click)="goToDetail(product.id)">
-                    <div class="product-image">
-                      <img [src]="getProductImageUrl(product)" 
-                           [alt]="product.name"
-                           (error)="$any($event.target).src = 'assets/images/no-image.png'">
-                      @if(product.discount > 0) {
-                        <span class="discount-badge">-{{product.discount}}%</span>
-                      }
-                    </div>
-                    <div class="product-content">
-                      <h5 class="product-name">{{product.name}}</h5>
-                      <div class="product-price">
-                        <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
-                        @if(product.discount > 0) {
-                          <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              }
-            </div>
-          } @else {
-            <p class="no-products">Không có sản phẩm liên quan.</p>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Reviews Section -->
-    <div class="reviews-section">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Đánh giá sản phẩm</h2>
-        </div>
-        <div class="reviews-content">
+          <!-- Tab 3: Đánh giá -->
+          <p-tabPanel header="Đánh giá ({{totalReviews}})">
+            <div class="reviews-content">
               <!-- Rating Summary -->
               <div class="rating-summary">
                 <div class="average-rating">
@@ -324,63 +309,65 @@
               <!-- Reviews History -->
               <div class="reviews-history">
                 <h4 class="history-title">Lịch sử đánh giá</h4>
-              <div class="reviews-list">
-                @if(reviews.length > 0) {
-                  @for(review of reviews; track review.id) {
-                    <div class="review-item">
-                      <div class="review-header">
-                        <div class="reviewer-info">
-                          <i class="pi pi-user"></i>
-                          <span class="reviewer-name">{{review.userName}}</span>
-                        </div>
-                        <div class="review-rating">
-                          <p-rating [(ngModel)]="review.rating" [readonly]="true" [cancel]="false"></p-rating>
-                        </div>
-                      </div>
-                      <div class="review-body">
-                        <p>{{review.comment}}</p>
-                      </div>
-                      @if(review.staffReply) {
-                        <div class="staff-reply">
-                          <div class="staff-reply-header">
-                            <i class="pi pi-check-circle"></i>
-                            <strong>Phản hồi từ nhân viên</strong>
-                            <span class="staff-name">{{review.staffReplyByName}}</span>
+                <div class="reviews-list">
+                  @if(reviews.length > 0) {
+                    @for(review of reviews; track review.id) {
+                      <div class="review-item">
+                        <div class="review-header">
+                          <div class="reviewer-info">
+                            <i class="pi pi-user"></i>
+                            <span class="reviewer-name">{{review.userName}}</span>
                           </div>
-                          <p class="staff-reply-content">{{review.staffReply}}</p>
-                          <span class="staff-reply-date">{{review.staffReplyAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                          <div class="review-rating">
+                            <p-rating [(ngModel)]="review.rating" [readonly]="true" [cancel]="false"></p-rating>
+                          </div>
                         </div>
-                      }
-                      <div class="review-footer">
-                        <span class="review-date">{{review.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
-                        @if(review.userId === currentUserId && review.id) {
-                          <button 
-                            pButton 
-                            icon="pi pi-trash" 
-                            class="p-button-text p-button-danger p-button-sm" 
-                            (click)="deleteReview(review.id)"
-                            [pTooltip]="'Xóa đánh giá (ID: ' + review.id + ')'">
-                          </button>
+                        <div class="review-body">
+                          <p>{{review.comment}}</p>
+                        </div>
+                        @if(review.staffReply) {
+                          <div class="staff-reply">
+                            <div class="staff-reply-header">
+                              <i class="pi pi-check-circle"></i>
+                              <strong>Phản hồi từ nhân viên</strong>
+                              <span class="staff-name">{{review.staffReplyByName}}</span>
+                            </div>
+                            <p class="staff-reply-content">{{review.staffReply}}</p>
+                            <span class="staff-reply-date">{{review.staffReplyAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                          </div>
                         }
-                        @if((roleId === 2 || roleId === 3) && !review.staffReply && review.id) {
-                          <button 
-                            pButton 
-                            icon="pi pi-reply" 
-                            class="p-button-text p-button-sm" 
-                            (click)="openReplyDialog(review)"
-                            [pTooltip]="'Phản hồi đánh giá'">
-                            Phản hồi
-                          </button>
-                        }
+                        <div class="review-footer">
+                          <span class="review-date">{{review.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                          @if(review.userId === currentUserId && review.id) {
+                            <button 
+                              pButton 
+                              icon="pi pi-trash" 
+                              class="p-button-text p-button-danger p-button-sm" 
+                              (click)="deleteReview(review.id)"
+                              [pTooltip]="'Xóa đánh giá (ID: ' + review.id + ')'">
+                            </button>
+                          }
+                          @if((roleId === 2 || roleId === 3) && !review.staffReply && review.id) {
+                            <button 
+                              pButton 
+                              icon="pi pi-reply" 
+                              class="p-button-text p-button-sm" 
+                              (click)="openReplyDialog(review)"
+                              [pTooltip]="'Phản hồi đánh giá'">
+                              Phản hồi
+                            </button>
+                          }
+                        </div>
                       </div>
-                    </div>
+                    }
+                  } @else {
+                    <p class="no-reviews">Chưa có đánh giá nào cho sản phẩm này.</p>
                   }
-                } @else {
-                  <p class="no-reviews">Chưa có đánh giá nào cho sản phẩm này.</p>
-                }
-              </div>
+                </div>
               </div>
             </div>
+          </p-tabPanel>
+        </p-tabView>
       </div>
     </div>
   </div>

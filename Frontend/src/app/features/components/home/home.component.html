@@ -8,7 +8,7 @@
           <div class="col-lg-3 d-none d-lg-block">
             <div class="p-3 bg-light rounded h-100 d-flex flex-column gap-3">
               <div>
-                <h6 class="mb-2">Danh mục</h6>
+                <h6 class="mb-2">Thương hiệu</h6>
                 <div class="categories-tags-wrapper small">
                   <ng-container *ngFor="let category of categories">
                     <div class="category-tag" (click)="navigateToCategory(category.id)">
@@ -83,11 +83,11 @@
                 </div>
               </div>
               <div *ngIf="!isLoadingNews && latestNews.length > 0" class="news-list">
-                <div *ngFor="let news of latestNews | slice:0:5" class="news-mini-card mb-3" (click)="navigateToNews(news.id)" style="cursor:pointer;">
-                  <div class="d-flex gap-2">
-                    <img [src]="getNewsImageUrl(news)" [alt]="news.title" style="width:72px;height:48px;object-fit:cover;border-radius:6px;">
+                <div *ngFor="let news of latestNews | slice:0:5" class="news-mini-card" (click)="navigateToNews(news.id)">
+                  <div class="d-flex">
+                    <img [src]="getNewsImageUrl(news)" [alt]="news.title">
                     <div class="flex-grow-1">
-                      <div class="small text-muted">{{ news.published_at | date:'dd/MM' }}</div>
+                      <div class="small">{{ news.published_at | date:'dd/MM' }}</div>
                       <div class="fw-semibold line-clamp-2">{{ news.title }}</div>
                     </div>
                   </div>
@@ -194,58 +194,33 @@
               </div>
             </div>
 
-            <!-- New Arrivals -->
-            <div class="new-arrivals py-4">
-              <div class="row text-center mb-4">
-                <div class="col-12">
-                  <h2 class="section-title">Hàng mới về</h2>
-                </div>
-              </div>
-              <div class="row g-4">
-                @for(product of productNewest; track product){
-                  <div class="col-lg-3 col-md-6">
-                    <div class="product-card-new" (click)="navigateToDetail(product.id)">
-                      <div class="product-image">
-                         <img [src]="getProductImageUrl(product)" [alt]="product.name" class="img-fluid">
-                        <div class="product-overlay">
-                          <button class="btn btn-white btn-sm">Xem Nhanh</button>
-                        </div>
-                      </div>
-                      <div class="product-details">
-                        <h6 class="product-name">{{product.name}}</h6>
-                        <p class="product-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</p>
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
           </div>
 
-          <!-- Right: news sidebar -->
+          <!-- Right: New Arrivals sidebar -->
           <div class="col-lg-3">
-            <aside class="news-aside">
-              <h3 class="mb-3">Tin tức mới</h3>
-              <div *ngIf="isLoadingNews" class="text-center py-3">
-                <div class="spinner-border text-danger" role="status">
-                  <span class="visually-hidden">Đang tải tin tức...</span>
-                </div>
-              </div>
-              <div *ngIf="!isLoadingNews && latestNews.length > 0" class="news-list">
-                <div *ngFor="let news of latestNews | slice:0:6" class="news-mini-card mb-3" (click)="navigateToNews(news.id)" style="cursor:pointer;">
+            <aside class="new-arrivals-aside">
+              <h3 class="mb-3">Hàng mới về</h3>
+              <div *ngIf="productNewest.length > 0" class="new-arrivals-list">
+                <div *ngFor="let product of productNewest | slice:0:6" class="new-arrival-card mb-3" (click)="navigateToDetail(product.id)" style="cursor:pointer;">
                   <div class="d-flex gap-2">
-                    <img [src]="getNewsImageUrl(news)" [alt]="news.title" style="width:84px;height:56px;object-fit:cover;border-radius:6px;">
+                    <img [src]="getProductImageUrl(product)" 
+                         [alt]="product.name" 
+                         style="width:84px;height:56px;object-fit:cover;border-radius:6px;"
+                         (error)="$any($event.target).src = 'assets/images/no-image.png'">
                     <div class="flex-grow-1">
-                      <div class="small text-muted">{{ news.published_at | date:'dd/MM' }}</div>
-                      <div class="fw-semibold">{{ news.title }}</div>
+                      <div class="fw-semibold line-clamp-2 mb-1">{{ product.name }}</div>
+                      <div class="product-price-small">
+                        <span class="current-price-small">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span>
+                        <span *ngIf="product.discount > 0" class="discount-badge-small">-{{product.discount}}%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="text-center">
-                  <button class="btn btn-outline-danger btn-sm" routerLink="/news">Xem tất cả</button>
+                  <button class="btn btn-outline-danger btn-sm" routerLink="/allProduct">Xem tất cả</button>
                 </div>
               </div>
-              <div *ngIf="!isLoadingNews && latestNews.length === 0" class="text-muted">Chưa có tin tức.</div>
+              <div *ngIf="productNewest.length === 0" class="text-muted">Chưa có sản phẩm mới.</div>
             </aside>
           </div>
         </div>

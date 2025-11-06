@@ -9,71 +9,24 @@
 
     <!-- News Content -->
     <div *ngIf="!isLoading && news" class="row">
-      <div class="col-lg-8 mx-auto">
+      <div class="col-lg-10 mx-auto">
         <!-- Back Button -->
-        <button class="btn btn-outline-secondary mb-4" (click)="goBack()">
+        <button class="btn-back mb-4" (click)="goBack()">
           <i class="pi pi-arrow-left"></i> Quay lại
         </button>
 
-        <!-- News Header -->
-        <div class="news-header mb-4">
-          <h1 class="fw-bold mb-3">{{ news.title }}</h1>
-          <div class="news-meta text-muted mb-3">
-            <span *ngIf="news.author"><i class="pi pi-user"></i> {{ news.author }}</span>
-            <span class="mx-2">|</span>
-            <span *ngIf="news.published_at"><i class="pi pi-calendar"></i> {{ formatDate(news.published_at) }}</span>
-            <span class="mx-2">|</span>
-            <span><i class="pi pi-eye"></i> {{ news.views }} lượt xem</span>
-            <span *ngIf="news.category" class="mx-2">|</span>
-            <span *ngIf="news.category"><i class="pi pi-tag"></i> {{ news.category }}</span>
-          </div>
-        </div>
-
-        <!-- Featured Image -->
-        <div *ngIf="news.featured_image" class="news-featured-image mb-4">
-          <img [src]="getImageUrl(news.featured_image)" 
-               [alt]="news.title" 
-               class="img-fluid rounded w-100"
-               style="max-height: 500px; object-fit: cover;">
-        </div>
-
-        <!-- Summary -->
-        <div *ngIf="news.summary" class="news-summary mb-4 p-3 bg-light rounded">
-          <p class="lead mb-0">{{ news.summary }}</p>
-        </div>
-
-        <!-- Content -->
-        <div class="news-content" [innerHTML]="getSafeHtml(news.content)">
-        </div>
-
-        <!-- Share Section -->
-        <div class="news-share mt-5 pt-4 border-top">
-          <h5 class="mb-3">Chia sẻ bài viết:</h5>
+        <!-- News Article -->
+        <article class="news-article">
+          <!-- Headline -->
+          <h1 class="news-headline">{{ news.title }}</h1>
           
-          <!-- Link Preview Card -->
-          <div class="mb-4">
-            <app-link-preview-card 
-              *ngIf="getNewsLinkPreview()" 
-              [linkData]="getNewsLinkPreview()!">
-            </app-link-preview-card>
+          <!-- Lead Paragraph -->
+          <p *ngIf="news.summary" class="news-lead">{{ news.summary }}</p>
+          
+          <!-- Content -->
+          <div class="news-content" [innerHTML]="getSafeHtml(news.content)">
           </div>
-
-          <!-- Social Share Buttons -->
-          <div class="d-flex gap-2 flex-wrap">
-            <button class="btn btn-primary btn-sm" (click)="copyLinkToClipboard()">
-              <i class="pi pi-copy"></i> Sao chép link
-            </button>
-            <button class="btn btn-primary btn-sm">
-              <i class="pi pi-facebook"></i> Facebook
-            </button>
-            <button class="btn btn-info btn-sm text-white">
-              <i class="pi pi-twitter"></i> Twitter
-            </button>
-            <button class="btn btn-success btn-sm">
-              <i class="pi pi-whatsapp"></i> WhatsApp
-            </button>
-          </div>
-        </div>
+        </article>
       </div>
     </div>
 
