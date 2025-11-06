@@ -6,6 +6,7 @@ export interface HomepageVoucherDto {
   discount_percentage: number;
   min_order_value: number;
   max_discount_amount?: number;
+  quantity: number;
   remaining_quantity: number;
   valid_to: string;
   expiration_date_formatted: string;

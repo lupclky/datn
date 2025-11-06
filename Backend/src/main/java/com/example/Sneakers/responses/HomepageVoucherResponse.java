@@ -29,6 +29,9 @@ public class HomepageVoucherResponse {
     @JsonProperty("max_discount_amount")
     private Long maxDiscountAmount;
 
+    @JsonProperty("quantity")
+    private Integer quantity;
+
     @JsonProperty("remaining_quantity")
     private Integer remainingQuantity;
 
@@ -73,6 +76,7 @@ public class HomepageVoucherResponse {
                 .discountPercentage(voucher.getDiscountPercentage())
                 .minOrderValue(voucher.getMinOrderValue())
                 .maxDiscountAmount(voucher.getMaxDiscountAmount())
+                .quantity(voucher.getQuantity())
                 .remainingQuantity(voucher.getRemainingQuantity())
                 .validTo(voucher.getValidTo())
                 .expirationDateFormatted(voucher.getValidTo().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")))

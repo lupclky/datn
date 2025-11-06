@@ -50,4 +50,17 @@ export class VoucherDisplayComponent implements OnInit {
       console.error('Could not copy text: ', err);
     });
   }
+
+  getProgressPercentage(voucher: HomepageVoucherDto): number {
+    const total = voucher.quantity || 0;
+    const remaining = voucher.remaining_quantity || 0;
+    
+    if (total === 0) return 0;
+    
+    // Tính phần trăm: (remaining / total) * 100
+    const percentage = (remaining / total) * 100;
+    
+    // Giới hạn từ 0 đến 100
+    return Math.max(0, Math.min(100, percentage));
+  }
 } 

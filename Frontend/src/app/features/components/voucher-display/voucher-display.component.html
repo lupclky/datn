@@ -6,32 +6,27 @@
   </h2>
   <div class="vouchers-grid">
     <div class="voucher-card" *ngFor="let voucher of vouchers">
-      <div class="voucher-icon">
-        <i class="bi bi-ticket-perforated"></i>
-      </div>
-      <div class="voucher-details">
-        <h3 class="voucher-name">{{ voucher.name }}</h3>
-        <div class="voucher-info">
+      <div class="voucher-content">
+        <div class="voucher-header">
+          <h3 class="voucher-name">{{ voucher.name }}</h3>
           <span class="discount-percent">Giảm {{ voucher.discount_percentage }}%</span>
-          <div class="voucher-conditions">
-            <span *ngIf="voucher.min_order_value && voucher.min_order_value > 0">
-              Đơn tối thiểu {{ voucher.min_order_value | currency:'VND':'symbol-narrow':'1.0-0' }}
-            </span>
-            <span *ngIf="voucher.max_discount_amount && voucher.max_discount_amount > 0">
-              Giảm tối đa {{ voucher.max_discount_amount | currency:'VND':'symbol-narrow':'1.0-0' }}
-            </span>
+        </div>
+        <div class="voucher-conditions">
+          <span *ngIf="voucher.min_order_value && voucher.min_order_value > 0">
+            Đơn tối thiểu {{ voucher.min_order_value | currency:'VND':'symbol-narrow':'1.0-0' }}
+          </span>
+          <span *ngIf="voucher.max_discount_amount && voucher.max_discount_amount > 0">
+            Giảm tối đa {{ voucher.max_discount_amount | currency:'VND':'symbol-narrow':'1.0-0' }}
+          </span>
+          <div class="voucher-progress" *ngIf="voucher.remaining_quantity !== undefined && voucher.remaining_quantity !== null">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getProgressPercentage(voucher)"></div>
+            </div>
           </div>
         </div>
-        <div class="voucher-usage-info">
-          <p class="voucher-usage">Lượt sử dụng còn lại: <strong>{{ voucher.remaining_quantity }}</strong></p>
-          <p class="voucher-expiry" [ngClass]="{'expiring-soon': voucher.is_expiring_soon}">
-            <i class="pi pi-clock"></i>
-            {{ voucher.status_message }}
-          </p>
-        </div>
       </div>
-      <div class="voucher-code">
-        <span>Mã: <strong>{{ voucher.code }}</strong></span>
+      <div class="voucher-code-section">
+        <span class="voucher-code">Mã: <strong>{{ voucher.code }}</strong></span>
         <button class="copy-btn" (click)="copyCode(voucher.code)">Copy</button>
       </div>
     </div>
