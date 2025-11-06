@@ -79,7 +79,11 @@
       <!-- Title -->
       <div class="col-12 mb-3">
         <label for="title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
-        <input type="text" pInputText id="title" formControlName="title" class="w-100" placeholder="Nhập tiêu đề banner"/>
+        <input type="text" pInputText id="title" formControlName="title" class="w-100" 
+               [class.ng-invalid]="bannerForm.get('title')?.invalid && bannerForm.get('title')?.touched"
+               placeholder="Nhập tiêu đề banner"/>
+        <small *ngIf="bannerForm.get('title')?.invalid && bannerForm.get('title')?.touched" 
+               class="text-danger d-block mt-1">Tiêu đề là bắt buộc</small>
       </div>
 
       <!-- Description -->
@@ -92,9 +96,20 @@
       <div class="col-12 mb-3">
         <label for="image" class="form-label">Hình ảnh <span class="text-danger">*</span></label>
         <input type="file" class="form-control" id="image" accept="image/*" (change)="onFileSelect($event)"/>
-        <small class="text-muted">Kích thước khuyến nghị: 1920x600px (tối đa 5MB)</small>
+        <small class="text-muted d-block">
+          <strong>Banner lớn (1-10):</strong> 1920x600px<br>
+          <strong>Banner nhỏ (11+):</strong> 600x120px (tối đa 5MB)
+        </small>
+        <small *ngIf="!isEditMode && !selectedFile && bannerForm.get('image_url')?.invalid && bannerForm.get('image_url')?.touched" 
+               class="text-danger d-block mt-1">Vui lòng chọn hình ảnh</small>
         <div *ngIf="imagePreview" class="mt-2">
           <img [src]="imagePreview" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+        </div>
+        <div *ngIf="isUploading" class="mt-2">
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Đang upload...</span>
+          </div>
+          <span class="ms-2 text-muted">Đang upload ảnh...</span>
         </div>
       </div>
 
@@ -121,6 +136,10 @@
       <div class="col-md-4 mb-3">
         <label for="displayOrder" class="form-label">Thứ tự hiển thị</label>
         <p-inputNumber id="displayOrder" formControlName="display_order" [style]="{'width': '100%'}"></p-inputNumber>
+        <small class="text-muted d-block mt-1">
+          <strong>Banner lớn:</strong> 1-10 (hiển thị trong carousel)<br>
+          <strong>Banner nhỏ:</strong> 11+ (hiển thị 2 cột bên dưới)
+        </small>
       </div>
 
       <!-- Is Active -->

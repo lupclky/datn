@@ -91,6 +91,36 @@ export class BannerManageComponent implements OnInit {
       start_date: [null],
       end_date: [null]
     });
+
+    // Custom validator: image_url is required only when creating new banner
+    // For edit mode, image_url can be empty if no new file is selected
+    this.bannerForm.get('image_url')?.valueChanges.subscribe(() => {
+      this.updateImageUrlValidator();
+    });
+  }
+
+  private updateImageUrlValidator(): void {
+    const imageUrlControl = this.bannerForm.get('image_url');
+    if (!imageUrlControl) return;
+
+    if (this.isEditMode) {
+      // In edit mode, image_url is only required if no file is selected and no existing image
+      const hasExistingImage = imageUrlControl.value && imageUrlControl.value !== '' && imageUrlControl.value !== 'temp_uploading';
+      const hasSelectedFile = !!this.selectedFile;
+      if (hasExistingImage || hasSelectedFile) {
+        imageUrlControl.clearValidators();
+      } else {
+        imageUrlControl.setValidators([Validators.required]);
+      }
+    } else {
+      // In create mode, image_url is required but we accept temp_uploading if file is selected
+      if (this.selectedFile || (imageUrlControl.value && imageUrlControl.value !== '')) {
+        imageUrlControl.clearValidators();
+      } else {
+        imageUrlControl.setValidators([Validators.required]);
+      }
+    }
+    imageUrlControl.updateValueAndValidity({ emitEvent: false });
   }
 
   loadBanners(): void {
@@ -110,13 +140,21 @@ export class BannerManageComponent implements OnInit {
   openNewDialog(): void {
     this.isEditMode = false;
     this.selectedBannerId = null;
-    this.bannerForm.reset({
-      button_style: 'primary',
-      display_order: 0,
-      is_active: true
-    });
     this.selectedFile = null;
     this.imagePreview = null;
+    this.bannerForm.reset({
+      title: '',
+      description: '',
+      image_url: '',
+      button_text: '',
+      button_link: '',
+      button_style: 'primary',
+      display_order: 0,
+      is_active: true,
+      start_date: null,
+      end_date: null
+    });
+    this.updateImageUrlValidator();
     this.displayDialog = true;
     this.cdr.markForCheck();
   }
@@ -148,6 +186,7 @@ export class BannerManageComponent implements OnInit {
       start_date: parseDateSafely(banner.start_date),
       end_date: parseDateSafely(banner.end_date)
     });
+    this.updateImageUrlValidator();
     this.displayDialog = true;
     this.cdr.markForCheck();
   }
@@ -156,19 +195,32 @@ export class BannerManageComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.selectedFile = file;
+      // Set a temporary value to image_url so form validation passes
+      // The actual file name will be set after upload
+      this.bannerForm.patchValue({ image_url: 'temp_uploading' });
+      this.updateImageUrlValidator();
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreview = e.target.result;
         this.cdr.markForCheck();
       };
       reader.readAsDataURL(file);
+    } else {
+      // If no file selected, clear the image_url if creating new banner
+      if (!this.isEditMode) {
+        this.bannerForm.patchValue({ image_url: '' });
+        this.updateImageUrlValidator();
+      }
+      this.selectedFile = null;
+      this.imagePreview = null;
     }
+    this.cdr.markForCheck();
   }
 
   uploadImage(): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!this.selectedFile) {
-        resolve('');
+        reject(new Error('No file selected'));
         return;
       }
 
@@ -182,17 +234,22 @@ export class BannerManageComponent implements OnInit {
         next: (response: any) => {
           this.isUploading = false;
           this.cdr.markForCheck();
+          
           if (response && response.fileName) {
             resolve(response.fileName);
+          } else if (response && response.error) {
+            reject(new Error(response.error));
           } else {
-            reject('No file name returned');
+            reject(new Error('No file name returned from server'));
           }
         },
         error: (error: any) => {
           console.error('Error uploading image:', error);
           this.isUploading = false;
           this.cdr.markForCheck();
-          this.toastService.showError('Lỗi', 'Không thể upload ảnh');
+          
+          const errorMessage = error?.error?.error || error?.error?.message || 'Không thể upload ảnh';
+          this.toastService.showError('Lỗi', errorMessage);
           reject(error);
         }
       });
@@ -200,15 +257,51 @@ export class BannerManageComponent implements OnInit {
   }
 
   async saveBanner(): Promise<void> {
+    // Validate form
     if (this.bannerForm.invalid) {
-      this.toastService.showError('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+      this.markFormGroupTouched(this.bannerForm);
+      this.toastService.showError('Lỗi', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+      return;
+    }
+
+    // Validate image requirement
+    if (!this.isEditMode && !this.selectedFile) {
+      this.toastService.showError('Lỗi', 'Vui lòng chọn hình ảnh cho banner');
+      return;
+    }
+
+    // Check if image_url is empty (for new banner) or missing (for edit without new file)
+    const currentImageUrl = this.bannerForm.value.image_url;
+    if (!this.isEditMode && !currentImageUrl && !this.selectedFile) {
+      this.toastService.showError('Lỗi', 'Vui lòng chọn hình ảnh cho banner');
       return;
     }
 
     try {
+      let imageUrl = currentImageUrl;
+
+      // Upload new image if selected
       if (this.selectedFile) {
-        const fileName = await this.uploadImage();
-        this.bannerForm.patchValue({ image_url: fileName });
+        try {
+          const fileName = await this.uploadImage();
+          if (fileName) {
+            imageUrl = fileName;
+            this.bannerForm.patchValue({ image_url: fileName });
+          } else {
+            this.toastService.showError('Lỗi', 'Không thể upload ảnh. Vui lòng thử lại');
+            return;
+          }
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          this.toastService.showError('Lỗi', 'Không thể upload ảnh. Vui lòng thử lại');
+          return;
+        }
+      }
+
+      // Validate image_url after upload
+      if (!imageUrl || imageUrl.trim() === '') {
+        this.toastService.showError('Lỗi', 'Hình ảnh banner là bắt buộc');
+        return;
       }
 
       // Format dates to LocalDateTime format (yyyy-MM-dd HH:mm:ss) without timezone
@@ -234,6 +327,7 @@ export class BannerManageComponent implements OnInit {
 
       const bannerData: BannerDto = {
         ...this.bannerForm.value,
+        image_url: imageUrl,
         start_date: formatDateForBackend(this.bannerForm.value.start_date),
         end_date: formatDateForBackend(this.bannerForm.value.end_date),
         created_at: undefined, // Don't send to backend
@@ -249,7 +343,8 @@ export class BannerManageComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error updating banner:', error);
-            this.toastService.showError('Lỗi', 'Không thể cập nhật banner');
+            const errorMessage = error?.error?.message || error?.error?.error || 'Không thể cập nhật banner';
+            this.toastService.showError('Lỗi', errorMessage);
           }
         });
       } else {
@@ -261,13 +356,25 @@ export class BannerManageComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error creating banner:', error);
-            this.toastService.showError('Lỗi', 'Không thể tạo banner');
+            const errorMessage = error?.error?.message || error?.error?.error || 'Không thể tạo banner';
+            this.toastService.showError('Lỗi', errorMessage);
           }
         });
       }
     } catch (error) {
       console.error('Error in saveBanner:', error);
+      this.toastService.showError('Lỗi', 'Đã xảy ra lỗi không mong muốn');
     }
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 
   toggleStatus(banner: BannerDto): void {

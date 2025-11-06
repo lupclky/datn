@@ -51,6 +51,8 @@ export class HomeComponent extends BaseComponent implements OnInit {
   public apiImage: string = environment.apiImage;
   public categories: CategoryDto[] = [];
   public banners: BannerDto[] = [];
+  public mainBanners: BannerDto[] = [];
+  public smallBanners: BannerDto[] = [];
   public isLoadingBanners: boolean = false;
   public latestNews: NewsDto[] = [];
   public isLoadingNews: boolean = false;
@@ -121,6 +123,12 @@ export class HomeComponent extends BaseComponent implements OnInit {
     this.router.navigate(['/detailProduct', id]);
   }
 
+  navigateToBanner(link?: string): void {
+    if (link) {
+      this.router.navigate([link]);
+    }
+  }
+
   getProductImageUrl(product: ProductDto): string {
     // If product has a thumbnail, use it
     if (product.thumbnail && product.thumbnail.trim() !== '') {
@@ -145,6 +153,14 @@ export class HomeComponent extends BaseComponent implements OnInit {
       }),
       tap((response) => {
         this.banners = response.banners || [];
+        // Phân loại banner: banner lớn (display_order <= 10) và banner nhỏ (display_order > 10)
+        this.mainBanners = this.banners
+          .filter(b => !b.display_order || b.display_order <= 10)
+          .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+        this.smallBanners = this.banners
+          .filter(b => b.display_order && b.display_order > 10)
+          .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+          .slice(0, 2); // Chỉ lấy 2 banner nhỏ đầu tiên
         this.isLoadingBanners = false;
       }),
       takeUntil(this.destroyed$)

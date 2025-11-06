@@ -41,13 +41,13 @@
               </div>
             </div>
 
-            <!-- Dynamic Banners -->
-            <div *ngIf="!isLoadingBanners && banners.length > 0" id="carouselBanners" class="carousel slide banner-compact" data-bs-ride="carousel">
+            <!-- Main Banner Carousel -->
+            <div *ngIf="!isLoadingBanners && mainBanners.length > 0" id="carouselBanners" class="carousel slide banner-compact mb-3" data-bs-ride="carousel">
               <div class="carousel-indicators">
-                <button *ngFor="let banner of banners; let i = index" type="button" [attr.data-bs-target]="'#carouselBanners'" [attr.data-bs-slide-to]="i" [class.active]="i === 0" [attr.aria-current]="i === 0 ? 'true' : null" [attr.aria-label]="'Slide ' + (i + 1)"></button>
+                <button *ngFor="let banner of mainBanners; let i = index" type="button" [attr.data-bs-target]="'#carouselBanners'" [attr.data-bs-slide-to]="i" [class.active]="i === 0" [attr.aria-current]="i === 0 ? 'true' : null" [attr.aria-label]="'Slide ' + (i + 1)"></button>
               </div>
               <div class="carousel-inner rounded overflow-hidden">
-                <div *ngFor="let banner of banners; let i = index" class="carousel-item" [class.active]="i === 0">
+                <div *ngFor="let banner of mainBanners; let i = index" class="carousel-item" [class.active]="i === 0">
                   <img [src]="getBannerImageUrl(banner)" class="d-block w-100" [alt]="banner.title">
                   <div class="carousel-caption d-none d-md-block text-start">
                     <h2 class="fw-bold mb-1">{{ banner.title }}</h2>
@@ -56,18 +56,34 @@
                   </div>
                 </div>
               </div>
-              <button *ngIf="banners.length > 1" class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
+              <button *ngIf="mainBanners.length > 1" class="carousel-control-prev" type="button" data-bs-target="#carouselBanners" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Previous</span>
               </button>
-              <button *ngIf="banners.length > 1" class="carousel-control-next" type="button" data-bs-target="#carouselBanners" data-bs-slide="next">
+              <button *ngIf="mainBanners.length > 1" class="carousel-control-next" type="button" data-bs-target="#carouselBanners" data-bs-slide="next">
                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Next</span>
               </button>
             </div>
 
+            <!-- Small Banners (2 columns) -->
+            <div *ngIf="!isLoadingBanners && smallBanners.length > 0" class="row g-2">
+              <div *ngFor="let banner of smallBanners" class="col-6">
+                <div class="small-banner-card" (click)="navigateToBanner(banner.button_link)" [class.cursor-pointer]="banner.button_link">
+                  <img [src]="getBannerImageUrl(banner)" class="d-block w-100" [alt]="banner.title">
+                  <div class="small-banner-overlay">
+                    <div class="small-banner-content">
+                      <h6 class="small-banner-title">{{ banner.title }}</h6>
+                      <p *ngIf="banner.description" class="small-banner-description">{{ banner.description }}</p>
+                      <button *ngIf="banner.button_text && banner.button_link" class="btn btn-sm btn-primary">{{ banner.button_text }}</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Fallback when no banners -->
-            <div *ngIf="!isLoadingBanners && banners.length === 0" class="carousel-fallback text-center py-5 bg-light rounded">
+            <div *ngIf="!isLoadingBanners && mainBanners.length === 0 && smallBanners.length === 0" class="carousel-fallback text-center py-5 bg-light rounded">
               <h5>Chưa có banner nào được hiển thị</h5>
               <p class="text-muted mb-0">Vui lòng liên hệ quản trị viên để thêm banner</p>
             </div>
