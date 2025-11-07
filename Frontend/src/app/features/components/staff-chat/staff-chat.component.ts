@@ -39,7 +39,6 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
   
   messages: ChatMessage[] = [];
-  customerMessages: ChatMessage[] = [];
   selectedCustomerId: number | null = null;
   selectedCustomerName: string = '';
   newMessage: string = '';
@@ -49,7 +48,6 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
   selectedFile: File | null = null;
   filePreview: string | null = null;
   isConversationClosed: boolean = false;
-  selectedGuestSessionId: string | null = null; // Store guest session ID when selecting guest customer
 
   constructor(
     private chatService: ChatService,
@@ -80,13 +78,13 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
 
   loadCustomerMessages(): void {
     this.isLoading = true;
-    this.chatService.getCustomerMessages().pipe(
-      tap((messages) => {
-        this.customerMessages = messages;
-        this.buildCustomersList();
+    // Get all active conversations
+    this.chatService.getAllActiveConversations().pipe(
+      tap((conversations) => {
+        this.buildCustomersListFromConversations(conversations);
       }),
       catchError((err) => {
-        this.toastService.fail('Không thể tải tin nhắn từ khách hàng');
+        this.toastService.fail('Không thể tải danh sách cuộc trò chuyện');
         return of([]);
       }),
       finalize(() => {
@@ -96,51 +94,36 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
     ).subscribe();
   }
 
-  buildCustomersList(): void {
-    const customerMap = new Map<number | string, { userName: string; lastMessage: string; unreadCount: number; lastMessageTime: Date }>();
+  buildCustomersListFromConversations(conversations: any[]): void {
+    // Group conversations by customerId to avoid duplicates
+    const customerMap = new Map<number, any>();
     
-    this.customerMessages.forEach(msg => {
-      if (!msg.isStaffMessage) {
-        // Use senderId if available, otherwise use a unique key for guest users
-        const customerKey = msg.senderId ?? `guest_${msg.id}`;
-        const existing = customerMap.get(customerKey);
-        const msgTime = msg.createdAt ? new Date(msg.createdAt) : new Date(0);
+    conversations.forEach(conv => {
+      const customerId = conv.customer_id || 0;
+      
+      // Only keep the most recent conversation for each customer
+      if (!customerMap.has(customerId)) {
+        const customerName = conv.customer_name || 
+                            (customerId > 0 ? `Khách hàng #${customerId}` : 'Khách vãng lai');
         
-        if (!existing || msgTime > existing.lastMessageTime) {
-          customerMap.set(customerKey, {
-            userName: msg.senderName || (msg.senderId ? `Khách hàng #${msg.senderId}` : 'Khách vãng lai'),
-            lastMessage: msg.message,
-            unreadCount: msg.isRead === false ? 1 : 0,
-            lastMessageTime: msgTime
-          });
-        } else if (msg.isRead === false) {
-          existing.unreadCount++;
-        }
+        customerMap.set(customerId, {
+          userId: customerId,
+          userName: customerName,
+          lastMessage: '',
+          unreadCount: 0,
+          isGuest: customerId === 0,
+          lastMessageAt: conv.last_message_at
+        });
       }
     });
     
-    this.customers = Array.from(customerMap.entries())
-      .map(([key, data]) => {
-        // Extract userId from key (if it's a number, use it; if it's guest_, use 0)
-        const userId = typeof key === 'number' ? key : 0;
-        return {
-          userId,
-          userName: data.userName,
-          lastMessage: data.lastMessage,
-          unreadCount: data.unreadCount,
-          isGuest: typeof key === 'string'
-        };
-      })
+    // Convert map to array and sort by last message time
+    this.customers = Array.from(customerMap.values())
+      .filter(c => c.userId !== undefined)
       .sort((a, b) => {
-        const aMsg = this.customerMessages.find(m => 
-          a.isGuest ? (m.senderId === null || m.senderId === undefined) : m.senderId === a.userId
-        );
-        const bMsg = this.customerMessages.find(m => 
-          b.isGuest ? (m.senderId === null || m.senderId === undefined) : m.senderId === b.userId
-        );
-        const aTime = aMsg?.createdAt ? new Date(aMsg.createdAt).getTime() : 0;
-        const bTime = bMsg?.createdAt ? new Date(bMsg.createdAt).getTime() : 0;
-        return bTime - aTime;
+        const timeA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+        const timeB = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+        return timeB - timeA; // Most recent first
       });
   }
 
@@ -148,98 +131,60 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
     this.selectedCustomerId = customerId;
     this.selectedCustomerName = customerName;
     this.loadConversation(customerId);
-    if (customerId !== 0) {
-      this.markAsRead(customerId);
-    }
   }
 
   loadConversation(customerId: number): void {
-    this.isLoading = true;
-    // Get current user ID (staff)
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.toastService.fail('Vui lòng đăng nhập');
-      this.isLoading = false;
+    if (!customerId && customerId !== 0) {
+      console.error('Invalid customerId:', customerId);
       return;
     }
     
-    this.userService.getInforUser(token).pipe(
-      tap(user => {
-        const staffId = user.id || 0;
-        
-        // If customerId is 0, it's a guest user - load public messages
-        if (customerId === 0) {
-          // Load all customer messages (including guest users) and filter for this conversation
-          this.chatService.getCustomerMessages().pipe(
-            tap((messages) => {
-              // Filter messages from guest users (senderId is null) and replies from staff
-              // Get all messages where receiver is null (public) or receiver is null and sender is staff
-              const filteredMessages = messages.filter(m => 
-                (m.senderId === null || m.senderId === undefined || m.senderId === customerId) || 
-                (m.isStaffMessage && (m.receiverId === null || m.receiverId === customerId))
-              );
-              
-              // Extract guest session ID from first guest message if available
-              if (customerId === 0 && filteredMessages.length > 0) {
-                const guestMessage = filteredMessages.find(m => m.senderId === null || m.senderId === undefined);
-                if (guestMessage && (guestMessage as any).guestSessionId) {
-                  this.selectedGuestSessionId = (guestMessage as any).guestSessionId;
+    this.isLoading = true;
+    
+    // Get customer conversations and load messages from the first (most recent) one
+    this.chatService.getCustomerConversations(customerId).pipe(
+      tap((conversations) => {
+        if (conversations && conversations.length > 0) {
+          // Get the most recent active conversation, or the most recent one if none are active
+          const activeConversation = conversations.find(c => !c.is_closed) || conversations[0];
+          if (activeConversation && activeConversation.id) {
+            this.chatService.getConversationMessages(activeConversation.id).pipe(
+              tap((messages) => {
+                this.messages = messages;
+                this.isConversationClosed = activeConversation.is_closed || false;
+                this.shouldScroll = true;
+                
+                // Mark conversation as read
+                if (activeConversation.id) {
+                  this.chatService.markConversationAsRead(activeConversation.id).pipe(
+                    takeUntil(this.destroyed$)
+                  ).subscribe();
                 }
-              }
-              
-              this.messages = filteredMessages.sort((a, b) => {
-                const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                return timeA - timeB;
-              });
-              // Check if conversation is closed
-              this.isConversationClosed = this.messages.some(m => m.isClosed === true);
-              this.shouldScroll = true;
-            }),
-            catchError((err) => {
-              console.error('Error loading guest messages:', err);
-              this.toastService.fail('Không thể tải cuộc trò chuyện');
-              return of([]);
-            }),
-            finalize(() => {
-              this.isLoading = false;
-            }),
-            takeUntil(this.destroyed$)
-          ).subscribe();
+              }),
+              catchError((err) => {
+                console.error('Error loading conversation messages:', err);
+                this.toastService.fail('Không thể tải cuộc trò chuyện');
+                return of([]);
+              }),
+              finalize(() => {
+                this.isLoading = false;
+              }),
+              takeUntil(this.destroyed$)
+            ).subscribe();
+          } else {
+            this.messages = [];
+            this.isLoading = false;
+          }
         } else {
-          // Normal conversation with registered user
-          console.log('Loading conversation - customerId:', customerId, 'staffId:', staffId);
-          // IMPORTANT: customerId should be the customer's ID, staffId should be the current staff's ID
-          // API endpoint: /conversation/{customerId} - backend will extract staffId from token
-          this.chatService.getConversation(customerId, staffId).pipe(
-            tap((messages) => {
-              console.log('Loaded conversation messages:', messages);
-              console.log('Customer messages:', messages.filter(m => !m.isStaffMessage));
-              console.log('Staff messages:', messages.filter(m => m.isStaffMessage));
-              this.messages = messages;
-              // Clear guest session ID for registered users
-              this.selectedGuestSessionId = null;
-              // Check if conversation is closed
-              this.isConversationClosed = messages.some(m => m.isClosed === true);
-              this.shouldScroll = true;
-            }),
-            catchError((err) => {
-              console.error('Error loading conversation:', err);
-              this.toastService.fail('Không thể tải cuộc trò chuyện');
-              return of([]);
-            }),
-            finalize(() => {
-              this.isLoading = false;
-            }),
-            takeUntil(this.destroyed$)
-          ).subscribe();
+          this.messages = [];
+          this.isLoading = false;
         }
       }),
       catchError((err) => {
-        console.error('Error getting user info:', err);
+        console.error('Error loading customer conversations:', err);
+        this.toastService.fail('Không thể tải cuộc trò chuyện');
         this.isLoading = false;
-        this.toastService.fail('Không thể lấy thông tin người dùng');
-        return of(null);
+        return of([]);
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
@@ -344,20 +289,6 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
     ).subscribe();
   }
 
-  markAsRead(customerId: number): void {
-    const unreadMessages = this.customerMessages.filter(
-      m => m.senderId === customerId && !m.isRead
-    );
-    
-    unreadMessages.forEach(msg => {
-      if (msg.id) {
-        this.chatService.markAsRead(msg.id).pipe(
-          takeUntil(this.destroyed$)
-        ).subscribe();
-      }
-    });
-  }
-
   scrollToBottom(): void {
     try {
       if (this.scrollContainer) {
@@ -367,12 +298,6 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
     } catch (err) {
       console.error('Error scrolling:', err);
     }
-  }
-
-  getUnreadCountForCustomer(customerId: number): number {
-    return this.customerMessages.filter(
-      m => m.senderId === customerId && !m.isRead
-    ).length;
   }
 
   openImagePreview(imageUrl: string): void {
@@ -415,22 +340,37 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
       return;
     }
 
-    // Use 0 for guest users (null/undefined), otherwise use the customerId
-    const customerIdToClose = this.selectedCustomerId || 0;
-    
-    this.chatService.closeConversation(customerIdToClose).pipe(
-      tap(() => {
-        this.toastService.success('Cuộc trò chuyện đã được đóng');
-        this.isConversationClosed = true;
-        // Reload conversation to show closed status
-        this.loadConversation(this.selectedCustomerId!);
-        // Reload customer list to update
-        this.loadCustomerMessages();
+    // Get the current conversation ID
+    this.chatService.getCustomerConversations(this.selectedCustomerId).pipe(
+      tap((conversations) => {
+        if (conversations && conversations.length > 0) {
+          const activeConversation = conversations.find(c => !c.is_closed);
+          if (activeConversation && activeConversation.id) {
+            this.chatService.closeConversationById(activeConversation.id).pipe(
+              tap(() => {
+                this.toastService.success('Cuộc trò chuyện đã được đóng');
+                this.isConversationClosed = true;
+                // Reload conversation to show closed status
+                this.loadConversation(this.selectedCustomerId!);
+                // Reload customer list to update
+                this.loadCustomerMessages();
+              }),
+              catchError((err) => {
+                console.error('Error closing conversation:', err);
+                this.toastService.fail('Không thể đóng cuộc trò chuyện');
+                return of(null);
+              }),
+              takeUntil(this.destroyed$)
+            ).subscribe();
+          } else {
+            this.toastService.fail('Không tìm thấy cuộc trò chuyện đang hoạt động');
+          }
+        }
       }),
       catchError((err) => {
-        console.error('Error closing conversation:', err);
-        this.toastService.fail('Không thể đóng cuộc trò chuyện');
-        return of(null);
+        console.error('Error getting conversations:', err);
+        this.toastService.fail('Không thể lấy thông tin cuộc trò chuyện');
+        return of([]);
       }),
       takeUntil(this.destroyed$)
     ).subscribe();

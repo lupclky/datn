@@ -42,6 +42,8 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   private shouldScroll = false;
   selectedFile: File | null = null;
   filePreview: string | null = null;
+  showClosedByStaffBanner: boolean = false;
+  closedByStaffName: string = '';
 
   constructor(
     private chatService: ChatService,
@@ -100,17 +102,27 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
 
   private loadMessagesInternal(): void {
     this.isLoading = true;
-    // Get messages where customer is sender or receiver
+    // Customer chat: just load all messages (backend will handle filtering)
+    // Use staffId = 0 to indicate "any staff" - backend will return all messages for this customer
     this.chatService.getMessages().pipe(
       tap((messages) => {
-        // Filter messages: customer's own messages or messages from staff to this customer
+        // Filter messages for current customer
         this.messages = messages.filter(m => 
           m.senderId === this.currentUserId || 
-          (m.isStaffMessage && m.receiverId === this.currentUserId)
-        );
+          m.receiverId === this.currentUserId ||
+          (m.isStaffMessage && m.receiverId === null) // Public messages from staff
+        ).sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return timeA - timeB;
+        });
         this.shouldScroll = true;
+        
+        // Check conversation status to show banner if closed by staff
+        this.checkConversationStatus();
       }),
       catchError((err) => {
+        console.error('Error loading messages:', err);
         this.toastService.fail('Không thể tải tin nhắn');
         return of([]);
       }),
@@ -238,6 +250,48 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
 
   openImagePreview(imageUrl: string): void {
     window.open(imageUrl, '_blank');
+  }
+
+  endSession(): void {
+    if (!confirm('Bạn có chắc muốn kết thúc phiên chat và xóa toàn bộ lịch sử trò chuyện? Hành động này không thể hoàn tác.')) {
+      return;
+    }
+
+    // Xóa lịch sử hiển thị ngay lập tức
+    this.messages = [];
+    this.showClosedByStaffBanner = false;
+    
+    this.chatService.endCustomerSession().pipe(
+      tap(() => {
+        this.toastService.success('Đã kết thúc phiên chat. Bạn có thể bắt đầu cuộc trò chuyện mới.');
+      }),
+      catchError((err) => {
+        console.error('Error ending session:', err);
+        this.toastService.fail('Không thể kết thúc phiên chat');
+        // Reload lại messages nếu có lỗi
+        this.loadMessages();
+        return of(null);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
+
+  checkConversationStatus(): void {
+    this.chatService.getConversationStatus().pipe(
+      tap((status) => {
+        if (status.lastConversationClosedByStaff) {
+          this.showClosedByStaffBanner = true;
+          this.closedByStaffName = status.closedByStaffName || 'Nhân viên';
+        } else {
+          this.showClosedByStaffBanner = false;
+        }
+      }),
+      catchError((err) => {
+        console.error('Error checking conversation status:', err);
+        return of(null);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
   }
 
   scrollToBottom(): void {

@@ -38,14 +38,23 @@
     font-size: 0.65rem;
     line-height: 1;
   }
+
+  // Responsive for smaller screens
+  @media (max-width: 480px) {
+    bottom: 15px;
+    right: 15px;
+    width: 55px;
+    height: 55px;
+  }
 }
 
 .customer-chat-window {
   position: fixed;
-  bottom: 90px;
+  bottom: 85px; // Reduced from 90px to save space
   right: 20px;
   width: 380px;
-  height: 600px;
+  height: min(600px, calc(100vh - 120px)); // Use smaller of 600px or available space
+  max-height: calc(100vh - 120px); // Ensure window fits in viewport with margin
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
@@ -63,6 +72,30 @@
     pointer-events: all;
   }
 
+  // Responsive for smaller screens
+  @media (max-height: 800px) {
+    height: calc(100vh - 110px);
+    bottom: 75px;
+  }
+
+  @media (max-height: 700px) {
+    height: calc(100vh - 95px);
+    bottom: 70px;
+  }
+
+  @media (max-height: 600px) {
+    height: calc(100vh - 75px);
+    bottom: 60px;
+  }
+
+  @media (max-width: 480px) {
+    width: calc(100vw - 40px);
+    right: 10px;
+    left: 10px;
+    bottom: 70px;
+    height: calc(100vh - 85px);
+  }
+
   .chat-header {
     padding: 15px 20px;
     border-bottom: 1px solid #eee;
@@ -76,6 +109,35 @@
     h3 {
       margin: 0;
       font-size: 1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .end-session-button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 6px 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      i {
+        font-size: 1rem;
+      }
     }
 
     .close-button {
@@ -98,6 +160,40 @@
     overflow-y: auto;
     padding: 20px;
     background: #f5f5f5;
+
+    .closed-by-staff-banner {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      animation: slideDown 0.3s ease-out;
+
+      i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+
+      span {
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     .empty-state {
       text-align: center;

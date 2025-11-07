@@ -13,12 +13,13 @@ export interface ChatMessage {
   messageType?: string;
   isRead?: boolean;
   isStaffMessage: boolean;
-  isClosed?: boolean;
+  isClosed?: boolean; // Now refers to conversation.isClosed
   guestSessionId?: string;
   createdAt?: string;
   updatedAt?: string;
   fileUrl?: string;
   fileName?: string;
+  conversationId?: number; // New field for conversation-based chat
 }
 
 export interface ChatMessageDTO {
@@ -28,6 +29,24 @@ export interface ChatMessageDTO {
   message: string;
   messageType?: string;
   isStaffMessage: boolean;
+}
+
+export interface ChatConversation {
+  id?: number;
+  customer_id?: number | null;
+  customer_name?: string | null;
+  customer_email?: string | null;
+  staff_id?: number | null;
+  staff_name?: string | null;
+  guest_session_id?: string | null;
+  is_closed?: boolean;
+  closed_by_id?: number | null;
+  closed_by_name?: string | null;
+  closed_at?: string | null;
+  first_message_at?: string | null;
+  last_message_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 @Injectable({
@@ -133,6 +152,80 @@ export class ChatService {
 
   closeConversation(customerId: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/close/${customerId}`, {}, {
+      headers: this.getHeaders()
+    });
+  }
+
+  // ===== NEW CONVERSATION-BASED METHODS =====
+  
+  /**
+   * Get all active conversations (for staff dashboard)
+   */
+  getAllActiveConversations(): Observable<ChatConversation[]> {
+    return this.http.get<ChatConversation[]>(`${this.apiUrl}/conversations/active`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Get all conversations for a specific customer
+   */
+  getCustomerConversations(customerId: number): Observable<ChatConversation[]> {
+    return this.http.get<ChatConversation[]>(`${this.apiUrl}/conversations/customer/${customerId}`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Get all messages in a specific conversation
+   */
+  getConversationMessages(conversationId: number): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(`${this.apiUrl}/conversations/${conversationId}/messages`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Close a conversation by ID (staff action)
+   */
+  closeConversationById(conversationId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/conversations/${conversationId}/close`, {}, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Mark all messages in a conversation as read
+   */
+  markConversationAsRead(conversationId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/conversations/${conversationId}/mark-read`, {}, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Get unread message count for current user
+   */
+  getUnreadCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.apiUrl}/unread-count`, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Customer ends their current session and starts a new one
+   */
+  endCustomerSession(): Observable<any> {
+    return this.http.post(`${this.apiUrl}/end-session`, {}, {
+      headers: this.getHeaders()
+    });
+  }
+
+  /**
+   * Get conversation status for customer
+   */
+  getConversationStatus(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/conversation-status`, {
       headers: this.getHeaders()
     });
   }

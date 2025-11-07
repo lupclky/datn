@@ -12,12 +12,28 @@
 <div class="customer-chat-window" [class.open]="isOpen">
   <div class="chat-header">
     <h3>Chat với nhân viên</h3>
-    <button class="close-button" (click)="toggleChat()">
-      <i class="pi pi-times"></i>
-    </button>
+    <div class="header-actions">
+      <button 
+        class="end-session-button" 
+        (click)="endSession()"
+        [pTooltip]="'Kết thúc phiên và xóa lịch sử'"
+        tooltipPosition="bottom"
+        title="Kết thúc cuộc trò chuyện và xóa toàn bộ lịch sử">
+        <i class="pi pi-trash"></i>
+      </button>
+      <button class="close-button" (click)="toggleChat()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
   </div>
 
   <div class="messages-container" #scrollContainer>
+    @if(showClosedByStaffBanner) {
+      <div class="closed-by-staff-banner">
+        <i class="pi pi-info-circle"></i>
+        <span>{{ closedByStaffName }} đã kết thúc cuộc trò chuyện. Gửi tin nhắn mới để bắt đầu phiên chat mới.</span>
+      </div>
+    }
     @if(messages.length === 0 && !isLoading) {
       <div class="empty-state">
         <p>Chưa có tin nhắn nào. Hãy gửi tin nhắn để bắt đầu!</p>

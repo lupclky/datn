@@ -2,8 +2,10 @@ package com.example.Sneakers.controllers;
 
 import com.example.Sneakers.dtos.ChatMessageDTO;
 import com.example.Sneakers.exceptions.DataNotFoundException;
+import com.example.Sneakers.models.ChatConversation;
+import com.example.Sneakers.responses.ChatConversationResponse;
 import com.example.Sneakers.responses.ChatMessageResponse;
-import com.example.Sneakers.services.ChatService;
+import com.example.Sneakers.services.ChatServiceV2;
 import com.example.Sneakers.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("${api.prefix}/chat")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ChatController {
-    private final ChatService chatService;
+    private final ChatServiceV2 chatService;
     private final UserService userService;
 
     @PostMapping("/send")
@@ -286,9 +289,13 @@ public class ChatController {
                 }
             }
             
+            // Encode filename for Content-Disposition header to support Unicode characters
+            String encodedFileName = java.net.URLEncoder.encode(fileName, "UTF-8")
+                    .replaceAll("\\+", "%20");
+            
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header("Content-Disposition", "inline; filename=\"" + fileName + "\"")
+                    .header("Content-Disposition", "inline; filename*=UTF-8''" + encodedFileName)
                     .body(resource);
         } catch (Exception e) {
             System.err.println("Error serving file: " + e.getMessage());
@@ -310,6 +317,146 @@ public class ChatController {
         Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
         
         return uniqueFileName;
+    }
+
+    // ===== NEW CONVERSATION-BASED ENDPOINTS =====
+
+    /**
+     * Get all active conversations (for staff dashboard)
+     */
+    @GetMapping("/conversations/active")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getAllActiveConversations() {
+        try {
+            List<ChatConversation> conversations = chatService.getAllActiveConversations();
+            List<ChatConversationResponse> responses = conversations.stream()
+                    .map(ChatConversationResponse::fromChatConversation)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(responses);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get all conversations for a specific customer
+     */
+    @GetMapping("/conversations/customer/{customerId}")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getCustomerConversations(@PathVariable Long customerId) {
+        try {
+            List<ChatConversation> conversations = chatService.getCustomerConversations(customerId);
+            List<ChatConversationResponse> responses = conversations.stream()
+                    .map(ChatConversationResponse::fromChatConversation)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(responses);
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get all messages in a specific conversation
+     */
+    @GetMapping("/conversations/{conversationId}/messages")
+    public ResponseEntity<?> getConversationMessages(@PathVariable Long conversationId) {
+        try {
+            List<ChatMessageResponse> messages = chatService.getConversationMessages(conversationId);
+            return ResponseEntity.ok(messages);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Close a conversation by ID
+     */
+    @PutMapping("/conversations/{conversationId}/close")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> closeConversationById(
+            @PathVariable Long conversationId,
+            @RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.substring(7);
+            Long staffId = userService.getUserDetailsFromToken(extractedToken).getId();
+            
+            chatService.closeConversation(conversationId, staffId);
+            return ResponseEntity.ok(Map.of("message", "Conversation closed successfully"));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Mark all messages in a conversation as read
+     */
+    @PutMapping("/conversations/{conversationId}/mark-read")
+    public ResponseEntity<?> markConversationAsRead(
+            @PathVariable Long conversationId,
+            @RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.substring(7);
+            Long userId = userService.getUserDetailsFromToken(extractedToken).getId();
+            
+            chatService.markConversationAsRead(conversationId, userId);
+            return ResponseEntity.ok(Map.of("message", "Conversation marked as read"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get unread message count for current user
+     */
+    @GetMapping("/unread-count")
+    public ResponseEntity<?> getUnreadCount(@RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.substring(7);
+            Long userId = userService.getUserDetailsFromToken(extractedToken).getId();
+            
+            Long count = chatService.getUnreadCount(userId);
+            return ResponseEntity.ok(Map.of("count", count));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Customer closes their own active conversation and starts a new session
+     */
+    @PostMapping("/end-session")
+    public ResponseEntity<?> endCustomerSession(@RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.substring(7);
+            Long customerId = userService.getUserDetailsFromToken(extractedToken).getId();
+            
+            chatService.endCustomerSession(customerId);
+            return ResponseEntity.ok(Map.of("message", "Session ended successfully. A new session will be created on your next message."));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Check if customer has any active conversations or if last conversation was closed by staff
+     */
+    @GetMapping("/conversation-status")
+    public ResponseEntity<?> getConversationStatus(@RequestHeader("Authorization") String token) {
+        try {
+            String extractedToken = token.substring(7);
+            Long customerId = userService.getUserDetailsFromToken(extractedToken).getId();
+            
+            Map<String, Object> status = chatService.getCustomerConversationStatus(customerId);
+            return ResponseEntity.ok(status);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
+        }
     }
 }
 

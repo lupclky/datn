@@ -1,4 +1,4 @@
-# 📚 Use Case Catalog — Locker Korea (Sneakers/Smart Lock Store)
+# 📚 Use Case Catalog — Locker Korea (Smart Lock Store)
 
 Updated: 2025-11-06
 

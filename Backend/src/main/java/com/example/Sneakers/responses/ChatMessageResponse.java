@@ -43,7 +43,7 @@ public class ChatMessageResponse {
                 .messageType(chatMessage.getMessageType())
                 .isRead(chatMessage.getIsRead())
                 .isStaffMessage(chatMessage.getIsStaffMessage())
-                .isClosed(chatMessage.getIsClosed())
+                .isClosed(chatMessage.getConversation() != null ? chatMessage.getConversation().getIsClosed() : false)
                 .guestSessionId(chatMessage.getGuestSessionId())
                 .fileUrl(chatMessage.getFileUrl())
                 .fileName(chatMessage.getFileName())
