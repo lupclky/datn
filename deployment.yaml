@@ -5,11 +5,15 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: shopsneaker
+      MYSQL_DATABASE: lockerkorea
+      TZ: Asia/Ho_Chi_Minh
     ports:
       - 3306:3306
+    volumes:
+      - ./Backend/lockerkorea.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - Sneaker-network
+      - lockerkorea-network
+    command: --default-time-zone='+07:00'
 
   phpmyadmin8-container:
     image: phpmyadmin/phpmyadmin
@@ -22,27 +26,27 @@ services:
     environment:
       PMA_HOST: mysql8-container #phpMyAdmin Host, PMA = PHP My Amin
     networks:
-      - Sneaker-network
+      - lockerkorea-network
 
-  sneaker-spring-container:
-    container_name: sneaker-spring-container
+  lockerkorea-spring-container:
+    container_name: lockerkorea-spring-container
     build:
       context: .
       dockerfile: DockerfileJavaSpring
     ports:
       - 8089:8089
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql8-container:3306/shopsneaker3?serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql8-container:3306/lockerkorea?serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: shopsneaker3
+      MYSQL_DATABASE: lockerkorea
       CHROMA_BASE_URL: http://chroma-container:8000
     #depends_on only waits for the container to start, not for the service inside the container to be fully operational
     depends_on:
       - mysql8-container
       - chroma-container
     networks:
-      - Sneaker-network
+      - lockerkorea-network
 
   jenkins-container:
     container_name: jenkins-container
@@ -57,7 +61,7 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - Sneaker-network
+      - lockerkorea-network
 
   sonarqube-container:
     container_name: sonarqube-container
@@ -76,17 +80,17 @@ services:
     depends_on:
       - mysql8-container
     networks:
-      - Sneaker-network
+      - lockerkorea-network
 
-  sneaker-angular-container:
-    container_name: sneaker-angular-container
+  lockerkorea-angular-container:
+    container_name: lockerkorea-angular-container
     build:
       context: .
       dockerfile: DockerfileAngular
     ports:
       - "4200:80"
     networks:
-      - Sneaker-network
+      - lockerkorea-network
 
   chroma-container:
     container_name: chroma-container
@@ -99,7 +103,7 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - Sneaker-network
+      - lockerkorea-network
 
 #docker-compose -f ./deployment.yaml down
 #docker-compose -f ./deployment.yaml rm -s -f mysql8-container
@@ -107,18 +111,18 @@ services:
 
 #docker-compose -f ./deployment.yaml rm -s -f phpmyadmin8-container
 #docker-compose -f ./deployment.yaml up -d phpmyadmin8-container
-#docker-compose -f ./deployment.yaml rm -s -f sneaker-spring-container
-#docker-compose -f ./deployment.yaml up -d sneaker-spring-container
-#docker-compose -f ./deployment.yaml up -d sneaker-spring-container
+#docker-compose -f ./deployment.yaml rm -s -f lockerkorea-spring-container
+#docker-compose -f ./deployment.yaml up -d lockerkorea-spring-container
+#docker-compose -f ./deployment.yaml up -d lockerkorea-spring-container
 #test
-#docker-compose -f ./deployment.yaml rm -s -f sneaker-angular-container
-#docker-compose -f ./deployment.yaml up -d sneaker-angular-container
+#docker-compose -f ./deployment.yaml rm -s -f lockerkorea-angular-container
+#docker-compose -f ./deployment.yaml up -d lockerkorea-angular-container
 #docker-compose -f ./deployment.yaml rm -s -f chroma-container
 #docker-compose -f ./deployment.yaml up -d chroma-container
 #docker run -d -p 9000:9000 SonarQubeimage
 networks:
-  Sneaker-network:
-    name: Sneaker-network
+  lockerkorea-network:
+    name: lockerkorea-network
     driver: bridge
 
 volumes:

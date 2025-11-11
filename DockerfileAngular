@@ -27,5 +27,5 @@ EXPOSE 80
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
 
-#docker build -t sneaker_fe:1.0.0 -f DockerfileAngular .
-#docker run -p 8080:80 sneaker_fe:1.0.0
+#docker build -t lockerkorea_fe:1.0.0 -f DockerfileAngular .
+#docker run -p 8080:80 lockerkorea_fe:1.0.0

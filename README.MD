@@ -10,7 +10,7 @@ docker compose -f ./deployment.yaml up -d chroma-container
 
 ```
 
-- Go to localhost:8100 and import database name: shopsneaker3
+- Go to localhost:8100 and import database name: lockerkorea
 
 
 ## BACKEND

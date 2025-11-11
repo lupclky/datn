@@ -3,7 +3,7 @@ version: '3.8'
 services:
   chromadb:
     image: chromadb/chroma:latest
-    container_name: sneakers-chromadb
+    container_name: lockerkorea-chromadb
     ports:
       - "8000:8000"
     volumes:
@@ -20,13 +20,13 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - sneakers-network
+      - lockerkorea-network
 
 volumes:
   chroma-data:
     driver: local
 
 networks:
-  sneakers-network:
+  lockerkorea-network:
     driver: bridge
 
