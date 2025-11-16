@@ -2,10 +2,10 @@
 -- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: mysql8-container
--- Thời gian đã tạo: Th10 06, 2025 lúc 12:58 PM
--- Phiên bản máy phục vụ: 8.2.0
--- Phiên bản PHP: 8.3.26
+-- Host: mysql8-container
+-- Generation Time: Nov 16, 2025 at 10:40 AM
+-- Server version: 8.2.0
+-- PHP Version: 8.3.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `shopsneaker3`
+-- Database: `shopsneaker3`
 --
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `banners`
+-- Table structure for table `banners`
 --
 
 CREATE TABLE `banners` (
@@ -44,7 +44,7 @@ CREATE TABLE `banners` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Bảng quản lý banner trang chủ';
 
 --
--- Đang đổ dữ liệu cho bảng `banners`
+-- Dumping data for table `banners`
 --
 
 INSERT INTO `banners` (`id`, `title`, `description`, `image_url`, `button_text`, `button_link`, `button_style`, `display_order`, `is_active`, `start_date`, `end_date`, `created_at`, `updated_at`) VALUES
@@ -57,7 +57,7 @@ INSERT INTO `banners` (`id`, `title`, `description`, `image_url`, `button_text`,
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `carts`
+-- Table structure for table `carts`
 --
 
 CREATE TABLE `carts` (
@@ -69,16 +69,16 @@ CREATE TABLE `carts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `carts`
+-- Dumping data for table `carts`
 --
 
 INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `size`) VALUES
-(12, 14, 11, 1, 43);
+(12, NULL, 11, 1, 43);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `categories`
+-- Table structure for table `categories`
 --
 
 CREATE TABLE `categories` (
@@ -87,7 +87,7 @@ CREATE TABLE `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `categories`
+-- Dumping data for table `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`) VALUES
@@ -105,31 +105,45 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `chat_conversations`
+-- Table structure for table `chat_conversations`
 --
 
 CREATE TABLE `chat_conversations` (
-  `id` int UNSIGNED NOT NULL,
-  `customer_id` int DEFAULT NULL,
-  `staff_id` int DEFAULT NULL,
+  `id` bigint NOT NULL,
+  `customer_id` bigint DEFAULT NULL,
+  `staff_id` bigint DEFAULT NULL,
   `guest_session_id` varchar(255) DEFAULT NULL,
   `is_closed` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `closed_at` datetime(6) DEFAULT NULL,
+  `first_message_at` datetime(6) DEFAULT NULL,
+  `last_message_at` datetime(6) DEFAULT NULL,
+  `closed_by_id` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `chat_conversations`
+--
+
+INSERT INTO `chat_conversations` (`id`, `customer_id`, `staff_id`, `guest_session_id`, `is_closed`, `created_at`, `updated_at`, `closed_at`, `first_message_at`, `last_message_at`, `closed_by_id`) VALUES
+(9, 18, 19, NULL, 1, '2025-11-06 14:05:10', '2025-11-06 14:21:34', '2025-11-06 14:21:34.250352', '2025-11-06 14:05:09.805585', '2025-11-06 14:12:41.131461', 19),
+(10, 18, 19, NULL, 1, '2025-11-06 14:05:20', '2025-11-06 14:12:23', '2025-11-06 14:12:22.620799', '2025-11-06 14:05:20.304423', '2025-11-06 14:12:01.314473', 19),
+(11, 18, 19, NULL, 1, '2025-11-06 14:21:46', '2025-11-06 14:26:06', '2025-11-06 14:26:06.188543', '2025-11-06 14:21:45.893334', '2025-11-06 14:22:14.016690', 19),
+(12, 18, 19, NULL, 1, '2025-11-06 14:26:17', '2025-11-06 14:26:33', '2025-11-06 14:26:33.340136', '2025-11-06 14:26:17.326581', '2025-11-06 14:26:25.322807', 19);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `chat_messages`
+-- Table structure for table `chat_messages`
 --
 
 CREATE TABLE `chat_messages` (
   `id` bigint NOT NULL,
-  `sender_id` int DEFAULT NULL COMMENT 'ID người gửi (NULL cho guest)',
+  `sender_id` bigint DEFAULT NULL,
   `guest_session_id` varchar(255) DEFAULT NULL COMMENT 'Session ID của khách vãng lai (từ localStorage)',
-  `receiver_id` int DEFAULT NULL COMMENT 'ID người nhận (NULL nếu là chat công khai)',
-  `conversation_id` int UNSIGNED DEFAULT NULL,
+  `receiver_id` bigint DEFAULT NULL,
+  `conversation_id` bigint NOT NULL,
   `message` text NOT NULL COMMENT 'Nội dung tin nhắn',
   `message_type` varchar(20) NOT NULL DEFAULT 'TEXT' COMMENT 'Loại tin nhắn: TEXT, IMAGE, FILE',
   `is_read` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Đã đọc chưa',
@@ -144,29 +158,30 @@ CREATE TABLE `chat_messages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Bảng lưu trữ tin nhắn chat';
 
 --
--- Đang đổ dữ liệu cho bảng `chat_messages`
+-- Dumping data for table `chat_messages`
 --
 
 INSERT INTO `chat_messages` (`id`, `sender_id`, `guest_session_id`, `receiver_id`, `conversation_id`, `message`, `message_type`, `is_read`, `is_staff_message`, `is_closed`, `closed_by`, `closed_at`, `created_at`, `updated_at`, `file_url`, `file_name`) VALUES
-(12, 19, NULL, 18, NULL, 'alo', 'TEXT', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:10:46', '2025-11-05 21:19:28', NULL, NULL),
-(13, 19, NULL, 18, NULL, 'ads', 'TEXT', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:10:54', '2025-11-05 21:19:28', NULL, NULL),
-(14, 18, NULL, 19, NULL, 'alo', 'TEXT', 1, 0, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:11:30', '2025-11-05 21:19:28', NULL, NULL),
-(15, 19, NULL, 18, NULL, 'alo', 'TEXT', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:11:38', '2025-11-05 21:19:28', NULL, NULL),
-(16, 19, NULL, 18, NULL, 'SHS-P718_3-4.png', 'IMAGE', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:12:01', '2025-11-05 21:19:28', '/api/v1/chat/files/d56747c7-6cdb-4de9-a277-f49ffbf14511_SHS-P718_3-4.png', 'SHS-P718_3-4.png'),
-(17, 18, NULL, 19, NULL, 'alo', 'TEXT', 1, 0, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:12:50', '2025-11-05 21:19:28', NULL, NULL),
-(18, 19, NULL, 18, NULL, 'alo', 'TEXT', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:13:19', '2025-11-05 21:19:28', NULL, NULL),
-(19, 19, NULL, 18, NULL, 'alo', 'TEXT', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:15:50', '2025-11-05 21:19:28', NULL, NULL),
-(20, 18, NULL, 19, NULL, 'alo', 'TEXT', 1, 0, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:16:10', '2025-11-05 21:19:28', NULL, NULL),
-(21, 19, NULL, 18, NULL, 'alo', 'TEXT', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:16:15', '2025-11-05 21:19:28', NULL, NULL),
-(22, 19, NULL, 18, NULL, 'alo', 'TEXT', 0, 1, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:17:59', '2025-11-05 21:19:28', NULL, NULL),
-(23, 18, NULL, 19, NULL, '', 'IMAGE', 0, 0, 1, 19, '2025-11-05 21:19:28', '2025-11-05 21:18:10', '2025-11-05 21:19:28', '/api/v1/chat/files/fda7270d-3e58-41df-a923-d873cdf5bf37_DH538_co 3-4.jpg', 'DH538_co 3-4.jpg'),
-(24, 18, NULL, 19, NULL, 'alo', 'TEXT', 1, 0, 0, NULL, NULL, '2025-11-05 21:19:43', '2025-11-05 21:21:49', NULL, NULL),
-(25, 18, NULL, 19, NULL, '', 'IMAGE', 1, 0, 0, NULL, NULL, '2025-11-05 21:21:40', '2025-11-05 21:24:27', '/api/v1/chat/files/6cdc20e9-d623-49c8-9ae2-182725c1497f_sht-3517nt-1.jpg', 'sht-3517nt-1.jpg');
+(36, 18, NULL, NULL, 9, 'alo', 'TEXT', 0, 0, 0, NULL, NULL, '2025-11-06 14:05:10', '2025-11-06 14:05:10', NULL, NULL),
+(37, 19, NULL, 18, 10, 'alo', 'TEXT', 0, 1, 0, NULL, NULL, '2025-11-06 14:05:20', '2025-11-06 14:05:20', NULL, NULL),
+(38, 18, NULL, NULL, 10, 'alo', 'TEXT', 0, 0, 0, NULL, NULL, '2025-11-06 14:07:43', '2025-11-06 14:07:43', NULL, NULL),
+(39, 19, NULL, 18, 10, 'alo', 'TEXT', 0, 1, 0, NULL, NULL, '2025-11-06 14:07:51', '2025-11-06 14:07:51', NULL, NULL),
+(40, 18, NULL, NULL, 10, 'alo', 'TEXT', 0, 0, 0, NULL, NULL, '2025-11-06 14:11:22', '2025-11-06 14:11:22', NULL, NULL),
+(41, 19, NULL, 18, 10, 'alo', 'TEXT', 0, 1, 0, NULL, NULL, '2025-11-06 14:11:32', '2025-11-06 14:11:32', NULL, NULL),
+(42, 18, NULL, NULL, 10, '', 'IMAGE', 0, 0, 0, NULL, NULL, '2025-11-06 14:11:47', '2025-11-06 14:11:47', '/api/v1/chat/files/6820dec1-453a-4816-a346-ea1633b206f3_loại bỏ viền trắng.png', 'loại bỏ viền trắng.png'),
+(43, 18, NULL, NULL, 10, 'How to đẹp trai', 'IMAGE', 0, 0, 0, NULL, NULL, '2025-11-06 14:12:01', '2025-11-06 14:12:01', '/api/v1/chat/files/00aa434e-2d72-4474-b46b-af06cfe78b5e_B21DCCN073.jpg', 'B21DCCN073.jpg'),
+(44, 19, NULL, 18, 9, 'alo', 'TEXT', 0, 1, 0, NULL, NULL, '2025-11-06 14:12:41', '2025-11-06 14:12:41', NULL, NULL),
+(45, 18, NULL, NULL, 11, 'alo', 'TEXT', 0, 0, 0, NULL, NULL, '2025-11-06 14:21:46', '2025-11-06 14:21:46', NULL, NULL),
+(46, 19, NULL, 18, 11, 'alo', 'TEXT', 0, 1, 0, NULL, NULL, '2025-11-06 14:21:49', '2025-11-06 14:21:49', NULL, NULL),
+(47, 18, NULL, NULL, 11, 'alo', 'TEXT', 0, 0, 0, NULL, NULL, '2025-11-06 14:21:56', '2025-11-06 14:21:56', NULL, NULL),
+(48, 18, NULL, NULL, 11, 'alo', 'TEXT', 0, 0, 0, NULL, NULL, '2025-11-06 14:22:14', '2025-11-06 14:22:14', NULL, NULL),
+(49, 18, NULL, NULL, 12, 'alo', 'TEXT', 0, 0, 0, NULL, NULL, '2025-11-06 14:26:17', '2025-11-06 14:26:17', NULL, NULL),
+(50, 19, NULL, 18, 12, 'alo', 'TEXT', 0, 1, 0, NULL, NULL, '2025-11-06 14:26:25', '2025-11-06 14:26:25', NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `lock_features`
+-- Table structure for table `lock_features`
 --
 
 CREATE TABLE `lock_features` (
@@ -179,7 +194,7 @@ CREATE TABLE `lock_features` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `lock_features`
+-- Dumping data for table `lock_features`
 --
 
 INSERT INTO `lock_features` (`id`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
@@ -195,7 +210,7 @@ INSERT INTO `lock_features` (`id`, `name`, `description`, `is_active`, `created_
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `news`
+-- Table structure for table `news`
 --
 
 CREATE TABLE `news` (
@@ -215,13 +230,13 @@ CREATE TABLE `news` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `news`
+-- Dumping data for table `news`
 --
 
 INSERT INTO `news` (`id`, `title`, `content`, `summary`, `author`, `category`, `status`, `featured_image`, `views`, `published_at`, `created_at`, `updated_at`, `thumbnail`) VALUES
 (1, 'Giới thiệu sản phẩm mới', '<p>Nội dung chi tiết về sản ph<span style=\"background-color: initial; color: inherit;\">Sau nhiều tháng thử nghiệm beta,&nbsp;</span><a href=\"https://tinhte.vn/tag/apple\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">Apple</a><span style=\"background-color: initial; color: inherit;\">&nbsp;hôm nay đã chính thức phát hành&nbsp;</span><a href=\"https://tinhte.vn/tag/ios-261\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iOS 26.1</a><span style=\"background-color: initial; color: inherit;\">&nbsp;và iPadOS 26.1 đến người dùng toàn cầu. Nếu như&nbsp;</span><a href=\"https://tinhte.vn/tag/ios-26\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iOS 26</a><span style=\"background-color: initial; color: inherit;\">&nbsp;là một cuộc lột xác về mặt giao diện với hiệu ứng Liquid Glass, thì&nbsp;</span><a href=\"https://tinhte.vn/tag/ios\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iOS</a><span style=\"background-color: initial; color: inherit;\">&nbsp;26.1 lại là một bản cập nhật mang tính hoàn thiện, tập trung vào việc lắng nghe phản hồi từ cộng đồng, tinh chỉnh trải nghiệm, và quan trọng nhất, AI Apple đã có tiếng Việt.</span></p><p><br></p><p><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: inherit;\"><img src=\"https://imgproxy7.tinhte.vn/NUfJH046YahZ_HW-22UTlJgIvTlNhrymgIa0jOut2hs/rs:fill:480:300:0/plain/https://photo2.tinhte.vn/data/attachment-files/2025/09/8844754_overr_neia.jpg\" height=\"300\" width=\"480\"></a></p><h2><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(20, 20, 20);\"><strong>Thử nhanh Apple Intelligence tiếng Việt: Cảm ơn Apple, mình đã chờ điều này hơn một năm qua</strong></a></h2><p><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(20, 20, 20);\">Bà con ơi, làng nước ơi, Apple AI có tiếng Việt rồi. Đây là một điều mình đã mong chờ trong hơn 1 năm qua, Siri tiếng Việt ừ cũng thường nhưng Apple Intelligence tiếng Việt lại là một chuyện khác, mới trải nghiệm sơ sơ là thấy đã rồi. Để xài AI...</a></p><p><a href=\"https://tinhte.vn/thread/thu-nhanh-apple-intelligence-tieng-viet-cam-on-apple-minh-da-cho-dieu-nay-hon-mot-nam-qua.4058827/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(20, 20, 20); background-color: initial;\">&nbsp;tinhte.vn</a></p><p><br></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Apple Intelligence chính thức hỗ trợ Tiếng Việt</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Đây chắc chắn là nâng cấp quan trọng và được mong chờ nhất đối với người dùng Việt Nam trong bản cập nhật lần này. Nền tảng trí tuệ nhân tạo của Apple giờ đây đã có thể hiểu và tương tác hoàn toàn bằng tiếng Việt, giúp anh em trải nghiệm nhiều tính năng mới mà trước đây chúng ta chỉ có thể trải nghiệm bằng tiếng Anh.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885130_8844754-overr-neia.jpg\" alt=\"8844754-overr-neia.jpg\"></span></p><p><br></p><p>Đầu tiên phải kể đến Writing Tools (Công cụ Viết). Tính năng này giờ đây đã có thể sử dụng hoàn toàn bằng tiếng Việt trên hầu hết mọi ứng dụng. Ae có thể dễ dàng yêu cầu AI tóm tắt một đoạn văn bản dài, viết lại theo một phong cách khác, sửa lỗi chính tả hay thậm chí chuyển đổi một đoạn so sánh thành dạng bảng biểu để dễ theo dõi hơn. Việc tích hợp sâu ChatGPT cũng cho phép người dùng đưa ra các yêu cầu phức tạp hơn bằng chính ngôn ngữ mẹ đẻ.</p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885131_8844747-piewjfipqwejf-2.jpg\" alt=\"8844747-piewjfipqwejf-2.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Trong ứng dụng Mail, AI có thể tự động đọc và tóm tắt nội dung các email dài bằng tiếng Việt một cách ngọt sớt, đồng thời đề xuất các câu trả lời thông minh phù hợp với ngữ cảnh. Cùng với khả năng lọc và phân loại mail tự động, việc quản lý email hàng ngày đã trở nên đơn giản và hiệu quả hơn rất nhiều.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885132_8844736-4.jpg\" alt=\"8844736-4.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Siri thế hệ mới cũng đã thông minh hơn khi giao tiếp bằng tiếng Việt. Nó có thể hiểu các câu lệnh phức tạp và tự nhiên hơn, thực hiện các tác vụ liền mạch như \"nhắn tin cho A rủ đi ăn phở, uống trà sữa\" hay thậm chí là yêu cầu ChatGPT soạn một đoạn văn bản rồi gửi đi.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885133_8844740-7-2.jpg\" alt=\"8844740-7-2.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Cuối cùng, Visual Intelligence cũng đã được Việt hóa. Khi ae hướng camera vào một địa điểm hay một đoạn văn bản, tính năng này có thể nhận diện và cung cấp các thông tin liên quan bằng tiếng Việt. Các tính năng sáng tạo như Image Playground và Genmoji cũng đã chấp nhận các câu lệnh mô tả bằng tiếng Việt, giúp cá nhân hóa trải nghiệm một cách sâu sắc hơn nhưng mấy cái đó thấy không vui nên mình không xài.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885134_8844742-11-2.jpg\" alt=\"8844742-11-2.jpg\"></span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Tùy chỉnh giao diện Liquid Glass</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Lắng nghe phản hồi từ những người dùng cho rằng giao diện Liquid Glass mặc định đôi khi hơi khó đọc do độ tương phản thấp, Apple đã bổ sung một tùy chọn tùy chỉnh quan trọng trong iOS 26.1. Trong mục Cài đặt &gt; Màn hình &amp; Độ sáng, người dùng giờ đây có thể chuyển đổi giữa hai chế độ: Clear và Tinted.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885135_tat-liquid-glass-trong-ban-cap-nhat-ios-26-1-8.jpg\" alt=\"tat-liquid-glass-trong-ban-cap-nhat-ios-26-1-8.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Chế độ Clear chính là giao diện Liquid Glass mặc định với các thành phần có độ trong mờ cao, cho phép nhìn thấy rõ hình nền phía sau. Trong khi đó, chế độ Tinted sẽ tăng độ mờ đục và thêm độ tương phản cho các yếu tố giao diện như nút bấm, thanh menu, giúp chúng trở nên nổi bật và dễ đọc hơn. Sự thay đổi này được áp dụng trên toàn bộ hệ điều hành, từ các ứng dụng cho đến thông báo trên Màn hình khóa.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">iPadOS 26.1: Slide Over chính thức trở lại, hoạt động song song với đa nhiệm cửa sổ</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Đây là một tin cực vui cho những người dùng iPad. Tính năng đa nhiệm Slide Over, vốn đã bị tạm thời loại bỏ trên iPadOS 26 để nhường chỗ cho hệ thống cửa sổ mới, đã chính thức được Apple mang trở lại, mình thích cái này hơn cái hệ thống cửa sổ mới. Mình thực sự đã quen với việc truy cập nhanh một ứng dụng phụ mà không làm gián đoạn công việc chính, Slide Over làm được chuyện đó.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885136_maxresdefault-4.jpg\" alt=\"maxresdefault-4.jpg\"></span></p><p><br></p><p>Giờ đây, Slide Over sẽ hoạt động song song và đóng vai trò bổ trợ cho hệ thống cửa sổ. Điều này có nghĩa là ae có thể mở nhiều cửa sổ ứng dụng trên màn hình, đồng thời vẫn có thể vuốt từ cạnh phải để truy cập nhanh một ứng dụng đang chạy ở chế độ Slide Over.</p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885137_8859365-ipados-26-1-slide-over.jpg\" alt=\"8859365-ipados-26-1-slide-over.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Để kích hoạt, người dùng chỉ cần nhấn vào nút điều khiển cửa sổ và chọn Enter Slide Over. Dù ở phiên bản hiện tại, người dùng chỉ có thể sử dụng một ứng dụng Slide Over tại một thời điểm, nhưng sự trở lại này đã cho thấy Apple đang tích cực lắng nghe và tìm ra điểm cân bằng tối ưu cho trải nghiệm đa nhiệm trên iPad.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Báo thức và Hẹn giờ: Thao tác \"Trượt để tắt\" thay cho nút bấm</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Một thay đổi nhỏ nhưng cực kỳ hữu ích và mình thấy được nhiều người dùng hoan nghênh chính là cách tương tác mới với báo thức trên Màn hình Khóa. Apple đã thay thế nút Stop bằng một thanh trượt Slide to Stop, trong khi nút Snooze vẫn giữ nguyên dạng nhấn.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885138_8859361-ios-26-1-slide-to-stop.jpg\" alt=\"8859361-ios-26-1-slide-to-stop.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Sự thay đổi này giải quyết triệt để một vấn đề mà rất nhiều người gặp phải vào mỗi buổi sáng: vô tình nhấn nhầm nút Dừng thay vì Báo lại trong lúc còn ngái ngủ, đặc biệt là những người ngủ xấu như&nbsp;</span><a href=\"https://tinhte.vn/profile/nha-cua-cao.1418508/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">@Nhà Của Cáo</a><span style=\"background-color: initial; color: inherit;\">.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Giờ đây, để tắt hoàn toàn báo thức, người dùng sẽ cần một thao tác trượt có chủ đích hơn, giảm thiểu đáng kể khả năng tắt nhầm. Thay đổi này cũng được áp dụng tương tự cho tính năng Hẹn giờ.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Nâng cấp toàn diện cho CarPlay: Giao diện mới, Widget, Live Activities và AirPlay</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">CarPlay có thể xem là nền tảng nhận được nhiều nâng cấp nhất trên iOS 26.1. Toàn bộ giao diện giờ đây được áp dụng hiệu ứng Liquid Glass, mang lại một vẻ ngoài đồng bộ và hiện đại. Người dùng có thể trả lời tin nhắn bằng các Tapback, xem các cuộc hội thoại đã ghim và nhận thông báo cuộc gọi trong một giao diện nhỏ gọn hơn để không che mất bản đồ.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885139_CarPlay-Messages-Tapbacks.jpg\" alt=\"CarPlay-Messages-Tapbacks.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Hai bổ sung lớn nhất là việc đưa Live Activities và Widget lên CarPlay. Màn hình Dashboard giờ đây có thể hiển thị các Live Activities để theo dõi thông tin thời gian thực, trong khi một màn hình widget riêng cho phép truy cập nhanh vào lịch, điều khiển thiết bị HomeKit.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885140_64001-133195-Live-Activity-in-CarPlay-xl.jpg\" alt=\"64001-133195-Live-Activity-in-CarPlay-xl.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Đặc biệt, iOS 26.1 còn mang tính năng AirPlay lên CarPlay, cho phép truyền phát video không dây từ&nbsp;</span><a href=\"https://tinhte.vn/tag/iphone\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(7, 104, 234);\">iPhone</a><span style=\"background-color: initial; color: inherit;\">&nbsp;lên màn hình của xe khi đang đỗ, một tính năng rất được mong chờ.</span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Các tinh chỉnh nhỏ nhưng đáng giá khác</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Bên cạnh những thay đổi lớn, iOS 26.1 còn mang đến hàng loạt các cải tiến nhỏ trên toàn hệ thống. Trong ứng dụng Cài đặt, toàn bộ các tiêu đề mục như Cài đặt chung, Bluetooth, Wi-Fi... giờ đây đã được căn lề trái đồng bộ để tạo sự nhất quán. Hiệu ứng khúc xạ ánh sáng của Liquid Glass xung quanh các biểu tượng ứng dụng cũng được làm cho tinh tế và nhẹ nhàng hơn.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885141_8859363-ios-26-1-left-aligned-settings.jpg\" alt=\"8859363-ios-26-1-left-aligned-settings.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Ứng dụng Apple Music có thêm cử chỉ vuốt mới để chuyển bài hát, ae chỉ cần muốn thanh phat nhạc là dược. Trên Apple Music, tính năng Crossfade cũ đã được thay thế bằng AutoMix, giúp tự động tạo ra các đoạn chuyển tiếp giữa các bài hát, riêng mình thì thấy tính năng này hơi xàm. À à, thông qua bản cập nhật này Airpods cũng được cập nhật tính năng dịch trực tiếp.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885142_apple-music-automix-ios-26.jpg\" alt=\"apple-music-automix-ios-26.jpg\"></span></p><p><br></p><h2><strong style=\"background-color: initial; color: inherit;\">Kết luận: Một bản cập nhật đáng nâng cấp</strong></h2><p><br></p><p><span style=\"background-color: initial; color: inherit;\">iOS 26.1 không phải là một cuộc cách mạng hay gì đó quá ghê gớm. Nó đã biến những ý tưởng của iOS 26 trở nên hoàn thiện, thực tế và thân thiện hơn với người dùng. Apple mang trở lại các tính năng được cộng đồng yêu thích như Slide Over, hay giải quyết các vấn đề nhỏ nhưng gây khó chịu như nút tắt báo thức.</span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\"><img src=\"https://photo2.tinhte.vn/data/attachment-files/2025/11/8885143_8860852-tinhte-tu-review-ios-26-3.jpg\" alt=\"8860852-tinhte-tu-review-ios-26-3.jpg\"></span></p><p><br></p><p><span style=\"background-color: initial; color: inherit;\">Trên hết, việc Apple Intelligence chính thức hỗ trợ tiếng Việt đã mở ra một điều gì đó hay ho cho người dùng iPhone tại Việt Nam. Dù vẫn còn một vài tính năng cần được cải thiện, nhưng những gì iOS 26.1 mang lại ở thời điểm hiện tại đã là quá đủ để nói đây là một bản cập nhật rất đáng giá, giúp trải nghiệm iOS trở nên trọn vẹn hơn, mình đang chạy beta thấy vẫn ngon lành cành đào...</span></p><p>ẩm mới...</p>', 'Tóm tắt về sản phẩm mới', 'Admin', 'Tin tức', 'PUBLISHED', 'f40e0038-70de-4459-8d39-13dfaefbd2ce_0b021a98-99b1-458f-add3-6464701ce854_giay-adidas-adifom-superstar-white-black-10-800x650.jpg', 180, '2025-11-04 18:00:12', '2025-11-04 11:30:34', '2025-11-05 03:04:01', NULL),
 (2, 'Hướng dẫn sử dụng', '<p>Hướng dẫn chi tiết cách sử dụng sản phẩm...</p>', 'Tóm tắt hướng dẫn', 'Admin', 'Hướng dẫn', 'PUBLISHED', '0a348d98-7cb3-4f96-9530-9b80f9c859f3_giay-mlb-chunky-liner-mid-denim-boston-red-sox-dblue-auth-5-300x300.jpg.jpg', 136, '2025-11-05 17:41:56', '2025-11-04 11:30:34', '2025-11-06 01:09:35', NULL),
-(3, 'GIảm giá 30% khi mua khoá vân tay Welkom', '<h1>GIẢM GIÁ 30% KHI MUA KHOÁ VÂN TAY WELKOM: Nâng Tầm An Ninh Gia Đình Với Công Nghệ Hiện Đại</h1><p>Trong bối cảnh công nghệ đang phát triển vũ bão, việc đảm bảo an ninh cho ngôi nhà và tài sản đã trở thành ưu tiên hàng đầu của mọi gia đình. Không chỉ dừng lại ở những chiếc khóa cơ truyền thống, thế giới khóa điện tử và công nghệ an ninh đã mở ra một kỷ nguyên mới với sự xuất hiện của các giải pháp thông minh, trong đó nổi bật là khóa vân tay. Sự tiện lợi, bảo mật vượt trội và tính thẩm mỹ cao đã biến khóa vân tay từ một sản phẩm xa xỉ thành một lựa chọn thiết yếu cho tổ ấm hiện đại. Đây không chỉ là một thiết bị bảo vệ mà còn là một phần quan trọng của hệ sinh thái nhà thông minh, mang lại trải nghiệm sống tiện nghi và an toàn hơn bao giờ hết.</p><p>Thấu hiểu nhu cầu đó, và nhằm tạo điều kiện cho nhiều gia đình Việt Nam tiếp cận với công nghệ bảo mật tiên tiến, chúng tôi vui mừng thông báo về chương trình <strong>khuyến mãi đặc biệt</strong>: <strong>GIẢM GIÁ 30% khi mua khóa vân tay Welkom</strong>. Đây là cơ hội vàng để quý vị nâng cấp hệ thống an ninh cho ngôi nhà của mình với mức đầu tư tối ưu. Chương trình này không chỉ là một ưu đãi về giá, mà còn là lời cam kết mang đến những sản phẩm chất lượng cao, tích hợp công nghệ hiện đại nhất từ Welkom, một thương hiệu uy tín trong lĩnh vực khóa điện tử. Hãy cùng chúng tôi đi sâu vào tìm hiểu lý do vì sao khóa vân tay Welkom lại là sự lựa chọn hoàn hảo và cách tận dụng chương trình khuyến mãi hấp dẫn này.</p><h2>Sự Trỗi Dậy Của Khóa Vân Tay Trong Thời Đại Số Hóa An Ninh</h2><p>Thị trường khóa cửa đã chứng kiến một sự chuyển mình mạnh mẽ trong thập kỷ qua, với sự thay thế dần của khóa cơ truyền thống bằng các giải pháp khóa điện tử và khóa thông minh. Trong số đó, khóa vân tay đã nhanh chóng chiếm lĩnh vị trí dẫn đầu nhờ những ưu điểm vượt trội về bảo mật và tiện lợi. Thay vì phải lo lắng về việc mất chìa khóa, quên mã số, hay bị sao chép chìa một cách trái phép, công nghệ sinh trắc học cho phép người dùng mở cửa chỉ bằng một chạm tay, sử dụng chính dấu vân tay độc nhất của mình. Điều này không chỉ giúp tiết kiệm thời gian mà còn loại bỏ hoàn toàn nguy cơ mất an toàn do sơ suất cá nhân. Khóa vân tay là minh chứng rõ ràng cho việc công nghệ có thể đơn giản hóa cuộc sống đồng thời tăng cường lớp bảo vệ.</p><p>Hơn nữa, các mẫu khóa vân tay hiện đại như Welkom thường được tích hợp nhiều phương thức mở khóa khác nhau, bao gồm mã số, thẻ từ, chìa cơ dự phòng và thậm chí là điều khiển qua ứng dụng di động. Sự đa dạng này đảm bảo rằng người dùng luôn có phương án dự phòng trong mọi tình huống, từ việc hết pin khẩn cấp cho đến việc cấp quyền truy cập tạm thời cho khách hoặc người giúp việc mà không cần phải trao chìa khóa vật lý. Đây là một bước tiến đáng kể so với khóa truyền thống, nơi mà việc quản lý chìa khóa trở nên phức tạp và dễ gây ra rủi ro an ninh. Sự kết hợp giữa tiện ích và tính năng bảo mật đa lớp chính là yếu tố then chốt giúp khóa vân tay trở thành lựa chọn ưu việt cho ngôi nhà hiện đại.</p><h2>Công Nghệ Vân Tay: Nền Tảng Của An Toàn và Tiện Nghi</h2><p>Trọng tâm của khóa vân tay nằm ở công nghệ nhận dạng sinh trắc học, cụ thể là dấu vân tay. Hiện nay, có hai loại cảm biến vân tay phổ biến được sử dụng trong khóa điện tử: cảm biến quang học và cảm biến điện dung. Cảm biến quang học hoạt động bằng cách chụp ảnh bề mặt vân tay và so sánh với dữ liệu đã lưu trữ, trong khi cảm biến điện dung sử dụng điện trường để tạo bản đồ chi tiết của các rãnh vân tay. Công nghệ cảm biến điện dung, thường được tìm thấy trên các thiết bị cao cấp như Welkom, có độ chính xác và khả năng chống làm giả cao hơn, vì nó đòi hỏi sự tiếp xúc trực tiếp với da người sống. Điều này giảm thiểu đáng kể rủi ro bị mở khóa bằng vân tay giả hoặc vân tay từ vật thể không phải là ngón tay thật.</p><p>Ngoài ra, hệ thống xử lý vân tay trên các khóa thông minh hiện đại còn được trang bị thuật toán học máy (Machine Learning), giúp cải thiện khả năng nhận diện theo thời gian. Mỗi lần người dùng đặt tay lên cảm biến, hệ thống không chỉ xác minh mà còn học hỏi, điều chỉnh để nhận diện vân tay nhanh và chính xác hơn, ngay cả khi ngón tay bị ướt, bẩn nhẹ hoặc có vết xước nhỏ. Điều này mang lại trải nghiệm sử dụng liền mạch và đáng tin cậy. Hơn nữa, khả năng lưu trữ hàng trăm dấu vân tay cho phép một ngôi nhà có thể cấp quyền truy cập cho tất cả thành viên trong gia đình, bạn bè thân thiết hoặc nhân viên một cách dễ dàng, đồng thời có thể xóa bỏ quyền truy cập bất cứ lúc nào khi cần thiết. Đây là một ưu điểm vượt trội so với việc phải thay khóa hoặc sao chép chìa khi có sự thay đổi về người sử dụng.</p><h2>Welkom: Sự Kết Hợp Hoàn Hảo Giữa Thiết Kế và Công Nghệ Bảo Mật</h2><p>Khóa vân tay Welkom không chỉ đơn thuần là một thiết bị an ninh; đó là một tuyên bố về phong cách sống và sự cam kết đối với an toàn. Các sản phẩm của Welkom được thiết kế với sự chú trọng cao đến cả tính thẩm mỹ và hiệu suất. Với kiểu dáng hiện đại, đường nét tinh tế và chất liệu cao cấp (thường là hợp kim kẽm hoặc thép không gỉ), khóa Welkom dễ dàng hòa nhập vào mọi không gian kiến trúc, từ căn hộ chung cư hiện đại đến biệt thự sang trọng. Nhưng vẻ đẹp bên ngoài chỉ là khởi đầu; sức mạnh thực sự của Welkom nằm ở công nghệ bảo mật tiên tiến được tích hợp bên trong.</p><p>Mỗi chiếc khóa Welkom đều được trang bị bộ vi xử lý mạnh mẽ, hệ thống mã hóa dữ liệu tiên tiến và các cảm biến vân tay chính xác, đảm bảo rằng mọi giao dịch mở khóa đều an toàn và riêng tư. Khả năng chống nước và chống bụi đạt chuẩn, cùng với khả năng chịu được nhiệt độ và độ ẩm khắc nghiệt, giúp khóa Welkom hoạt động bền bỉ trong nhiều điều kiện môi trường khác nhau. Hơn nữa, Welkom còn tích hợp các tính năng thông minh như cảnh báo đột nhập trái phép, cảnh báo pin yếu, và khả năng xem lại lịch sử ra vào qua ứng dụng di động. Điều này biến cánh cửa của bạn thành một trung tâm điều khiển an ninh mini, cho phép bạn kiểm soát và giám sát từ xa mọi lúc, mọi nơi, mang lại sự yên tâm tuyệt đối cho gia đình.</p><h2>Tích Hợp IoT và Nhà Thông Minh: Khóa Welkom trong Hệ Sinh Thái Số</h2><p>Trong kỷ nguyên Internet of Things (IoT), khóa vân tay Welkom không chỉ là một thiết bị độc lập mà còn là một mắt xích quan trọng trong hệ sinh thái nhà thông minh. Khả năng kết nối không dây qua Wi-Fi hoặc Bluetooth cho phép khóa Welkom giao tiếp với các thiết bị thông minh khác trong nhà, tạo ra một hệ thống an ninh và tiện nghi liền mạch. Ví dụ, bạn có thể thiết lập kịch bản tự động để khi bạn mở cửa bằng vân tay, đèn trong nhà sẽ tự động bật, điều hòa không khí khởi động và hệ thống âm thanh phát nhạc chào đón. Ngược lại, khi khóa cửa từ bên ngoài, tất cả các thiết bị điện không cần thiết có thể tự động tắt, giúp tiết kiệm năng lượng.</p><p>Khả năng quản lý từ xa qua ứng dụng di động là một trong những tính năng được đánh giá cao nhất. Dù bạn đang ở văn phòng, đi du lịch hay chỉ đơn giản là không có mặt ở nhà, bạn vẫn có thể cấp quyền truy cập tạm thời cho người thân, dịch vụ giao hàng hoặc thợ sửa chữa thông qua mã số dùng một lần hoặc mã số có thời hạn. Bạn cũng có thể theo dõi lịch sử ra vào chi tiết, nhận cảnh báo ngay lập tức nếu có bất kỳ hoạt động đáng ngờ nào tại cửa. Sự tích hợp này không chỉ tăng cường bảo mật mà còn nâng cao đáng kể sự tiện nghi và linh hoạt trong quản lý ngôi nhà, biến ngôi nhà của bạn thực sự trở thành một \"ngôi nhà thông minh\" theo đúng nghĩa.</p><h2>Lời Khuyên Chuyên Gia: Lựa Chọn và Bảo Trì Khóa Vân Tay Welkom</h2><p>Để đảm bảo tận dụng tối đa lợi ích từ khóa vân tay Welkom, việc lựa chọn sản phẩm phù hợp và bảo trì đúng cách là vô cùng quan trọng. Trước khi mua, hãy xem xét kỹ lưỡng các yếu tố như loại cửa (gỗ, thép, cửa kính), độ dày đố cửa, và hướng mở cửa để chọn mẫu khóa tương thích. Welkom cung cấp nhiều dòng sản phẩm đa dạng, từ khóa cửa chính, cửa phòng ngủ đến cửa cổng, mỗi loại có những đặc điểm và yêu cầu lắp đặt riêng. Đừng ngần ngại tham khảo ý kiến từ các chuyên gia hoặc nhân viên tư vấn để có được lựa chọn tối ưu nhất cho ngôi nhà của bạn. Về tính năng, hãy ưu tiên các mẫu có nhiều phương thức mở khóa (vân tay, mã số, thẻ từ, chìa cơ, app) và các tính năng cảnh báo thông minh, tích hợp nhà thông minh để đảm bảo an toàn và tiện lợi toàn diện.</p><p>Về bảo trì, mặc dù khóa vân tay Welkom được thiết kế để hoạt động bền bỉ, nhưng việc chăm sóc định kỳ sẽ giúp kéo dài tuổi thọ và duy trì hiệu suất. Hãy đảm bảo vệ sinh bề mặt cảm biến vân tay và bàn phím mã số thường xuyên bằng vải mềm và khô để loại bỏ bụi bẩn và dầu mỡ. Kiểm tra và thay pin định kỳ (thường là 6-12 tháng một lần, tùy theo tần suất sử dụng và loại pin) là rất quan trọng để tránh tình trạng khóa hết pin đột ngột. Hầu hết các khóa Welkom đều có cảnh báo pin yếu, vì vậy hãy chú ý đến tín hiệu này. Ngoài ra, hãy thường xuyên cập nhật phần mềm hoặc firmware của khóa (nếu có) thông qua ứng dụng để đảm bảo hệ thống bảo mật luôn được vá lỗi và nâng cấp các tính năng mới nhất, giữ cho khóa của bạn luôn hoạt động ở trạng thái tốt nhất và an toàn nhất.</p><h2>Tóm Tắt Khuyến Mãi: Cơ Hội Vàng Để Nâng Cấp An Ninh</h2><p>Chương trình <strong>GIẢM GIÁ 30% khi mua khóa vân tay Welkom</strong> không chỉ là một cơ hội tiết kiệm chi phí mà còn là một bước đầu tư thông minh vào sự an toàn và tiện nghi cho tổ ấm của bạn. Đây là thời điểm lý tưởng để bạn loại bỏ những chiếc chìa khóa lỉnh kỉnh, những lo lắng về an ninh và chào đón một kỷ nguyên mới của sự tiện lợi và bảo mật vượt trội. Với mức giảm giá hấp dẫn này, việc sở hữu một chiếc khóa vân tay cao cấp từ Welkom trở nên dễ dàng và phải chăng hơn bao giờ hết. Chúng tôi tin rằng, mỗi gia đình đều xứng đáng được trải nghiệm những công nghệ bảo mật tiên tiến nhất, và Welkom cam kết mang đến những giải pháp tốt nhất để bảo vệ những gì quý giá nhất của bạn.</p><p>Hãy nhanh chóng nắm bắt cơ hội có một không hai này. Chương trình khuyến mãi có thời hạn và số lượng sản phẩm có thể có giới hạn. Đừng bỏ lỡ dịp để biến ngôi nhà của bạn thành một pháo đài an toàn và hiện đại hơn với khóa vân tay Welkom. Liên hệ ngay với các đại lý hoặc truy cập website chính thức của Welkom để biết thêm thông tin chi tiết về các mẫu khóa áp dụng, điều khoản và điều kiện của chương trình. An toàn của gia đình bạn là ưu tiên hàng đầu, và với Welkom, bạn có thể hoàn toàn yên tâm. <strong>Tóm tắt khuyến mãi</strong>: Chương trình <strong>GIẢM GIÁ 30%</strong> áp dụng cho các sản phẩm khóa vân tay Welkom, mang đến công nghệ bảo mật hàng đầu với mức giá ưu đãi chưa từng có. Hãy hành động ngay để không bỏ lỡ!</p><h1><br></h1>', 'Tóm tắt khuyến mãi', 'Admin', 'Khuyến mãi', 'PUBLISHED', 'd0ce9b71-438e-47b0-bf54-6f3dde8f9abf_SHS-2920_1.jpg', 206, '2025-11-05 17:42:19', '2025-11-04 11:30:34', '2025-11-06 01:10:19', NULL),
+(3, 'GIảm giá 30% khi mua khoá vân tay Welkom', '<h1>GIẢM GIÁ 30% KHI MUA KHOÁ VÂN TAY WELKOM: Nâng Tầm An Ninh Gia Đình Với Công Nghệ Hiện Đại</h1><p>Trong bối cảnh công nghệ đang phát triển vũ bão, việc đảm bảo an ninh cho ngôi nhà và tài sản đã trở thành ưu tiên hàng đầu của mọi gia đình. Không chỉ dừng lại ở những chiếc khóa cơ truyền thống, thế giới khóa điện tử và công nghệ an ninh đã mở ra một kỷ nguyên mới với sự xuất hiện của các giải pháp thông minh, trong đó nổi bật là khóa vân tay. Sự tiện lợi, bảo mật vượt trội và tính thẩm mỹ cao đã biến khóa vân tay từ một sản phẩm xa xỉ thành một lựa chọn thiết yếu cho tổ ấm hiện đại. Đây không chỉ là một thiết bị bảo vệ mà còn là một phần quan trọng của hệ sinh thái nhà thông minh, mang lại trải nghiệm sống tiện nghi và an toàn hơn bao giờ hết.</p><p>Thấu hiểu nhu cầu đó, và nhằm tạo điều kiện cho nhiều gia đình Việt Nam tiếp cận với công nghệ bảo mật tiên tiến, chúng tôi vui mừng thông báo về chương trình <strong>khuyến mãi đặc biệt</strong>: <strong>GIẢM GIÁ 30% khi mua khóa vân tay Welkom</strong>. Đây là cơ hội vàng để quý vị nâng cấp hệ thống an ninh cho ngôi nhà của mình với mức đầu tư tối ưu. Chương trình này không chỉ là một ưu đãi về giá, mà còn là lời cam kết mang đến những sản phẩm chất lượng cao, tích hợp công nghệ hiện đại nhất từ Welkom, một thương hiệu uy tín trong lĩnh vực khóa điện tử. Hãy cùng chúng tôi đi sâu vào tìm hiểu lý do vì sao khóa vân tay Welkom lại là sự lựa chọn hoàn hảo và cách tận dụng chương trình khuyến mãi hấp dẫn này.</p><h2>Sự Trỗi Dậy Của Khóa Vân Tay Trong Thời Đại Số Hóa An Ninh</h2><p>Thị trường khóa cửa đã chứng kiến một sự chuyển mình mạnh mẽ trong thập kỷ qua, với sự thay thế dần của khóa cơ truyền thống bằng các giải pháp khóa điện tử và khóa thông minh. Trong số đó, khóa vân tay đã nhanh chóng chiếm lĩnh vị trí dẫn đầu nhờ những ưu điểm vượt trội về bảo mật và tiện lợi. Thay vì phải lo lắng về việc mất chìa khóa, quên mã số, hay bị sao chép chìa một cách trái phép, công nghệ sinh trắc học cho phép người dùng mở cửa chỉ bằng một chạm tay, sử dụng chính dấu vân tay độc nhất của mình. Điều này không chỉ giúp tiết kiệm thời gian mà còn loại bỏ hoàn toàn nguy cơ mất an toàn do sơ suất cá nhân. Khóa vân tay là minh chứng rõ ràng cho việc công nghệ có thể đơn giản hóa cuộc sống đồng thời tăng cường lớp bảo vệ.</p><p>Hơn nữa, các mẫu khóa vân tay hiện đại như Welkom thường được tích hợp nhiều phương thức mở khóa khác nhau, bao gồm mã số, thẻ từ, chìa cơ dự phòng và thậm chí là điều khiển qua ứng dụng di động. Sự đa dạng này đảm bảo rằng người dùng luôn có phương án dự phòng trong mọi tình huống, từ việc hết pin khẩn cấp cho đến việc cấp quyền truy cập tạm thời cho khách hoặc người giúp việc mà không cần phải trao chìa khóa vật lý. Đây là một bước tiến đáng kể so với khóa truyền thống, nơi mà việc quản lý chìa khóa trở nên phức tạp và dễ gây ra rủi ro an ninh. Sự kết hợp giữa tiện ích và tính năng bảo mật đa lớp chính là yếu tố then chốt giúp khóa vân tay trở thành lựa chọn ưu việt cho ngôi nhà hiện đại.</p><h2>Công Nghệ Vân Tay: Nền Tảng Của An Toàn và Tiện Nghi</h2><p>Trọng tâm của khóa vân tay nằm ở công nghệ nhận dạng sinh trắc học, cụ thể là dấu vân tay. Hiện nay, có hai loại cảm biến vân tay phổ biến được sử dụng trong khóa điện tử: cảm biến quang học và cảm biến điện dung. Cảm biến quang học hoạt động bằng cách chụp ảnh bề mặt vân tay và so sánh với dữ liệu đã lưu trữ, trong khi cảm biến điện dung sử dụng điện trường để tạo bản đồ chi tiết của các rãnh vân tay. Công nghệ cảm biến điện dung, thường được tìm thấy trên các thiết bị cao cấp như Welkom, có độ chính xác và khả năng chống làm giả cao hơn, vì nó đòi hỏi sự tiếp xúc trực tiếp với da người sống. Điều này giảm thiểu đáng kể rủi ro bị mở khóa bằng vân tay giả hoặc vân tay từ vật thể không phải là ngón tay thật.</p><p>Ngoài ra, hệ thống xử lý vân tay trên các khóa thông minh hiện đại còn được trang bị thuật toán học máy (Machine Learning), giúp cải thiện khả năng nhận diện theo thời gian. Mỗi lần người dùng đặt tay lên cảm biến, hệ thống không chỉ xác minh mà còn học hỏi, điều chỉnh để nhận diện vân tay nhanh và chính xác hơn, ngay cả khi ngón tay bị ướt, bẩn nhẹ hoặc có vết xước nhỏ. Điều này mang lại trải nghiệm sử dụng liền mạch và đáng tin cậy. Hơn nữa, khả năng lưu trữ hàng trăm dấu vân tay cho phép một ngôi nhà có thể cấp quyền truy cập cho tất cả thành viên trong gia đình, bạn bè thân thiết hoặc nhân viên một cách dễ dàng, đồng thời có thể xóa bỏ quyền truy cập bất cứ lúc nào khi cần thiết. Đây là một ưu điểm vượt trội so với việc phải thay khóa hoặc sao chép chìa khi có sự thay đổi về người sử dụng.</p><h2>Welkom: Sự Kết Hợp Hoàn Hảo Giữa Thiết Kế và Công Nghệ Bảo Mật</h2><p>Khóa vân tay Welkom không chỉ đơn thuần là một thiết bị an ninh; đó là một tuyên bố về phong cách sống và sự cam kết đối với an toàn. Các sản phẩm của Welkom được thiết kế với sự chú trọng cao đến cả tính thẩm mỹ và hiệu suất. Với kiểu dáng hiện đại, đường nét tinh tế và chất liệu cao cấp (thường là hợp kim kẽm hoặc thép không gỉ), khóa Welkom dễ dàng hòa nhập vào mọi không gian kiến trúc, từ căn hộ chung cư hiện đại đến biệt thự sang trọng. Nhưng vẻ đẹp bên ngoài chỉ là khởi đầu; sức mạnh thực sự của Welkom nằm ở công nghệ bảo mật tiên tiến được tích hợp bên trong.</p><p>Mỗi chiếc khóa Welkom đều được trang bị bộ vi xử lý mạnh mẽ, hệ thống mã hóa dữ liệu tiên tiến và các cảm biến vân tay chính xác, đảm bảo rằng mọi giao dịch mở khóa đều an toàn và riêng tư. Khả năng chống nước và chống bụi đạt chuẩn, cùng với khả năng chịu được nhiệt độ và độ ẩm khắc nghiệt, giúp khóa Welkom hoạt động bền bỉ trong nhiều điều kiện môi trường khác nhau. Hơn nữa, Welkom còn tích hợp các tính năng thông minh như cảnh báo đột nhập trái phép, cảnh báo pin yếu, và khả năng xem lại lịch sử ra vào qua ứng dụng di động. Điều này biến cánh cửa của bạn thành một trung tâm điều khiển an ninh mini, cho phép bạn kiểm soát và giám sát từ xa mọi lúc, mọi nơi, mang lại sự yên tâm tuyệt đối cho gia đình.</p><h2>Tích Hợp IoT và Nhà Thông Minh: Khóa Welkom trong Hệ Sinh Thái Số</h2><p>Trong kỷ nguyên Internet of Things (IoT), khóa vân tay Welkom không chỉ là một thiết bị độc lập mà còn là một mắt xích quan trọng trong hệ sinh thái nhà thông minh. Khả năng kết nối không dây qua Wi-Fi hoặc Bluetooth cho phép khóa Welkom giao tiếp với các thiết bị thông minh khác trong nhà, tạo ra một hệ thống an ninh và tiện nghi liền mạch. Ví dụ, bạn có thể thiết lập kịch bản tự động để khi bạn mở cửa bằng vân tay, đèn trong nhà sẽ tự động bật, điều hòa không khí khởi động và hệ thống âm thanh phát nhạc chào đón. Ngược lại, khi khóa cửa từ bên ngoài, tất cả các thiết bị điện không cần thiết có thể tự động tắt, giúp tiết kiệm năng lượng.</p><p>Khả năng quản lý từ xa qua ứng dụng di động là một trong những tính năng được đánh giá cao nhất. Dù bạn đang ở văn phòng, đi du lịch hay chỉ đơn giản là không có mặt ở nhà, bạn vẫn có thể cấp quyền truy cập tạm thời cho người thân, dịch vụ giao hàng hoặc thợ sửa chữa thông qua mã số dùng một lần hoặc mã số có thời hạn. Bạn cũng có thể theo dõi lịch sử ra vào chi tiết, nhận cảnh báo ngay lập tức nếu có bất kỳ hoạt động đáng ngờ nào tại cửa. Sự tích hợp này không chỉ tăng cường bảo mật mà còn nâng cao đáng kể sự tiện nghi và linh hoạt trong quản lý ngôi nhà, biến ngôi nhà của bạn thực sự trở thành một \"ngôi nhà thông minh\" theo đúng nghĩa.</p><h2>Lời Khuyên Chuyên Gia: Lựa Chọn và Bảo Trì Khóa Vân Tay Welkom</h2><p>Để đảm bảo tận dụng tối đa lợi ích từ khóa vân tay Welkom, việc lựa chọn sản phẩm phù hợp và bảo trì đúng cách là vô cùng quan trọng. Trước khi mua, hãy xem xét kỹ lưỡng các yếu tố như loại cửa (gỗ, thép, cửa kính), độ dày đố cửa, và hướng mở cửa để chọn mẫu khóa tương thích. Welkom cung cấp nhiều dòng sản phẩm đa dạng, từ khóa cửa chính, cửa phòng ngủ đến cửa cổng, mỗi loại có những đặc điểm và yêu cầu lắp đặt riêng. Đừng ngần ngại tham khảo ý kiến từ các chuyên gia hoặc nhân viên tư vấn để có được lựa chọn tối ưu nhất cho ngôi nhà của bạn. Về tính năng, hãy ưu tiên các mẫu có nhiều phương thức mở khóa (vân tay, mã số, thẻ từ, chìa cơ, app) và các tính năng cảnh báo thông minh, tích hợp nhà thông minh để đảm bảo an toàn và tiện lợi toàn diện.</p><p>Về bảo trì, mặc dù khóa vân tay Welkom được thiết kế để hoạt động bền bỉ, nhưng việc chăm sóc định kỳ sẽ giúp kéo dài tuổi thọ và duy trì hiệu suất. Hãy đảm bảo vệ sinh bề mặt cảm biến vân tay và bàn phím mã số thường xuyên bằng vải mềm và khô để loại bỏ bụi bẩn và dầu mỡ. Kiểm tra và thay pin định kỳ (thường là 6-12 tháng một lần, tùy theo tần suất sử dụng và loại pin) là rất quan trọng để tránh tình trạng khóa hết pin đột ngột. Hầu hết các khóa Welkom đều có cảnh báo pin yếu, vì vậy hãy chú ý đến tín hiệu này. Ngoài ra, hãy thường xuyên cập nhật phần mềm hoặc firmware của khóa (nếu có) thông qua ứng dụng để đảm bảo hệ thống bảo mật luôn được vá lỗi và nâng cấp các tính năng mới nhất, giữ cho khóa của bạn luôn hoạt động ở trạng thái tốt nhất và an toàn nhất.</p><h2>Tóm Tắt Khuyến Mãi: Cơ Hội Vàng Để Nâng Cấp An Ninh</h2><p>Chương trình <strong>GIẢM GIÁ 30% khi mua khóa vân tay Welkom</strong> không chỉ là một cơ hội tiết kiệm chi phí mà còn là một bước đầu tư thông minh vào sự an toàn và tiện nghi cho tổ ấm của bạn. Đây là thời điểm lý tưởng để bạn loại bỏ những chiếc chìa khóa lỉnh kỉnh, những lo lắng về an ninh và chào đón một kỷ nguyên mới của sự tiện lợi và bảo mật vượt trội. Với mức giảm giá hấp dẫn này, việc sở hữu một chiếc khóa vân tay cao cấp từ Welkom trở nên dễ dàng và phải chăng hơn bao giờ hết. Chúng tôi tin rằng, mỗi gia đình đều xứng đáng được trải nghiệm những công nghệ bảo mật tiên tiến nhất, và Welkom cam kết mang đến những giải pháp tốt nhất để bảo vệ những gì quý giá nhất của bạn.</p><p>Hãy nhanh chóng nắm bắt cơ hội có một không hai này. Chương trình khuyến mãi có thời hạn và số lượng sản phẩm có thể có giới hạn. Đừng bỏ lỡ dịp để biến ngôi nhà của bạn thành một pháo đài an toàn và hiện đại hơn với khóa vân tay Welkom. Liên hệ ngay với các đại lý hoặc truy cập website chính thức của Welkom để biết thêm thông tin chi tiết về các mẫu khóa áp dụng, điều khoản và điều kiện của chương trình. An toàn của gia đình bạn là ưu tiên hàng đầu, và với Welkom, bạn có thể hoàn toàn yên tâm. <strong>Tóm tắt khuyến mãi</strong>: Chương trình <strong>GIẢM GIÁ 30%</strong> áp dụng cho các sản phẩm khóa vân tay Welkom, mang đến công nghệ bảo mật hàng đầu với mức giá ưu đãi chưa từng có. Hãy hành động ngay để không bỏ lỡ!</p><h1><br></h1>', 'Tóm tắt khuyến mãi', 'Admin', 'Khuyến mãi', 'PUBLISHED', 'd0ce9b71-438e-47b0-bf54-6f3dde8f9abf_SHS-2920_1.jpg', 208, '2025-11-05 17:42:19', '2025-11-04 11:30:34', '2025-11-08 00:42:56', NULL),
 (5, 'Ra mắt Khóa vân tay Samsung SHP-DH538', '<h2><strong style=\"background-color: initial;\"><em>Khóa vân tay Samsung SHP-DH538:</em></strong></h2><p>- Mở bằng: vân tay, mã số, chìa cơ (dự phòng)</p><h4><strong style=\"background-color: initial; color: rgb(204, 0, 0);\"><em>- Giá: 5.490.000 đồng</em></strong></h4><iframe class=\"ql-video\" frameborder=\"0\" allowfullscreen=\"true\" src=\"https://www.youtube.com/embed/4ldAlQJer5w?showinfo=0\"></iframe><p class=\"ql-align-center\"><br></p><p><strong style=\"color: rgb(119, 119, 119);\">1. Chức năng cơ bản</strong></p><p>Khóa cửa điện tử Samsung SHP DH538 với thiết kế màu đỏ đồng phù hợp với các căn hộ sang trọng. Công nghệ quét vân tay quang học và mã số ngẫu nhiên, cùng hệ thống cảnh báo đột nhập sẽ đem lại sự an toàn và tiện lợi đến căn hộ của bạn.</p><p><br></p><p><span style=\"background-color: initial; color: rgb(0, 0, 238);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEitN1ag8THMYP6RRfGExIy4WoW215YjBgcVtmZKXS0naO-aen-OLqV6EdzrBLHgH32co26LxCr-pmaRPXV290CI7uL46Z1dcVZOZSzOlK_qiMl26AbCdnsUPha_V3roELfwKVysRErqigeB/w640-h212/Screenshot-365-1024x340.png\" height=\"212\" width=\"640\"></span></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhyqgdga_-zcWFx6gF5igT7FBpefisGLWYKv4PHxkkXU5M4OG64dlEEf_H0qvOucwXmBUaB1-50LY2vFWbcK5qazfIO1YO98vG9cMiNnSpX7Vi2oXMJhAXYRr2Pi44LmSp9yFmVNTi2WNgD/s1024/Screenshot-362-2-1024x496-1.jpg\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhyqgdga_-zcWFx6gF5igT7FBpefisGLWYKv4PHxkkXU5M4OG64dlEEf_H0qvOucwXmBUaB1-50LY2vFWbcK5qazfIO1YO98vG9cMiNnSpX7Vi2oXMJhAXYRr2Pi44LmSp9yFmVNTi2WNgD/w640-h310/Screenshot-362-2-1024x496-1.jpg\" height=\"310\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh9WfkszxYZICvwC_HcVI2n3nxg9fQ1gr2tyTtM3wX45onDY_fo6nz5Ez83t47N9f1laxixaBYxJQaltsL25PUDIixk7St5jHFFyM0NRnjTJNEEiNJB4G_YqHvphGrkqvQ52mFb11g12FRn/s1024/Screenshot-366-3-1024x587.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh9WfkszxYZICvwC_HcVI2n3nxg9fQ1gr2tyTtM3wX45onDY_fo6nz5Ez83t47N9f1laxixaBYxJQaltsL25PUDIixk7St5jHFFyM0NRnjTJNEEiNJB4G_YqHvphGrkqvQ52mFb11g12FRn/w640-h366/Screenshot-366-3-1024x587.png\" height=\"366\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgMTvZvsaQXjXVTTqpimFXvMsx0Rz9V1U-N2c3ymxYWx2mp5qDGTLsNHC-DrRjznpDuYTDNPTBI8SOfHh9hPwI4CFYCxq9QZY-wUGZ_OCLehXWYbRtpEFn4TNgBTtvAKX1OdRH4Y51HwBRt/s1024/Screenshot-368-2-1024x620.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgMTvZvsaQXjXVTTqpimFXvMsx0Rz9V1U-N2c3ymxYWx2mp5qDGTLsNHC-DrRjznpDuYTDNPTBI8SOfHh9hPwI4CFYCxq9QZY-wUGZ_OCLehXWYbRtpEFn4TNgBTtvAKX1OdRH4Y51HwBRt/w640-h388/Screenshot-368-2-1024x620.png\" height=\"388\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDXBiy2-BavdmqssMDSnpFlAAvHdVvwsH0AnOUd06mmiARCHuIZrhuP-3ajV4S_iPnxr4hasItAVRCU7IQwXQQpisbPZfFDjehnYk2LKddUp7fW87qhaocfqlUJqehR1oWjqqmVN3Xd-Za/s1024/Screenshot-370-2-1024x577-1.jpg\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjDXBiy2-BavdmqssMDSnpFlAAvHdVvwsH0AnOUd06mmiARCHuIZrhuP-3ajV4S_iPnxr4hasItAVRCU7IQwXQQpisbPZfFDjehnYk2LKddUp7fW87qhaocfqlUJqehR1oWjqqmVN3Xd-Za/w640-h360/Screenshot-370-2-1024x577-1.jpg\" height=\"360\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCAKCrUustusR9ei3Dkafz-uMnbDkpt2yf-RGTN3TZmgcM5Ma8OR3rv5BDh0iX72R4ff886tGGrfnIVuti1ud_5uMP1_mo1uwzsQ1VOyIT1nBCCAQIk4RVeWgUaVRATAfkGZpK6zN0cspa/s510/Screenshot-372-1-510x289.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCAKCrUustusR9ei3Dkafz-uMnbDkpt2yf-RGTN3TZmgcM5Ma8OR3rv5BDh0iX72R4ff886tGGrfnIVuti1ud_5uMP1_mo1uwzsQ1VOyIT1nBCCAQIk4RVeWgUaVRATAfkGZpK6zN0cspa/w640-h362/Screenshot-372-1-510x289.png\" height=\"362\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg7aGYa-7BxFJ_i3xbGuG5tDPs2Fg9kuNChMiAXvvfWg6VNcX7ijXzzX7Z3ZShGir2RAvcjqSnCdEtF23hIQhePo32CE3DU3hI7rA8aNtf4ZFq-hzKSEUCqf7oWczpE-qBOxWpJAipZbmmp/s1024/Screenshot-372-2-1024x580.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg7aGYa-7BxFJ_i3xbGuG5tDPs2Fg9kuNChMiAXvvfWg6VNcX7ijXzzX7Z3ZShGir2RAvcjqSnCdEtF23hIQhePo32CE3DU3hI7rA8aNtf4ZFq-hzKSEUCqf7oWczpE-qBOxWpJAipZbmmp/w640-h362/Screenshot-372-2-1024x580.png\" height=\"362\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgP9DpsDZpw9k5BhdFCFPDXzo9azB3feYl4ML5WZl8ooLoyNHeNPySwcEY_OWrcJdwrsjG6mPW_Eli1Pc7wdDqzFOIBUSJu04fQScdWmUqCpagcB-6zlRc9SCLnpQownCipdDP0a7wWAJGa/s1024/Screenshot-374-2-1024x591.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgP9DpsDZpw9k5BhdFCFPDXzo9azB3feYl4ML5WZl8ooLoyNHeNPySwcEY_OWrcJdwrsjG6mPW_Eli1Pc7wdDqzFOIBUSJu04fQScdWmUqCpagcB-6zlRc9SCLnpQownCipdDP0a7wWAJGa/w640-h370/Screenshot-374-2-1024x591.png\" height=\"370\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh0fNo5Qbq5wt4Ovq1TBq_9gk0QxqUrFgO1MbZLsqO73_N-ZLr5Z6rBUutmyr0xOivrNv_Q9SoAOCDLSLmygysVuGXor9p-1D8h91EVKEKNL3dH20enL4F4t8Lyj2djR94GSh3NzeEOTZWS/s1024/Screenshot-376-2-1024x552.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh0fNo5Qbq5wt4Ovq1TBq_9gk0QxqUrFgO1MbZLsqO73_N-ZLr5Z6rBUutmyr0xOivrNv_Q9SoAOCDLSLmygysVuGXor9p-1D8h91EVKEKNL3dH20enL4F4t8Lyj2djR94GSh3NzeEOTZWS/w640-h344/Screenshot-376-2-1024x552.png\" height=\"344\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh82Bf9-6POfLFXfOr1E2rkmbN-pJ5hXLnsl0fhnAPkWsH8FVxT-kr7zBP-d0qvxct_SzbW2eLpDQKqSwSvG2L2m93zVZbjE9c7vu67HNIMqT0yhYhAZflMrGItf7-0irZTlSwXK-cGWBno/s1024/Screenshot-380-2-1024x580.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh82Bf9-6POfLFXfOr1E2rkmbN-pJ5hXLnsl0fhnAPkWsH8FVxT-kr7zBP-d0qvxct_SzbW2eLpDQKqSwSvG2L2m93zVZbjE9c7vu67HNIMqT0yhYhAZflMrGItf7-0irZTlSwXK-cGWBno/w640-h362/Screenshot-380-2-1024x580.png\" height=\"362\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhdu4zX0mrI7mdyJNcHkFC4QhtztqNiNd04qLX6cXo2eTsHW5XwAkZS3kPP0ocSg01dSQgSnoNXxs40SJ9jNQDT0mazvGXOQSNkbZE3IiKcjHmBEhIoKpPGfi0mSpsWFRNu5Et-Ismlbves/s1024/Screenshot-385-2-1024x587.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhdu4zX0mrI7mdyJNcHkFC4QhtztqNiNd04qLX6cXo2eTsHW5XwAkZS3kPP0ocSg01dSQgSnoNXxs40SJ9jNQDT0mazvGXOQSNkbZE3IiKcjHmBEhIoKpPGfi0mSpsWFRNu5Et-Ismlbves/w640-h366/Screenshot-385-2-1024x587.png\" height=\"366\" width=\"640\"></a></p><p><br></p><p class=\"ql-align-center\"><a href=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFYFoEpvedT4hh3XkWGNOs6HyxbOPS5dk-RcMHQhTFKIPYm25nskOjUPDmx1IcoAFKIjnpb3YrN27LVoCU10kQFpu_4e7BW6zzDzudC-4GDpDtWZMEUav1h0SCasTsND40LqQAYAlloL_w/s1024/Screenshot-386-2-1024x536.png\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: initial; color: rgb(191, 30, 45);\"><img src=\"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFYFoEpvedT4hh3XkWGNOs6HyxbOPS5dk-RcMHQhTFKIPYm25nskOjUPDmx1IcoAFKIjnpb3YrN27LVoCU10kQFpu_4e7BW6zzDzudC-4GDpDtWZMEUav1h0SCasTsND40LqQAYAlloL_w/w640-h336/Screenshot-386-2-1024x536.png\" height=\"336\" width=\"640\"></a></p><p><br></p><p><strong style=\"background-color: initial;\">2. Thông số kĩ thuật&nbsp;khóa Samsung&nbsp;SHP-DH538</strong></p><p><strong style=\"background-color: initial;\">Vân tay và mã số</strong>Mã số: 4~12 ký tự điện tử</p><p>Công nghệ cảm ứng điện dung</p><p><strong style=\"background-color: initial;\">Bộ nhớ vân tay tối đa</strong>100<strong style=\"background-color: initial;\">Kích thướcThân ngoài</strong>81.8(W) X 320(H) X 66.8(D)mm<strong style=\"background-color: initial;\">Thân trong</strong>79(W) X 290(H) X 80.3(D)mm<strong style=\"background-color: initial;\">Độ dày cửa thích hợp</strong>40~80mm<strong style=\"background-color: initial;\">Nguồn</strong>8 viên pin AA Alkaline Batteries<strong style=\"background-color: initial;\">Thời gian cần thay pin</strong>Xấp xỉ 12 tháng<strong style=\"background-color: initial;\">Màu</strong>Đen, đỏ đồng</p>', '- Mở bằng: vân tay, mã số, chìa cơ (dự phòng)\n\n- Giá: 5.490.000 đồng', NULL, 'Tin tức', 'PUBLISHED', '38a51683-a41c-4740-a173-a8ceac011b7a_SHS-P718_3-4.png', 16, '2025-11-04 18:00:04', '2025-11-04 13:50:37', '2025-11-05 01:55:34', NULL),
 (6, 'Các công nghệ Khoá cửa mới ứng dụng Trí tuệ nhân tạo', '<h1><br></h1><h2>Mở đầu</h2><p>Trong kỷ nguyên số hóa không ngừng, sự tiến bộ của <strong>công nghệ</strong> đã và đang định hình lại mọi khía cạnh của cuộc sống, từ cách chúng ta giao tiếp đến cách chúng ta bảo vệ không gian riêng tư. Đặc biệt, lĩnh vực an ninh gia đình đã chứng kiến một cuộc cách mạng mạnh mẽ với sự xuất hiện của các thiết bị <strong>khóa điện tử</strong> và <strong>smart lock</strong>. Tuy nhiên, nếu chỉ dừng lại ở việc mở khóa bằng vân tay, mã số hay thẻ từ thì đó mới chỉ là bước khởi đầu. Ngày nay, với sự tích hợp của <strong>Trí tuệ nhân tạo (AI)</strong>, các hệ thống khóa cửa đã vượt xa giới hạn thông thường, mang đến một cấp độ <strong>bảo mật</strong>, tiện lợi và thông minh hoàn toàn mới.</p><p>Bài viết này sẽ đi sâu vào khám phá cách AI đang cách mạng hóa ngành khóa cửa, từ việc tăng cường khả năng nhận diện sinh trắc học, phân tích hành vi người dùng, đến việc tích hợp liền mạch vào hệ sinh thái nhà thông minh. Chúng ta cũng sẽ tìm hiểu những lợi ích vượt trội mà công nghệ này mang lại, cũng như những thách thức cần đối mặt và những lời khuyên hữu ích để người dùng có thể đưa ra lựa chọn sáng suốt nhất cho ngôi nhà của mình.</p><p><br></p><h2>Nội dung chính</h2><h3>1. AI nâng tầm bảo mật và tiện ích của Khóa thông minh</h3><p>Ban đầu, các loại <strong>khóa điện tử</strong> và <strong>smart lock</strong> đã gây ấn tượng với khả năng mở khóa không cần chìa vật lý, điều khiển từ xa và ghi nhận lịch sử ra vào. Nhưng khi AI được đưa vào, chúng không chỉ còn là thiết bị thực hiện lệnh đơn thuần mà đã trở thành \"người gác cổng\" thông minh, có khả năng học hỏi, thích nghi và thậm chí là dự đoán. AI giúp nâng cao đáng kể độ chính xác và tốc độ của các phương thức xác thực sinh trắc học như <strong>nhận diện vân tay</strong> và <strong>nhận diện khuôn mặt</strong>. Các thuật toán AI có thể phân tích hàng triệu điểm dữ liệu từ vân tay hay đặc điểm khuôn mặt, giúp phân biệt giữa người thật và các hành vi giả mạo một cách hiệu quả hơn bao giờ hết, ngay cả trong điều kiện ánh sáng yếu hoặc khi có sự thay đổi nhỏ trên khuôn mặt.</p><p>Hơn nữa, AI còn cho phép khóa cửa học hỏi các thói quen và lịch trình của người dùng. Ví dụ, nếu bạn thường xuyên về nhà vào một giờ cố định, khóa có thể tự động chuẩn bị mở khóa khi bạn đến gần. Khả năng này không chỉ tăng cường tiện ích mà còn là nền tảng cho các hệ thống an ninh chủ động hơn. Với <strong>xu hướng công nghệ IoT</strong> phát triển mạnh mẽ, các <strong>khóa thông minh AI</strong> trở thành một mắt xích quan trọng trong hệ sinh thái <strong>smart home</strong>, kết nối với các thiết bị khác như camera an ninh, đèn chiếu sáng, và hệ thống báo động để tạo ra một mạng lưới an ninh đồng bộ và thông minh.</p><h3>2. Các ứng dụng AI đột phá trong công nghệ khóa cửa</h3><p>Sự tích hợp của AI mang đến nhiều ứng dụng vượt trội, biến khóa cửa không chỉ là một thiết bị bảo vệ mà còn là một phần của hệ thống quản lý an ninh toàn diện:</p><ul><li><strong>Nhận diện sinh trắc học thông minh thích ứng:</strong> AI cho phép các cảm biến vân tay và camera nhận diện khuôn mặt \"học\" và thích nghi với sự thay đổi. Chẳng hạn, cảm biến vân tay có thể nhận diện chính xác ngay cả khi tay bạn hơi ướt, bẩn, hoặc có vết thương nhỏ. Công nghệ <strong>nhận diện khuôn mặt</strong> được hỗ trợ bởi AI có thể phân biệt người thật với hình ảnh hoặc mặt nạ 3D, thậm chí còn có khả năng nhận diện cảm xúc để phát hiện các hành vi đáng ngờ.</li><li><strong>Phân tích hành vi và phát hiện bất thường:</strong> Đây là một trong những ứng dụng mạnh mẽ nhất của AI. Khóa AI có thể theo dõi và học hỏi các mô hình truy cập thông thường của bạn và gia đình. Khi có bất kỳ hành vi nào lệch khỏi mô hình này (ví dụ: cố gắng mở khóa vào những thời điểm bất thường, số lần nhập sai mã PIN liên tục vượt quá mức cho phép), hệ thống sẽ tự động gửi cảnh báo đến điện thoại của bạn hoặc kích hoạt các biện pháp an ninh khác như bật còi báo động, ghi hình qua camera.</li><li><strong>Quản lý truy cập tự động và thông minh:</strong> AI tối ưu hóa việc cấp quyền truy cập. Thay vì phải cài đặt thủ công từng quyền cho từng người, AI có thể gợi ý hoặc tự động cấp quyền tạm thời dựa trên lịch trình đã định sẵn (ví dụ: cho nhân viên dọn dẹp, người giao hàng). Nó cũng có thể tự động khóa cửa khi phát hiện không có ai ở nhà, hoặc mở cửa khi bạn về mà không cần thao tác.</li><li><strong>Tích hợp sâu rộng với hệ sinh thái nhà thông minh:</strong> Với AI, khóa cửa trở thành trung tâm điều khiển an ninh. Khi bạn mở cửa, AI có thể ra lệnh cho đèn bật sáng, điều hòa khởi động và rèm cửa mở ra. Ngược lại, khi bạn khóa cửa đi ra ngoài, toàn bộ hệ thống sẽ chuyển sang chế độ an ninh, tắt các thiết bị điện không cần thiết và kích hoạt camera giám sát.</li></ul><h3>3. Lợi ích và những cân nhắc khi lựa chọn khóa cửa AI</h3><p>Việc ứng dụng AI vào khóa cửa mang lại những lợi ích vượt trội:</p><ul><li><strong>An ninh vượt trội:</strong> Khả năng phân tích và dự đoán của AI giúp phát hiện và ngăn chặn các mối đe dọa sớm hơn, hiệu quả hơn các hệ thống truyền thống.</li><li><strong>Tiện lợi tối đa:</strong> Tự động hóa quá trình khóa/mở, quản lý truy cập linh hoạt, giảm bớt gánh nặng về chìa khóa vật lý hay nhớ mã số.</li><li><strong>Trải nghiệm cá nhân hóa:</strong> Hệ thống học hỏi thói quen để cung cấp trải nghiệm mượt mà, phù hợp với từng thành viên gia đình.</li><li><strong>Tăng cường hiệu quả năng lượng:</strong> Kết hợp với các thiết bị smart home khác, AI có thể tối ưu hóa việc sử dụng năng lượng khi không có người ở nhà.</li></ul><p>Tuy nhiên, cũng có một số cân nhắc quan trọng:</p><ul><li><strong>Vấn đề quyền riêng tư và bảo mật dữ liệu:</strong> Khóa AI thu thập nhiều dữ liệu cá nhân (dữ liệu sinh trắc học, lịch sử ra vào). Điều quan trọng là phải chọn sản phẩm từ các nhà cung cấp uy tín, có chính sách bảo mật dữ liệu rõ ràng.</li><li><strong>Chi phí đầu tư ban đầu:</strong> Công nghệ AI thường đi kèm với chi phí cao hơn so với các loại khóa thông minh cơ bản.</li><li><strong>Phụ thuộc vào kết nối mạng và nguồn điện:</strong> Hầu hết các tính năng thông minh yêu cầu kết nối internet ổn định. Cần có giải pháp dự phòng nguồn điện để đảm bảo hoạt động liên tục khi mất điện.</li><li><strong>Rủi ro an ninh mạng:</strong> Như bất kỳ thiết bị IoT nào, khóa AI cũng có thể là mục tiêu của các cuộc tấn công mạng. Cần đảm bảo thiết bị được cập nhật phần mềm thường xuyên và có các lớp bảo mật vững chắc.</li></ul><blockquote><em>\"AI không chỉ là một tính năng bổ sung; nó là yếu tố cốt lõi thay đổi cách chúng ta tương tác với an ninh, biến khóa cửa từ một vật cản tĩnh thành một người bảo vệ chủ động và thông minh.\"</em></blockquote><h3>4. Tư vấn chọn mua và sử dụng khóa cửa AI hiệu quả</h3><p>Để tận dụng tối đa lợi ích của khóa cửa AI, người tiêu dùng cần lưu ý một số điểm sau:</p><ul><li><strong>Xác định nhu cầu:</strong> Đánh giá mức độ an ninh mong muốn, các tính năng cụ thể cần thiết (nhận diện khuôn mặt, vân tay, tích hợp smart home), và ngân sách của bạn.</li><li><strong>Nghiên cứu kỹ sản phẩm:</strong> Tìm hiểu về các công nghệ AI mà khóa sử dụng, độ tin cậy của thuật toán, và khả năng tương thích với các thiết bị smart home khác trong gia đình bạn.</li><li><strong>Ưu tiên các nhà sản xuất uy tín:</strong> Chọn những thương hiệu có tiếng trong lĩnh vực an ninh, cung cấp chính sách bảo hành rõ ràng và hỗ trợ kỹ thuật tốt.</li><li><strong>Kiểm tra các chứng nhận bảo mật:</strong> Đảm bảo khóa có các chứng nhận về an toàn dữ liệu và chống tấn công mạng từ các tổ chức uy tín.</li><li><strong>Thường xuyên cập nhật phần mềm (firmware):</strong> Các bản cập nhật không chỉ thêm tính năng mới mà còn vá lỗi bảo mật, nâng cao hiệu suất của AI.</li><li><strong>Thiết lập mật khẩu mạnh và sử dụng xác thực đa yếu tố (MFA):</strong> Nếu có, hãy kích hoạt MFA cho tài khoản quản lý khóa để tăng cường lớp bảo mật.</li><li><strong>Bảo vệ dữ liệu cá nhân:</strong> Hiểu rõ cách dữ liệu của bạn được thu thập và sử dụng. Đọc kỹ chính sách quyền riêng tư.</li><li><strong>Lên kế hoạch dự phòng:</strong> Đảm bảo có nguồn điện dự phòng (pin hoặc sạc khẩn cấp) và một phương pháp mở khóa cơ bản (chìa khóa vật lý, mã PIN) trong trường hợp khẩn cấp.</li></ul><h2>Kết luận</h2><p>Sự kết hợp giữa <strong>khóa điện tử</strong>, <strong>smart lock</strong> và <strong>Trí tuệ nhân tạo</strong> đang mở ra một kỷ nguyên mới cho <strong>an ninh gia đình</strong>. Khóa cửa không còn là một thiết bị đơn thuần để khóa và mở, mà đã trở thành một hệ thống bảo vệ thông minh, chủ động, có khả năng học hỏi và thích nghi. Mặc dù vẫn còn những thách thức về quyền riêng tư và an ninh mạng, nhưng tiềm năng mà AI mang lại là vô cùng to lớn, hứa hẹn một tương lai nơi ngôi nhà của chúng ta không chỉ an toàn hơn mà còn thông minh và tiện nghi hơn bao giờ hết.</p><p>Việc đầu tư vào một hệ thống khóa cửa AI thông minh là một quyết định đáng giá cho bất kỳ ai muốn nâng cấp an ninh và trải nghiệm sống trong ngôi nhà hiện đại. Hãy là người tiêu dùng thông thái, tìm hiểu kỹ lưỡng và chọn lựa sản phẩm phù hợp nhất để bảo vệ tổ ấm của mình.</p><p>```</p>', NULL, NULL, NULL, 'PUBLISHED', '85526858-1561-42f0-a38b-8ab16bb49dcc_SHS-2920_1.jpg', 4, '2025-11-04 17:32:50', '2025-11-04 17:32:50', '2025-11-05 01:55:40', NULL);
 INSERT INTO `news` (`id`, `title`, `content`, `summary`, `author`, `category`, `status`, `featured_image`, `views`, `published_at`, `created_at`, `updated_at`, `thumbnail`) VALUES
@@ -231,7 +246,7 @@ INSERT INTO `news` (`id`, `title`, `content`, `summary`, `author`, `category`, `
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `orders`
+-- Table structure for table `orders`
 --
 
 CREATE TABLE `orders` (
@@ -257,17 +272,18 @@ CREATE TABLE `orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `orders`
+-- Dumping data for table `orders`
 --
 
 INSERT INTO `orders` (`id`, `user_id`, `fullname`, `email`, `phone_number`, `address`, `note`, `order_date`, `status`, `total_money`, `shipping_method`, `shipping_date`, `payment_method`, `active`, `voucher_id`, `discount_amount`, `payment_intent_id`, `vnp_txn_ref`, `vnp_transaction_no`) VALUES
 (92, 18, 'Truong Quang Lap', 'secroramot123@gmail.com', '0854768836', 'Mình Loc', 'àdasfadsfdsafsadfasdf', '2025-06-13 00:00:00', 'canceled', 29030000, 'Tiêu chuẩn', '2025-06-16', 'Thanh toán thẻ thành công', 1, NULL, 0, 'pi_3RZW4FRoKh7pvaZe1sbaN2MH', NULL, NULL),
-(94, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc, Xã Minh Lộc, Huyện Hậu Lộc, Tỉnh Thanh Hóa', '', '2025-11-06 02:15:09', 'delivered', 3450000, 'Tiêu chuẩn', '2025-11-09', 'Cash', 1, 11, 380000, NULL, NULL, NULL);
+(94, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc, Xã Minh Lộc, Huyện Hậu Lộc, Tỉnh Thanh Hóa', '', '2025-11-06 02:15:09', 'delivered', 3450000, 'Tiêu chuẩn', '2025-11-09', 'Cash', 1, 11, 380000, NULL, NULL, NULL),
+(95, 18, 'Lap Truong Quang', 'lapduynh72@gmail.com', '0854768836', 'Mình Loc, Xã Cổ Bi, Huyện Gia Lâm, Thành phố Hà Nội', '', '2025-11-06 14:45:09', 'payment_failed', 7680000, 'Tiêu chuẩn', '2025-11-09', 'VNPAY', 1, 11, 850000, NULL, '87117391', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `order_details`
+-- Table structure for table `order_details`
 --
 
 CREATE TABLE `order_details` (
@@ -281,16 +297,17 @@ CREATE TABLE `order_details` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `order_details`
+-- Dumping data for table `order_details`
 --
 
 INSERT INTO `order_details` (`id`, `order_id`, `product_id`, `price`, `number_of_products`, `total_money`, `size`) VALUES
-(127, 94, 17, 3800000, 1, 3800000, NULL);
+(127, 94, 17, 3800000, 1, 3800000, NULL),
+(128, 95, 3, 8500000, 1, 8500000, 0);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `products`
+-- Table structure for table `products`
 --
 
 CREATE TABLE `products` (
@@ -307,13 +324,13 @@ CREATE TABLE `products` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `products`
+-- Dumping data for table `products`
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `thumbnail`, `description`, `created_at`, `updated_at`, `category_id`, `discount`, `quantity`) VALUES
 (1, 'Khóa vân tay GATEMAN FINGUS (WF-20)', 6500000, 'WF20_1 3-4.jpg', '<p></p><h2>Khóa Vân Tay GATEMAN FINGUS (WF-20) – An Toàn Tối Ưu, Tiện Nghi Vượt Trội</h2><p>Trong kỷ nguyên công nghệ số, bảo vệ không gian sống và làm việc không chỉ là nhu cầu mà còn là nghệ thuật. Locker Korea tự hào giới thiệu siêu phẩm khóa vân tay GATEMAN FINGUS (WF-20) – một biểu tượng của sự sang trọng, hiện đại và bảo mật tuyệt đối đến từ thương hiệu khóa điện tử hàng đầu GATEMAN. FINGUS (WF-20) không chỉ là một thiết bị an ninh mà còn là một phần không thể thiếu, nâng tầm đẳng cấp cho mọi không gian. Với sự kết hợp hoàn hảo giữa công nghệ nhận diện vân tay tiên tiến và khả năng mở khóa bằng thẻ từ tiện lợi, sản phẩm này mang đến trải nghiệm an toàn, nhanh chóng và tinh tế cho mọi thành viên trong gia đình hoặc môi trường công sở. Hãy khám phá một giải pháp an ninh đột phá, nơi sự an tâm và tiện lợi giao thoa hoàn hảo.</p><h3>Đặc Điểm Nổi Bật</h3><h4>1. Công Nghệ Vân Tay FPC Thụy Điển – Bảo Mật Không Thể Xâm Phạm</h4><p>GATEMAN FINGUS (WF-20) được trang bị cảm biến vân tay FPC tiên tiến nhất từ Thụy Điển, một công nghệ sinh trắc học đã được chứng minh về độ chính xác và bảo mật. Khác với các cảm biến quang học truyền thống, FPC quét vân tay dựa trên cảm biến áp suất và nhiệt độ, cho phép nhận diện sâu các đặc điểm vân tay, từ đó loại bỏ hoàn toàn khả năng làm giả bằng silicon, keo dán hay ảnh chụp. Quá trình nhận diện diễn ra chỉ trong tích tắc, dưới 0.5 giây, đảm bảo việc mở cửa nhanh chóng và thuận tiện mà vẫn giữ vững tường thành bảo mật vững chắc nhất cho ngôi nhà hay văn phòng của bạn. Đây là sự lựa chọn tối ưu cho những ai đặt tiêu chí an toàn lên hàng đầu.</p><h4>2. Mở Khóa Bằng Thẻ Từ Tiện Lợi – Giải Pháp Cho Mọi Thành Viên</h4><p>Bên cạnh công nghệ vân tay, GATEMAN FINGUS (WF-20) còn tích hợp khả năng mở khóa bằng thẻ từ thông minh. Tính năng này đặc biệt hữu ích cho những người lớn tuổi, trẻ nhỏ hoặc những ai gặp khó khăn với việc nhận diện vân tay. Với khả năng lưu trữ lên đến 40 thẻ từ RFID, bạn có thể dễ dàng cấp phát và quản lý quyền truy cập cho từng thành viên trong gia đình hoặc nhân viên trong văn phòng một cách linh hoạt. Thẻ từ được mã hóa riêng biệt, cực kỳ nhỏ gọn và dễ dàng mang theo, mang lại sự tiện lợi tối đa mà không hề ảnh hưởng đến yếu tố an ninh. Đây là một giải pháp hoàn hảo để đảm bảo mọi người đều có thể vào nhà một cách dễ dàng và an toàn.</p><h4>3. Thiết Kế Sang Trọng, Đẳng Cấp – Nâng Tầm Kiến Trúc</h4><p>GATEMAN FINGUS (WF-20) không chỉ là một thiết bị an ninh mà còn là một tác phẩm nghệ thuật góp phần tô điểm cho không gian sống của bạn. Với thiết kế hiện đại, tinh tế và tối giản, sản phẩm này dễ dàng hòa nhập và làm nổi bật vẻ đẹp của mọi loại cửa, từ phong cách cổ điển đến hiện đại. Vỏ ngoài được chế tác từ hợp kim kẽm nguyên khối cao cấp, kết hợp với các đường nét bo tròn mềm mại và lớp phủ bề mặt chống trầy xước, chống bám vân tay, mang lại vẻ ngoài luôn sáng bóng và bền bỉ theo thời gian. Màu sắc trung tính, sang trọng giúp khóa vân tay FINGUS (WF-20) trở thành điểm nhấn tinh tế, thể hiện gu thẩm mỹ và đẳng cấp của gia chủ.</p><h4>4. Chức Năng Bảo Mật Kép Nâng Cao – An Toàn Tuyệt Đối</h4><p>Để đảm bảo an ninh ở mức độ cao nhất, GATEMAN FINGUS (WF-20) tích hợp nhiều tính năng bảo mật kép vượt trội. Chế độ &quot;mã số ảo&quot; cho phép bạn nhập thêm các số ngẫu nhiên trước hoặc sau mật khẩu chính, ngăn chặn kẻ gian đọc trộm mật khẩu qua dấu vân tay trên màn hình. Tính năng &quot;khóa trái từ bên trong&quot; (Double Lock) vô hiệu hóa mọi thao tác mở cửa từ bên ngoài, mang lại sự riêng tư và an toàn tuyệt đối khi bạn ở trong nhà. Ngoài ra, chức năng báo động chống phá khóa, đột nhập trái phép sẽ được kích hoạt ngay lập tức nếu có bất kỳ hành vi cố ý phá hoại nào, gửi cảnh báo đến bạn và những người xung quanh.</p><h4>5. Cảnh Báo Thông Minh Đa Lớp – Luôn Luôn An Tâm</h4><p>Sự an tâm của người dùng luôn là ưu tiên hàng đầu của GATEMAN. FINGUS (WF-20) được trang bị hệ thống cảnh báo thông minh đa lớp, mang đến sự bảo vệ toàn diện. Khóa sẽ tự động phát ra âm thanh cảnh báo lớn nếu phát hiện dấu hiệu cạy phá, đột nhập bất hợp pháp hoặc cố gắng mở cửa bằng phương pháp không hợp lệ. Đặc biệt, cảm biến nhiệt tích hợp sẽ kích hoạt báo động cháy nổ khi nhiệt độ bên trong vượt quá ngưỡng cho phép, đồng thời tự động mở khóa để tạo điều kiện thoát hiểm an toàn. Hệ thống còn cảnh báo khi pin yếu, giúp bạn thay pin kịp thời, tránh tình trạng gián đoạn hoạt động. Với FINGUS (WF-20), bạn luôn được thông báo và bảo vệ.</p><h4>6. Dễ Dàng Lắp Đặt &amp; Sử Dụng – Phù Hợp Mọi Lứa Tuổi</h4><p>GATEMAN FINGUS (WF-20) được thiết kế với tiêu chí thân thiện với người dùng, đảm bảo mọi thao tác cài đặt và sử dụng đều diễn ra một cách đơn giản, trực quan. Quy trình lắp đặt không quá phức tạp, có thể thực hiện bởi đội ngũ kỹ thuật viên chuyên nghiệp của Locker Korea trong thời gian ngắn. Giao diện người dùng rõ ràng, hệ thống hướng dẫn bằng giọng nói (tùy chọn) giúp người dùng dễ dàng thiết lập và quản lý vân tay, thẻ từ mà không cần đến sự hỗ trợ kỹ thuật phức tạp. Thiết kế tay nắm cửa dạng đẩy/kéo tiện lợi giúp việc mở cửa trở nên nhẹ nhàng, phù hợp cho cả trẻ nhỏ và người lớn tuổi, mang lại sự tiện nghi tối đa trong cuộc sống hàng ngày.</p><h4>7. Độ Bền Vượt Thời Gian – Cam Kết Chất Lượng</h4><p>GATEMAN là thương hiệu nổi tiếng với độ bền vượt trội, và FINGUS (WF-20) không phải là ngoại lệ. Sản phẩm được sản xuất theo quy trình nghiêm ngặt, trải qua hàng loạt kiểm tra chất lượng khắt khe để đảm bảo khả năng hoạt động ổn định và bền bỉ trong mọi điều kiện môi trường. Khóa có khả năng chịu lực tác động mạnh, chống ăn mòn và chống sốc điện hiệu quả. Toàn bộ linh kiện điện tử bên trong được bảo vệ bởi lớp vỏ chắc chắn và công nghệ chống ẩm, chống bụi, đảm bảo tuổi thọ lâu dài. Với GATEMAN FINGUS (WF-20), bạn không chỉ mua một sản phẩm mà còn đầu tư vào sự an tâm và độ bền bỉ đã được kiểm chứng.</p><h3>Công Nghệ &amp; Chất Liệu</h3><p>GATEMAN FINGUS (WF-20) là sự kết hợp hoàn hảo giữa những công nghệ tiên tiến nhất và các vật liệu cao cấp, tạo nên một sản phẩm khóa điện tử đỉnh cao về hiệu suất và độ bền. Trái tim của hệ thống bảo mật là <strong>cảm biến vân tay FPC (Fingerprint Cards AB) từ Thụy Điển</strong>, công nghệ sinh trắc học hàng đầu thế giới. Cảm biến này sử dụng công nghệ nhận diện bán dẫn điện dung, quét chi tiết các đặc điểm độc đáo của vân tay ở lớp hạ bì, giúp phân biệt vân tay thật với các vật liệu làm giả một cách chính xác tuyệt đối, giảm thiểu tối đa tỷ lệ từ chối sai và chấp nhận sai. Mọi dữ liệu vân tay và thẻ từ đều được mã hóa bằng <strong>thuật toán bảo mật AES-128 bit</strong>, đảm bảo thông tin cá nhân của bạn được bảo vệ an toàn khỏi các mối đe dọa từ bên ngoài.</p><p>Về mặt vật liệu, FINGUS (WF-20) được chế tạo từ <strong>hợp kim kẽm đúc nguyên khối</strong> cao cấp, mang lại độ cứng cáp và khả năng chống va đập vượt trội. Bề mặt khóa được xử lý bằng công nghệ <strong>phủ Nano PVD (Physical Vapor Deposition)</strong> tiên tiến, không chỉ tạo nên vẻ ngoài sang trọng, bền màu mà còn chống trầy xước, chống ăn mòn hiệu quả trước tác động của thời tiết và hóa chất. Phần tay nắm được thiết kế với <strong>lõi thép cường lực</strong> bên trong, đảm bảo độ chắc chắn và chịu lực cao. Các chi tiết bên trong sử dụng nhựa ABS chống cháy chất lượng cao, tăng cường khả năng chịu nhiệt và đảm bảo an toàn cho người sử dụng trong trường hợp hỏa hoạn. Hệ thống mạch điện được thiết kế thông minh, sử dụng <strong>chip xử lý tốc độ cao</strong> và được bọc chống ẩm, chống bụi, đảm bảo hoạt động ổn định và bền bỉ qua thời gian.</p><h3>Ứng Dụng Thực Tế</h3><p>Khóa vân tay GATEMAN FINGUS (WF-20) với sự kết hợp hoàn hảo giữa công nghệ hiện đại và thiết kế tinh tế, là lựa chọn lý tưởng cho nhiều loại hình không gian và đối tượng người dùng khác nhau. Đây là giải pháp an ninh vượt trội cho <strong>các căn hộ chung cư cao cấp, biệt thự sang trọng</strong>, nơi yêu cầu cao về bảo mật và tính thẩm mỹ. Gia đình có trẻ nhỏ và người lớn tuổi sẽ đặc biệt yêu thích FINGUS (WF-20) bởi sự dễ dàng trong việc mở khóa bằng vân tay hoặc thẻ từ, không còn loay hoay với chìa khóa cơ truyền thống, giúp mọi thành viên ra vào nhà một cách thuận tiện và an toàn tuyệt đối.</p><p>Ngoài ra, GATEMAN FINGUS (WF-20) cũng là lựa chọn hoàn hảo cho <strong>các văn phòng làm việc, phòng ban cần kiểm soát truy cập</strong>, hay các cửa hàng, studio nhỏ. Khả năng quản lý nhiều vân tay và thẻ từ giúp chủ doanh nghiệp dễ dàng cấp quyền truy cập cho nhân viên, đồng thời dễ dàng loại bỏ quyền truy cập khi cần thiết. Đối với những người bận rộn, thường xuyên di chuyển, việc không cần mang theo chìa khóa vật lý sẽ mang lại sự tự do và tiện lợi tối đa. FINGUS (WF-20) không chỉ bảo vệ tài sản mà còn mang đến sự an tâm, nâng cao chất lượng cuộc sống và làm việc, biến cánh cửa của bạn trở thành một cổng an ninh thông minh, linh hoạt và đáng tin cậy.</p><h3>Kết Luận</h3><blockquote>Đầu tư vào GATEMAN FINGUS (WF-20) là đầu tư vào sự an tâm, tiện nghi và đẳng cấp. Hãy để Locker Korea đồng hành cùng bạn trên hành trình kiến tạo một không gian sống và làm việc hiện đại, an toàn hơn bao giờ hết.</blockquote><p>Với khóa vân tay GATEMAN FINGUS (WF-20), bạn không chỉ sở hữu một thiết bị an ninh thông thường mà còn là một giải pháp toàn diện cho cuộc sống hiện đại. Sự kết hợp giữa công nghệ vân tay FPC Thụy Điển hàng đầu, tính năng mở khóa bằng thẻ từ linh hoạt, thiết kế sang trọng và khả năng bảo mật đa lớp đã tạo nên một sản phẩm hoàn hảo. FINGUS (WF-20) mang lại sự yên bình tuyệt đối cho tâm trí bạn, giúp bạn tận hưởng cuộc sống mà không phải lo lắng về an ninh. Hãy nói lời tạm biệt với những chiếc chìa khóa cồng kềnh và chào đón kỷ nguyên của sự tiện lợi, an toàn tối ưu. Lựa chọn GATEMAN FINGUS (WF-20) từ Locker Korea chính là lựa chọn sự tinh hoa của công nghệ bảo mật, nâng tầm giá trị cho không gian sống và làm việc của bạn.</p>', '2024-02-16 16:46:58', '2025-11-05 12:48:17', 1, 30, 51),
 (2, 'Khóa vân tay Samsung SHP-DH538', 5490000, 'DH538_co 3-4.jpg', 'Khóa vân tay Samsung SHP-DH538 - Mở bằng vân tay, mã số, chìa cơ dự phòng. Chống nước, thiết kế hiện đại.', '2024-02-17 07:35:46', '2025-11-04 15:43:33', 2, 20, 3),
-(3, 'Khóa vân tay SamSung SHS P718', 8500000, '03fde30d-fbb6-4306-bae0-4ebfb4ece53a_700_mat ngoaiw.png', '<p></p><h2 class=\"ql-align-center\"><span style=\"color: rgb(0, 64, 128);\">Khóa Cửa Vân Tay Samsung SHS P718 – Nâng Tầm An Ninh, Định Hình Phong Cách Sống</span></h2><p class=\"ql-align-center\"><span style=\"color: rgb(85, 85, 85);\">Tại Locker Korea, chúng tôi tự hào giới thiệu siêu phẩm </span><strong style=\"color: rgb(0, 64, 128);\">khóa vân tay Samsung SHS P718</strong><span style=\"color: rgb(85, 85, 85);\"> – biểu tượng của sự kết hợp hoàn hảo giữa công nghệ bảo mật hàng đầu, thiết kế tinh tế và trải nghiệm người dùng vượt trội. Đây không chỉ là một thiết bị an ninh mà còn là một tuyên ngôn về đẳng cấp và sự tiện nghi cho mọi không gian sống hiện đại. Samsung SHS P718 cam kết mang đến sự an tâm tuyệt đối và phong cách sống thời thượng cho gia đình bạn.</span></p><h3><span style=\"color: rgb(0, 64, 128);\">Đặc Điểm Nổi Bật Vượt Trội</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Samsung SHS P718 được thiết kế để đáp ứng mọi kỳ vọng của bạn về một hệ thống an ninh hiện đại, với những ưu điểm không thể bỏ qua:</span></p><ul><li><strong style=\"color: rgb(51, 51, 51);\">Công Nghệ Vân Tay Siêu Nhạy và An Toàn:</strong><span style=\"color: rgb(51, 51, 51);\"> Tích hợp cảm biến vân tay quang học/FPC tiên tiến, nhận diện chỉ trong tích tắc, đảm bảo độ chính xác và bảo mật tối đa, loại bỏ hoàn toàn nguy cơ sao chép hoặc làm giả vân tay.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Thiết Kế Tay Cầm Push-Pull Đột Phá:</strong><span style=\"color: rgb(51, 51, 51);\"> Cơ chế mở/đóng cửa bằng cách đẩy hoặc kéo nhẹ nhàng, mang lại trải nghiệm sử dụng vô cùng tiện lợi và thoải mái, đặc biệt khi bạn đang mang vác đồ đạc.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Đa Dạng Phương Thức Mở Khóa Linh Hoạt:</strong><span style=\"color: rgb(51, 51, 51);\"> Cung cấp tới 4 tùy chọn mở khóa: vân tay, mã số, thẻ từ và chìa khóa cơ dự phòng, cho phép bạn và gia đình lựa chọn phương thức phù hợp nhất trong mọi tình huống.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Hệ Thống Bảo Mật Đa Lớp Thông Minh:</strong><span style=\"color: rgb(51, 51, 51);\"> Từ mã số ảo chống nhìn trộm, tính năng khóa kép từ bên trong, đến cảnh báo xâm nhập và cháy nổ, P718 mang đến một lớp bảo vệ vững chắc cho ngôi nhà của bạn.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Chất Liệu Cao Cấp, Bền Bỉ Theo Thời Gian:</strong><span style=\"color: rgb(51, 51, 51);\"> Được chế tạo từ hợp kim kẽm siêu bền và bề mặt kính cường lực chống trầy xước, khóa không chỉ sang trọng mà còn có khả năng chống chịu va đập, ăn mòn hiệu quả.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Cảnh Báo An Ninh Tức Thời:</strong><span style=\"color: rgb(51, 51, 51);\"> Tích hợp các cảm biến thông minh để phát hiện các mối đe dọa như cháy nổ, phá hoại hoặc xâm nhập trái phép, đồng thời phát ra âm thanh cảnh báo lớn và gửi thông báo (nếu có module kết nối nhà thông minh).</span></li></ul><h3><span style=\"color: rgb(0, 64, 128);\">Công Nghệ &amp; Chất Liệu Vượt Trội</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Sự ưu việt của Samsung SHS P718 không chỉ nằm ở vẻ ngoài mà còn ẩn chứa trong từng chi tiết công nghệ và chất liệu cấu thành:</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Công Nghệ Nhận Diện Vân Tay FPC Tiên Tiến</span></h4><p><span style=\"color: rgb(51, 51, 51);\">Trái tim của Samsung SHS P718 là công nghệ nhận diện vân tay FPC (Fingerprint Cards) hoặc quang học thế hệ mới, cho phép quét và xác thực vân tay với độ chính xác cao tuyệt đối, chỉ trong </span><strong style=\"color: rgb(51, 51, 51);\">0.5 giây</strong><span style=\"color: rgb(51, 51, 51);\">. Khả năng chống làm giả vân tay hiệu quả, kết hợp với bộ nhớ lớn (có thể lưu trữ tới 100 vân tay), giúp việc quản lý ra vào trở nên dễ dàng và an toàn hơn bao giờ hết. Bạn sẽ không còn phải lo lắng về việc mất chìa khóa hay lộ mã số.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Cơ Chế Tay Cầm Push-Pull Đột Phá</span></h4><p><span style=\"color: rgb(51, 51, 51);\">Thiết kế tay cầm Push-Pull là điểm nhấn độc đáo, giúp việc mở cửa trở nên </span><strong style=\"color: rgb(0, 64, 128);\">thuận tiện và trực quan</strong><span style=\"color: rgb(51, 51, 51);\">. Thay vì phải xoay hoặc vặn tay nắm, bạn chỉ cần đẩy nhẹ từ bên ngoài để vào hoặc kéo nhẹ từ bên trong để ra. Cơ chế này đặc biệt hữu ích cho người già, trẻ nhỏ hoặc khi bạn đang bận tay xách đồ, mang lại sự mượt mà và thoải mái tối đa trong mọi thao tác.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Bộ Vi Xử Lý Thông Minh và Mã Số Ảo Chống Lộ</span></h4><p><span style=\"color: rgb(51, 51, 51);\">P718 được trang bị bộ vi xử lý thông minh, cho phép người dùng thiết lập </span><strong style=\"color: rgb(0, 64, 128);\">mã số ảo</strong><span style=\"color: rgb(51, 51, 51);\"> – một tính năng bảo mật tuyệt vời giúp ngăn chặn việc lộ mã số ngay cả khi có người đứng cạnh quan sát. Bạn có thể nhập một dãy số bất kỳ trước hoặc sau mã số chính mà vẫn mở được khóa. Thêm vào đó, chức năng mã số chủ (Master Code) cho phép quản lý toàn bộ cài đặt khóa, tăng cường quyền kiểm soát an ninh tối đa.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Kết Cấu Bền Vững Từ Hợp Kim Cao Cấp</span></h4><p><span style=\"color: rgb(51, 51, 51);\">Vỏ khóa được chế tác từ </span><strong style=\"color: rgb(0, 64, 128);\">hợp kim kẽm nguyên khối</strong><span style=\"color: rgb(51, 51, 51);\">, trải qua quy trình xử lý bề mặt tinh xảo, chống ăn mòn và oxy hóa hiệu quả. Bề mặt bàn phím cảm ứng được bảo vệ bằng kính cường lực Gorilla Glass, chống trầy xước, va đập và chịu lực tốt, đảm bảo độ bền vượt trội theo thời gian. Sự kết hợp giữa vật liệu cao cấp và kỹ thuật chế tạo tiên tiến mang lại cho P718 khả năng hoạt động ổn định và bền bỉ trong mọi điều kiện môi trường.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Cảm Biến Cháy và Chống Sốc Điện</span></h4><p><span style=\"color: rgb(51, 51, 51);\">An toàn luôn là ưu tiên hàng đầu. Samsung SHS P718 được tích hợp </span><strong style=\"color: rgb(0, 64, 128);\">cảm biến nhiệt độ</strong><span style=\"color: rgb(51, 51, 51);\"> bên trong, sẽ tự động mở khóa khi phát hiện nhiệt độ trong nhà tăng cao bất thường (trên 60°C), giúp người trong nhà thoát hiểm kịp thời trong trường hợp hỏa hoạn. Đồng thời, khóa còn có tính năng </span><strong style=\"color: rgb(0, 64, 128);\">chống sốc điện tử</strong><span style=\"color: rgb(51, 51, 51);\">, vô hiệu hóa mọi nỗ lực mở khóa bằng các thiết bị điện áp cao, đảm bảo an toàn tuyệt đối cho hệ thống và người dùng.</span></p><h3><span style=\"color: rgb(0, 64, 128);\">Ứng Dụng Đa Dạng &amp; Linh Hoạt</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Với thiết kế sang trọng và tính năng ưu việt, Samsung SHS P718 là lựa chọn lý tưởng cho nhiều không gian khác nhau:</span></p><ul><li><strong style=\"color: rgb(51, 51, 51);\">Không Gian Sống Hiện Đại:</strong><span style=\"color: rgb(51, 51, 51);\"> Phù hợp cho căn hộ chung cư cao cấp, biệt thự, nhà phố, mang lại sự tiện nghi và an tâm cho mọi thành viên trong gia đình.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Văn Phòng &amp; Công Sở:</strong><span style=\"color: rgb(51, 51, 51);\"> Dễ dàng quản lý quyền ra vào cho nhân viên, đối tác, đồng thời tăng cường bảo mật cho các khu vực quan trọng.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Phù Hợp Mọi Thành Viên Gia Đình:</strong><span style=\"color: rgb(51, 51, 51);\"> Với nhiều phương thức mở khóa và thao tác đơn giản, P718 dễ dàng sử dụng cho cả người lớn tuổi (không cần nhớ mật khẩu, chỉ cần vân tay/thẻ từ) và trẻ nhỏ (không cần loay hoay với chìa khóa).</span></li></ul><blockquote><em style=\"color: rgb(85, 85, 85); background-color: rgb(248, 248, 248);\">&quot;Samsung SHS P718 không chỉ là một chiếc khóa cửa, mà là một giải pháp an ninh toàn diện, mang đến sự an tâm tuyệt đối và nâng tầm giá trị cho không gian sống của bạn.&quot;</em></blockquote><h3><span style=\"color: rgb(0, 64, 128);\">Kết Luận: Tại Sao Samsung SHS P718 Là Lựa Chọn Hoàn Hảo?</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Trong thế giới ngày càng phát triển, nhu cầu về một ngôi nhà không chỉ đẹp mà còn an toàn và thông minh trở nên cấp thiết hơn bao giờ hết. </span><strong style=\"color: rgb(0, 64, 128);\">Khóa vân tay Samsung SHS P718</strong><span style=\"color: rgb(51, 51, 51);\"> chính là câu trả lời hoàn hảo cho mọi mong đợi đó.</span></p><p><span style=\"color: rgb(51, 51, 51);\">Khi lựa chọn P718, bạn không chỉ đầu tư vào một sản phẩm công nghệ cao mà còn đầu tư vào </span><strong style=\"color: rgb(0, 64, 128);\">sự yên bình, tiện lợi và đẳng cấp</strong><span style=\"color: rgb(51, 51, 51);\">. Từ khả năng bảo mật vượt trội với vân tay siêu nhạy, đến thiết kế Push-Pull độc đáo mang lại trải nghiệm mở cửa mượt mà, P718 đã và đang định nghĩa lại chuẩn mực về khóa cửa điện tử.</span></p><p><span style=\"color: rgb(51, 51, 51);\">Với chất liệu bền bỉ, công nghệ thông minh và các tính năng cảnh báo an ninh tiên tiến, Samsung SHS P718 mang đến sự bảo vệ tối ưu cho tài sản và những người thân yêu của bạn. Nó phù hợp với mọi thành viên trong gia đình, từ người lớn tuổi đến trẻ nhỏ, biến mỗi lần ra vào nhà thành một trải nghiệm dễ dàng và an toàn.</span></p><p><span style=\"color: rgb(51, 51, 51);\">Hãy để </span><strong style=\"color: rgb(0, 64, 128);\">Locker Korea</strong><span style=\"color: rgb(51, 51, 51);\"> đồng hành cùng bạn trên hành trình kiến tạo không gian sống an toàn, tiện nghi và sang trọng. Liên hệ ngay hôm nay để được tư vấn chi tiết về khóa vân tay Samsung SHS P718 và nhận những ưu đãi tốt nhất!</span></p><p>```</p>', '2024-02-17 07:35:46', '2025-11-05 02:17:43', 2, 60, 8),
+(3, 'Khóa vân tay SamSung SHS P718', 8500000, '03fde30d-fbb6-4306-bae0-4ebfb4ece53a_700_mat ngoaiw.png', '<p></p><h2 class=\"ql-align-center\"><span style=\"color: rgb(0, 64, 128);\">Khóa Cửa Vân Tay Samsung SHS P718 – Nâng Tầm An Ninh, Định Hình Phong Cách Sống</span></h2><p class=\"ql-align-center\"><span style=\"color: rgb(85, 85, 85);\">Tại Locker Korea, chúng tôi tự hào giới thiệu siêu phẩm </span><strong style=\"color: rgb(0, 64, 128);\">khóa vân tay Samsung SHS P718</strong><span style=\"color: rgb(85, 85, 85);\"> – biểu tượng của sự kết hợp hoàn hảo giữa công nghệ bảo mật hàng đầu, thiết kế tinh tế và trải nghiệm người dùng vượt trội. Đây không chỉ là một thiết bị an ninh mà còn là một tuyên ngôn về đẳng cấp và sự tiện nghi cho mọi không gian sống hiện đại. Samsung SHS P718 cam kết mang đến sự an tâm tuyệt đối và phong cách sống thời thượng cho gia đình bạn.</span></p><h3><span style=\"color: rgb(0, 64, 128);\">Đặc Điểm Nổi Bật Vượt Trội</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Samsung SHS P718 được thiết kế để đáp ứng mọi kỳ vọng của bạn về một hệ thống an ninh hiện đại, với những ưu điểm không thể bỏ qua:</span></p><ul><li><strong style=\"color: rgb(51, 51, 51);\">Công Nghệ Vân Tay Siêu Nhạy và An Toàn:</strong><span style=\"color: rgb(51, 51, 51);\"> Tích hợp cảm biến vân tay quang học/FPC tiên tiến, nhận diện chỉ trong tích tắc, đảm bảo độ chính xác và bảo mật tối đa, loại bỏ hoàn toàn nguy cơ sao chép hoặc làm giả vân tay.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Thiết Kế Tay Cầm Push-Pull Đột Phá:</strong><span style=\"color: rgb(51, 51, 51);\"> Cơ chế mở/đóng cửa bằng cách đẩy hoặc kéo nhẹ nhàng, mang lại trải nghiệm sử dụng vô cùng tiện lợi và thoải mái, đặc biệt khi bạn đang mang vác đồ đạc.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Đa Dạng Phương Thức Mở Khóa Linh Hoạt:</strong><span style=\"color: rgb(51, 51, 51);\"> Cung cấp tới 4 tùy chọn mở khóa: vân tay, mã số, thẻ từ và chìa khóa cơ dự phòng, cho phép bạn và gia đình lựa chọn phương thức phù hợp nhất trong mọi tình huống.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Hệ Thống Bảo Mật Đa Lớp Thông Minh:</strong><span style=\"color: rgb(51, 51, 51);\"> Từ mã số ảo chống nhìn trộm, tính năng khóa kép từ bên trong, đến cảnh báo xâm nhập và cháy nổ, P718 mang đến một lớp bảo vệ vững chắc cho ngôi nhà của bạn.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Chất Liệu Cao Cấp, Bền Bỉ Theo Thời Gian:</strong><span style=\"color: rgb(51, 51, 51);\"> Được chế tạo từ hợp kim kẽm siêu bền và bề mặt kính cường lực chống trầy xước, khóa không chỉ sang trọng mà còn có khả năng chống chịu va đập, ăn mòn hiệu quả.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Cảnh Báo An Ninh Tức Thời:</strong><span style=\"color: rgb(51, 51, 51);\"> Tích hợp các cảm biến thông minh để phát hiện các mối đe dọa như cháy nổ, phá hoại hoặc xâm nhập trái phép, đồng thời phát ra âm thanh cảnh báo lớn và gửi thông báo (nếu có module kết nối nhà thông minh).</span></li></ul><h3><span style=\"color: rgb(0, 64, 128);\">Công Nghệ &amp; Chất Liệu Vượt Trội</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Sự ưu việt của Samsung SHS P718 không chỉ nằm ở vẻ ngoài mà còn ẩn chứa trong từng chi tiết công nghệ và chất liệu cấu thành:</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Công Nghệ Nhận Diện Vân Tay FPC Tiên Tiến</span></h4><p><span style=\"color: rgb(51, 51, 51);\">Trái tim của Samsung SHS P718 là công nghệ nhận diện vân tay FPC (Fingerprint Cards) hoặc quang học thế hệ mới, cho phép quét và xác thực vân tay với độ chính xác cao tuyệt đối, chỉ trong </span><strong style=\"color: rgb(51, 51, 51);\">0.5 giây</strong><span style=\"color: rgb(51, 51, 51);\">. Khả năng chống làm giả vân tay hiệu quả, kết hợp với bộ nhớ lớn (có thể lưu trữ tới 100 vân tay), giúp việc quản lý ra vào trở nên dễ dàng và an toàn hơn bao giờ hết. Bạn sẽ không còn phải lo lắng về việc mất chìa khóa hay lộ mã số.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Cơ Chế Tay Cầm Push-Pull Đột Phá</span></h4><p><span style=\"color: rgb(51, 51, 51);\">Thiết kế tay cầm Push-Pull là điểm nhấn độc đáo, giúp việc mở cửa trở nên </span><strong style=\"color: rgb(0, 64, 128);\">thuận tiện và trực quan</strong><span style=\"color: rgb(51, 51, 51);\">. Thay vì phải xoay hoặc vặn tay nắm, bạn chỉ cần đẩy nhẹ từ bên ngoài để vào hoặc kéo nhẹ từ bên trong để ra. Cơ chế này đặc biệt hữu ích cho người già, trẻ nhỏ hoặc khi bạn đang bận tay xách đồ, mang lại sự mượt mà và thoải mái tối đa trong mọi thao tác.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Bộ Vi Xử Lý Thông Minh và Mã Số Ảo Chống Lộ</span></h4><p><span style=\"color: rgb(51, 51, 51);\">P718 được trang bị bộ vi xử lý thông minh, cho phép người dùng thiết lập </span><strong style=\"color: rgb(0, 64, 128);\">mã số ảo</strong><span style=\"color: rgb(51, 51, 51);\"> – một tính năng bảo mật tuyệt vời giúp ngăn chặn việc lộ mã số ngay cả khi có người đứng cạnh quan sát. Bạn có thể nhập một dãy số bất kỳ trước hoặc sau mã số chính mà vẫn mở được khóa. Thêm vào đó, chức năng mã số chủ (Master Code) cho phép quản lý toàn bộ cài đặt khóa, tăng cường quyền kiểm soát an ninh tối đa.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Kết Cấu Bền Vững Từ Hợp Kim Cao Cấp</span></h4><p><span style=\"color: rgb(51, 51, 51);\">Vỏ khóa được chế tác từ </span><strong style=\"color: rgb(0, 64, 128);\">hợp kim kẽm nguyên khối</strong><span style=\"color: rgb(51, 51, 51);\">, trải qua quy trình xử lý bề mặt tinh xảo, chống ăn mòn và oxy hóa hiệu quả. Bề mặt bàn phím cảm ứng được bảo vệ bằng kính cường lực Gorilla Glass, chống trầy xước, va đập và chịu lực tốt, đảm bảo độ bền vượt trội theo thời gian. Sự kết hợp giữa vật liệu cao cấp và kỹ thuật chế tạo tiên tiến mang lại cho P718 khả năng hoạt động ổn định và bền bỉ trong mọi điều kiện môi trường.</span></p><h4><span style=\"color: rgb(0, 86, 179);\">Cảm Biến Cháy và Chống Sốc Điện</span></h4><p><span style=\"color: rgb(51, 51, 51);\">An toàn luôn là ưu tiên hàng đầu. Samsung SHS P718 được tích hợp </span><strong style=\"color: rgb(0, 64, 128);\">cảm biến nhiệt độ</strong><span style=\"color: rgb(51, 51, 51);\"> bên trong, sẽ tự động mở khóa khi phát hiện nhiệt độ trong nhà tăng cao bất thường (trên 60°C), giúp người trong nhà thoát hiểm kịp thời trong trường hợp hỏa hoạn. Đồng thời, khóa còn có tính năng </span><strong style=\"color: rgb(0, 64, 128);\">chống sốc điện tử</strong><span style=\"color: rgb(51, 51, 51);\">, vô hiệu hóa mọi nỗ lực mở khóa bằng các thiết bị điện áp cao, đảm bảo an toàn tuyệt đối cho hệ thống và người dùng.</span></p><h3><span style=\"color: rgb(0, 64, 128);\">Ứng Dụng Đa Dạng &amp; Linh Hoạt</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Với thiết kế sang trọng và tính năng ưu việt, Samsung SHS P718 là lựa chọn lý tưởng cho nhiều không gian khác nhau:</span></p><ul><li><strong style=\"color: rgb(51, 51, 51);\">Không Gian Sống Hiện Đại:</strong><span style=\"color: rgb(51, 51, 51);\"> Phù hợp cho căn hộ chung cư cao cấp, biệt thự, nhà phố, mang lại sự tiện nghi và an tâm cho mọi thành viên trong gia đình.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Văn Phòng &amp; Công Sở:</strong><span style=\"color: rgb(51, 51, 51);\"> Dễ dàng quản lý quyền ra vào cho nhân viên, đối tác, đồng thời tăng cường bảo mật cho các khu vực quan trọng.</span></li><li><strong style=\"color: rgb(51, 51, 51);\">Phù Hợp Mọi Thành Viên Gia Đình:</strong><span style=\"color: rgb(51, 51, 51);\"> Với nhiều phương thức mở khóa và thao tác đơn giản, P718 dễ dàng sử dụng cho cả người lớn tuổi (không cần nhớ mật khẩu, chỉ cần vân tay/thẻ từ) và trẻ nhỏ (không cần loay hoay với chìa khóa).</span></li></ul><blockquote><em style=\"color: rgb(85, 85, 85); background-color: rgb(248, 248, 248);\">&quot;Samsung SHS P718 không chỉ là một chiếc khóa cửa, mà là một giải pháp an ninh toàn diện, mang đến sự an tâm tuyệt đối và nâng tầm giá trị cho không gian sống của bạn.&quot;</em></blockquote><h3><span style=\"color: rgb(0, 64, 128);\">Kết Luận: Tại Sao Samsung SHS P718 Là Lựa Chọn Hoàn Hảo?</span></h3><p><span style=\"color: rgb(51, 51, 51);\">Trong thế giới ngày càng phát triển, nhu cầu về một ngôi nhà không chỉ đẹp mà còn an toàn và thông minh trở nên cấp thiết hơn bao giờ hết. </span><strong style=\"color: rgb(0, 64, 128);\">Khóa vân tay Samsung SHS P718</strong><span style=\"color: rgb(51, 51, 51);\"> chính là câu trả lời hoàn hảo cho mọi mong đợi đó.</span></p><p><span style=\"color: rgb(51, 51, 51);\">Khi lựa chọn P718, bạn không chỉ đầu tư vào một sản phẩm công nghệ cao mà còn đầu tư vào </span><strong style=\"color: rgb(0, 64, 128);\">sự yên bình, tiện lợi và đẳng cấp</strong><span style=\"color: rgb(51, 51, 51);\">. Từ khả năng bảo mật vượt trội với vân tay siêu nhạy, đến thiết kế Push-Pull độc đáo mang lại trải nghiệm mở cửa mượt mà, P718 đã và đang định nghĩa lại chuẩn mực về khóa cửa điện tử.</span></p><p><span style=\"color: rgb(51, 51, 51);\">Với chất liệu bền bỉ, công nghệ thông minh và các tính năng cảnh báo an ninh tiên tiến, Samsung SHS P718 mang đến sự bảo vệ tối ưu cho tài sản và những người thân yêu của bạn. Nó phù hợp với mọi thành viên trong gia đình, từ người lớn tuổi đến trẻ nhỏ, biến mỗi lần ra vào nhà thành một trải nghiệm dễ dàng và an toàn.</span></p><p><span style=\"color: rgb(51, 51, 51);\">Hãy để </span><strong style=\"color: rgb(0, 64, 128);\">Locker Korea</strong><span style=\"color: rgb(51, 51, 51);\"> đồng hành cùng bạn trên hành trình kiến tạo không gian sống an toàn, tiện nghi và sang trọng. Liên hệ ngay hôm nay để được tư vấn chi tiết về khóa vân tay Samsung SHS P718 và nhận những ưu đãi tốt nhất!</span></p><p>```</p>', '2024-02-17 07:35:46', '2025-11-06 14:45:15', 2, 60, 7),
 (4, 'Khóa SAMSUNG SHS-2920', 4200000, 'SHS-2920_1.jpg', 'Khóa SAMSUNG SHS-2920 - Khóa điện tử mã số, thiết kế đơn giản, phù hợp mọi loại cửa.', '2024-02-17 07:35:46', '2024-02-17 07:35:46', 2, NULL, 0),
 (5, 'Khóa điện tử SAMSUNG SHP-DS700', 3290000, 'SHP-DS700_1.jpg', 'Khóa điện tử Samsung SHP-DS700 cao cấp, mở khóa bằng thẻ từ và mã số.', '2024-02-17 07:35:46', '2025-06-13 10:03:43', 2, 60, 48),
 (6, 'Khóa điện tử SAMSUNG SHS 1321', 3480000, '1321-1-3-4.jpg', 'Khóa điện tử Samsung SHS 1321 với thiết kế thanh lịch, bảo mật cao.', '2024-02-17 07:35:46', '2025-06-13 07:07:29', 2, 5, 333),
@@ -364,7 +381,7 @@ INSERT INTO `products` (`id`, `name`, `price`, `thumbnail`, `description`, `crea
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `product_features`
+-- Table structure for table `product_features`
 --
 
 CREATE TABLE `product_features` (
@@ -376,7 +393,7 @@ CREATE TABLE `product_features` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `product_features`
+-- Dumping data for table `product_features`
 --
 
 INSERT INTO `product_features` (`id`, `product_id`, `feature_id`, `created_at`, `updated_at`) VALUES
@@ -395,7 +412,7 @@ INSERT INTO `product_features` (`id`, `product_id`, `feature_id`, `created_at`, 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `product_images`
+-- Table structure for table `product_images`
 --
 
 CREATE TABLE `product_images` (
@@ -405,7 +422,7 @@ CREATE TABLE `product_images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `product_images`
+-- Dumping data for table `product_images`
 --
 
 INSERT INTO `product_images` (`id`, `product_id`, `image_url`) VALUES
@@ -423,7 +440,7 @@ INSERT INTO `product_images` (`id`, `product_id`, `image_url`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `return_requests`
+-- Table structure for table `return_requests`
 --
 
 CREATE TABLE `return_requests` (
@@ -438,7 +455,7 @@ CREATE TABLE `return_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `return_requests`
+-- Dumping data for table `return_requests`
 --
 
 INSERT INTO `return_requests` (`id`, `order_id`, `reason`, `status`, `refund_amount`, `admin_notes`, `created_at`, `updated_at`) VALUES
@@ -447,7 +464,7 @@ INSERT INTO `return_requests` (`id`, `order_id`, `reason`, `status`, `refund_amo
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `reviews`
+-- Table structure for table `reviews`
 --
 
 CREATE TABLE `reviews` (
@@ -464,7 +481,7 @@ CREATE TABLE `reviews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `reviews`
+-- Dumping data for table `reviews`
 --
 
 INSERT INTO `reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `staff_reply`, `staff_reply_by`, `staff_reply_at`, `created_at`, `updated_at`) VALUES
@@ -475,7 +492,7 @@ INSERT INTO `reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `staf
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `roles`
+-- Table structure for table `roles`
 --
 
 CREATE TABLE `roles` (
@@ -484,7 +501,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `roles`
+-- Dumping data for table `roles`
 --
 
 INSERT INTO `roles` (`id`, `name`) VALUES
@@ -495,11 +512,42 @@ INSERT INTO `roles` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `users`
+-- Table structure for table `social_accounts`
+--
+
+CREATE TABLE `social_accounts` (
+  `id` bigint NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `provider` varchar(20) NOT NULL,
+  `provider_id` varchar(50) NOT NULL,
+  `user_id` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tokens`
+--
+
+CREATE TABLE `tokens` (
+  `id` bigint NOT NULL,
+  `expiration_date` datetime(6) DEFAULT NULL,
+  `expired` bit(1) NOT NULL,
+  `revoked` bit(1) NOT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `token_type` varchar(50) DEFAULT NULL,
+  `user_id` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `fullname` varchar(100) DEFAULT '',
   `phone_number` varchar(10) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
@@ -513,25 +561,22 @@ CREATE TABLE `users` (
   `google_account_id` int DEFAULT '0',
   `role_id` int DEFAULT NULL,
   `reset_password_token` varchar(255) DEFAULT NULL,
-  `reset_password_token_expiry` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  KEY `role_id` (`role_id`)
+  `reset_password_token_expiry` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `fullname`, `phone_number`, `email`, `address`, `password`, `created_at`, `updated_at`, `is_active`, `date_of_birth`, `facebook_account_id`, `google_account_id`, `role_id`, `reset_password_token`, `reset_password_token_expiry`) VALUES
 (3, 'Tổng tài Lạnh lùng', '0111222333', 'admin@gmail.com', 'Hanoi', '$2a$10$zgJgPl51rJQGl8xlznCKgOGipZjbaPMXiF/Zv/03ri1mA1iN1Z.su', '2024-02-21 09:00:03', '2025-11-06 02:33:11', 1, '2003-11-12 00:00:00.000000', 0, 0, 2, NULL, NULL),
-(18, 'Truong Quang Lap', '0854768836', 'secroramot123@gmail.com', 'lap', '$2a$10$vagQjcnWTqYMU8mxtWsl.uF8DY3te0JzO6ObqVMkA9TfdMBa1mZEi', '2025-06-09 19:33:13', '2025-11-06 03:10:11', 1, '2003-10-26 00:00:00.000000', 0, 0, 1, NULL, NULL),
+(18, 'Truong Quang Lap', '0854768836', 'secroramot123@gmail.com', 'lap', '$2a$10$vagQjcnWTqYMU8mxtWsl.uF8DY3te0JzO6ObqVMkA9TfdMBa1mZEi', '2025-06-09 19:33:13', '2025-11-06 14:44:05', 1, '2003-10-26 00:00:00.000000', 0, 0, 1, NULL, NULL),
 (19, 'Lap Truong Quang', '0975050669', 'lapduynh11@gmail.com', 'addsadasdasd', '$2a$10$Mx7VmM5VdSMRgR33Z2xGiuKkys1L6a1lSoLSxZ1nuSAG5aZjFFc5q', '2025-11-05 19:52:01', '2025-11-05 20:00:43', 1, '2025-11-05 19:51:32.495000', 0, 0, 3, NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `vouchers`
+-- Table structure for table `vouchers`
 --
 
 CREATE TABLE `vouchers` (
@@ -552,17 +597,17 @@ CREATE TABLE `vouchers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `vouchers`
+-- Dumping data for table `vouchers`
 --
 
 INSERT INTO `vouchers` (`id`, `code`, `name`, `description`, `discount_percentage`, `min_order_value`, `max_discount_amount`, `quantity`, `remaining_quantity`, `valid_from`, `valid_to`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'SALE66', 'Sale 6/6', 'Giảm giá nhân dịp 6/6', 20, 500000, 100000, 100, 100, '2024-05-31 17:00:00', '2026-06-30 16:59:00', 1, '2025-06-09 18:19:46', '2025-11-05 18:10:47'),
-(11, 'SAMSUNG', 'Sản phẩm SAMSUNG', '', 10, 1, NULL, 2, 1, '2025-11-05 19:14:32', '2025-12-05 19:14:32', 1, '2025-11-06 02:14:53', '2025-11-06 02:15:13');
+(11, 'SAMSUNG', 'Sản phẩm SAMSUNG', '', 10, 1, NULL, 2, 0, '2025-11-05 19:14:32', '2025-12-05 19:14:32', 1, '2025-11-06 02:14:53', '2025-11-06 14:45:15');
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `voucher_usage`
+-- Table structure for table `voucher_usage`
 --
 
 CREATE TABLE `voucher_usage` (
@@ -575,18 +620,19 @@ CREATE TABLE `voucher_usage` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Đang đổ dữ liệu cho bảng `voucher_usage`
+-- Dumping data for table `voucher_usage`
 --
 
 INSERT INTO `voucher_usage` (`id`, `voucher_id`, `order_id`, `user_id`, `discount_amount`, `used_at`) VALUES
-(3, 11, 94, 18, 380000, '2025-11-06 02:15:09');
+(3, 11, 94, 18, 380000, '2025-11-06 02:15:09'),
+(4, 11, 95, 18, 850000, '2025-11-06 14:45:09');
 
 --
--- Chỉ mục cho các bảng đã đổ
+-- Indexes for dumped tables
 --
 
 --
--- Chỉ mục cho bảng `banners`
+-- Indexes for table `banners`
 --
 ALTER TABLE `banners`
   ADD PRIMARY KEY (`id`),
@@ -595,7 +641,7 @@ ALTER TABLE `banners`
   ADD KEY `idx_date_range` (`start_date`,`end_date`);
 
 --
--- Chỉ mục cho bảng `carts`
+-- Indexes for table `carts`
 --
 ALTER TABLE `carts`
   ADD PRIMARY KEY (`id`),
@@ -603,21 +649,23 @@ ALTER TABLE `carts`
   ADD KEY `FK__products` (`product_id`);
 
 --
--- Chỉ mục cho bảng `categories`
+-- Indexes for table `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `chat_conversations`
+-- Indexes for table `chat_conversations`
 --
 ALTER TABLE `chat_conversations`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_conv_customer` (`customer_id`),
-  ADD KEY `idx_conv_staff` (`staff_id`);
+  ADD KEY `idx_conv_staff` (`staff_id`),
+  ADD KEY `idx_conv_customer_staff` (`customer_id`,`staff_id`,`is_closed`),
+  ADD KEY `idx_conv_guest_session` (`guest_session_id`,`is_closed`);
 
 --
--- Chỉ mục cho bảng `chat_messages`
+-- Indexes for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
   ADD PRIMARY KEY (`id`),
@@ -628,17 +676,20 @@ ALTER TABLE `chat_messages`
   ADD KEY `idx_is_closed` (`is_closed`),
   ADD KEY `idx_closed_by` (`closed_by`),
   ADD KEY `idx_guest_session` (`guest_session_id`),
-  ADD KEY `idx_msg_conversation` (`conversation_id`);
+  ADD KEY `idx_msg_conversation` (`conversation_id`),
+  ADD KEY `idx_msg_conversation_created` (`conversation_id`,`created_at`),
+  ADD KEY `idx_msg_receiver_unread` (`receiver_id`,`is_read`),
+  ADD KEY `idx_msg_guest_session` (`guest_session_id`);
 
 --
--- Chỉ mục cho bảng `lock_features`
+-- Indexes for table `lock_features`
 --
 ALTER TABLE `lock_features`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_is_active` (`is_active`);
 
 --
--- Chỉ mục cho bảng `news`
+-- Indexes for table `news`
 --
 ALTER TABLE `news`
   ADD PRIMARY KEY (`id`),
@@ -647,7 +698,7 @@ ALTER TABLE `news`
   ADD KEY `idx_published_at` (`published_at`);
 
 --
--- Chỉ mục cho bảng `orders`
+-- Indexes for table `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
@@ -656,7 +707,7 @@ ALTER TABLE `orders`
   ADD KEY `idx_orders_payment_intent_id` (`payment_intent_id`);
 
 --
--- Chỉ mục cho bảng `order_details`
+-- Indexes for table `order_details`
 --
 ALTER TABLE `order_details`
   ADD PRIMARY KEY (`id`),
@@ -664,14 +715,14 @@ ALTER TABLE `order_details`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Chỉ mục cho bảng `products`
+-- Indexes for table `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
   ADD KEY `category_id` (`category_id`);
 
 --
--- Chỉ mục cho bảng `product_features`
+-- Indexes for table `product_features`
 --
 ALTER TABLE `product_features`
   ADD PRIMARY KEY (`id`),
@@ -680,14 +731,14 @@ ALTER TABLE `product_features`
   ADD KEY `created_at` (`created_at`);
 
 --
--- Chỉ mục cho bảng `product_images`
+-- Indexes for table `product_images`
 --
 ALTER TABLE `product_images`
   ADD PRIMARY KEY (`id`),
   ADD KEY `product_id` (`product_id`);
 
 --
--- Chỉ mục cho bảng `return_requests`
+-- Indexes for table `return_requests`
 --
 ALTER TABLE `return_requests`
   ADD PRIMARY KEY (`id`),
@@ -695,7 +746,7 @@ ALTER TABLE `return_requests`
   ADD KEY `idx_return_requests_status` (`status`);
 
 --
--- Chỉ mục cho bảng `reviews`
+-- Indexes for table `reviews`
 --
 ALTER TABLE `reviews`
   ADD PRIMARY KEY (`id`),
@@ -705,15 +756,33 @@ ALTER TABLE `reviews`
   ADD KEY `idx_staff_reply_by` (`staff_reply_by`);
 
 --
--- Chỉ mục cho bảng `roles`
+-- Indexes for table `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`);
 
--- (Bỏ qua vì đã tạo PRIMARY KEY/UNIQUE/KEY trong CREATE TABLE `users` ở trên)
+--
+-- Indexes for table `social_accounts`
+--
+ALTER TABLE `social_accounts`
+  ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `vouchers`
+-- Indexes for table `tokens`
+--
+ALTER TABLE `tokens`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `role_id` (`role_id`);
+
+--
+-- Indexes for table `vouchers`
 --
 ALTER TABLE `vouchers`
   ADD PRIMARY KEY (`id`),
@@ -722,7 +791,7 @@ ALTER TABLE `vouchers`
   ADD KEY `idx_valid_dates` (`valid_from`,`valid_to`);
 
 --
--- Chỉ mục cho bảng `voucher_usage`
+-- Indexes for table `voucher_usage`
 --
 ALTER TABLE `voucher_usage`
   ADD PRIMARY KEY (`id`),
@@ -731,175 +800,187 @@ ALTER TABLE `voucher_usage`
   ADD KEY `user_id` (`user_id`);
 
 --
--- AUTO_INCREMENT cho các bảng đã đổ
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT cho bảng `banners`
+-- AUTO_INCREMENT for table `banners`
 --
 ALTER TABLE `banners`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `carts`
+-- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
--- AUTO_INCREMENT cho bảng `categories`
+-- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT cho bảng `chat_conversations`
+-- AUTO_INCREMENT for table `chat_conversations`
 --
 ALTER TABLE `chat_conversations`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT cho bảng `chat_messages`
+-- AUTO_INCREMENT for table `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
--- AUTO_INCREMENT cho bảng `lock_features`
+-- AUTO_INCREMENT for table `lock_features`
 --
 ALTER TABLE `lock_features`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT cho bảng `news`
+-- AUTO_INCREMENT for table `news`
 --
 ALTER TABLE `news`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
--- AUTO_INCREMENT cho bảng `orders`
+-- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
--- AUTO_INCREMENT cho bảng `order_details`
+-- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=128;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=129;
 
 --
--- AUTO_INCREMENT cho bảng `products`
+-- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5789;
 
 --
--- AUTO_INCREMENT cho bảng `product_features`
+-- AUTO_INCREMENT for table `product_features`
 --
 ALTER TABLE `product_features`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT cho bảng `product_images`
+-- AUTO_INCREMENT for table `product_images`
 --
 ALTER TABLE `product_images`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=140;
 
 --
--- AUTO_INCREMENT cho bảng `return_requests`
+-- AUTO_INCREMENT for table `return_requests`
 --
 ALTER TABLE `return_requests`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT cho bảng `reviews`
+-- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
   MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT cho bảng `roles`
+-- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
--- (Bỏ qua vì `users.id` đã AUTO_INCREMENT trong CREATE TABLE)
+--
+-- AUTO_INCREMENT for table `social_accounts`
+--
+ALTER TABLE `social_accounts`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `vouchers`
+-- AUTO_INCREMENT for table `tokens`
+--
+ALTER TABLE `tokens`
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `vouchers`
 --
 ALTER TABLE `vouchers`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT cho bảng `voucher_usage`
+-- AUTO_INCREMENT for table `voucher_usage`
 --
 ALTER TABLE `voucher_usage`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- Ràng buộc đối với các bảng kết xuất
+-- Constraints for dumped tables
 --
 
 --
--- Ràng buộc cho bảng `carts`
+-- Constraints for table `carts`
 --
--- Dọn dữ liệu mồ côi trước khi thêm FK (user_id không tồn tại trong users)
-UPDATE `carts` c
-LEFT JOIN `users` u ON c.`user_id` = u.`id`
-SET c.`user_id` = NULL
-WHERE c.`user_id` IS NOT NULL AND u.`id` IS NULL;
-
 ALTER TABLE `carts`
   ADD CONSTRAINT `FK__products` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   ADD CONSTRAINT `FK__users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
--- (Bỏ qua: các FK cho `chat_conversations` đã được thêm sau khi `users` có index id)
-
--- (Bỏ qua: dùng các FK mới `fk_msg_sender`, `fk_msg_receiver`, `fk_msg_conv` đã thêm ở phần trên; cột `closed_by` đã bị loại bỏ trong V2)
+--
+-- Constraints for table `chat_messages`
+--
+ALTER TABLE `chat_messages`
+  ADD CONSTRAINT `FKqgkanrr90j46564w4ww63jcna` FOREIGN KEY (`conversation_id`) REFERENCES `chat_conversations` (`id`);
 
 --
--- Ràng buộc cho bảng `orders`
+-- Constraints for table `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `orders_voucher_fk` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`);
 
 --
--- Ràng buộc cho bảng `order_details`
+-- Constraints for table `order_details`
 --
 ALTER TABLE `order_details`
   ADD CONSTRAINT `order_details_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
   ADD CONSTRAINT `order_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
--- Ràng buộc cho bảng `products`
+-- Constraints for table `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
 
 --
--- Ràng buộc cho bảng `product_features`
+-- Constraints for table `product_features`
 --
 ALTER TABLE `product_features`
   ADD CONSTRAINT `product_features_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `product_features_ibfk_2` FOREIGN KEY (`feature_id`) REFERENCES `lock_features` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `product_images`
+-- Constraints for table `product_images`
 --
 ALTER TABLE `product_images`
   ADD CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `return_requests`
+-- Constraints for table `return_requests`
 --
 ALTER TABLE `return_requests`
   ADD CONSTRAINT `return_requests_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`);
 
 --
--- Ràng buộc cho bảng `reviews`
+-- Constraints for table `reviews`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `fk_review_staff` FOREIGN KEY (`staff_reply_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
@@ -907,13 +988,13 @@ ALTER TABLE `reviews`
   ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Ràng buộc cho bảng `users`
+-- Constraints for table `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`);
 
 --
--- Ràng buộc cho bảng `voucher_usage`
+-- Constraints for table `voucher_usage`
 --
 ALTER TABLE `voucher_usage`
   ADD CONSTRAINT `voucher_usage_ibfk_1` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`),
