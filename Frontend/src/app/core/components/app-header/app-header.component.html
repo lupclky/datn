@@ -11,52 +11,59 @@
     </div>
 
     <!-- Center Section: Search -->
-    <div class="header-search">
-      <div class="search-container">
-        <div class="search-input-wrapper">
-          <input 
-            [(ngModel)]="searchValue" 
-            (input)="onSearchInput($event)"
-            (keydown.enter)="sendContentSearch()"
-            (focus)="showSuggestions = true"
-            (blur)="hideSuggestions()"
-            type="text" 
-            placeholder="Tìm kiếm sản phẩm..." 
-            class="search-input"
-          />
-          <button (click)="sendContentSearch()" class="search-btn">
-            <i class="pi pi-search"></i>
-          </button>
-        </div>
-        
-        <!-- Search Suggestions -->
-        <div class="search-suggestions" *ngIf="showSuggestions && searchSuggestions.length > 0">
-          <div 
-            class="suggestion-item" 
-            *ngFor="let product of searchSuggestions"
-            (mousedown)="selectProduct(product)"
-          >
-            <img [src]="getProductImageUrl(product)" 
-                 [alt]="product.name" 
-                 class="suggestion-image"
-                 (error)="$any($event.target).src = 'assets/images/no-image.png'">
-            <div class="suggestion-info">
-              <div class="suggestion-name">{{ product.name }}</div>
-              <div class="suggestion-price">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</div>
+    <div class="header-search-container" [class.mobile-active]="isMobileSearchActive">
+      <div class="header-search">
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <input 
+              [(ngModel)]="searchValue" 
+              (input)="onSearchInput($event)"
+              (keydown.enter)="sendContentSearch()"
+              (focus)="showSuggestions = true"
+              (blur)="hideSuggestions()"
+              type="text" 
+              placeholder="Tìm kiếm sản phẩm..." 
+              class="search-input"
+            />
+            <button (click)="sendContentSearch()" class="search-btn">
+              <i class="pi pi-search"></i>
+            </button>
+          </div>
+          
+          <!-- Search Suggestions -->
+          <div class="search-suggestions" *ngIf="showSuggestions && searchSuggestions.length > 0">
+            <div 
+              class="suggestion-item" 
+              *ngFor="let product of searchSuggestions"
+              (mousedown)="selectProduct(product)"
+            >
+              <img [src]="getProductImageUrl(product)" 
+                   [alt]="product.name" 
+                   class="suggestion-image"
+                   (error)="$any($event.target).src = 'assets/images/no-image.png'">
+              <div class="suggestion-info">
+                <div class="suggestion-name">{{ product.name }}</div>
+                <div class="suggestion-price">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</div>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div class="search-suggestions" *ngIf="showSuggestions && searchValue.length > 0 && searchSuggestions.length === 0">
-          <div class="no-results">Không tìm thấy sản phẩm nào</div>
+          
+          <div class="search-suggestions" *ngIf="showSuggestions && searchValue.length > 0 && searchSuggestions.length === 0">
+            <div class="no-results">Không tìm thấy sản phẩm nào</div>
+          </div>
         </div>
       </div>
+      <button class="mobile-search-close" *ngIf="isMobileSearchActive" (click)="isMobileSearchActive = false">
+        <i class="pi pi-times"></i>
+      </button>
     </div>
 
     <!-- Right Section: User & Cart -->
     <div class="header-right">
 
-      
+      <button class="mobile-search-trigger" (click)="isMobileSearchActive = true">
+        <i class="pi pi-search"></i>
+      </button>
 
       <!-- User Section -->
       @if(token == null) {

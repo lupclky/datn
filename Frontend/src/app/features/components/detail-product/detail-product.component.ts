@@ -36,7 +36,8 @@ import { RatingModule } from 'primeng/rating';
 import { TooltipModule } from 'primeng/tooltip';
 import { LockFeatureService } from '../../../core/services/lock-feature.service';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { QuillModule } from 'ngx-quill';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import * as ClassicEditorBuild from '@ckeditor/ckeditor5-build-classic';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AiService } from '../../../core/services/ai.service';
 
@@ -63,7 +64,7 @@ import { AiService } from '../../../core/services/ai.service';
     RatingModule,
     TooltipModule,
     MultiSelectModule,
-    QuillModule,
+    CKEditorModule,
     DialogModule
   ],
   templateUrl: './detail-product.component.html',
@@ -105,18 +106,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public isDescriptionExpanded: boolean = false;
   public showExpandToggle: boolean = false;
 
-  // Quill editor configuration
-  quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'align': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
-    ]
-  };
+  public Editor: any = ClassicEditorBuild;
 
   constructor(
     private readonly fb: FormBuilder,

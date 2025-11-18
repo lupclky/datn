@@ -39,6 +39,7 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   isLoading: boolean = false;
   isOpen: boolean = false;
   currentUserId: number = 0;
+  isAuthenticated: boolean = false;
   private shouldScroll = false;
   selectedFile: File | null = null;
   filePreview: string | null = null;
@@ -54,12 +55,21 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
     if (typeof localStorage !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token) {
+        this.isAuthenticated = true;
         this.userService.getInforUser(token).pipe(
           tap(user => {
             this.currentUserId = user.id || 0;
           }),
+          catchError(err => {
+            console.error('Error fetching user info for chat:', err);
+            this.isAuthenticated = false;
+            this.currentUserId = 0;
+            return of(null);
+          }),
           takeUntil(this.destroyed$)
         ).subscribe();
+      } else {
+        this.isAuthenticated = false;
       }
     }
   }
@@ -76,6 +86,37 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   toggleChat(): void {
+    if (!this.isAuthenticated) {
+      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
+        return;
+      }
+
+      this.userService.getInforUser(token).pipe(
+        tap(user => {
+          this.currentUserId = user.id || 0;
+          this.isAuthenticated = !!this.currentUserId;
+
+          if (this.isAuthenticated) {
+            this.isOpen = true;
+            this.loadMessages();
+          } else {
+            this.toastService.warn('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
+          }
+        }),
+        catchError(err => {
+          console.error('Error verifying user before opening chat:', err);
+          this.isAuthenticated = false;
+          this.currentUserId = 0;
+          this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
+          return of(null);
+        }),
+        takeUntil(this.destroyed$)
+      ).subscribe();
+      return;
+    }
+
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
       this.loadMessages();
@@ -83,14 +124,28 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   loadMessages(): void {
+    if (!this.isAuthenticated) {
+      return;
+    }
+
     if (!this.currentUserId) {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        this.isAuthenticated = false;
+        return;
+      }
       
       this.userService.getInforUser(token).pipe(
         tap(user => {
           this.currentUserId = user.id || 0;
+          this.isAuthenticated = !!this.currentUserId;
           this.loadMessagesInternal();
+        }),
+        catchError(err => {
+          console.error('Error refreshing user info for chat:', err);
+          this.isAuthenticated = false;
+          this.currentUserId = 0;
+          return of(null);
         }),
         takeUntil(this.destroyed$)
       ).subscribe();
@@ -134,6 +189,11 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   sendMessage(): void {
+    if (!this.isAuthenticated) {
+      this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
+      return;
+    }
+
     if ((!this.newMessage.trim() && !this.selectedFile)) {
       return;
     }
@@ -162,6 +222,11 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   onFileSelected(event: Event): void {
+    if (!this.isAuthenticated) {
+      this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
@@ -193,6 +258,11 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   sendFileMessage(): void {
+    if (!this.isAuthenticated) {
+      this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
+      return;
+    }
+
     if (!this.selectedFile) return;
 
     const formData = new FormData();

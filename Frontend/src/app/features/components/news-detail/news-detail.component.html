@@ -7,9 +7,9 @@
       </div>
     </div>
 
-    <!-- News Content -->
-    <div *ngIf="!isLoading && news" class="row">
-      <div class="col-lg-10 mx-auto">
+    <!-- News Content + Sidebar -->
+    <div *ngIf="!isLoading && news" class="row g-5 news-layout">
+      <div class="col-lg-8">
         <!-- Back Button -->
         <button class="btn-back mb-4" (click)="goBack()">
           <i class="pi pi-arrow-left"></i> Quay lại
@@ -17,40 +17,48 @@
 
         <!-- News Article -->
         <article class="news-article">
-          <!-- Headline -->
-          <h1 class="news-headline">{{ news.title }}</h1>
+          <header class="news-header-block">
+            <p class="news-breadcrumb mb-2">
+              <span>{{ news.category || 'Tin tức' }}</span>
+              <span class="bullet">•</span>
+              <span>{{ news?.created_at ? formatDate(news.created_at) : '' }}</span>
+            </p>
+
+            <h1 class="news-headline">{{ news.title }}</h1>
+            
+            <p *ngIf="news.summary" class="news-lead">{{ news.summary }}</p>
+          </header>
           
-          <!-- Lead Paragraph -->
-          <p *ngIf="news.summary" class="news-lead">{{ news.summary }}</p>
-          
-          <!-- Content -->
-          <div class="news-content" [innerHTML]="getSafeHtml(news.content)">
-          </div>
+          <div class="news-content" [innerHTML]="getSafeHtml(news.content)"></div>
         </article>
       </div>
-    </div>
 
-    <!-- Related News -->
-    <div *ngIf="!isLoading && relatedNews.length > 0" class="row mt-5">
-      <div class="col-12">
-        <h3 class="mb-4">Bài viết liên quan</h3>
-      </div>
-      <div *ngFor="let relNews of relatedNews" class="col-md-4 mb-4">
-        <div class="card h-100" style="cursor: pointer;" (click)="viewRelatedNews(relNews.id)">
-          <img [src]="getImageUrl(relNews.featured_image)" 
-               [alt]="relNews.title" 
-               class="card-img-top"
-               style="height: 200px; object-fit: cover;">
-          <div class="card-body">
-            <h5 class="card-title">{{ relNews.title }}</h5>
-            <p class="card-text text-muted">
-              {{ relNews.summary ? relNews.summary.substring(0, 100) : '' }}{{ relNews.summary && relNews.summary.length > 100 ? '...' : '' }}
-            </p>
-            <small class="text-muted">
-              <i class="pi pi-eye"></i> {{ relNews.views }} lượt xem
-            </small>
+      <div class="col-lg-4">
+        <aside class="news-sidebar">
+          <div class="sidebar-header">
+            <h4>Tin tức khác</h4>
           </div>
-        </div>
+
+          <ng-container *ngIf="relatedNews.length > 0; else noRelatedNews">
+            <div class="sidebar-item" *ngFor="let relNews of relatedNews" (click)="viewRelatedNews(relNews.id)">
+              <div class="sidebar-thumb" [ngClass]="{'placeholder': !relNews.featured_image}">
+                <img *ngIf="relNews.featured_image" 
+                     [src]="getImageUrl(relNews.featured_image)" 
+                     [alt]="relNews.title">
+                <span *ngIf="!relNews.featured_image">{{ relNews.title ? relNews.title.charAt(0) : 'N' }}</span>
+              </div>
+              <div class="sidebar-info">
+                <h5>{{ relNews.title }}</h5>
+                <p>{{ relNews.summary ? (relNews.summary.length > 110 ? (relNews.summary | slice:0:110) + '...' : relNews.summary) : 'Xem chi tiết' }}</p>
+                <small><i class="pi pi-eye"></i> {{ relNews.views }} lượt xem</small>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #noRelatedNews>
+            <p class="text-muted mb-0">Chưa có bài viết liên quan.</p>
+          </ng-template>
+        </aside>
       </div>
     </div>
 

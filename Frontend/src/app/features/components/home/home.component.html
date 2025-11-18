@@ -149,15 +149,16 @@
                       </div>
                       <div class="product-info">
                         <h5 class="product-title">{{product.name}}</h5>
-                        <div *ngIf="product.averageRating && product.averageRating > 0" class="product-rating">
-                          <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
-                          <span class="rating-count">({{product.totalReviews}})</span>
+                        <div class="product-rating">
+                          <ng-container *ngFor="let i of [].constructor(5); let index = index">
+                            <i class="pi" [ngClass]="{'pi-star-fill': index < (product.averageRating || 0), 'pi-star': index >= (product.averageRating || 0)}"></i>
+                          </ng-container>
+                          <span class="review-count">({{product.totalReviews || 0}})</span>
                         </div>
                         <div class="product-price">
                           <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
                           <span *ngIf="product.discount > 0" class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
                         </div>
-                        <button class="btn btn-primary btn-sm mt-2">Chi tiết</button>
                       </div>
                     </div>
                   </div>
@@ -187,19 +188,18 @@
                       </div>
                       <div class="product-info">
                         <h5 class="product-title">{{product.name}}</h5>
-                        @if(product.averageRating && product.averageRating > 0) {
-                          <div class="product-rating">
-                            <p-rating [(ngModel)]="product.averageRating" [readonly]="true" [cancel]="false"></p-rating>
-                            <span class="rating-count">({{product.totalReviews}})</span>
-                          </div>
-                        }
+                        <div class="product-rating">
+                          <ng-container *ngFor="let i of [].constructor(5); let index = index">
+                            <i class="pi" [ngClass]="{'pi-star-fill': index < (product.averageRating || 0), 'pi-star': index >= (product.averageRating || 0)}"></i>
+                          </ng-container>
+                          <span class="review-count">({{product.totalReviews || 0}})</span>
+                        </div>
                         <div class="product-price">
                           <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
                           @if(product.discount > 0) {
                             <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
                           }
                         </div>
-                        <button class="btn btn-primary btn-sm mt-2">Chi tiết</button>
                       </div>
                     </div>
                   </div>

@@ -182,7 +182,12 @@ public class ProductService implements IProductService {
         List<ProductResponse> productResponses = new ArrayList<>();
         List<Product> products = productRepository.getProductsByPrice(minPrice, maxPrice);
         for (Product product : products) {
-            productResponses.add(ProductResponse.fromProduct(product));
+            ProductResponse response = ProductResponse.fromProduct(product);
+            Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
+            Long totalReviews = reviewRepository.countByProductId(product.getId());
+            response.setAverageRating(avgRating != null ? avgRating : 0.0);
+            response.setTotalReviews(totalReviews);
+            productResponses.add(response);
         }
         return ListProductResponse.builder()
                 .products(productResponses)
@@ -195,7 +200,12 @@ public class ProductService implements IProductService {
         List<ProductResponse> productResponses = new ArrayList<>();
         List<Product> products = productRepository.getProductsByKeyword(keyword);
         for (Product product : products) {
-            productResponses.add(ProductResponse.fromProduct(product));
+            ProductResponse response = ProductResponse.fromProduct(product);
+            Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
+            Long totalReviews = reviewRepository.countByProductId(product.getId());
+            response.setAverageRating(avgRating != null ? avgRating : 0.0);
+            response.setTotalReviews(totalReviews);
+            productResponses.add(response);
         }
         return ListProductResponse.builder()
                 .products(productResponses)
@@ -208,7 +218,12 @@ public class ProductService implements IProductService {
         List<ProductResponse> productResponses = new ArrayList<>();
         List<Product> products = productRepository.getProductsByCategory(categoryId);
         for (Product product : products) {
-            productResponses.add(ProductResponse.fromProduct(product));
+            ProductResponse response = ProductResponse.fromProduct(product);
+            Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
+            Long totalReviews = reviewRepository.countByProductId(product.getId());
+            response.setAverageRating(avgRating != null ? avgRating : 0.0);
+            response.setTotalReviews(totalReviews);
+            productResponses.add(response);
         }
         return ListProductResponse.builder()
                 .products(productResponses)
@@ -238,7 +253,12 @@ public class ProductService implements IProductService {
         int cnt = 0;
         for (Product p : products) {
             if (!Objects.equals(p.getId(), productId)) {
-                productResponses.add(ProductResponse.fromProduct(p));
+                ProductResponse response = ProductResponse.fromProduct(p);
+                Double avgRating = reviewRepository.getAverageRatingByProductId(p.getId());
+                Long totalReviews = reviewRepository.countByProductId(p.getId());
+                response.setAverageRating(avgRating != null ? avgRating : 0.0);
+                response.setTotalReviews(totalReviews);
+                productResponses.add(response);
                 cnt++;
             }
             if (cnt == 4)

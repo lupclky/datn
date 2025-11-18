@@ -29,7 +29,7 @@ import { ProductDto } from '../../dtos/product.dto';
 import { AllProductDto } from '../../dtos/AllProduct.dto';
 
 @Component({
-  selector: 'app-app-header',
+  selector: 'app-header',
   standalone: true,
   imports: [
     InputTextModule,
@@ -69,6 +69,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   public showSuggestions: boolean = false;
   private searchSubject = new Subject<string>();
   public isMenuOpen = false;
+  public isMobileSearchActive = false;
 
   constructor(
     private userService : UserService,
@@ -188,6 +189,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   sendContentSearch(){
     this.detailProductService.setContent(this.searchValue);
     this.hideSuggestions();
+    this.isMobileSearchActive = false; // Close mobile search after search
   }
 
   // Search suggestions methods

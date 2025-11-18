@@ -47,9 +47,7 @@ export class NewsDetailComponent implements OnInit {
         this.isLoading = false;
         this.cdr.markForCheck();
         // Load related news
-        if (news.category) {
-          this.loadRelatedNews(news.category, id);
-        }
+        this.loadSidebarNews(news.category || null, id);
       },
       error: (error) => {
         console.error('Error loading news detail:', error);
@@ -60,15 +58,34 @@ export class NewsDetailComponent implements OnInit {
     });
   }
 
-  loadRelatedNews(category: string, excludeId: number): void {
-    this.newsService.getNewsByCategory(category, 0, 3).subscribe({
+  loadSidebarNews(category: string | null, excludeId: number, isFallback = false): void {
+    const source$ = category 
+      ? this.newsService.getNewsByCategory(category, 0, 5)
+      : this.newsService.getPublishedNews(0, 5);
+
+    source$.subscribe({
       next: (response) => {
-        this.relatedNews = response.news_list.filter(n => n.id !== excludeId);
+        const filtered = response.news_list.filter(n => n.id !== excludeId);
+
+        if (filtered.length === 0 && category) {
+          // Fallback to latest published news when no related items in category
+          this.loadSidebarNews(null, excludeId, true);
+          return;
+        }
+
+        // If still empty after fallback, keep empty array to show placeholder
+        this.relatedNews = filtered;
         this.cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading related news:', error);
-        this.cdr.markForCheck();
+        console.error('Error loading sidebar news:', error);
+        if (category && !isFallback) {
+          // fallback to general news on error
+          this.loadSidebarNews(null, excludeId, true);
+        } else {
+          this.relatedNews = [];
+          this.cdr.markForCheck();
+        }
       }
     });
   }

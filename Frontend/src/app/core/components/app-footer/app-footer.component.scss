@@ -1,0 +1,28 @@
+.footer-column {
+  padding: 2rem;
+}
+
+.footer-policy-list {
+  list-style: none;
+  padding: 0;
+  li {
+    margin-bottom: 0.75rem;
+    a {
+      color: #ccc;
+      text-decoration: none;
+      &:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.footer-address-container {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+
+
+

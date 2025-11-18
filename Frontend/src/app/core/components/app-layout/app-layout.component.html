@@ -1,13 +1,13 @@
 <div class="layout-main">
   <div class="layout-header-section" [class.header-hidden]="isHeaderHidden">
-    <app-app-header></app-app-header>
+    <app-header></app-header>
   </div>
   
   <div class="layout-main-content">
     <router-outlet></router-outlet>
   </div>
   <div class="layout-footer">
-    <app-app-footer></app-app-footer>
+    <app-footer></app-footer>
   </div>
   <!-- KVK Intelligence - chỉ hiển thị cho user thông thường -->
   @if(roleId == 1 || roleId == 0) {

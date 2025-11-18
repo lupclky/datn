@@ -1406,11 +1406,12 @@
         }
       }
 
-      .article-content {
+        .article-content {
         font-size: 1.1rem;
         line-height: 1.8;
         color: #495057;
         margin-bottom: 3rem;
+          overflow-x: auto;
 
         &.collapsed {
           max-height: 420px; // roughly ~6-8 paragraphs depending on content
@@ -1533,11 +1534,13 @@
             width: 100%;
             border-collapse: collapse;
             margin: 2rem 0;
+            border: 1px solid #dee2e6;
 
             th, td {
               padding: 1rem;
               border: 1px solid #dee2e6;
               text-align: left;
+              vertical-align: top;
             }
 
             th {
@@ -1546,8 +1549,8 @@
               color: #2c3e50;
             }
 
-            tr:hover {
-              background: #f8f9fa;
+            tr:nth-child(even) {
+              background: #fafafa;
             }
           }
         }

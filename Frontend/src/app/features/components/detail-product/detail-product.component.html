@@ -588,12 +588,7 @@
                     <span>KVK Intelligence đang tạo mô tả chuyên nghiệp cho sản phẩm...</span>
                   </div>
 
-                  <quill-editor 
-                    formControlName="description"
-                    [modules]="quillModules"
-                    placeholder="Nhập mô tả chi tiết về sản phẩm hoặc sử dụng KVK Intelligence để tự động tạo..."
-                    [styles]="{'min-height': '400px'}">
-                  </quill-editor>
+                  <ckeditor [editor]="Editor" formControlName="description"></ckeditor>
                 </div>
   
                 <div class="field">

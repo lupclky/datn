@@ -22,8 +22,9 @@ export class NewsComponent implements OnInit {
   searchKeyword: string = '';
   currentPage: number = 0;
   totalPages: number = 0;
-  pageSize: number = 6;
+  pageSize: number = 9; // Tăng pageSize để hiển thị nhiều tin hơn
   isLoading: boolean = false;
+  currentView: 'grid' | 'table' = 'grid'; // Thêm biến để quản lý view
   private searchTimeout: any;
 
   constructor(
@@ -35,6 +36,11 @@ export class NewsComponent implements OnInit {
   ngOnInit(): void {
     this.loadPublishedNews();
     this.loadLatestNews();
+  }
+
+  // Thêm hàm để thay đổi view
+  setView(view: 'grid' | 'table'): void {
+    this.currentView = view;
   }
 
   loadPublishedNews(): void {
@@ -102,11 +108,13 @@ export class NewsComponent implements OnInit {
     this.router.navigate(['/news', newsId]);
   }
 
-  formatDate(dateString: string): { day: string, month: string } {
+  formatDate(dateString: string): { day: string, month: string, year: string, fullDate: string } {
     const date = new Date(dateString);
     return {
       day: date.getDate().toString().padStart(2, '0'),
-      month: (date.getMonth() + 1).toString()
+      month: (date.getMonth() + 1).toString(),
+      year: date.getFullYear().toString(),
+      fullDate: `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`
     };
   }
 

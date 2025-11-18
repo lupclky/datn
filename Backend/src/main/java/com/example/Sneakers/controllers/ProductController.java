@@ -312,7 +312,12 @@ public class ProductController {
             List<ProductResponse> productResponses = new ArrayList<>();
             List<Product> products = productService.allProducts();
             for (Product product : products) {
-                productResponses.add(ProductResponse.fromProduct(product));
+                ProductResponse response = ProductResponse.fromProduct(product);
+                Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
+                Long totalReviews = reviewRepository.countByProductId(product.getId());
+                response.setAverageRating(avgRating != null ? avgRating : 0.0);
+                response.setTotalReviews(totalReviews);
+                productResponses.add(response);
             }
             return ResponseEntity.ok(ListProductResponse.builder()
                     .products(productResponses)

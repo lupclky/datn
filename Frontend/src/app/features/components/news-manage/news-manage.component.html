@@ -225,66 +225,30 @@
           </div>
           
           <!-- Rich Text Editor for Browser -->
-          <p-editor #editor
-                    *ngIf="isBrowser" 
-                    formControlName="content" 
-                    [style]="{'height':'400px'}">
-            <ng-template pTemplate="header">
-              <span class="ql-formats">
-                <select class="ql-header">
-                  <option value="1">Heading 1</option>
-                  <option value="2">Heading 2</option>
-                  <option value="3">Heading 3</option>
-                  <option selected>Normal</option>
-                </select>
-                <select class="ql-font">
-                  <option selected>Sans Serif</option>
-                  <option value="serif">Serif</option>
-                  <option value="monospace">Monospace</option>
-                </select>
-              </span>
-              <span class="ql-formats">
-                <button class="ql-bold" aria-label="Bold" type="button"></button>
-                <button class="ql-italic" aria-label="Italic" type="button"></button>
-                <button class="ql-underline" aria-label="Underline" type="button"></button>
-                <button class="ql-strike" aria-label="Strike" type="button"></button>
-              </span>
-              <span class="ql-formats">
-                <select class="ql-color"></select>
-                <select class="ql-background"></select>
-              </span>
-              <span class="ql-formats">
-                <button class="ql-list" value="ordered" aria-label="Ordered List" type="button"></button>
-                <button class="ql-list" value="bullet" aria-label="Unordered List" type="button"></button>
-                <select class="ql-align">
-                  <option selected></option>
-                  <option value="center"></option>
-                  <option value="right"></option>
-                  <option value="justify"></option>
-                </select>
-              </span>
-              <span class="ql-formats">
-                <button class="ql-link" aria-label="Insert Link" type="button"></button>
-                <button class="ql-image" aria-label="Insert Image" type="button"></button>
-                <button class="ql-video" aria-label="Insert Video" type="button"></button>
-              </span>
-              <span class="ql-formats">
-                <button class="ql-code-block" aria-label="Insert Code Block" type="button"></button>
-                <button class="ql-blockquote" aria-label="Blockquote" type="button"></button>
-              </span>
-              <span class="ql-formats">
-                <button class="ql-clean" aria-label="Remove Styles" type="button"></button>
-              </span>
+          <ng-container *ngIf="isBrowser; else serverTextarea">
+            <ckeditor *ngIf="Editor; else loadingEditor"
+                      [editor]="Editor"
+                      formControlName="content" 
+                      (ready)="onEditorReady($event)">
+            </ckeditor>
+
+            <ng-template #loadingEditor>
+              <textarea id="content-loading"
+                        class="form-control"
+                        formControlName="content"
+                        rows="10"
+                        placeholder="Đang tải trình soạn thảo..."></textarea>
             </ng-template>
-          </p-editor>
+          </ng-container>
           
           <!-- Fallback textarea for SSR -->
-          <textarea *ngIf="!isBrowser" 
-                    id="content"
-                    class="form-control" 
-                    formControlName="content"
-                    rows="10"
-                    placeholder="Nhập nội dung chi tiết"></textarea>
+          <ng-template #serverTextarea>
+            <textarea id="content"
+                      class="form-control" 
+                      formControlName="content"
+                      rows="10"
+                      placeholder="Nhập nội dung chi tiết"></textarea>
+          </ng-template>
         </div>
       </div>
     </form>

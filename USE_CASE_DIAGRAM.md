@@ -422,3 +422,9 @@ Hệ thống **Locker Korea** bao gồm:
 - **Tính năng nổi bật**: AI Chatbot tư vấn, Vector Search, Thanh toán đa phương thức, Chat hỗ trợ real-time
 
 
+
+
+
+
+
+

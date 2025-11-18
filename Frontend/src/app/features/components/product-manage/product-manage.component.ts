@@ -17,7 +17,8 @@ import { TagModule } from 'primeng/tag';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TooltipModule } from 'primeng/tooltip';
-import { QuillModule } from 'ngx-quill';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import * as ClassicEditorBuild from '@ckeditor/ckeditor5-build-classic';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoriesService } from '../../../core/services/categories.service';
 import { LockFeatureService, LockFeature } from '../../../core/services/lock-feature.service';
@@ -59,7 +60,7 @@ interface ProductUploadReq {
     MultiSelectModule,
     FileUploadModule,
     TooltipModule,
-    QuillModule
+    CKEditorModule
   ],
   providers: [MessageService, ToastService, ConfirmationService],
   templateUrl: './product-manage.component.html',
@@ -88,18 +89,7 @@ export class ProductManageComponent implements OnInit {
   apiImage: string = environment.apiImage;
   isGeneratingDescription: boolean = false;
 
-  // Quill editor configuration
-  quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'align': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
-    ]
-  };
+  public Editor: any = ClassicEditorBuild;
 
   categoriesOptions: any[] = [];
   featuresOptions: any[] = [];
