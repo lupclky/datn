@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+  <uml:Model xmi:id="model_seq_ai" name="LockerKorea_AI_Sequence">
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_seq" name="AI_Chatbot_Sequence">
+      
+      <!-- COLLABORATION: Chat Process -->
+      <packagedElement xmi:type="uml:Collaboration" xmi:id="collab_ai" name="AI_Chat_Collaboration">
+        <ownedAttribute xmi:id="lifeline_user" name="User" />
+        <ownedAttribute xmi:id="lifeline_ui" name="AIChatbot.tsx (UI)" />
+        <ownedAttribute xmi:id="lifeline_ctrl" name="AIChatController" />
+        <ownedAttribute xmi:id="lifeline_svc" name="AIChatService" />
+        <ownedAttribute xmi:id="lifeline_vectordb" name="ChromaVectorDB" />
+        <ownedAttribute xmi:id="lifeline_vertex" name="VertexAI_Gemini" />
+        <ownedAttribute xmi:id="lifeline_repo" name="ProductRepository" />
+      </packagedElement>
+
+      <!-- INTERACTION 1: Product Advice (Text Chat) -->
+      <packagedElement xmi:type="uml:Interaction" xmi:id="seq_text_chat" name="Scenario_1_Product_Advice_Chat">
+        <!-- Lifelines -->
+        <lifeline xmi:id="ll_user" name="User" represents="lifeline_user"/>
+        <lifeline xmi:id="ll_ui" name="AIChatbot.tsx" represents="lifeline_ui"/>
+        <lifeline xmi:id="ll_ctrl" name="AIChatController" represents="lifeline_ctrl"/>
+        <lifeline xmi:id="ll_svc" name="AIChatService" represents="lifeline_svc"/>
+        <lifeline xmi:id="ll_vdb" name="VectorDB" represents="lifeline_vectordb"/>
+        <lifeline xmi:id="ll_repo" name="ProductRepository" represents="lifeline_repo"/>
+
+        <!-- Messages -->
+        <!-- 1. User types message -->
+        <message xmi:id="msg_1" name="1: Nhap cau hoi va gui()" messageSort="synchCall" sendEvent="ev_send_1" receiveEvent="ev_recv_1"/>
+        
+        <!-- 2. UI calls API -->
+        <message xmi:id="msg_2" name="2: POST /api/v1/ai/chat/product-assistant" messageSort="synchCall" sendEvent="ev_send_2" receiveEvent="ev_recv_2"/>
+        
+        <!-- 3. Controller calls Service -->
+        <message xmi:id="msg_3" name="3: getProductAdvice(question)" messageSort="synchCall" sendEvent="ev_send_3" receiveEvent="ev_recv_3"/>
+        
+        <!-- 4. Service searches Vector DB -->
+        <message xmi:id="msg_4" name="4: similaritySearch(question)" messageSort="synchCall" sendEvent="ev_send_4" receiveEvent="ev_recv_4"/>
+        <message xmi:id="msg_5" name="5: return relevant_docs" messageSort="reply" sendEvent="ev_send_5" receiveEvent="ev_recv_5"/>
+        
+        <!-- 6. Service generates answer -->
+        <message xmi:id="msg_6" name="6: generateAnswer(context, question)" messageSort="synchCall" sendEvent="ev_send_6" receiveEvent="ev_recv_6"/>
+        
+        <!-- 7. Return answer -->
+        <message xmi:id="msg_7" name="7: return AI Response" messageSort="reply" sendEvent="ev_send_7" receiveEvent="ev_recv_7"/>
+        <message xmi:id="msg_8" name="8: return ResponseEntity" messageSort="reply" sendEvent="ev_send_8" receiveEvent="ev_recv_8"/>
+        <message xmi:id="msg_9" name="9: Hien thi cau tra loi" messageSort="reply" sendEvent="ev_send_9" receiveEvent="ev_recv_9"/>
+
+        <!-- Fragments/Events mapping (simplified for XMI 2.1 import) -->
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_1" covered="ll_user" message="msg_1"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_1" covered="ll_ui" message="msg_1"/>
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_2" covered="ll_ui" message="msg_2"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_2" covered="ll_ctrl" message="msg_2"/>
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_3" covered="ll_ctrl" message="msg_3"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_3" covered="ll_svc" message="msg_3"/>
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_4" covered="ll_svc" message="msg_4"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_4" covered="ll_vdb" message="msg_4"/>
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_5" covered="ll_vdb" message="msg_5"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_5" covered="ll_svc" message="msg_5"/>
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_6" covered="ll_svc" message="msg_6"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_6" covered="ll_svc" message="msg_6"/> <!-- Self call logic simulation -->
+
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_7" covered="ll_svc" message="msg_7"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_7" covered="ll_ctrl" message="msg_7"/>
+
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_8" covered="ll_ctrl" message="msg_8"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_8" covered="ll_ui" message="msg_8"/>
+
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_send_9" covered="ll_ui" message="msg_9"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_recv_9" covered="ll_user" message="msg_9"/>
+
+      </packagedElement>
+
+      <!-- INTERACTION 2: Image Analysis (Visual Search) -->
+      <packagedElement xmi:type="uml:Interaction" xmi:id="seq_img_chat" name="Scenario_2_Image_Analysis">
+        <lifeline xmi:id="ll_user_2" name="User" represents="lifeline_user"/>
+        <lifeline xmi:id="ll_ui_2" name="AIChatbot.tsx" represents="lifeline_ui"/>
+        <lifeline xmi:id="ll_ctrl_2" name="AIChatController" represents="lifeline_ctrl"/>
+        <lifeline xmi:id="ll_svc_2" name="AIChatService" represents="lifeline_svc"/>
+        <lifeline xmi:id="ll_vertex" name="VertexAI" represents="lifeline_vertex"/>
+        <lifeline xmi:id="ll_repo_2" name="ProductRepository" represents="lifeline_repo"/>
+
+        <!-- Flow -->
+        <message xmi:id="msg_i1" name="1: Upload anh khoa cua va gui()" messageSort="synchCall" sendEvent="ev_s1" receiveEvent="ev_r1"/>
+        <message xmi:id="msg_i2" name="2: POST /api/v1/ai/chat/image (Multipart)" messageSort="synchCall" sendEvent="ev_s2" receiveEvent="ev_r2"/>
+        <message xmi:id="msg_i3" name="3: analyzeImage(imageFile)" messageSort="synchCall" sendEvent="ev_s3" receiveEvent="ev_r3"/>
+        
+        <message xmi:id="msg_i4" name="4: callGeminiVision(imageBytes)" messageSort="synchCall" sendEvent="ev_s4" receiveEvent="ev_r4"/>
+        <message xmi:id="msg_i5" name="5: return image_description & keywords" messageSort="reply" sendEvent="ev_s5" receiveEvent="ev_r5"/>
+        
+        <message xmi:id="msg_i6" name="6: findProductsByKeywords(keywords)" messageSort="synchCall" sendEvent="ev_s6" receiveEvent="ev_r6"/>
+        <message xmi:id="msg_i7" name="7: return List<Product>" messageSort="reply" sendEvent="ev_s7" receiveEvent="ev_r7"/>
+        
+        <message xmi:id="msg_i8" name="8: return Analysis Result + Product Suggestions" messageSort="reply" sendEvent="ev_s8" receiveEvent="ev_r8"/>
+        <message xmi:id="msg_i9" name="9: Hien thi ket qua phan tich" messageSort="reply" sendEvent="ev_s9" receiveEvent="ev_r9"/>
+
+        <!-- Mapping -->
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s1" covered="ll_user_2" message="msg_i1"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r1" covered="ll_ui_2" message="msg_i1"/>
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s2" covered="ll_ui_2" message="msg_i2"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r2" covered="ll_ctrl_2" message="msg_i2"/>
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s3" covered="ll_ctrl_2" message="msg_i3"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r3" covered="ll_svc_2" message="msg_i3"/>
+
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s4" covered="ll_svc_2" message="msg_i4"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r4" covered="ll_vertex" message="msg_i4"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s5" covered="ll_vertex" message="msg_i5"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r5" covered="ll_svc_2" message="msg_i5"/>
+
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s6" covered="ll_svc_2" message="msg_i6"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r6" covered="ll_repo_2" message="msg_i6"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s7" covered="ll_repo_2" message="msg_i7"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r7" covered="ll_svc_2" message="msg_i7"/>
+
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s8" covered="ll_svc_2" message="msg_i8"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r8" covered="ll_ui_2" message="msg_i8"/> <!-- skipping controller return for brevity -->
+        
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_s9" covered="ll_ui_2" message="msg_i9"/>
+        <fragment xmi:type="uml:MessageOccurrenceSpecification" xmi:id="ev_r9" covered="ll_user_2" message="msg_i9"/>
+
+      </packagedElement>
+
+    </packagedElement>
+  </uml:Model>
+</xmi:XMI>
+
+
+
+

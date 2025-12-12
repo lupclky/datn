@@ -1,6 +1,7 @@
 package com.example.Sneakers.utils;
 
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 import java.util.Properties;
@@ -14,9 +15,12 @@ import javax.mail.internet.MimeMessage;
 
 @Component
 public class Email {
-	public static final String from = "ducanh21112003@gmail.com";
-	//Mật khẩu ứng dụng được google cung cấp
-	public static final String password = "ymfudurkopzezdnn";
+	@Value("${spring.mail.username}")
+	private String from;
+
+	@Value("${spring.mail.password}")
+	private String password;
+
 	public boolean sendEmail(String to, String subject,String content) {
 		//Cấu hình các thuôc tính liên quan đến việc gửi mail bằng smtp
 		Properties props = new Properties();

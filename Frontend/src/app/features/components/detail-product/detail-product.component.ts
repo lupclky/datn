@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, Inject, ChangeDetectorRef } from '@angular/core';
 import { BaseComponent } from '../../../core/commonComponent/base.component';
 import { ProductService } from '../../../core/services/product.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -37,9 +37,10 @@ import { TooltipModule } from 'primeng/tooltip';
 import { LockFeatureService } from '../../../core/services/lock-feature.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import * as ClassicEditorBuild from '@ckeditor/ckeditor5-build-classic';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AiService } from '../../../core/services/ai.service';
+import { PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 
 @Component({
@@ -106,7 +107,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public isDescriptionExpanded: boolean = false;
   public showExpandToggle: boolean = false;
 
-  public Editor: any = ClassicEditorBuild;
+  public Editor: any = null;
+  private isBrowser: boolean;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -124,9 +126,12 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     private reviewService: ReviewService,
     private lockFeatureService: LockFeatureService,
     private sanitizer: DomSanitizer,
-    private aiService: AiService
+    private aiService: AiService,
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     super();
+    this.isBrowser = isPlatformBrowser(this.platformId);
     if (typeof localStorage != 'undefined'){
       this.token = localStorage.getItem("token");
       const userInfor = JSON.parse(localStorage.getItem("userInfor") || '{"role_id": "0", "id": "0"}');
@@ -146,6 +151,14 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   }
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      import('@ckeditor/ckeditor5-build-classic').then(editor => {
+        this.Editor = editor.default;
+        this.cdr.markForCheck();
+      }).catch(error => {
+        console.error('Error loading CKEditor:', error);
+      });
+    }
     if (this.token != null){
       this.userService.getInforUser(this.token).pipe(
         filter((userInfo: UserDto) => !!userInfo),

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,7 +18,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TooltipModule } from 'primeng/tooltip';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import * as ClassicEditorBuild from '@ckeditor/ckeditor5-build-classic';
+import { PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoriesService } from '../../../core/services/categories.service';
 import { LockFeatureService, LockFeature } from '../../../core/services/lock-feature.service';
@@ -89,7 +90,8 @@ export class ProductManageComponent implements OnInit {
   apiImage: string = environment.apiImage;
   isGeneratingDescription: boolean = false;
 
-  public Editor: any = ClassicEditorBuild;
+  public Editor: any = null;
+  private isBrowser: boolean;
 
   categoriesOptions: any[] = [];
   featuresOptions: any[] = [];
@@ -121,12 +123,22 @@ export class ProductManageComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private aiService: AiService
+    private aiService: AiService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.initForm();
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      import('@ckeditor/ckeditor5-build-classic').then(editor => {
+        this.Editor = editor.default;
+        this.cdr.markForCheck();
+      }).catch(error => {
+        console.error('Error loading CKEditor:', error);
+      });
+    }
     this.loadProducts();
     this.loadCategories();
     this.loadFeatures();

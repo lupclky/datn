@@ -1,0 +1,72 @@
+@startuml LockerKorea_AI_Sequence
+
+actor User
+boundary "AIChatbot.tsx" as UI
+control "AIChatController" as Controller
+control "AIChatService" as Service
+database "ChromaVectorDB" as VectorDB
+boundary "VertexAI_Gemini" as AI_Model
+database "ProductRepository" as Repo
+
+== Kịch bản 1: Tư vấn sản phẩm (Text Chat) ==
+
+User -> UI: 1. Nhập câu hỏi ("Khóa nào phù hợp cửa gỗ?")
+activate UI
+
+UI -> Controller: 2. POST /api/v1/ai/chat/product-assistant
+activate Controller
+
+Controller -> Service: 3. getProductAdvice(question)
+activate Service
+
+Service -> VectorDB: 4. similaritySearch(question)
+activate VectorDB
+VectorDB --> Service: 5. Trả về danh sách tài liệu liên quan
+deactivate VectorDB
+
+Service -> Service: 6. Xây dựng Prompt (Context + Question)
+Service -> AI_Model: 7. Gửi Prompt tới Gemini Pro
+activate AI_Model
+AI_Model --> Service: 8. Trả về câu trả lời tự nhiên
+deactivate AI_Model
+
+Service --> Controller: 9. Trả về kết quả (Text + Source)
+deactivate Service
+
+Controller --> UI: 10. ResponseEntity (JSON)
+deactivate Controller
+
+UI -> User: 11. Hiển thị câu trả lời tư vấn
+deactivate UI
+
+== Kịch bản 2: Phân tích hình ảnh (Image Analysis) ==
+
+User -> UI: 1. Upload ảnh cửa/khóa và gửi
+activate UI
+
+UI -> Controller: 2. POST /api/v1/ai/chat/image (MultipartFile)
+activate Controller
+
+Controller -> Service: 3. analyzeImage(imageFile)
+activate Service
+
+Service -> AI_Model: 4. Gửi ảnh tới Gemini Pro Vision
+activate AI_Model
+AI_Model --> Service: 5. Trả về mô tả ảnh & từ khóa nhận diện
+deactivate AI_Model
+
+Service -> Repo: 6. Tìm sản phẩm theo từ khóa (findByKeywords)
+activate Repo
+Repo --> Service: 7. Trả về danh sách sản phẩm gợi ý
+deactivate Repo
+
+Service --> Controller: 8. Trả về (AnalysisText + ProductList)
+deactivate Service
+
+Controller --> UI: 9. ResponseEntity (JSON)
+deactivate Controller
+
+UI -> User: 10. Hiển thị phân tích và thẻ sản phẩm gợi ý
+deactivate UI
+
+@enduml

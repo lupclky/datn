@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+  <uml:Model xmi:id="model_1" name="LockerKorea_UseCase_Model">
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_system" name="HeThongLockerKorea">
+      
+      <!-- ACTORS (Merged Roles) -->
+      <packagedElement xmi:type="uml:Actor" xmi:id="actor_customer" name="Khach Hang (Customer + Guest)"/>
+      <packagedElement xmi:type="uml:Actor" xmi:id="actor_admin" name="Quan Tri Vien (Admin + Staff)"/>
+      <packagedElement xmi:type="uml:Actor" xmi:id="actor_ai" name="AI Services"/>
+
+      <!-- Auth -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_login" name="Dang nhap"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_logout" name="Dang xuat">
+        <include xmi:id="inc_logout" addition="uc_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_register" name="Dang ky"/>
+
+      <!-- Customer Features (Includes Guest) -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_view_prod" name="Xem va Tim kiem San pham"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_view_news" name="Xem Tin tuc"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_cart" name="Quan ly Gio hang"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_order" name="Dat hang va Thanh toan">
+        <include xmi:id="inc_order" addition="uc_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_history" name="Xem lich su don hang">
+        <include xmi:id="inc_hist" addition="uc_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_return" name="Yeu cau doi tra">
+         <include xmi:id="inc_ret" addition="uc_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_profile" name="Quan ly ho so ca nhan">
+         <include xmi:id="inc_prof" addition="uc_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_cust_chat" name="Chat voi Nhan vien ho tro"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_cust_review" name="Viet danh gia san pham"/>
+
+      <!-- Admin Features (Includes Staff) -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_prod" name="Quan ly San pham"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_cat" name="Quan ly Danh muc"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_order" name="Quan ly Don hang"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_user" name="Quan ly Nguoi dung"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_news" name="Quan ly Tin tuc"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_banner" name="Quan ly Banner"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_voucher" name="Quan ly Voucher"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_return" name="Quan ly Yeu cau Doi tra"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_stats" name="Thong ke va Bao cao"/>
+      
+      <!-- Added/Merged Admin Features -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_review" name="Quan ly Danh gia"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_manage_feature" name="Quan ly Tinh nang Khoa"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_support_chat" name="Ho tro Khach hang (Chat)"/>
+
+      <!-- AI Features -->
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_ai_chat" name="Chat tu van (AI)"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_ai_img" name="Phan tich anh (AI)"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_ai_diag" name="Chan doan loi khoa (AI)"/>
+      <packagedElement xmi:type="uml:UseCase" xmi:id="uc_ai_content" name="Sinh noi dung tu dong (AI)"/>
+
+      <!-- Associations: Customer -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_reg" memberEnd="end_cust_reg end_reg_cust">
+        <ownedEnd xmi:id="end_cust_reg" type="actor_customer" association="asc_cust_reg"/>
+        <ownedEnd xmi:id="end_reg_cust" type="uc_register" association="asc_cust_reg"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_login" memberEnd="end_cust_login end_login_cust">
+        <ownedEnd xmi:id="end_cust_login" type="actor_customer" association="asc_cust_login"/>
+        <ownedEnd xmi:id="end_login_cust" type="uc_login" association="asc_cust_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_view" memberEnd="end_cust_view end_view_cust">
+        <ownedEnd xmi:id="end_cust_view" type="actor_customer" association="asc_cust_view"/>
+        <ownedEnd xmi:id="end_view_cust" type="uc_view_prod" association="asc_cust_view"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_news" memberEnd="end_cust_news end_news_cust">
+        <ownedEnd xmi:id="end_cust_news" type="actor_customer" association="asc_cust_news"/>
+        <ownedEnd xmi:id="end_news_cust" type="uc_view_news" association="asc_cust_news"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_cart" memberEnd="end_cust_cart end_cart_cust">
+        <ownedEnd xmi:id="end_cust_cart" type="actor_customer" association="asc_cust_cart"/>
+        <ownedEnd xmi:id="end_cart_cust" type="uc_cart" association="asc_cust_cart"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_order" memberEnd="end_cust_order end_order_cust">
+        <ownedEnd xmi:id="end_cust_order" type="actor_customer" association="asc_cust_order"/>
+        <ownedEnd xmi:id="end_order_cust" type="uc_order" association="asc_cust_order"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_hist" memberEnd="end_cust_hist end_hist_cust">
+        <ownedEnd xmi:id="end_cust_hist" type="actor_customer" association="asc_cust_hist"/>
+        <ownedEnd xmi:id="end_hist_cust" type="uc_history" association="asc_cust_hist"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_ret" memberEnd="end_cust_ret end_ret_cust">
+        <ownedEnd xmi:id="end_cust_ret" type="actor_customer" association="asc_cust_ret"/>
+        <ownedEnd xmi:id="end_ret_cust" type="uc_return" association="asc_cust_ret"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_prof" memberEnd="end_cust_prof end_prof_cust">
+        <ownedEnd xmi:id="end_cust_prof" type="actor_customer" association="asc_cust_prof"/>
+        <ownedEnd xmi:id="end_prof_cust" type="uc_profile" association="asc_cust_prof"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_chat" memberEnd="end_cust_chat end_chat_cust">
+        <ownedEnd xmi:id="end_cust_chat" type="actor_customer" association="asc_cust_chat"/>
+        <ownedEnd xmi:id="end_chat_cust" type="uc_cust_chat" association="asc_cust_chat"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_rev" memberEnd="end_cust_rev end_rev_cust">
+        <ownedEnd xmi:id="end_cust_rev" type="actor_customer" association="asc_cust_rev"/>
+        <ownedEnd xmi:id="end_rev_cust" type="uc_cust_review" association="asc_cust_rev"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_aichat" memberEnd="end_cust_aichat end_aichat_cust">
+        <ownedEnd xmi:id="end_cust_aichat" type="actor_customer" association="asc_cust_aichat"/>
+        <ownedEnd xmi:id="end_aichat_cust" type="uc_ai_chat" association="asc_cust_aichat"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_aiimg" memberEnd="end_cust_aiimg end_aiimg_cust">
+        <ownedEnd xmi:id="end_cust_aiimg" type="actor_customer" association="asc_cust_aiimg"/>
+        <ownedEnd xmi:id="end_aiimg_cust" type="uc_ai_img" association="asc_cust_aiimg"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cust_aidiag" memberEnd="end_cust_aidiag end_aidiag_cust">
+        <ownedEnd xmi:id="end_cust_aidiag" type="actor_customer" association="asc_cust_aidiag"/>
+        <ownedEnd xmi:id="end_aidiag_cust" type="uc_ai_diag" association="asc_cust_aidiag"/>
+      </packagedElement>
+
+      <!-- Associations: Admin -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_login" memberEnd="end_admin_login end_login_admin">
+        <ownedEnd xmi:id="end_admin_login" type="actor_admin" association="asc_admin_login"/>
+        <ownedEnd xmi:id="end_login_admin" type="uc_login" association="asc_admin_login"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mprod" memberEnd="end_admin_mprod end_mprod_admin">
+        <ownedEnd xmi:id="end_admin_mprod" type="actor_admin" association="asc_admin_mprod"/>
+        <ownedEnd xmi:id="end_mprod_admin" type="uc_manage_prod" association="asc_admin_mprod"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mcat" memberEnd="end_admin_mcat end_mcat_admin">
+        <ownedEnd xmi:id="end_admin_mcat" type="actor_admin" association="asc_admin_mcat"/>
+        <ownedEnd xmi:id="end_mcat_admin" type="uc_manage_cat" association="asc_admin_mcat"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mord" memberEnd="end_admin_mord end_mord_admin">
+        <ownedEnd xmi:id="end_admin_mord" type="actor_admin" association="asc_admin_mord"/>
+        <ownedEnd xmi:id="end_mord_admin" type="uc_manage_order" association="asc_admin_mord"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_muser" memberEnd="end_admin_muser end_muser_admin">
+        <ownedEnd xmi:id="end_admin_muser" type="actor_admin" association="asc_admin_muser"/>
+        <ownedEnd xmi:id="end_muser_admin" type="uc_manage_user" association="asc_admin_muser"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mnews" memberEnd="end_admin_mnews end_mnews_admin">
+        <ownedEnd xmi:id="end_admin_mnews" type="actor_admin" association="asc_admin_mnews"/>
+        <ownedEnd xmi:id="end_mnews_admin" type="uc_manage_news" association="asc_admin_mnews"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mban" memberEnd="end_admin_mban end_mban_admin">
+        <ownedEnd xmi:id="end_admin_mban" type="actor_admin" association="asc_admin_mban"/>
+        <ownedEnd xmi:id="end_mban_admin" type="uc_manage_banner" association="asc_admin_mban"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mvouch" memberEnd="end_admin_mvouch end_mvouch_admin">
+        <ownedEnd xmi:id="end_admin_mvouch" type="actor_admin" association="asc_admin_mvouch"/>
+        <ownedEnd xmi:id="end_mvouch_admin" type="uc_manage_voucher" association="asc_admin_mvouch"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mret" memberEnd="end_admin_mret end_mret_admin">
+        <ownedEnd xmi:id="end_admin_mret" type="actor_admin" association="asc_admin_mret"/>
+        <ownedEnd xmi:id="end_mret_admin" type="uc_manage_return" association="asc_admin_mret"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_stat" memberEnd="end_admin_stat end_stat_admin">
+        <ownedEnd xmi:id="end_admin_stat" type="actor_admin" association="asc_admin_stat"/>
+        <ownedEnd xmi:id="end_stat_admin" type="uc_stats" association="asc_admin_stat"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_sup" memberEnd="end_admin_sup end_sup_admin">
+        <ownedEnd xmi:id="end_admin_sup" type="actor_admin" association="asc_admin_sup"/>
+        <ownedEnd xmi:id="end_sup_admin" type="uc_support_chat" association="asc_admin_sup"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mrev" memberEnd="end_admin_mrev end_mrev_admin">
+        <ownedEnd xmi:id="end_admin_mrev" type="actor_admin" association="asc_admin_mrev"/>
+        <ownedEnd xmi:id="end_mrev_admin" type="uc_manage_review" association="asc_admin_mrev"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_mfeat" memberEnd="end_admin_mfeat end_mfeat_admin">
+        <ownedEnd xmi:id="end_admin_mfeat" type="actor_admin" association="asc_admin_mfeat"/>
+        <ownedEnd xmi:id="end_mfeat_admin" type="uc_manage_feature" association="asc_admin_mfeat"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_admin_aicontent" memberEnd="end_admin_aicontent end_aicontent_admin">
+        <ownedEnd xmi:id="end_admin_aicontent" type="actor_admin" association="asc_admin_aicontent"/>
+        <ownedEnd xmi:id="end_aicontent_admin" type="uc_ai_content" association="asc_admin_aicontent"/>
+      </packagedElement>
+
+      <!-- Associations: AI -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_ai_chat_svc" memberEnd="end_ai_chat_svc end_svc_chat">
+        <ownedEnd xmi:id="end_ai_chat_svc" type="actor_ai" association="asc_ai_chat_svc"/>
+        <ownedEnd xmi:id="end_svc_chat" type="uc_ai_chat" association="asc_ai_chat_svc"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_ai_img_svc" memberEnd="end_ai_img_svc end_svc_img">
+        <ownedEnd xmi:id="end_ai_img_svc" type="actor_ai" association="asc_ai_img_svc"/>
+        <ownedEnd xmi:id="end_svc_img" type="uc_ai_img" association="asc_ai_img_svc"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_ai_diag_svc" memberEnd="end_ai_diag_svc end_svc_diag">
+        <ownedEnd xmi:id="end_ai_diag_svc" type="actor_ai" association="asc_ai_diag_svc"/>
+        <ownedEnd xmi:id="end_svc_diag" type="uc_ai_diag" association="asc_ai_diag_svc"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_ai_content_svc" memberEnd="end_ai_content_svc end_svc_content">
+        <ownedEnd xmi:id="end_ai_content_svc" type="actor_ai" association="asc_ai_content_svc"/>
+        <ownedEnd xmi:id="end_svc_content" type="uc_ai_content" association="asc_ai_content_svc"/>
+      </packagedElement>
+
+    </packagedElement>
+  </uml:Model>
+</xmi:XMI>

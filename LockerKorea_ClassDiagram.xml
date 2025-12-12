@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+  <uml:Model xmi:id="model_class_1" name="LockerKorea_Analysis_Model">
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_domain" name="DomainModel">
+      
+      <!-- CLASS: User -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_user" name="User">
+        <ownedAttribute xmi:id="att_u_id" name="userId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_u_email" name="email" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_u_pass" name="password" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_u_name" name="fullName" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_u_role" name="role" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_u_phone" name="phone" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_u_addr" name="address" type="dataType_String"/>
+      </packagedElement>
+
+      <!-- CLASS: Product (Tuong tu Room trong hinh mau) -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_product" name="Product">
+        <ownedAttribute xmi:id="att_p_id" name="productId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_p_name" name="productName" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_p_price" name="price" type="dataType_Double"/>
+        <ownedAttribute xmi:id="att_p_desc" name="description" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_p_stock" name="stockQuantity" type="dataType_Int"/>
+        <ownedAttribute xmi:id="att_p_brand" name="brand" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_p_date" name="createAt" type="dataType_Date"/>
+      </packagedElement>
+
+      <!-- CLASS: Category -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_category" name="Category">
+        <ownedAttribute xmi:id="att_c_id" name="categoryId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_c_name" name="categoryName" type="dataType_String"/>
+      </packagedElement>
+
+      <!-- CLASS: Order (Tuong tu Booking trong hinh mau) -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_order" name="Order">
+        <ownedAttribute xmi:id="att_o_id" name="orderId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_o_date" name="orderDate" type="dataType_Date"/>
+        <ownedAttribute xmi:id="att_o_total" name="totalAmount" type="dataType_Double"/>
+        <ownedAttribute xmi:id="att_o_status" name="status" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_o_pay" name="paymentMethod" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_o_note" name="notes" type="dataType_String"/>
+      </packagedElement>
+
+      <!-- CLASS: OrderDetail (Chi tiet don hang) -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_order_detail" name="OrderDetail">
+        <ownedAttribute xmi:id="att_od_id" name="id" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_od_qty" name="quantity" type="dataType_Int"/>
+        <ownedAttribute xmi:id="att_od_price" name="unitPrice" type="dataType_Double"/>
+      </packagedElement>
+
+      <!-- CLASS: ReturnRequest (Tuong tu ApprovalHistory/Yeu cau doi tra) -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_return" name="ReturnRequest">
+        <ownedAttribute xmi:id="att_r_id" name="requestId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_r_reason" name="reason" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_r_status" name="status" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_r_date" name="requestDate" type="dataType_Date"/>
+        <ownedAttribute xmi:id="att_r_img" name="proofImage" type="dataType_String"/>
+      </packagedElement>
+
+      <!-- CLASS: Review -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_review" name="Review">
+        <ownedAttribute xmi:id="att_rv_id" name="reviewId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_rv_rate" name="rating" type="dataType_Int"/>
+        <ownedAttribute xmi:id="att_rv_cmt" name="comment" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_rv_date" name="createAt" type="dataType_Date"/>
+      </packagedElement>
+
+      <!-- CLASS: Notification -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_notif" name="Notification">
+        <ownedAttribute xmi:id="att_n_id" name="id" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_n_title" name="title" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_n_cont" name="content" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_n_date" name="createAt" type="dataType_Date"/>
+        <ownedAttribute xmi:id="att_n_read" name="isRead" type="dataType_Boolean"/>
+      </packagedElement>
+
+      <!-- CLASS: LockFeature (Tuong tu Equipment/Software - Tinh nang cua khoa) -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_feature" name="LockFeature">
+        <ownedAttribute xmi:id="att_f_id" name="featureId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_f_name" name="featureName" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_f_desc" name="description" type="dataType_String"/>
+      </packagedElement>
+      
+      <!-- CLASS: AI_Log (Tuong tu ImageDetect - Lich su tuong tac AI) -->
+      <packagedElement xmi:type="uml:Class" xmi:id="cls_ai_log" name="AIInteractionLog">
+        <ownedAttribute xmi:id="att_ai_id" name="logId" type="dataType_Long"/>
+        <ownedAttribute xmi:id="att_ai_type" name="type" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_ai_input" name="userInput" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_ai_resp" name="aiResponse" type="dataType_String"/>
+        <ownedAttribute xmi:id="att_ai_date" name="timestamp" type="dataType_Date"/>
+      </packagedElement>
+
+      <!-- DataTypes -->
+      <packagedElement xmi:type="uml:DataType" xmi:id="dataType_String" name="String"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dataType_Long" name="Long"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dataType_Int" name="int"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dataType_Double" name="Double"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dataType_Date" name="Date"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dataType_Boolean" name="boolean"/>
+
+      <!-- RELATIONSHIPS -->
+
+      <!-- User 1 -- * Order -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_user_order" memberEnd="end_u_o end_o_u">
+        <ownedEnd xmi:id="end_u_o" type="cls_user" association="asc_user_order" aggregation="shared"/>
+        <ownedEnd xmi:id="end_o_u" type="cls_order" association="asc_user_order"/>
+      </packagedElement>
+
+      <!-- Order 1 -- * OrderDetail (Composition) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_order_detail" memberEnd="end_o_od end_od_o">
+        <ownedEnd xmi:id="end_o_od" type="cls_order" association="asc_order_detail" aggregation="composite"/>
+        <ownedEnd xmi:id="end_od_o" type="cls_order_detail" association="asc_order_detail"/>
+      </packagedElement>
+
+      <!-- Product 1 -- * OrderDetail -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_prod_detail" memberEnd="end_p_od end_od_p">
+        <ownedEnd xmi:id="end_p_od" type="cls_product" association="asc_prod_detail"/>
+        <ownedEnd xmi:id="end_od_p" type="cls_order_detail" association="asc_prod_detail"/>
+      </packagedElement>
+
+      <!-- Category 1 -- * Product -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_cat_prod" memberEnd="end_c_p end_p_c">
+        <ownedEnd xmi:id="end_c_p" type="cls_category" association="asc_cat_prod" aggregation="shared"/>
+        <ownedEnd xmi:id="end_p_c" type="cls_product" association="asc_cat_prod"/>
+      </packagedElement>
+
+      <!-- Product * -- * LockFeature (Association) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_prod_feat" memberEnd="end_p_f end_f_p">
+        <ownedEnd xmi:id="end_p_f" type="cls_product" association="asc_prod_feat"/>
+        <ownedEnd xmi:id="end_f_p" type="cls_feature" association="asc_prod_feat"/>
+      </packagedElement>
+
+      <!-- User 1 -- * ReturnRequest -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_user_ret" memberEnd="end_u_r end_r_u">
+        <ownedEnd xmi:id="end_u_r" type="cls_user" association="asc_user_ret" aggregation="shared"/>
+        <ownedEnd xmi:id="end_r_u" type="cls_return" association="asc_user_ret"/>
+      </packagedElement>
+
+      <!-- Order 1 -- 1 ReturnRequest -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_order_ret" memberEnd="end_o_r end_r_o">
+        <ownedEnd xmi:id="end_o_r" type="cls_order" association="asc_order_ret"/>
+        <ownedEnd xmi:id="end_r_o" type="cls_return" association="asc_order_ret"/>
+      </packagedElement>
+
+      <!-- User 1 -- * Review -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_user_rev" memberEnd="end_u_rv end_rv_u">
+        <ownedEnd xmi:id="end_u_rv" type="cls_user" association="asc_user_rev" aggregation="shared"/>
+        <ownedEnd xmi:id="end_rv_u" type="cls_review" association="asc_user_rev"/>
+      </packagedElement>
+
+      <!-- Product 1 -- * Review -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_prod_rev" memberEnd="end_p_rv end_rv_p">
+        <ownedEnd xmi:id="end_p_rv" type="cls_product" association="asc_prod_rev" aggregation="shared"/>
+        <ownedEnd xmi:id="end_rv_p" type="cls_review" association="asc_prod_rev"/>
+      </packagedElement>
+
+      <!-- User 1 -- * Notification (Composition) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_user_notif" memberEnd="end_u_n end_n_u">
+        <ownedEnd xmi:id="end_u_n" type="cls_user" association="asc_user_notif" aggregation="composite"/>
+        <ownedEnd xmi:id="end_n_u" type="cls_notif" association="asc_user_notif"/>
+      </packagedElement>
+      
+      <!-- User 1 -- * AIInteractionLog -->
+      <packagedElement xmi:type="uml:Association" xmi:id="asc_user_ai" memberEnd="end_u_ai end_ai_u">
+        <ownedEnd xmi:id="end_u_ai" type="cls_user" association="asc_user_ai" aggregation="shared"/>
+        <ownedEnd xmi:id="end_ai_u" type="cls_ai_log" association="asc_user_ai"/>
+      </packagedElement>
+
+    </packagedElement>
+  </uml:Model>
+</xmi:XMI>
+
+
+
+

@@ -41,6 +41,7 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   currentUserId: number = 0;
   isAuthenticated: boolean = false;
   private shouldScroll = false;
+  private messageListSignature: string | null = null;
   selectedFile: File | null = null;
   filePreview: string | null = null;
   showClosedByStaffBanner: boolean = false;
@@ -161,18 +162,18 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
     // Use staffId = 0 to indicate "any staff" - backend will return all messages for this customer
     this.chatService.getMessages().pipe(
       tap((messages) => {
-        // Filter messages for current customer
-        this.messages = messages.filter(m => 
-          m.senderId === this.currentUserId || 
+        const relevantMessages = messages.filter(m =>
+          m.senderId === this.currentUserId ||
           m.receiverId === this.currentUserId ||
-          (m.isStaffMessage && m.receiverId === null) // Public messages from staff
+          (m.isStaffMessage && m.receiverId === null)
         ).sort((a, b) => {
           const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return timeA - timeB;
         });
-        this.shouldScroll = true;
-        
+
+        this.updateMessagesIfChanged(relevantMessages);
+
         // Check conversation status to show banner if closed by staff
         this.checkConversationStatus();
       }),
@@ -207,10 +208,10 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
         messageType: 'TEXT',
         isStaffMessage: false
       }, false).pipe(
-        tap(() => {
+        tap((sentMessage) => {
           this.newMessage = '';
-          this.loadMessages();
-          this.shouldScroll = true;
+          this.appendMessageLocally(sentMessage);
+          this.checkConversationStatus();
         }),
         catchError((err) => {
           this.toastService.fail('Không thể gửi tin nhắn');
@@ -275,12 +276,12 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
     const headers: any = {};
 
     this.chatService.sendFileMessage(formData, headers).pipe(
-      tap(() => {
+      tap((sentMessage) => {
         this.newMessage = '';
         this.selectedFile = null;
         this.filePreview = null;
-        this.loadMessages();
-        this.shouldScroll = true;
+        this.appendMessageLocally(sentMessage);
+        this.checkConversationStatus();
       }),
       catchError((err) => {
         console.error('Error sending file:', err);
@@ -329,6 +330,7 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
 
     // Xóa lịch sử hiển thị ngay lập tức
     this.messages = [];
+    this.messageListSignature = null;
     this.showClosedByStaffBanner = false;
     
     this.chatService.endCustomerSession().pipe(
@@ -362,6 +364,45 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
+  }
+
+  private updateMessagesIfChanged(newMessages: ChatMessage[]): void {
+    const signature = this.computeMessageSignature(newMessages);
+    if (signature !== this.messageListSignature) {
+      this.messages = newMessages;
+      this.messageListSignature = signature;
+      this.shouldScroll = true;
+    }
+  }
+
+  private appendMessageLocally(message: ChatMessage | null | undefined): void {
+    if (!message) {
+      return;
+    }
+
+    const exists = message.id
+      ? this.messages.some(m => m.id === message.id)
+      : false;
+
+    const updatedMessages = exists
+      ? this.messages
+      : [...this.messages, message].sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return timeA - timeB;
+        });
+
+    this.updateMessagesIfChanged(updatedMessages);
+  }
+
+  private computeMessageSignature(messages: ChatMessage[]): string {
+    if (!messages.length) {
+      return '0';
+    }
+
+    const last = messages[messages.length - 1];
+    const lastIdentifier = `${last.id ?? 'no-id'}:${last.updatedAt ?? last.createdAt ?? 'no-date'}`;
+    return `${messages.length}:${lastIdentifier}`;
   }
 
   scrollToBottom(): void {

@@ -39,6 +39,7 @@ public class OrderService implements IOrderService {
     private final CartService cartService;
     private final VoucherRepository voucherRepository;
     private final VoucherUsageRepository voucherUsageRepository;
+    private final Email emailService;
 
     @Override
     @Transactional
@@ -213,11 +214,10 @@ public class OrderService implements IOrderService {
 
         // Gửi mail thông báo cho người dùng (không throw exception nếu thất bại)
         try {
-            Email email = new Email();
             String to = order.getEmail();
-            String subject = "Đặt hàng thành công từ Sneaker Store - Đơn hàng #" + order.getId();
+            String subject = "Đặt hàng thành công từ Locker Korea - Đơn hàng #" + order.getId();
             String content = BuilderEmailContent.buildOrderEmailContent(order);
-            boolean sendMail = email.sendEmail(to, subject, content);
+            boolean sendMail = emailService.sendEmail(to, subject, content);
 
             if (!sendMail) {
                 System.err.println("Warning: Failed to send order confirmation email to " + to);

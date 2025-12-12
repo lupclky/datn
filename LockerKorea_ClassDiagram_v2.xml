@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+  <uml:Model xmi:id="model_lk_v2" name="LockerKorea_Analysis_Model_V2">
+    <packagedElement xmi:type="uml:Package" xmi:id="pkg_domain_v2" name="DomainModel">
+      
+      <!-- CLASS DEFINITIONS -->
+      
+      <packagedElement xmi:type="uml:Class" xmi:id="c_user" name="User">
+        <ownedAttribute xmi:id="a_u_id" name="userId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_u_email" name="email" visibility="private" type="dt_str"/>
+        <ownedAttribute xmi:id="a_u_pass" name="password" visibility="private" type="dt_str"/>
+        <ownedAttribute xmi:id="a_u_name" name="fullName" visibility="private" type="dt_str"/>
+        <ownedAttribute xmi:id="a_u_role" name="role" visibility="private" type="dt_str"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_notif" name="Notification">
+        <ownedAttribute xmi:id="a_n_id" name="id" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_n_cont" name="content" visibility="private" type="dt_str"/>
+        <ownedAttribute xmi:id="a_n_read" name="isRead" visibility="private" type="dt_bool"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_prod" name="Product">
+        <ownedAttribute xmi:id="a_p_id" name="productId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_p_name" name="productName" visibility="private" type="dt_str"/>
+        <ownedAttribute xmi:id="a_p_price" name="price" visibility="private" type="dt_dbl"/>
+        <ownedAttribute xmi:id="a_p_stock" name="stock" visibility="private" type="dt_int"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_cat" name="Category">
+        <ownedAttribute xmi:id="a_c_id" name="categoryId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_c_name" name="categoryName" visibility="private" type="dt_str"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_order" name="Order">
+        <ownedAttribute xmi:id="a_o_id" name="orderId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_o_date" name="orderDate" visibility="private" type="dt_date"/>
+        <ownedAttribute xmi:id="a_o_total" name="totalAmount" visibility="private" type="dt_dbl"/>
+        <ownedAttribute xmi:id="a_o_stt" name="status" visibility="private" type="dt_str"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_odetail" name="OrderDetail">
+        <ownedAttribute xmi:id="a_od_id" name="id" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_od_qty" name="quantity" visibility="private" type="dt_int"/>
+        <ownedAttribute xmi:id="a_od_pr" name="price" visibility="private" type="dt_dbl"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_return" name="ReturnRequest">
+        <ownedAttribute xmi:id="a_r_id" name="requestId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_r_rea" name="reason" visibility="private" type="dt_str"/>
+        <ownedAttribute xmi:id="a_r_stt" name="status" visibility="private" type="dt_str"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_feat" name="LockFeature">
+        <ownedAttribute xmi:id="a_f_id" name="featureId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_f_name" name="featureName" visibility="private" type="dt_str"/>
+      </packagedElement>
+
+      <packagedElement xmi:type="uml:Class" xmi:id="c_review" name="Review">
+        <ownedAttribute xmi:id="a_rv_id" name="reviewId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_rv_rt" name="rating" visibility="private" type="dt_int"/>
+        <ownedAttribute xmi:id="a_rv_cmt" name="comment" visibility="private" type="dt_str"/>
+      </packagedElement>
+      
+      <packagedElement xmi:type="uml:Class" xmi:id="c_ai" name="AI_Log">
+        <ownedAttribute xmi:id="a_ai_id" name="logId" visibility="private" type="dt_long"/>
+        <ownedAttribute xmi:id="a_ai_in" name="input" visibility="private" type="dt_str"/>
+        <ownedAttribute xmi:id="a_ai_out" name="output" visibility="private" type="dt_str"/>
+      </packagedElement>
+
+      <!-- DATA TYPES -->
+      <packagedElement xmi:type="uml:DataType" xmi:id="dt_str" name="String"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dt_int" name="int"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dt_long" name="Long"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dt_dbl" name="Double"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dt_bool" name="boolean"/>
+      <packagedElement xmi:type="uml:DataType" xmi:id="dt_date" name="Date"/>
+
+      <!-- RELATIONSHIPS -->
+
+      <!-- User - Notification (Composition) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_u_n" memberEnd="end_u_n end_n_u">
+        <ownedEnd xmi:id="end_u_n" type="c_user" association="rel_u_n" aggregation="composite"/>
+        <ownedEnd xmi:id="end_n_u" type="c_notif" association="rel_u_n"/>
+      </packagedElement>
+
+      <!-- User - Order (Aggregation) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_u_o" memberEnd="end_u_o end_o_u">
+        <ownedEnd xmi:id="end_u_o" type="c_user" association="rel_u_o" aggregation="shared"/>
+        <ownedEnd xmi:id="end_o_u" type="c_order" association="rel_u_o"/>
+      </packagedElement>
+
+      <!-- Order - OrderDetail (Composition) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_o_od" memberEnd="end_o_od end_od_o">
+        <ownedEnd xmi:id="end_o_od" type="c_order" association="rel_o_od" aggregation="composite"/>
+        <ownedEnd xmi:id="end_od_o" type="c_odetail" association="rel_o_od"/>
+      </packagedElement>
+
+      <!-- Product - OrderDetail (Association) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_p_od" memberEnd="end_p_od end_od_p">
+        <ownedEnd xmi:id="end_p_od" type="c_prod" association="rel_p_od"/>
+        <ownedEnd xmi:id="end_od_p" type="c_odetail" association="rel_p_od"/>
+      </packagedElement>
+
+      <!-- Category - Product (Aggregation) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_c_p" memberEnd="end_c_p end_p_c">
+        <ownedEnd xmi:id="end_c_p" type="c_cat" association="rel_c_p" aggregation="shared"/>
+        <ownedEnd xmi:id="end_p_c" type="c_prod" association="rel_c_p"/>
+      </packagedElement>
+
+      <!-- Product - LockFeature (Association) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_p_f" memberEnd="end_p_f end_f_p">
+        <ownedEnd xmi:id="end_p_f" type="c_prod" association="rel_p_f"/>
+        <ownedEnd xmi:id="end_f_p" type="c_feat" association="rel_p_f"/>
+      </packagedElement>
+
+      <!-- User - ReturnRequest (Aggregation) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_u_r" memberEnd="end_u_r end_r_u">
+        <ownedEnd xmi:id="end_u_r" type="c_user" association="rel_u_r" aggregation="shared"/>
+        <ownedEnd xmi:id="end_r_u" type="c_return" association="rel_u_r"/>
+      </packagedElement>
+
+      <!-- Order - ReturnRequest (Association) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_o_r" memberEnd="end_o_r end_r_o">
+        <ownedEnd xmi:id="end_o_r" type="c_order" association="rel_o_r"/>
+        <ownedEnd xmi:id="end_r_o" type="c_return" association="rel_o_r"/>
+      </packagedElement>
+
+      <!-- User - Review (Aggregation) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_u_rv" memberEnd="end_u_rv end_rv_u">
+        <ownedEnd xmi:id="end_u_rv" type="c_user" association="rel_u_rv" aggregation="shared"/>
+        <ownedEnd xmi:id="end_rv_u" type="c_review" association="rel_u_rv"/>
+      </packagedElement>
+
+      <!-- Product - Review (Aggregation) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_p_rv" memberEnd="end_p_rv end_rv_p">
+        <ownedEnd xmi:id="end_p_rv" type="c_prod" association="rel_p_rv" aggregation="shared"/>
+        <ownedEnd xmi:id="end_rv_p" type="c_review" association="rel_p_rv"/>
+      </packagedElement>
+      
+      <!-- User - AI_Log (Aggregation) -->
+      <packagedElement xmi:type="uml:Association" xmi:id="rel_u_ai" memberEnd="end_u_ai end_ai_u">
+        <ownedEnd xmi:id="end_u_ai" type="c_user" association="rel_u_ai" aggregation="shared"/>
+        <ownedEnd xmi:id="end_ai_u" type="c_ai" association="rel_u_ai"/>
+      </packagedElement>
+
+    </packagedElement>
+  </uml:Model>
+</xmi:XMI>
+
+
+
+

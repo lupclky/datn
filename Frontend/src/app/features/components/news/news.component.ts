@@ -128,16 +128,25 @@ export class NewsComponent implements OnInit {
     return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
   }
 
-  getImageUrl(featuredImage: string | undefined): string {
+  getImageUrl(featuredImage: string | undefined | null): string {
+    const baseUrl = `${environment.apiUrl}/news/images`;
+    const configuredFallback = environment.newsDefaultImage;
+
+    const fallbackFromConfig = configuredFallback
+      ? (configuredFallback.startsWith('http')
+          ? configuredFallback
+          : `${baseUrl}/${configuredFallback}`)
+      : `${baseUrl}/default-lock-news.jpg`;
+
     if (!featuredImage) {
-      return '../../../../assets/images/post1.jpg';
+      return fallbackFromConfig;
     }
-    // If it's already a full URL, return it
+
     if (featuredImage.startsWith('http')) {
       return featuredImage;
     }
-    // Otherwise, construct the URL to backend
-    return `${environment.apiUrl}/news/images/${featuredImage}`;
+
+    return `${baseUrl}/${featuredImage}`;
   }
 
   getNewsLinkPreview(news: NewsDto): LinkPreview {
