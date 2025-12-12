@@ -199,23 +199,13 @@
 
   // Section Titles
   .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 1rem;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
     position: relative;
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80px;
-      height: 4px;
-      background: linear-gradient(45deg, #007bff, #0056b3);
-      border-radius: 2px;
-    }
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .section-subtitle {
@@ -234,16 +224,6 @@
       font-weight: 700;
       color: #333;
       margin-bottom: 0.5rem;
-      
-      &::after {
-        content: '';
-        display: block;
-        width: 60px;
-        height: 3px;
-        background: #dc3545;
-        margin: 0.75rem auto 0;
-        border-radius: 2px;
-      }
     }
 
     .section-subtitle {
@@ -326,20 +306,8 @@
       font-weight: 700;
       color: #333;
       margin-bottom: 1rem;
-      position: relative;
       display: inline-block;
       padding-bottom: 0.5rem;
-
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-        height: 2px;
-        background: #007bff;
-      }
     }
 
     .features-tags-wrapper {
@@ -769,16 +737,6 @@
       font-weight: 700;
       color: #333;
       margin-bottom: 1rem;
-      
-      &::after {
-        content: '';
-        display: block;
-        width: 80px;
-        height: 4px;
-        background: #dc3545;
-        margin: 1rem auto 0;
-        border-radius: 2px;
-      }
     }
 
     .section-subtitle {
@@ -1101,16 +1059,6 @@
       font-weight: 700;
       color: #333;
       margin-bottom: 1rem;
-      
-      &::after {
-        content: '';
-        display: block;
-        width: 80px;
-        height: 4px;
-        background: #dc3545;
-        margin: 1rem auto 0;
-        border-radius: 2px;
-      }
     }
 
     .section-subtitle {
@@ -1401,18 +1349,11 @@
       color: #333;
       margin-bottom: 1.5rem;
       position: relative;
-      padding-bottom: 0.75rem;
-      
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 60px;
-        height: 3px;
-        background: #dc3545;
-        border-radius: 2px;
-      }
+      padding-bottom: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-left: 4px solid #dc3545;
+      padding-left: 10px;
     }
 
     .new-arrivals-list {

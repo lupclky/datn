@@ -2,9 +2,14 @@
   <div class="header-container">
     <!-- Left Section: Logo + Brand Name -->
     <div class="header-left">
+      @if(roleId == 2 || roleId == 3) {
+        <button class="sidebar-toggler" (click)="toggleSidebar()">
+          <i class="pi pi-bars"></i>
+        </button>
+      }
       <div class="brand-section">
         <a [routerLink]="['/']">
-          <img src="../../../../assets/images/hvmlogo.gif" alt="Trang chủ" class="logo-img">
+          <img src="../../../../assets/images/hvmlogo.gif" alt="Locker Korea" class="logo-img">
         </a>
       </div>
       
@@ -15,6 +20,9 @@
       <div class="header-search">
         <div class="search-container">
           <div class="search-input-wrapper">
+            <button (click)="sendContentSearch()" class="search-btn">
+              <i class="pi pi-search"></i>
+            </button>
             <input 
               [(ngModel)]="searchValue" 
               (input)="onSearchInput($event)"
@@ -22,12 +30,11 @@
               (focus)="showSuggestions = true"
               (blur)="hideSuggestions()"
               type="text" 
+              name="search"
+              autocomplete="off"
               placeholder="Tìm kiếm sản phẩm..." 
               class="search-input"
             />
-            <button (click)="sendContentSearch()" class="search-btn">
-              <i class="pi pi-search"></i>
-            </button>
           </div>
           
           <!-- Search Suggestions -->
@@ -68,9 +75,8 @@
       <!-- User Section -->
       @if(token == null) {
         <div class="auth-links">
-          <a [routerLink]="['/auth-login']" class="auth-link pill-strong">Đăng nhập</a>
-          <span class="divider">|</span>
-          <a [routerLink]="['/register']" class="auth-link">Đăng ký</a>
+          <a [routerLink]="['/auth-login']" class="auth-link">Đăng nhập</a>
+          <a [routerLink]="['/register']" class="auth-link pill-strong">Đăng ký</a>
         </div>
       } @else {
         <div class="user-menu-container">
@@ -81,7 +87,7 @@
             <span class="user-name">{{userName}}</span>
             <i class="pi pi-chevron-down"></i>
           </div>
-          <p-menu #menu [model]="itemsMenuAvatar" [popup]="true" [appendTo]="'body'"></p-menu>
+          <p-menu #menu [model]="itemsMenuAvatar" [popup]="true" [appendTo]="'body'" styleClass="user-profile-menu"></p-menu>
         </div>
       }
 
@@ -90,13 +96,15 @@
         <div class="cart-section" 
              (mouseenter)="showCartPreview = true" 
              (mouseleave)="showCartPreview = false">
-          <div class="cart-link" [routerLink]="['/shoppingCart']">
+          <a class="cart-link" [routerLink]="['/shoppingCart']">
             <div class="cart-icon-wrapper">
               <i class="pi pi-shopping-cart"></i>
-              <p-badge [value]="quantityInCart.toString()" severity="danger"></p-badge>
+              @if(quantityInCart > 0) {
+                <p-badge [value]="quantityInCart.toString()" severity="danger"></p-badge>
+              }
             </div>
             <span class="cart-text">Giỏ hàng</span>
-          </div>
+          </a>
 
           <!-- Cart Preview Popup -->
           <div class="cart-preview" [class.show]="showCartPreview" *ngIf="products && products.length > 0">
@@ -138,7 +146,7 @@
 
 <!-- Admin Sidebar -->
 @if(roleId == 2) {
-  <aside class="admin-sidebar">
+  <aside class="admin-sidebar" [class.closed]="!isSidebarOpen">
     <div class="sidebar-header">
       <h3>KVK Admin</h3>
     </div>
@@ -229,7 +237,7 @@
 
 <!-- Staff Sidebar -->
 @if(roleId == 3) {
-  <aside class="admin-sidebar">
+  <aside class="admin-sidebar" [class.closed]="!isSidebarOpen">
     <div class="sidebar-header">
       <h3>KVK Staff</h3>
     </div>
@@ -276,10 +284,10 @@
   </aside>
 }
 
-<nav class="navbar navbar-expand-lg bg-dark navbar-dark" [class.hidden]="roleId == 2 || roleId == 3">
+<nav class="navbar navbar-expand-lg" [class.hidden]="roleId == 2 || roleId == 3">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" (click)="toggleMenu()">
-      <span class="navbar-toggler-icon"></span>
+      <i class="pi pi-bars" style="font-size: 1.5rem; color: #E6E1E5;"></i>
     </button>
     
     <div class="collapse navbar-collapse" [class.show]="isMenuOpen">
@@ -305,135 +313,7 @@
               <span class="nav-text">Tất cả sản phẩm</span>
             </a>
           </li>
-      
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/about']" routerLinkActive="active">
-              <i class="pi pi-info-circle"></i>
-              <span class="nav-text">Giới thiệu & Liên hệ</span>
-            </a>
-          </li>
-        } @else if (roleId == 2) {
-          <li class="nav-item">
-            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-              <i class="pi pi-home"></i>
-              <span class="nav-text">Trang chủ</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/admin/dashboard']" routerLinkActive="active">
-              <i class="pi pi-chart-bar"></i>
-              <span class="nav-text">Dashboard</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/userManage']" routerLinkActive="active">
-              <i class="pi pi-users"></i>
-              <span class="nav-text">Người dùng</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/orderManage']" routerLinkActive="active">
-              <i class="pi pi-shopping-cart"></i>
-              <span class="nav-text">Đơn hàng</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/productManage']" routerLinkActive="active">
-              <i class="pi pi-list"></i>
-              <span class="nav-text">Quản lý SP</span>
-            </a>
-          </li>
-
-          
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/categoryManage']" routerLinkActive="active">
-              <i class="pi pi-tags"></i>
-              <span class="nav-text">Danh mục</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/voucherManage']" routerLinkActive="active">
-              <i class="pi pi-ticket"></i>
-              <span class="nav-text">Voucher</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/newsManage']" routerLinkActive="active">
-              <i class="pi pi-book"></i>
-              <span class="nav-text">Tin tức</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/bannerManage']" routerLinkActive="active">
-              <i class="pi pi-images"></i>
-              <span class="nav-text">Banner</span>
-            </a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/admin/returns']" routerLinkActive="active">
-              <i class="pi pi-replay"></i>
-              <span class="nav-text">Trả hàng</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/admin/features']" routerLinkActive="active">
-              <i class="pi pi-cog"></i>
-              <span class="nav-text">Chức năng</span>
-            </a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/staff/chat']" routerLinkActive="active">
-              <i class="pi pi-comments"></i>
-              <span class="nav-text">Chat với khách hàng</span>
-            </a>
-          </li>
-          
-          
-        } @else if (roleId == 3) {
-          <li class="nav-item">
-            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-              <i class="pi pi-home"></i>
-              <span class="nav-text">Trang chủ</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/orderManage']" routerLinkActive="active">
-              <i class="pi pi-shopping-cart"></i>
-              <span class="nav-text">Quản lý đơn hàng</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/reviewManage']" routerLinkActive="active">
-              <i class="pi pi-star"></i>
-              <span class="nav-text">Quản lý đánh giá</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/newsManage']" routerLinkActive="active">
-              <i class="pi pi-book"></i>
-              <span class="nav-text">Quản lý tin tức</span>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/staff/chat']" routerLinkActive="active">
-              <i class="pi pi-comments"></i>
-              <span class="nav-text">Chat với khách hàng</span>
-            </a>
-          </li>
-        } @else {}
+        }
       </ul>
     </div>
   </div>

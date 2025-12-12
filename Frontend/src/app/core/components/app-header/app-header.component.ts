@@ -70,6 +70,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   private searchSubject = new Subject<string>();
   public isMenuOpen = false;
   public isMobileSearchActive = false;
+  public isSidebarOpen = true; // Sidebar defaults to open on desktop
 
   constructor(
     private userService : UserService,
@@ -261,6 +262,10 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
   initMenu() {

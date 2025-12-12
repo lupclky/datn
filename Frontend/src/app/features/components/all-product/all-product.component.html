@@ -71,9 +71,33 @@
       <div class="row">
         <!-- Desktop left sidebar -->
         <div class="col-md-3 d-none d-md-block">
+          
+          <!-- Categories Filter (New) -->
+          <div class="allProduct-content-filter mb-4">
+            <h4 class="sidebar-title">DANH MỤC</h4>
+            <div class="category-list">
+              <div 
+                class="category-item" 
+                [class.active]="selectedCategory === 'all'"
+                (click)="onCategorySelect('all')">
+                <i class="pi pi-th-large"></i>
+                <span>Tất cả sản phẩm</span>
+              </div>
+              <ng-container *ngFor="let cat of categoriesOptions">
+                <div *ngIf="cat.value !== 'all'"
+                  class="category-item" 
+                  [class.active]="selectedCategory === cat.value"
+                  (click)="onCategorySelect(cat.value)">
+                  <i class="pi pi-angle-right"></i>
+                  <span>{{cat.label}}</span>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
           <!-- price filter -->
           <div class="allProduct-content-filter">
-            <h4>LỌC THEO GIÁ</h4>
+            <h4 class="sidebar-title">LỌC THEO GIÁ</h4>
             <div class="range mb-3">
               <p-slider [min]="1" [(ngModel)]="priceFilterValue" [range]="true" id="range1"></p-slider>
             </div>
@@ -88,7 +112,7 @@
 
           <!-- features filter -->
           <div class="allProduct-content-filter mt-4">
-            <h4>CHỨC NĂNG</h4>
+            <h4 class="sidebar-title">CHỨC NĂNG</h4>
             <div class="features-list">
               <ng-container *ngFor="let feature of features">
                 <div class="form-check mb-2">
@@ -108,7 +132,7 @@
 
           <!-- product suggestion -->
           <div class="featured-products mt-4">
-            <h4 class="text-dark mb-3">SẢN PHẨM NỔI BẬT</h4>
+            <h4 class="sidebar-title mb-3">SẢN PHẨM NỔI BẬT</h4>
             <div class="product-list">
               @for(item of productsHighlight;track item){
                 <div (click)="navigateToDetail(item.id)" class="product-item">

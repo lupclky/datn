@@ -370,6 +370,11 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
     this.updateDisplayedProducts();
   }
 
+  onCategorySelect(categoryId: any) {
+    this.selectedCategory = categoryId;
+    this.onCategoryChange({ value: categoryId });
+  }
+
   onCategoryChange(event: any){
     // Update selectedCategory
     this.selectedCategory = event.value;

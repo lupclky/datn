@@ -1,80 +1,77 @@
-<div class="container-fluid footer-container">
-  <div class="row">
-    <!-- Intro -->
-    <div class="col-lg-4 offset-lg-1 footer-column">
-      <h2>Khóa vân tay Hàn Quốc</h2>
-      <p>Khoá vân tay Hàn Quốc với KVK Intelligence mang lại trải nghiệm mua sắm thông minh, giúp bạn lựa chọn sản phẩm ưng ý.</p>
+<div class="modern-footer">
+  <div class="footer-content">
+    <!-- Intro Column -->
+    <div class="footer-column intro-column">
+      <h2 class="footer-heading">Khóa vân tay Hàn Quốc</h2>
+      <p class="footer-description">
+        Khoá vân tay Hàn Quốc với KVK Intelligence mang lại trải nghiệm mua sắm thông minh, giúp bạn lựa chọn sản phẩm ưng ý.
+      </p>
+      <div class="footer-actions">
+        <a [routerLink]="['/about']" class="footer-chip-link">Giới thiệu</a>
+      </div>
     </div>
 
-    <!-- Chính sách -->
-    <div class="col-lg-2 footer-column">
-      <h2>Chính sách</h2>
-      <ul class="footer-policy-list">
-        <li><a [routerLink]="['/news/11']">Chính sách vận chuyển</a></li>
-        <li><a [routerLink]="['/news/10']">Chính sách bảo hành đổi trả</a></li>
+    <!-- Policy Column -->
+    <div class="footer-column policy-column">
+      <h2 class="footer-heading">Chính sách</h2>
+      <ul class="footer-link-list">
+        <li><a [routerLink]="['/news/11']" class="footer-link">Chính sách vận chuyển</a></li>
+        <li><a [routerLink]="['/news/10']" class="footer-link">Chính sách bảo hành đổi trả</a></li>
       </ul>
     </div>
 
-    <!-- Addresses & contact -->
-    <div class="col-lg-5 footer-column">
-      <div class="row">
-        <div class="col-sm-12 col-md-12 footer-address-container">
-          <h2>Liên hệ & Địa chỉ</h2>
-          <ul class="footer-address-list">
-            <li class="footer-address-item">
-              <i class="pi pi-map-marker"></i>
-              <p><strong>Hà Nội</strong><br/>
-                Cơ sở 1: 15 Nguyễn An Ninh, Q. Hoàng Mai<br/>
-                Cơ sở 2: B5 Làng Quốc tế Thăng Long, Q. Cầu Giấy
-              </p>
-            </li>
-            <li class="footer-address-item">
-              <i class="pi pi-map-marker"></i>
-              <p><strong>TP. HCM</strong><br/>
-                Cơ sở 1: Số 3, Trường Sa, P. 12, Q. 3<br/>
-                Cơ sở 2: Chung cư 518 Võ Văn Kiệt, P. Cầu Kho, Q. 1
-              </p>
-            </li>
-            <li class="footer-address-item">
-              <i class="pi pi-phone"></i>
-              <p>
-                Hotline: <a href="tel:0912424173">091.2424.173</a><br/>
-                Kỹ thuật: <a href="tel:0988033081">0988.033.081</a>
-              </p>
-            </li>
-            <li class="footer-address-item">
-              <i class="pi pi-envelope"></i>
-              <p><a href="mailto:khoavantaykorea@gmail.com">khoavantaykorea&#64;gmail.com</a></p>
-            </li>
-            <li class="footer-address-item">
-              <i class="pi pi-globe"></i>
-              <p><a href="http://www.khoavantaykorea.com" target="_blank" rel="noopener">www.khoavantaykorea.com</a></p>
-            </li>
-          </ul>
+    <!-- Address Column -->
+    <div class="footer-column address-column">
+      <h2 class="footer-heading">Địa chỉ & Liên hệ</h2>
+      <div class="address-grid">
+        <div class="address-item">
+          <i class="pi pi-map-marker"></i>
+          <div>
+            <strong>Hà Nội</strong>
+            <p>CS1: 15 Nguyễn An Ninh, Hoàng Mai</p>
+            <p>CS2: B5 Làng Quốc tế Thăng Long</p>
+          </div>
+        </div>
+        <div class="address-item">
+          <i class="pi pi-map-marker"></i>
+          <div>
+            <strong>TP. HCM</strong>
+            <p>CS1: Số 3, Trường Sa, P. 12, Q. 3</p>
+            <p>CS2: Chung cư 518 Võ Văn Kiệt, Q. 1</p>
+          </div>
+        </div>
+        <div class="address-item">
+          <i class="pi pi-phone"></i>
+          <div>
+            <p>Hotline: <a href="tel:0912424173">091.2424.173</a></p>
+            <p>Kỹ thuật: <a href="tel:0988033081">0988.033.081</a></p>
+          </div>
+        </div>
+        <div class="address-item">
+          <i class="pi pi-envelope"></i>
+          <a href="mailto:khoavantaykorea@gmail.com">khoavantaykorea&#64;gmail.com</a>
         </div>
       </div>
     </div>
 
-    <!-- Social -->
-    <div class="col-lg-2 footer-column">
-      <h2>Kết nối</h2>
-      <ul class="footer-social-list">
-        <li class="footer-social-item">
-          <a href="https://www.facebook.com/khoavantaykorea" target="_blank" rel="noopener">
-          <i class="pi pi-facebook footer-facebook__icon"></i>
-          </a>
-        </li>
-        <li class="footer-social-item">
-          <a href="http://www.khoavantaykorea.com" target="_blank" rel="noopener">
-            <i class="pi pi-globe"></i>
-          </a>
-        </li>
-        <li class="footer-social-item">
-          <a href="mailto:khoavantaykorea@gmail.com">
-            <i class="pi pi-envelope"></i>
-          </a>
-        </li>
-      </ul>
+    <!-- Social Column -->
+    <div class="footer-column social-column">
+      <h2 class="footer-heading">Kết nối</h2>
+      <div class="social-links">
+        <a href="https://www.facebook.com/khoavantaykorea" target="_blank" rel="noopener" class="social-icon-btn facebook" aria-label="Facebook">
+          <i class="pi pi-facebook"></i>
+        </a>
+        <a href="http://www.khoavantaykorea.com" target="_blank" rel="noopener" class="social-icon-btn website" aria-label="Website">
+          <i class="pi pi-globe"></i>
+        </a>
+        <a href="mailto:khoavantaykorea@gmail.com" class="social-icon-btn email" aria-label="Email">
+          <i class="pi pi-envelope"></i>
+        </a>
+      </div>
     </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <p>&copy; {{ currentYear }} Khóa vân tay Hàn Quốc. All rights reserved.</p>
   </div>
 </div>

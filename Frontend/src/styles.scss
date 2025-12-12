@@ -109,3 +109,110 @@ li {
     background: #fbfcfe;
   }
 }
+
+// Material 3 Expressive Dark Theme Overrides for PrimeNG Menu
+.user-profile-menu.p-menu {
+  background: #1D1B20 !important; // Surface Container
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 8px 0 !important;
+  box-shadow: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3) !important;
+  margin-top: 8px; // Spacing from trigger
+  min-width: 240px;
+
+  .p-menu-list {
+    padding: 0 !important;
+  }
+
+  .p-menuitem {
+    margin: 4px 8px !important;
+
+    .p-menuitem-link {
+      padding: 12px 16px !important;
+      border-radius: 28px !important; // Pill shape
+      transition: all 0.2s cubic-bezier(0.2, 0.0, 0, 1.0) !important;
+      background: transparent !important;
+      text-decoration: none !important; // Remove underline
+      outline: none !important;
+
+      .p-menuitem-text {
+        color: #E6E1E5 !important; // On Surface
+        font-weight: 500 !important;
+        font-family: 'Roboto', sans-serif !important;
+        font-size: 0.95rem !important;
+      }
+
+      .p-menuitem-icon {
+        color: #CAC4D0 !important; // On Surface Variant
+        margin-right: 12px !important;
+        font-size: 1.1rem !important;
+      }
+
+      // Hover State
+      &:hover {
+        background: rgba(138, 180, 248, 0.08) !important; // Primary (Blue) with opacity
+        text-decoration: none !important; // Ensure no underline on hover
+        
+        .p-menuitem-text {
+          color: #8AB4F8 !important; // Primary (Blue)
+        }
+        
+        .p-menuitem-icon {
+          color: #8AB4F8 !important; // Primary (Blue)
+        }
+      }
+
+      // Active/Focus State (Fixing the white block issue)
+      &:focus, &:active {
+        background: rgba(138, 180, 248, 0.08) !important; // Same as hover
+        box-shadow: none !important;
+        outline: none !important;
+        
+        .p-menuitem-text {
+          color: #8AB4F8 !important;
+        }
+
+        .p-menuitem-icon {
+          color: #8AB4F8 !important;
+        }
+      }
+    }
+    
+    // Override PrimeNG's default focused item styles which might be causing the white background
+    &.p-focus > .p-menuitem-link {
+      background: rgba(138, 180, 248, 0.08) !important;
+      
+      .p-menuitem-text {
+        color: #8AB4F8 !important;
+      }
+      
+      .p-menuitem-icon {
+        color: #8AB4F8 !important;
+      }
+    }
+    
+    // Explicitly target p-menuitem-content if present (sometimes used in newer PrimeNG)
+    .p-menuitem-content {
+       background: transparent !important;
+       
+       &:hover {
+         background: transparent !important;
+       }
+    }
+
+    // Force remove any white backgrounds from active states in standard theme
+    &.p-highlight > .p-menuitem-link {
+      background: rgba(138, 180, 248, 0.08) !important;
+      
+      .p-menuitem-text {
+        color: #8AB4F8 !important;
+      }
+    }
+
+    // Separator if needed
+    &.p-menu-separator {
+      border-top: 1px solid #49454F !important; // Outline Variant
+      margin: 8px 0 !important;
+    }
+  }
+}
