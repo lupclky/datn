@@ -372,6 +372,30 @@ public class NewsController {
     }
 
     /**
+     * Share news to Facebook (admin only)
+     */
+    @PostMapping("/admin/{id}/share-facebook")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> shareNewsToFacebook(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long scheduledTime) {
+        try {
+            newsService.shareNewsToFacebook(id, scheduledTime);
+            String msg = (scheduledTime != null) 
+                ? "News scheduled on Facebook successfully" 
+                : "News shared to Facebook successfully";
+            return ResponseEntity.ok(MessageResponse.builder()
+                    .message(msg)
+                    .build());
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error sharing news to Facebook: ", e);
+            return ResponseEntity.badRequest().body("Failed to share to Facebook: " + e.getMessage());
+        }
+    }
+
+    /**
      * Get image by filename
      */
     @GetMapping("/images/{imageName}")
@@ -431,6 +455,8 @@ public class NewsController {
                 .publishedAt(news.getPublishedAt())
                 .createdAt(news.getCreatedAt())
                 .updatedAt(news.getUpdatedAt())
+                .facebookPostId(news.getFacebookPostId())
+                .facebookScheduledAt(news.getFacebookScheduledAt())
                 .build();
     }
 

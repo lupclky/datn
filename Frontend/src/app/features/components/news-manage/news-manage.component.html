@@ -36,6 +36,7 @@
             <th style="width: 10%">Tác giả</th>
             <th style="width: 10%">Danh mục</th>
             <th style="width: 10%">Trạng thái</th>
+            <th style="width: 10%">Facebook</th>
             <th style="width: 8%">Lượt xem</th>
             <th style="width: 12%">Ngày tạo</th>
             <th style="width: 20%">Thao tác</th>
@@ -56,6 +57,24 @@
               <span [ngClass]="getStatusClass(news.status)">
                 {{ getStatusLabel(news.status) }}
               </span>
+            </td>
+            <td>
+              <div *ngIf="news.facebook_post_id; else noFb">
+                <a [href]="'https://facebook.com/' + news.facebook_post_id" target="_blank" class="text-decoration-none">
+                  <span *ngIf="news.facebook_scheduled_at; else sharedFb" class="badge bg-warning text-dark" 
+                        [pTooltip]="'Lên lịch: ' + formatDate(news.facebook_scheduled_at)" tooltipPosition="top">
+                    <i class="pi pi-clock me-1"></i>Đã lên lịch
+                  </span>
+                  <ng-template #sharedFb>
+                    <span class="badge bg-primary" pTooltip="Xem bài viết" tooltipPosition="top">
+                      <i class="pi pi-facebook me-1"></i>Đã đăng
+                    </span>
+                  </ng-template>
+                </a>
+              </div>
+              <ng-template #noFb>
+                <span class="text-muted"><small>Chưa đăng</small></span>
+              </ng-template>
             </td>
             <td>{{ news.views }}</td>
             <td>{{ formatDate(news.created_at) }}</td>
@@ -78,6 +97,11 @@
                         (click)="archiveNews(news.id)"
                         pTooltip="Lưu trữ" tooltipPosition="top"></button>
                 
+                <button pButton type="button" icon="pi pi-facebook" 
+                        class="p-button-rounded p-button-info p-button-sm"
+                        (click)="shareToFacebook(news.id)"
+                        pTooltip="Chia sẻ lên Facebook" tooltipPosition="top"></button>
+
                 <button pButton type="button" icon="pi pi-trash" 
                         class="p-button-rounded p-button-danger p-button-sm"
                         (click)="deleteNews(news.id)"
@@ -198,6 +222,41 @@
                     placeholder="Nhập tóm tắt nội dung"></textarea>
         </div>
 
+        <!-- Facebook Share Options -->
+        <div class="col-12">
+            <div class="card bg-light border-0">
+                <div class="card-body py-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="pi pi-facebook text-primary me-2" style="font-size: 1.2rem"></i>
+                        <h6 class="mb-0">Chia sẻ lên Facebook</h6>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <p-checkbox formControlName="share_to_facebook" 
+                                    [binary]="true" 
+                                    inputId="shareFb"
+                                    label="Đăng bài viết này lên Facebook Page ngay khi lưu"></p-checkbox>
+                    </div>
+
+                    <div *ngIf="newsForm.get('share_to_facebook')?.value" class="mt-2 ms-4 animate__animated animate__fadeIn">
+                        <label class="form-label d-block text-muted small mb-1">Lên lịch đăng bài (Tùy chọn)</label>
+                        <p-calendar [(ngModel)]="scheduledDate" 
+                                    [ngModelOptions]="{standalone: true}"
+                                    [showTime]="true" 
+                                    [showSeconds]="false"
+                                    [minDate]="minDate"
+                                    placeholder="Chọn thời gian đăng (để trống nếu đăng ngay)"
+                                    appendTo="body"
+                                    [style]="{'width':'100%', 'max-width': '400px'}"
+                                    inputStyleClass="p-inputtext-sm"></p-calendar>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.8rem">
+                            * Để trống để đăng ngay lập tức. Lên lịch tối thiểu 10 phút.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Content -->
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -259,6 +318,47 @@
       <button pButton type="button" label="Lưu" icon="pi pi-check" 
               class="p-button-success" (click)="saveNews()"
               [disabled]="newsForm.invalid"></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Share Facebook Dialog -->
+  <p-dialog [(visible)]="displayShareDialog" 
+            header="Chia sẻ lên Facebook"
+            [modal]="true" 
+            [style]="{width: '400px'}"
+            [draggable]="false"
+            [resizable]="false">
+    
+    <div class="d-flex flex-column gap-3">
+      <div class="text-center">
+        <i class="pi pi-facebook text-primary" style="font-size: 2rem"></i>
+        <h5 class="mt-2">Tùy chọn đăng bài</h5>
+      </div>
+
+      <div class="field">
+        <label for="scheduleTime" class="d-block mb-2">Lên lịch (Để trống nếu muốn đăng ngay)</label>
+        <p-calendar [(ngModel)]="scheduledDate" 
+                    [showTime]="true" 
+                    [showSeconds]="false"
+                    [minDate]="minDate"
+                    placeholder="Chọn thời gian đăng..."
+                    appendTo="body"
+                    [style]="{'width':'100%'}"
+                    inputId="scheduleTime"></p-calendar>
+        <small class="text-muted d-block mt-1">
+          * Thời gian lên lịch phải ít nhất 10 phút kể từ hiện tại.
+        </small>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Hủy" icon="pi pi-times" 
+              class="p-button-text" (click)="displayShareDialog = false"></button>
+      <button pButton type="button" 
+              [label]="scheduledDate ? 'Lên lịch' : 'Đăng ngay'" 
+              icon="pi pi-check" 
+              class="p-button-primary" 
+              (click)="confirmShare()"></button>
     </ng-template>
   </p-dialog>
 </div>

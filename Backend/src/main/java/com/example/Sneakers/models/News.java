@@ -47,5 +47,10 @@ public class News extends BaseEntity {
 
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
-}
 
+    @Column(name = "facebook_post_id")
+    private String facebookPostId;
+
+    @Column(name = "facebook_scheduled_at")
+    private LocalDateTime facebookScheduledAt;
+}

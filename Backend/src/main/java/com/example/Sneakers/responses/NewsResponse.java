@@ -52,5 +52,11 @@ public class NewsResponse {
     @JsonProperty("updated_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-}
 
+    @JsonProperty("facebook_post_id")
+    private String facebookPostId;
+
+    @JsonProperty("facebook_scheduled_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime facebookScheduledAt;
+}

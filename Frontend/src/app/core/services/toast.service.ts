@@ -30,6 +30,10 @@ export class ToastService {
     this.messageService.add({ severity: 'warn', summary: 'Cảnh báo', detail: content });
   }
 
+  showInfo(summary: string, detail: string) {
+    this.messageService.add({ severity: 'info', summary: summary, detail: detail });
+  }
+
   accountBlocked(content : string){
     this.messageService.add({ 
       severity: 'error', 

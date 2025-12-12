@@ -18,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NewsService implements INewsService {
     private final NewsRepository newsRepository;
+    private final IFacebookService facebookService;
 
     @Override
     @Transactional
@@ -38,7 +39,19 @@ public class NewsService implements INewsService {
             news.setPublishedAt(LocalDateTime.now());
         }
 
-        return newsRepository.save(news);
+        News savedNews = newsRepository.save(news);
+
+        // Share to Facebook if requested
+        if (Boolean.TRUE.equals(newsDTO.getShareToFacebook())) {
+            try {
+                shareNewsToFacebook(savedNews.getId(), newsDTO.getFacebookScheduledTime());
+            } catch (Exception e) {
+                // Log error but allow creation to proceed
+                System.err.println("Failed to share news to Facebook during creation: " + e.getMessage());
+            }
+        }
+
+        return savedNews;
     }
 
     @Override
@@ -65,7 +78,19 @@ public class NewsService implements INewsService {
             }
         }
 
-        return newsRepository.save(existingNews);
+        News savedNews = newsRepository.save(existingNews);
+
+        // Share to Facebook if requested
+        if (Boolean.TRUE.equals(newsDTO.getShareToFacebook())) {
+            try {
+                shareNewsToFacebook(savedNews.getId(), newsDTO.getFacebookScheduledTime());
+            } catch (Exception e) {
+                // Log error but allow creation to proceed
+                System.err.println("Failed to share news to Facebook during update: " + e.getMessage());
+            }
+        }
+
+        return savedNews;
     }
 
     @Override
@@ -135,6 +160,81 @@ public class NewsService implements INewsService {
         
         news.setStatus(NewsStatus.ARCHIVED);
         return newsRepository.save(news);
+    }
+
+    @Override
+    @Transactional
+    public void shareNewsToFacebook(Long id, Long scheduledTime) throws DataNotFoundException {
+        News news = getNewsById(id);
+        
+        // Use a configured base URL or default to localhost for dev
+        String baseUrl = "http://localhost:4200"; // Should be in config
+        
+        // Create a rich message content
+        StringBuilder message = new StringBuilder();
+        message.append(news.getTitle().toUpperCase()).append("\n\n");
+        
+        if (news.getSummary() != null && !news.getSummary().isEmpty()) {
+            message.append(news.getSummary()).append("\n\n");
+        }
+        
+        if (news.getContent() != null && !news.getContent().isEmpty()) {
+            String plainContent = stripHtml(news.getContent());
+            // Truncate if too long (Facebook has high limits but good to be safe/concise, e.g. 5000 chars)
+            if (plainContent.length() > 5000) {
+                plainContent = plainContent.substring(0, 5000) + "...";
+            }
+            message.append(plainContent).append("\n\n");
+        }
+        
+        // Append content (stripped of HTML if possible, or just raw text if simple)
+        // Here we just append the "Read more" link as text
+        message.append("--------------------\n");
+        message.append("Xem bài viết gốc tại: ").append(baseUrl).append("/news/").append(news.getId());
+        
+        // Pass null for link parameter to avoid creating a link preview card
+        // This will post as a regular status update with text
+        String responseBody = facebookService.postToPage(message.toString(), null, scheduledTime);
+        
+        // Parse JSON response to get ID
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(responseBody);
+            String fbId = root.path("id").asText();
+            
+            news.setFacebookPostId(fbId);
+            if (scheduledTime != null) {
+                // Convert UNIX timestamp to LocalDateTime
+                news.setFacebookScheduledAt(LocalDateTime.ofEpochSecond(scheduledTime, 0, java.time.ZoneOffset.of("+07:00")));
+            } else {
+                // Shared immediately, so scheduled time is null (or you could set it to now)
+                news.setFacebookScheduledAt(null);
+            }
+            
+            newsRepository.save(news);
+            
+        } catch (Exception e) {
+            // Log error but don't fail the request as sharing might have succeeded
+            System.err.println("Error parsing Facebook response or saving news: " + e.getMessage());
+        }
+    }
+
+    private String stripHtml(String html) {
+        if (html == null) return "";
+        // Replace paragraph and break tags with newlines to preserve some formatting
+        String text = html.replaceAll("(?i)<br\\s*/?>", "\n")
+                          .replaceAll("(?i)</?p\\s*>", "\n");
+        // Remove all other HTML tags
+        text = text.replaceAll("<[^>]+>", "");
+        // Decode common HTML entities (basic ones)
+        text = text.replace("&nbsp;", " ")
+                   .replace("&amp;", "&")
+                   .replace("&lt;", "<")
+                   .replace("&gt;", ">")
+                   .replace("&quot;", "\"")
+                   .replace("&#39;", "'");
+        // Remove multiple extra newlines
+        return text.replaceAll("\\n\\s*\\n", "\n\n").trim();
     }
 }
 

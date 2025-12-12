@@ -18,6 +18,9 @@ import { environment } from '../../../../environments/environment.development';
 import { AiService } from '../../../core/services/ai.service';
 import { finalize } from 'rxjs/operators';
 
+import { CalendarModule } from 'primeng/calendar';
+import { CheckboxModule } from 'primeng/checkbox';
+
 @Component({
   selector: 'app-news-manage',
   standalone: true,
@@ -33,7 +36,9 @@ import { finalize } from 'rxjs/operators';
     DropdownModule,
     ToastModule,
     ConfirmDialogModule,
-    CKEditorModule
+    CKEditorModule,
+    CalendarModule,
+    CheckboxModule
   ],
   providers: [MessageService, ToastService, ConfirmationService],
   templateUrl: './news-manage.component.html',
@@ -59,6 +64,12 @@ export class NewsManageComponent implements OnInit {
   isUploading: boolean = false;
   isGenerating: boolean = false;
   pendingContent: string | null = null;
+  
+  // Facebook Share
+  displayShareDialog: boolean = false;
+  shareNewsId: number | null = null;
+  scheduledDate: Date | null = null;
+  minDate: Date = new Date();
 
   statusOptions = [
     { label: 'Nháp', value: 'DRAFT' },
@@ -103,7 +114,8 @@ export class NewsManageComponent implements OnInit {
       author: [''],
       category: [''],
       status: ['DRAFT', Validators.required],
-      featured_image: ['']
+      featured_image: [''],
+      share_to_facebook: [false]
     });
   }
 
@@ -132,7 +144,8 @@ export class NewsManageComponent implements OnInit {
     this.selectedFile = null;
     this.imagePreview = null;
     this.pendingContent = null;
-    this.newsForm.reset({ status: 'DRAFT' });
+    this.scheduledDate = null;
+    this.newsForm.reset({ status: 'DRAFT', share_to_facebook: false });
     this.displayDialog = true;
     this.cdr.markForCheck();
   }
@@ -142,6 +155,7 @@ export class NewsManageComponent implements OnInit {
     this.selectedNewsId = news.id;
     this.selectedFile = null;
     this.imagePreview = news.featured_image ? `${environment.apiUrl}/news/images/${news.featured_image}` : null;
+    this.scheduledDate = null;
     
     // Store content to set later after editor is ready
     this.pendingContent = news.content || '';
@@ -153,7 +167,8 @@ export class NewsManageComponent implements OnInit {
       author: news.author,
       category: news.category,
       status: news.status,
-      featured_image: news.featured_image
+      featured_image: news.featured_image,
+      share_to_facebook: false
     });
     
     this.displayDialog = true;
@@ -262,11 +277,19 @@ export class NewsManageComponent implements OnInit {
       }
 
       const newsData: NewsCreateRequest = this.newsForm.value;
+      
+      // Add scheduling info
+      if (this.newsForm.get('share_to_facebook')?.value && this.scheduledDate) {
+        newsData.facebook_scheduled_time = Math.floor(this.scheduledDate.getTime() / 1000);
+      }
 
       if (this.isEditMode && this.selectedNewsId) {
         this.newsService.updateNews(this.selectedNewsId, newsData).subscribe({
           next: () => {
             this.toastService.showSuccess('Thành công', 'Cập nhật tin tức thành công');
+            if (newsData.share_to_facebook) {
+                 this.toastService.showInfo('Facebook', 'Đang xử lý đăng bài lên Facebook...');
+            }
             this.displayDialog = false;
             this.loadNews();
           },
@@ -279,6 +302,9 @@ export class NewsManageComponent implements OnInit {
         this.newsService.createNews(newsData).subscribe({
           next: () => {
             this.toastService.showSuccess('Thành công', 'Tạo tin tức thành công');
+            if (newsData.share_to_facebook) {
+                 this.toastService.showInfo('Facebook', 'Đang xử lý đăng bài lên Facebook...');
+            }
             this.displayDialog = false;
             this.loadNews();
           },
@@ -337,6 +363,45 @@ export class NewsManageComponent implements OnInit {
       error: (error) => {
         console.error('Error archiving news:', error);
         this.toastService.showError('Lỗi', 'Không thể lưu trữ tin tức');
+      }
+    });
+  }
+
+  shareToFacebook(id: number): void {
+    this.shareNewsId = id;
+    this.scheduledDate = null;
+    this.minDate = new Date();
+    this.minDate.setMinutes(this.minDate.getMinutes() + 10); // Min 10 mins from now
+    this.displayShareDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  confirmShare(): void {
+    if (!this.shareNewsId) return;
+
+    let scheduledTime: number | undefined;
+    if (this.scheduledDate) {
+      // Convert to Unix timestamp (seconds)
+      scheduledTime = Math.floor(this.scheduledDate.getTime() / 1000);
+    }
+
+    this.newsService.shareToFacebook(this.shareNewsId, scheduledTime).subscribe({
+      next: () => {
+        const msg = scheduledTime 
+          ? 'Đã lên lịch đăng bài lên Facebook thành công' 
+          : 'Đã chia sẻ lên Facebook thành công';
+        this.toastService.showSuccess('Thành công', msg);
+        this.displayShareDialog = false;
+        this.loadNews(); // Reload to show updated Facebook status
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error sharing to Facebook:', error);
+        let errorMsg = 'Không thể chia sẻ lên Facebook.';
+        if (error.error) {
+             errorMsg += ' ' + error.error;
+        }
+        this.toastService.showError('Lỗi', errorMsg);
       }
     });
   }

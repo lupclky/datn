@@ -32,5 +32,7 @@ public interface INewsService {
     News publishNews(Long id) throws DataNotFoundException;
     
     News archiveNews(Long id) throws DataNotFoundException;
+
+    void shareNewsToFacebook(Long id, Long scheduledTime) throws DataNotFoundException;
 }
 

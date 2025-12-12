@@ -156,5 +156,20 @@ export class NewsService {
       headers: headers
     });
   }
+
+  /**
+   * Share news to Facebook (admin only)
+   */
+  shareToFacebook(id: number, scheduledTime?: number): Observable<any> {
+    let params = new HttpParams();
+    if (scheduledTime) {
+      params = params.set('scheduledTime', scheduledTime.toString());
+    }
+    
+    return this.httpClient.post(`${this.apiUrl}/news/admin/${id}/share-facebook`, {}, {
+      headers: this.getAuthHeaders(),
+      params: params
+    });
+  }
 }
 

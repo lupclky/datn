@@ -56,5 +56,10 @@ public class NewsDTO {
     @JsonProperty("updated_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-}
 
+    @JsonProperty("share_to_facebook")
+    private Boolean shareToFacebook;
+
+    @JsonProperty("facebook_scheduled_time")
+    private Long facebookScheduledTime;
+}
