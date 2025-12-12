@@ -1,0 +1,217 @@
+.ai-management-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #1e293b;
+
+  .page-header {
+    margin-bottom: 2rem;
+    
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 1rem;
+    }
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+
+      h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #334155;
+      }
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+
+  // Status Card Styles
+  .status-card {
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+
+      &.active {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      &.inactive {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+
+      &:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .label {
+        color: #64748b;
+      }
+
+      .value {
+        font-weight: 600;
+        color: #0f172a;
+      }
+    }
+  }
+
+  // Actions Card Styles
+  .actions-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .action-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      width: fit-content;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      i {
+        font-size: 1.1rem;
+      }
+    }
+
+    .description {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+      &:hover:not(:disabled) { background: #2563eb; }
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+      &:hover:not(:disabled) { background: #d97706; }
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      &:hover:not(:disabled) { background: #dc2626; }
+    }
+  }
+
+  // Logs Card Styles
+  .logs-card {
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #e2e8f0;
+        color: #ef4444;
+      }
+    }
+
+    .logs-container {
+      height: 300px;
+      overflow-y: auto;
+      background: #0f172a; // Terminal-like background
+      color: #e2e8f0;
+      font-family: monospace;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .empty-logs {
+        color: #64748b;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .log-entry {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.4;
+
+        .timestamp {
+          color: #64748b;
+          min-width: 80px;
+        }
+
+        &.info { color: #e2e8f0; }
+        &.success { color: #4ade80; }
+        &.error { color: #f87171; }
+        &.warning { color: #fbbf24; }
+      }
+    }
+  }
+}
+

@@ -5,6 +5,7 @@ import com.example.Sneakers.services.LockFeatureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public class LockFeatureController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> createFeature(@RequestBody LockFeatureDTO featureDTO) {
         try {
             LockFeatureDTO created = lockFeatureService.createFeature(featureDTO);
@@ -49,6 +51,7 @@ public class LockFeatureController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateFeature(@PathVariable Long id, @RequestBody LockFeatureDTO featureDTO) {
         try {
             LockFeatureDTO updated = lockFeatureService.updateFeature(id, featureDTO);
@@ -59,6 +62,7 @@ public class LockFeatureController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deleteFeature(@PathVariable Long id) {
         try {
             lockFeatureService.deleteFeature(id);

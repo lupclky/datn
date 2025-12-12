@@ -41,13 +41,30 @@ public class WebSecurityConfig {
                                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                                 .authorizeHttpRequests(requests -> {
                                         requests
-                                                        // Review endpoints require authentication
-                                                        .requestMatchers(POST, String.format("%s/reviews/**", apiPrefix)).authenticated()
-                                                        .requestMatchers(PUT, String.format("%s/reviews/**", apiPrefix)).authenticated()
-                                                        .requestMatchers(DELETE, String.format("%s/reviews/**", apiPrefix)).authenticated()
-                                                        .requestMatchers(GET, String.format("%s/reviews/admin/**", apiPrefix)).authenticated()
-                                                        // All other requests are permitted
-                                                        .anyRequest().permitAll();
+                                                        .requestMatchers(
+                                                                String.format("%s/users/register", apiPrefix),
+                                                                String.format("%s/users/login", apiPrefix),
+                                                                String.format("%s/users/forgot-password", apiPrefix),
+                                                                String.format("%s/users/reset-password", apiPrefix)
+                                                        ).permitAll()
+                                                        
+                                                        .requestMatchers(GET,
+                                                                String.format("%s/categories/**", apiPrefix),
+                                                                String.format("%s/products/**", apiPrefix),
+                                                                String.format("%s/products/images/**", apiPrefix),
+                                                                String.format("%s/reviews/**", apiPrefix),
+                                                                String.format("%s/vouchers/**", apiPrefix),
+                                                                String.format("%s/news/**", apiPrefix),
+                                                                String.format("%s/banners/**", apiPrefix),
+                                                                String.format("%s/vnpay/payment-callback", apiPrefix),
+                                                                String.format("%s/lock-features/**", apiPrefix)
+                                                        ).permitAll()
+
+                                                        .requestMatchers(POST,
+                                                                String.format("%s/orders/**", apiPrefix)
+                                                        ).hasAnyRole("USER", "ADMIN")
+
+                                                        .anyRequest().authenticated();
 
                                 })
                                 .csrf(AbstractHttpConfigurer::disable);

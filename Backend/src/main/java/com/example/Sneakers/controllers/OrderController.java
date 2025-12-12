@@ -74,7 +74,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getOrder(@Valid @PathVariable("id") Long orderId){
         try {
             OrderResponse existingOrder = orderService.getOrder(orderId);
@@ -188,6 +188,7 @@ public class OrderController {
     }
 
     @GetMapping("/revenue")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getTotalRevenue() {
         try {
             Long totalRevenue = orderService.getTotalRevenue();
@@ -198,6 +199,7 @@ public class OrderController {
     }
 
     @GetMapping("/dashboard-stats")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<DashboardStatsDTO> getDashboardStats() {
         DashboardStatsDTO stats = orderService.getDashboardStats();
         return ResponseEntity.ok(stats);

@@ -1,0 +1,82 @@
+<div class="ai-management-container">
+  <div class="page-header">
+    <h2>Quản lý AI & Database</h2>
+    <p class="subtitle">Quản lý cơ sở dữ liệu vector và trạng thái của trợ lý AI</p>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Status Card -->
+    <div class="card status-card">
+      <div class="card-header">
+        <h3>Trạng thái Database</h3>
+        <div class="status-badge" [class.active]="status() === 'initialized'" [class.inactive]="status() !== 'initialized'">
+          {{ status() === 'initialized' ? 'Đã kích hoạt' : 'Chưa kích hoạt' }}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="stat-item">
+          <span class="label">Số lượng documents:</span>
+          <span class="value">{{ documentCount() }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="label">Lần cập nhật cuối:</span>
+          <span class="value">{{ lastUpdated() | date:'medium' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Card -->
+    <div class="card actions-card">
+      <div class="card-header">
+        <h3>Thao tác</h3>
+      </div>
+      <div class="card-body actions-grid">
+        <div class="action-item">
+          <button class="btn-primary" (click)="initializeAI()" [disabled]="isLoading()">
+            <i class="pi pi-database"></i>
+            {{ isLoading() ? 'Đang xử lý...' : 'Khởi tạo lại toàn bộ Database' }}
+          </button>
+          <p class="description">Xóa toàn bộ index cũ và tạo lại index mới cho tất cả sản phẩm và danh mục. Dùng khi có thay đổi lớn về dữ liệu.</p>
+        </div>
+
+        <div class="action-item">
+          <button class="btn-warning" (click)="checkAIStatus()" [disabled]="isLoading()">
+            <i class="pi pi-refresh"></i>
+            Kiểm tra trạng thái
+          </button>
+          <p class="description">Cập nhật lại trạng thái kết nối và số lượng bản ghi trong ChromaDB.</p>
+        </div>
+
+        <div class="action-item">
+          <button class="btn-danger" (click)="clearDatabase()" [disabled]="isLoading()">
+            <i class="pi pi-trash"></i>
+            Xóa Database
+          </button>
+          <p class="description">Xóa toàn bộ dữ liệu trong ChromaDB. Cẩn thận khi sử dụng!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs Section -->
+  <div class="card logs-card">
+    <div class="card-header">
+      <h3>Nhật ký hoạt động</h3>
+      <button class="btn-icon" (click)="clearLogs()" title="Xóa logs">
+        <i class="pi pi-trash"></i>
+      </button>
+    </div>
+    <div class="card-body logs-container" #logsContainer>
+      @if (logs().length === 0) {
+        <div class="empty-logs">Chưa có nhật ký hoạt động nào.</div>
+      }
+      @for (log of logs(); track log.timestamp) {
+        <div class="log-entry" [class]="log.type">
+          <span class="timestamp">{{ log.timestamp | date:'HH:mm:ss' }}</span>
+          <span class="message">{{ log.message }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+

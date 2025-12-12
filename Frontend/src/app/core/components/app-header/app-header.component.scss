@@ -1,17 +1,19 @@
 @import '../../../../assets/abstracts/variable.scss';
 
 // Material 3 Expressive Design System Variables (Blue Theme)
-$m3-sys-dark-surface: #111111; // Slightly darker surface
-$m3-sys-dark-surface-container: #1D1F24; // Blue-tinted grey
-$m3-sys-dark-surface-container-high: #282A2F;
+$m3-sys-dark-surface: #141218; // M3 Dark Surface
+$m3-sys-dark-surface-container: #1D1B20;
+$m3-sys-dark-surface-container-high: #2B2930;
 $m3-sys-dark-on-surface: #E6E1E5;
-$m3-sys-dark-on-surface-variant: #C4C7C5;
-$m3-sys-dark-primary: #8AB4F8; // Google Blue 300
-$m3-sys-dark-on-primary: #002855; // Dark Blue
-$m3-sys-dark-primary-container: #004080; // Dark Blue container
-$m3-sys-dark-on-primary-container: #D1E4FC; // Light Blue text
-$m3-sys-dark-outline: #8E918F;
-$m3-sys-dark-outline-variant: #444746;
+$m3-sys-dark-on-surface-variant: #CAC4D0;
+$m3-sys-dark-primary: #D0BCFF; // M3 Primary
+$m3-sys-dark-on-primary: #381E72;
+$m3-sys-dark-primary-container: #4F378B;
+$m3-sys-dark-on-primary-container: #EADDFF;
+$m3-sys-dark-outline: #938F99;
+$m3-sys-dark-outline-variant: #49454F;
+
+@import './admin-sidebar.scss';
 
 .modern-header {
   background: $m3-sys-dark-surface;
@@ -30,10 +32,10 @@ $m3-sys-dark-outline-variant: #444746;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  max-width: 1440px; // Wider for expressive feel
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0.75rem 1.5rem;
-  height: 80px; // Taller header
+  height: 80px;
   background: transparent;
 }
 
@@ -72,7 +74,7 @@ $m3-sys-dark-outline-variant: #444746;
   }
 
   .logo-img {
-    height: 48px; // Larger logo
+    height: 48px;
     width: auto;
     transition: transform 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
     display: block;
@@ -83,13 +85,13 @@ $m3-sys-dark-outline-variant: #444746;
   }
 }
 
-/* Center search column - M3 Search Bar */
+/* Center search column */
 .header-search {
   flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  max-width: 720px; // Limit max width
+  max-width: 720px;
 
   .search-container {
     position: relative;
@@ -100,9 +102,9 @@ $m3-sys-dark-outline-variant: #444746;
       display: flex;
       align-items: center;
       background: $m3-sys-dark-surface-container-high;
-      border-radius: 28px; // Fully rounded (Pill)
+      border-radius: 28px;
       border: none;
-      height: 56px; // M3 standard height
+      height: 56px;
       transition: all 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
       
       &:hover {
@@ -120,7 +122,7 @@ $m3-sys-dark-outline-variant: #444746;
       flex: 1;
       border: none;
       background: transparent;
-      padding: 0 16px 0 56px; // Left padding for icon
+      padding: 0 16px 0 56px;
       color: $m3-sys-dark-on-surface;
       font-size: 1rem;
       font-weight: 400;
@@ -167,7 +169,7 @@ $m3-sys-dark-outline-variant: #444746;
       left: 0;
       right: 0;
       background: $m3-sys-dark-surface-container;
-      border-radius: 16px; // Larger radius
+      border-radius: 16px;
       box-shadow: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
       overflow: hidden;
       z-index: 1002;
@@ -190,7 +192,7 @@ $m3-sys-dark-outline-variant: #444746;
         width: 48px;
         height: 48px;
         object-fit: cover;
-        border-radius: 8px; // M3 small shape
+        border-radius: 8px;
       }
 
       .suggestion-info {
@@ -262,7 +264,7 @@ $m3-sys-dark-outline-variant: #444746;
   height: 40px;
   display: flex;
   align-items: center;
-  border-radius: 20px; // Pill shape
+  border-radius: 20px;
   transition: all 0.2s;
   font-size: 0.875rem;
   letter-spacing: 0.1px;
@@ -285,10 +287,6 @@ $m3-sys-dark-outline-variant: #444746;
   }
 }
 
-.divider {
-  display: none;
-}
-
 .user-menu-container {
   position: relative;
 }
@@ -298,7 +296,7 @@ $m3-sys-dark-outline-variant: #444746;
   align-items: center;
   gap: 12px;
   padding: 6px 16px 6px 8px;
-  border-radius: 24px; // Pill
+  border-radius: 24px;
   cursor: pointer;
   transition: background 0.2s;
   border: 1px solid transparent;
@@ -382,7 +380,7 @@ $m3-sys-dark-outline-variant: #444746;
   }
 }
 
-/* Cart Preview Popup - M3 Card */
+/* Cart Preview Popup */
 .cart-preview {
   position: absolute;
   top: calc(100% + 12px);
@@ -519,7 +517,7 @@ $m3-sys-dark-outline-variant: #444746;
   }
 }
 
-/* Navbar Styles - Integrated */
+/* Navbar Styles */
 .navbar {
   padding: 0 1.5rem 1rem 1.5rem;
   box-shadow: none;
@@ -548,12 +546,12 @@ $m3-sys-dark-outline-variant: #444746;
   .navbar-nav {
     gap: 8px;
     justify-content: center;
-
+    
     .nav-item {
       .nav-link {
         color: $m3-sys-dark-on-surface-variant;
         padding: 8px 16px;
-        border-radius: 20px; // Pill
+        border-radius: 20px;
         transition: all 0.2s ease;
         font-size: 0.9rem;
         font-weight: 500;
@@ -567,7 +565,6 @@ $m3-sys-dark-outline-variant: #444746;
           font-size: 1.1rem;
         }
         
-        // Remove underline animation for M3 pill style
         &::after {
           display: none;
         }
@@ -588,68 +585,6 @@ $m3-sys-dark-outline-variant: #444746;
           }
         }
       }
-    }
-  }
-}
-
-/* Admin Sidebar Styles - Preserved but M3 updated */
-.admin-sidebar {
-  position: fixed;
-  top: 80px; // Match new header height
-  left: 0;
-  width: 280px;
-  height: calc(100vh - 80px);
-  background: $m3-sys-dark-surface;
-  border-right: 1px solid $m3-sys-dark-outline-variant;
-  z-index: 999;
-  transition: transform 0.3s cubic-bezier(0.2, 0.0, 0, 1.0);
-  
-  &.closed {
-    transform: translateX(-100%);
-  }
-  
-  .sidebar-header {
-    padding: 24px;
-    background: transparent;
-    border-bottom: none;
-
-    h3 {
-      font-size: 1.5rem;
-      color: $m3-sys-dark-on-surface;
-    }
-  }
-  
-  .sidebar-link {
-    margin: 4px 12px;
-    border-radius: 28px; // Pill
-    padding: 12px 24px;
-    border-left: none; // Remove old border style
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    color: $m3-sys-dark-on-surface-variant;
-    transition: all 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
-    
-    &:hover {
-      background: rgba(255,255,255,0.05);
-      color: $m3-sys-dark-on-surface;
-    }
-    
-    &.active {
-      background: $m3-sys-dark-primary-container;
-      color: $m3-sys-dark-on-primary-container;
-      border-left-color: transparent;
-      font-weight: 600;
-      
-      i {
-        color: $m3-sys-dark-on-primary-container;
-      }
-    }
-
-    i {
-      font-size: 1.25rem;
-      color: $m3-sys-dark-on-surface-variant;
     }
   }
 }
@@ -691,103 +626,92 @@ $m3-sys-dark-outline-variant: #444746;
       height: 48px;
     }
   }
-
-  .admin-sidebar {
-    top: 72px;
-    height: calc(100vh - 72px);
-  }
 }
 
 @media (max-width: 768px) {
   .header-container {
     height: 64px;
     padding: 0 1rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
   }
   
-  // Align navbar with header on mobile
-  .navbar {
-    padding: 0 1rem 1rem 1rem;
+  // Left section gets remaining space but allows right section to overlap if needed
+  .header-left {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  // Position Right Section ABSOLUTELY to force it to the right
+  .header-right {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    z-index: 20; // Higher than left
+    gap: 0.5rem;
+    justify-content: flex-end;
     
-    .container-fluid {
-      padding: 0 !important;
+    .mobile-search-trigger {
+      display: none; 
+    }
+    
+    .cart-section, .auth-links, .user-menu-container {
+      display: flex; 
+      align-items: center;
+    }
+
+    .cart-text, .user-name {
+      display: none !important; 
+    }
+
+    .user-menu {
+      padding: 0;
+      background: transparent;
+      border: none;
       
-      // Ensure the toggler aligns with header left content
-      // Header has 1rem padding, we matched that in .navbar padding
-      // So toggler at 0 padding inside container aligns with logo
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        margin: 0;
+      }
+      
+      i.pi-chevron-down {
+        display: none;
+      }
     }
-    
-    .navbar-toggler {
-        padding: 4px; // Reduce padding to align better visually with logo
-        margin-left: -4px; // Slight negative margin to offset padding for perfect optical alignment
+
+    .cart-section .cart-link {
+      padding: 0 6px;
+      background: transparent;
+      height: auto;
     }
+  }
+
+  // Hide hamburger menu on mobile
+  .navbar-toggler {
+    display: none !important;
   }
   
   .header-search-container {
-    display: none;
+    display: none; 
+  }
+  
+  .auth-links {
+    gap: 8px;
     
-    &.mobile-active {
-      display: flex;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(20, 18, 24, 0.95); // M3 Surface with opacity
-      z-index: 1001;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      backdrop-filter: blur(4px);
-
-      .header-search {
-        width: 100%;
-        max-width: 520px;
-        
-        .search-container {
-          flex: 1;
-        }
-      }
+    .auth-link {
+      padding: 0 12px;
+      height: 32px;
+      font-size: 0.8rem;
+      white-space: nowrap; 
     }
   }
   
-  .mobile-search-close {
-    display: block;
-    position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
-    background: transparent;
-    border: none;
-    color: #E6E1E5; // On Surface
-    font-size: 1.5rem;
-    cursor: pointer;
-    z-index: 1002;
-    padding: 8px;
-    border-radius: 50%;
-    
-    &:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
-  }
-  
-  .mobile-search-trigger {
-    display: block;
-  }
-  
-  .cart-text, .user-name {
-    display: none;
-  }
-  
-  .navbar .navbar-nav {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-    
-    .nav-item {
-      width: 100%;
-      .nav-link {
-        width: 100%;
-        justify-content: flex-start;
-      }
-    }
+  .navbar {
+    display: none !important;
   }
 }

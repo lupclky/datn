@@ -51,7 +51,7 @@ public class ProductController {
     private final ReviewRepository reviewRepository;
 
     @PostMapping("")
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> createProduct(
             @Valid @RequestBody ProductDTO productDTO,
             @RequestHeader("Authorization") String authorizationHeader,
@@ -101,6 +101,7 @@ public class ProductController {
     }
 
     @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> uploadImgages(
             @ModelAttribute("files") List<MultipartFile> files,
             @PathVariable("id") Long productId,
@@ -368,7 +369,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> updateProduct(
             @PathVariable Long id,
             @RequestBody ProductDTO productDTO,
@@ -382,7 +383,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteProduct(
             @PathVariable Long id,
             @RequestHeader("Authorization") String authorizationHeader) {
@@ -395,7 +396,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/images/{id}")
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<String> deleteProductImage(
             @PathVariable Long id,
             @RequestHeader("Authorization") String authorizationHeader) {

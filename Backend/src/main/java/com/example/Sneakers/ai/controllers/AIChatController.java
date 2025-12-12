@@ -1,8 +1,6 @@
 package com.example.Sneakers.ai.controllers;
 
 import com.example.Sneakers.ai.services.AIProductAssistantService;
-import dev.langchain4j.data.message.ImageContent;
-import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatModel;
 import lombok.RequiredArgsConstructor;
@@ -85,13 +83,11 @@ public class AIChatController {
 
             log.info("Image MIME type: {}", mimeType);
 
-            var response = geminiChatModel.chat(
-                    UserMessage.from(
-                            ImageContent.from(base64Image, mimeType),
-                            TextContent.from(prompt)));
+            // Use the enhanced service to answer with image and database context
+            String responseText = aiProductAssistantService.answerProductQueryWithImage(base64Image, mimeType, prompt);
 
             Map<String, Object> result = new HashMap<>();
-            result.put("response", response.aiMessage().text());
+            result.put("response", responseText);
             result.put("success", true);
             result.put("timestamp", System.currentTimeMillis());
 

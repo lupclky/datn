@@ -1,0 +1,87 @@
+/* Admin Sidebar Styles - Restored & M3 Updated */
+.admin-sidebar {
+  position: fixed;
+  top: 80px; // Match new header height
+  left: 0;
+  width: 280px;
+  height: calc(100vh - 80px);
+  background: $m3-sys-dark-surface;
+  border-right: 1px solid $m3-sys-dark-outline-variant;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.2, 0.0, 0, 1.0);
+  overflow-y: auto;
+  
+  &.closed {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar-header {
+    padding: 24px;
+    background: transparent;
+    border-bottom: none;
+
+    h3 {
+      font-size: 1.5rem;
+      color: $m3-sys-dark-on-surface;
+      margin: 0;
+    }
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+  }
+  
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar-link {
+    margin: 4px 12px;
+    border-radius: 28px; // Pill
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: $m3-sys-dark-on-surface-variant;
+    transition: all 0.2s cubic-bezier(0.2, 0.0, 0, 1.0);
+    
+    &:hover {
+      background: rgba(255,255,255,0.05);
+      color: $m3-sys-dark-on-surface;
+    }
+    
+    &.active {
+      background: $m3-sys-dark-primary-container;
+      color: $m3-sys-dark-on-primary-container;
+      font-weight: 600;
+      
+      i {
+        color: $m3-sys-dark-on-primary-container;
+      }
+    }
+
+    i {
+      font-size: 1.25rem;
+      color: $m3-sys-dark-on-surface-variant;
+    }
+  }
+}
+
+/* Responsive Sidebar */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    top: 72px;
+    height: calc(100vh - 72px);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    top: 64px;
+    height: calc(100vh - 64px);
+    width: 100%; // Full width on mobile if needed, or keep partial
+  }
+}

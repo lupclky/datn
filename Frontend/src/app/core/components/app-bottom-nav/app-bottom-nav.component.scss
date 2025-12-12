@@ -1,0 +1,176 @@
+@import '../../../../assets/abstracts/variable';
+
+// Dark Theme Variables for Bottom Nav
+$m3-sys-dark-surface: #141218;
+$m3-sys-dark-surface-container: #1D1B20;
+$m3-sys-dark-on-surface: #E6E1E5;
+$m3-sys-dark-on-surface-variant: #CAC4D0;
+$m3-sys-dark-secondary-container: #4A4458;
+$m3-sys-dark-on-secondary-container: #E8DEF8;
+
+.bottom-nav {
+  display: none; // Hidden on desktop
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px; // Standard Material 3 height
+  background-color: $m3-sys-dark-surface-container; // Surface color
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.2); // Darker shadow
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+  @media (min-width: 769px) {
+    display: none !important;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 1;
+    height: 100%;
+    text-decoration: none;
+    color: $m3-sys-dark-on-surface-variant; // On Surface Variant
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    .icon-container {
+      width: 64px;
+      height: 32px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: background-color 0.2s ease;
+
+      i {
+        font-size: 1.5rem;
+      }
+
+      .badge {
+        position: absolute;
+        top: -2px;
+        right: 12px;
+        background-color: #CF6679; // Dark theme error color
+        color: #000; // Text on error
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-weight: bold;
+      }
+    }
+
+    .label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: font-weight 0.2s ease;
+    }
+
+    &.active {
+      color: $m3-sys-dark-on-surface; // On Surface
+
+      .icon-container {
+        background-color: $m3-sys-dark-secondary-container; // Secondary Container
+        
+        i {
+          color: $m3-sys-dark-on-secondary-container; // On Secondary Container
+        }
+      }
+
+      .label {
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+// Search Overlay
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $m3-sys-dark-surface;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.0, 0, 1.0); // Material ease
+
+  &.open {
+    transform: translateY(0);
+  }
+
+  .search-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .search-input-wrapper {
+      flex: 1;
+      background-color: $m3-sys-dark-surface-container;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      height: 48px;
+
+      .search-icon {
+        color: $m3-sys-dark-on-surface-variant;
+        margin-right: 8px;
+      }
+
+      input {
+        border: none;
+        background: transparent;
+        flex: 1;
+        font-size: 1rem;
+        outline: none;
+        color: $m3-sys-dark-on-surface;
+      }
+
+      .clear-icon {
+        color: $m3-sys-dark-on-surface-variant;
+        padding: 4px;
+      }
+    }
+
+    .cancel-btn {
+      background: none;
+      border: none;
+      color: #D0BCFF; // Primary Dark
+      font-weight: 500;
+      font-size: 1rem;
+      padding: 8px;
+    }
+  }
+
+  .search-suggestions {
+    padding: 16px;
+    overflow-y: auto;
+
+    .suggestion-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      gap: 16px;
+      color: $m3-sys-dark-on-surface;
+
+      i {
+        color: $m3-sys-dark-on-surface-variant;
+      }
+    }
+  }
+}

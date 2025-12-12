@@ -1,0 +1,55 @@
+<nav class="bottom-nav">
+  <a routerLink="/Home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+    <div class="icon-container">
+      <i class="pi pi-home"></i>
+    </div>
+    <span class="label">Trang chủ</span>
+  </a>
+
+  <a routerLink="/news" routerLinkActive="active" class="nav-item">
+    <div class="icon-container">
+      <i class="pi pi-book"></i>
+    </div>
+    <span class="label">Tin tức</span>
+  </a>
+
+  <a routerLink="/allProduct" routerLinkActive="active" class="nav-item">
+    <div class="icon-container">
+      <i class="pi pi-th-large"></i>
+    </div>
+    <span class="label">Sản phẩm</span>
+  </a>
+
+  <div class="nav-item" [class.active]="isSearchOpen" (click)="toggleSearch()">
+    <div class="icon-container">
+      <i class="pi pi-search"></i>
+    </div>
+    <span class="label">Tìm kiếm</span>
+  </div>
+</nav>
+
+<!-- Search Overlay -->
+<div class="search-overlay" [class.open]="isSearchOpen">
+  <div class="search-header">
+    <div class="search-input-wrapper">
+      <i class="pi pi-search search-icon"></i>
+      <input 
+        #searchInput
+        type="text" 
+        [(ngModel)]="searchKeyword"
+        (keydown.enter)="onSearch()"
+        placeholder="Tìm kiếm sản phẩm..." 
+        autocomplete="off"
+      >
+      <i class="pi pi-times clear-icon" *ngIf="searchKeyword" (click)="searchKeyword = ''"></i>
+    </div>
+    <button class="cancel-btn" (click)="toggleSearch()">Hủy</button>
+  </div>
+  
+  <div class="search-suggestions" *ngIf="searchKeyword.trim().length > 0">
+    <div class="suggestion-item" (click)="onSearch()">
+      <i class="pi pi-search"></i>
+      <span>Tìm kiếm "{{searchKeyword}}"</span>
+    </div>
+  </div>
+</div>

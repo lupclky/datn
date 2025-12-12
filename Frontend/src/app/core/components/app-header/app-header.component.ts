@@ -188,9 +188,15 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   }
 
   sendContentSearch(){
-    this.detailProductService.setContent(this.searchValue);
-    this.hideSuggestions();
-    this.isMobileSearchActive = false; // Close mobile search after search
+    if (this.searchValue.trim()) {
+      this.router.navigate(['/allProduct'], { 
+        queryParams: { 
+          keyword: this.searchValue.trim() 
+        } 
+      });
+      this.hideSuggestions();
+      this.isMobileSearchActive = false; // Close mobile search after search
+    }
   }
 
   // Search suggestions methods
@@ -299,7 +305,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
         }
       },
       {
-        label: 'Sign out',
+        label: 'Đăng xuất',
         icon: 'pi pi-power-off',
         command: () => {
           this.signOut();

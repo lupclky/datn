@@ -13,6 +13,7 @@ import { takeUntil, tap, filter } from 'rxjs';
 import { AiChatbotComponent } from '../ai-chatbot/ai-chatbot.component';
 import { ScrollToTopComponent } from '../../../shared/components/scroll-to-top/scroll-to-top.component';
 import { CustomerChatComponent } from '../../../features/components/customer-chat/customer-chat.component';
+import { AppBottomNavComponent } from '../app-bottom-nav/app-bottom-nav.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -29,7 +30,8 @@ import { CommonModule } from '@angular/common';
     BlockUIModule,
     AiChatbotComponent,
     ScrollToTopComponent,
-    CustomerChatComponent
+    CustomerChatComponent,
+    AppBottomNavComponent
   ],
   templateUrl: './app-layout.component.html',
   styleUrl: './app-layout.component.scss'

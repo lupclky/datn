@@ -3,8 +3,11 @@
   <div class="allProduct-header">
     <div class="container">
       <div class="row justify-content-between align-items-center">
-        <div class="col-12 col-lg-3 col-md-4 mb-3">
-          <h3 class="mobile-title"> <span style="color: #c4c2c2">TRANG CHỦ / </span>TẤT CẢ SẢN PHẨM</h3>
+        <div class="col-12 col-lg-6 col-md-6 mb-3">
+          <h3 class="mobile-title"> 
+            <span style="color: #c4c2c2">TRANG CHỦ / </span>
+            {{ isSearchMode ? 'KẾT QUẢ TÌM KIẾM: "' + searchKeyword + '"' : 'TẤT CẢ SẢN PHẨM' }}
+          </h3>
         </div>
         <!-- Mobile filters -->
         <div class="d-md-none col-12 mb-4">

@@ -35,6 +35,7 @@ import { NewsManageComponent } from './features/components/news-manage/news-mana
 import { NewsDetailComponent } from './features/components/news-detail/news-detail.component';
 import { ProductManageComponent } from './features/components/product-manage/product-manage.component';
 import { StaffChatComponent } from './features/components/staff-chat/staff-chat.component';
+import { AiManagementComponent } from './features/components/ai-management/ai-management.component';
 import { StaffGuard } from './features/auth/authInterceptor/staff.guard';
 
 export const routes: Routes = [
@@ -174,6 +175,11 @@ export const routes: Routes = [
       {
         path: 'admin/returns',
         component: ReturnManageComponent,
+        canActivate: [RoleGuard]
+      },
+      {
+        path: 'admin/ai-management',
+        component: AiManagementComponent,
         canActivate: [RoleGuard]
       },
       {

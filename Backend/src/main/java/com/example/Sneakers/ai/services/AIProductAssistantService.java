@@ -40,6 +40,52 @@ public class AIProductAssistantService {
         return response.aiMessage().text();
     }
 
+    public String answerProductQueryWithImage(String base64Image, String mimeType, String userPrompt) {
+        log.info("Processing product query with image: {}", userPrompt);
+
+        // Step 1: Analyze image to get a search query
+        // We ask Gemini to describe the product in the image specifically for search purposes
+        String imageAnalysisPrompt = "Describe the product in this image in detail (color, type, brand, key features) to use as a search query for a database. Return ONLY the search keywords.";
+        
+        var analysisResponse = geminiChatModel.chat(UserMessage.from(
+                dev.langchain4j.data.message.ImageContent.from(base64Image, mimeType),
+                dev.langchain4j.data.message.TextContent.from(imageAnalysisPrompt)
+        ));
+        
+        String searchQuery = analysisResponse.aiMessage().text();
+        log.info("Generated search query from image: {}", searchQuery);
+
+        // Step 2: Search for relevant products using the generated description
+        List<Document> relevantDocuments = vectorSearchService.searchProducts(searchQuery, 5);
+        String productContext = buildProductContext(relevantDocuments);
+
+        // Step 3: Answer the user's original prompt using the image AND the found products
+        String finalPrompt = String.format("""
+                Bạn là chuyên gia tư vấn khóa điện tử của Locker Korea.
+                
+                Khách hàng đã gửi một hình ảnh sản phẩm và hỏi: "%s"
+                
+                Hệ thống đã tìm thấy các sản phẩm tương tự trong cửa hàng dựa trên hình ảnh:
+                %s
+                
+                Hãy trả lời khách hàng dựa trên CẢ hình ảnh họ gửi VÀ danh sách sản phẩm tìm thấy ở trên.
+                
+                Quy tắc:
+                1. Nếu hình ảnh giống với một trong các sản phẩm tìm thấy, hãy xác nhận và giới thiệu chi tiết sản phẩm đó.
+                2. Nếu không giống hoàn toàn, hãy giới thiệu các sản phẩm tương tự nhất từ danh sách.
+                3. Trả lời chuyên nghiệp, thân thiện bằng tiếng Việt.
+                4. Cung cấp tên, giá và link (nếu có trong context) của sản phẩm được đề xuất.
+                """, userPrompt, productContext);
+
+        // We send the image again so Gemini can compare specific visual details with the text descriptions
+        var finalResponse = geminiChatModel.chat(UserMessage.from(
+                dev.langchain4j.data.message.ImageContent.from(base64Image, mimeType),
+                dev.langchain4j.data.message.TextContent.from(finalPrompt)
+        ));
+
+        return finalResponse.aiMessage().text();
+    }
+
     public String answerProductQueryByCategory(String userQuery, String category) {
         log.info("Processing product query in category {}: {}", category, userQuery);
 

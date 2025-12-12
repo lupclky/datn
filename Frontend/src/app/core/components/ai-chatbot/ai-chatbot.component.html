@@ -69,6 +69,11 @@
       }
       @for (message of staffMessages(); track message.id) {
         <div class="message" [class.staff]="message.isStaffMessage" [class.customer]="!message.isStaffMessage">
+          @if(message.isStaffMessage) {
+            <div class="avatar">
+              <i class="pi pi-user"></i>
+            </div>
+          }
           <div class="message-bubble">
             @if(message.messageType === 'IMAGE' && message.fileUrl) {
               <img [src]="getFileUrl(message.fileUrl)" alt="Image" class="message-image" (click)="openImagePreview(getFileUrl(message.fileUrl))" 
@@ -98,9 +103,14 @@
 
       @for (message of messages(); track message.timestamp) {
         <div class="message" [class.user]="message.sender === 'user'" [class.bot]="message.sender === 'bot'" [class.error]="message.isError">
+          @if(message.sender === 'bot') {
+            <div class="avatar">
+              <i class="pi pi-sparkles"></i>
+            </div>
+          }
           <div class="message-bubble">
             @if (message.image) {
-              <img [src]="message.image" alt="Uploaded image" class="message-image">
+              <img [src]="message.image" alt="Uploaded image" class="message-image" style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 8px;">
             }
             <p [innerHTML]="message.content"></p>
           </div>
@@ -110,6 +120,9 @@
 
       @if (isLoading()) {
         <div class="message bot loading">
+          <div class="avatar">
+            <i class="pi pi-spin pi-spinner"></i>
+          </div>
           <div class="message-bubble">
             <div class="typing-indicator">
               <span></span>
@@ -194,4 +207,4 @@
       </button>
     </div>
   </div>
-</div> 
+</div>

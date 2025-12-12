@@ -75,6 +75,8 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
   public selectedFeatures: string[] = []; // Multiple features selected (for desktop)
   public featureOptions: MenuItem[] = [];
   public features: LockFeature[] = []; // Lưu trữ features từ database
+  public searchKeyword: string = '';
+  public isSearchMode: boolean = false;
 
   constructor(
     private productService: ProductService,
@@ -109,27 +111,45 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
   }
 
   ngOnInit(): void {
-    // Xử lý query params từ route (category hoặc feature/features)
+    // Xử lý query params từ route
     this.route.queryParams.pipe(
       takeUntil(this.destroyed$),
       tap(params => {
+        // Reset state
+        this.selectedCategory = 'all';
+        this.selectedFeature = 'all';
+        this.selectedFeatures = [];
+        this.isSearchMode = false;
+        this.searchKeyword = '';
+
+        // Handle Search Keyword
+        if (params['keyword']) {
+          this.searchKeyword = params['keyword'];
+          this.isSearchMode = true;
+          this.selectedCategory = 'all'; // Reset category when searching
+          console.log('Search by keyword:', this.searchKeyword);
+        }
+
+        // Handle Category
         if (params['category']) {
           this.selectedCategory = params['category'];
           console.log('Filter by category:', this.selectedCategory);
         }
-        // Handle single feature (from home page)
+
+        // Handle Feature
         if (params['feature']) {
           this.selectedFeature = params['feature'];
-          // Also add to selectedFeatures for desktop display
           this.selectedFeatures = [params['feature']];
           console.log('Filter by feature:', this.selectedFeature);
         }
-        // Handle multiple features (from checkboxes)
+
+        // Handle Multiple Features
         if (params['features']) {
           this.selectedFeatures = params['features'].split(',');
           console.log('Filter by features:', this.selectedFeatures);
         }
-        // Load data sau khi xử lý query params
+
+        // Load data logic based on priority: Keyword > Category > Default(All)
         this.loadInitialData();
       })
     ).subscribe();
@@ -146,7 +166,7 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
       ).subscribe();
     }
 
-    // Tải danh mục sản phẩm
+    // Tải danh mục sản phẩm (Always load for sidebar)
     this.categoriesService.getCategories().pipe(
       tap((categories) => {
         const categoryItems = categories.map((item: CategoriesDto) => ({
@@ -160,7 +180,7 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
       })
     ).subscribe();
 
-    // Tải danh sách features
+    // Tải features và sau đó tải sản phẩm
     this.loadFeatures();
   }
 
@@ -178,14 +198,49 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
           ...featureItems
         ];
 
-        // Sau khi có features, load products theo selectedCategory
-        this.loadProductsByCategory();
+        // Decide which product loading method to use
+        if (this.isSearchMode && this.searchKeyword) {
+          this.loadProductsBySearch(this.searchKeyword);
+        } else {
+          this.loadProductsByCategory();
+        }
       }),
       catchError((error) => {
         console.error('Error loading features:', error);
-        // Nếu lỗi, vẫn load products
-        this.loadProductsByCategory();
+        // Fallback loading
+        if (this.isSearchMode && this.searchKeyword) {
+          this.loadProductsBySearch(this.searchKeyword);
+        } else {
+          this.loadProductsByCategory();
+        }
         return of([]);
+      })
+    ).subscribe();
+  }
+
+  private loadProductsBySearch(keyword: string): void {
+    this.isLoading = true;
+    this.productService.searchProduct(keyword).pipe(
+      takeUntil(this.destroyed$),
+      tap((product: AllProductDto) => {
+        if (product && product.products) {
+          this.allProducts = product.products;
+          this.applyFilters(); // Apply local filters (price, etc.) on search results
+          this.error = null;
+        } else {
+          this.products = [];
+          this.displayedProducts = [];
+          this.totalRecords = 0;
+          this.error = `Không tìm thấy sản phẩm nào với từ khóa "${keyword}"`;
+        }
+      }),
+      catchError((error) => {
+        console.error('Error searching products:', error);
+        this.error = 'Có lỗi xảy ra khi tìm kiếm sản phẩm';
+        return of(null);
+      }),
+      finalize(() => {
+        this.isLoading = false;
       })
     ).subscribe();
   }

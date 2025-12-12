@@ -2,6 +2,7 @@ package com.example.Sneakers.ai.services;
 
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.Category;
+import com.example.Sneakers.models.ProductFeature;
 import com.example.Sneakers.repositories.ProductRepository;
 import com.example.Sneakers.repositories.CategoryRepository;
 import dev.langchain4j.data.document.Document;
@@ -206,19 +207,33 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     }
 
     private String formatProductContent(Product product) {
+        StringBuilder featuresBuilder = new StringBuilder();
+        if (product.getProductFeatures() != null && !product.getProductFeatures().isEmpty()) {
+            for (ProductFeature pf : product.getProductFeatures()) {
+                if (pf.getFeature() != null) {
+                    featuresBuilder.append(pf.getFeature().getName()).append(", ");
+                }
+            }
+        }
+        
+        String features = featuresBuilder.length() > 0 
+            ? featuresBuilder.substring(0, featuresBuilder.length() - 2) 
+            : "Standard features";
+
         return String.format("""
                 Product: %s
                 Description: %s
                 Category: %s
                 Price: %d VND
                 Discount: %d%%
-                Features: Sneaker shoe, comfortable, stylish
+                Features: %s
                 """,
                 product.getName(),
                 product.getDescription(),
                 product.getCategory() != null ? product.getCategory().getName() : "Unknown",
                 product.getPrice(),
-                product.getDiscount() != null ? product.getDiscount() : 0);
+                product.getDiscount() != null ? product.getDiscount() : 0,
+                features);
     }
 
     private Map<String, String> createProductMetadata(Product product) {
@@ -230,6 +245,19 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         metadata.put("category_id", product.getCategory() != null ? product.getCategory().getId().toString() : "");
         metadata.put("category_name", product.getCategory() != null ? product.getCategory().getName() : "");
         metadata.put("discount", product.getDiscount() != null ? product.getDiscount().toString() : "0");
+        metadata.put("thumbnail", product.getThumbnail() != null ? product.getThumbnail() : "");
+        
+        StringBuilder featuresBuilder = new StringBuilder();
+        if (product.getProductFeatures() != null && !product.getProductFeatures().isEmpty()) {
+            for (ProductFeature pf : product.getProductFeatures()) {
+                if (pf.getFeature() != null) {
+                    featuresBuilder.append(pf.getFeature().getName()).append(", ");
+                }
+            }
+        }
+        if (featuresBuilder.length() > 0) {
+             metadata.put("features", featuresBuilder.substring(0, featuresBuilder.length() - 2));
+        }
 
         return metadata;
     }
