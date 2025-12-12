@@ -12,7 +12,6 @@ import com.example.Sneakers.repositories.UserRepository;
 import com.example.Sneakers.repositories.VoucherRepository;
 import com.example.Sneakers.repositories.VoucherUsageRepository;
 import com.example.Sneakers.responses.*;
-import com.example.Sneakers.utils.BuilderEmailContent;
 import com.example.Sneakers.utils.Email;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -36,10 +35,10 @@ public class OrderService implements IOrderService {
     private final ProductRepository productRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final UserService userService;
-    private final CartService cartService;
     private final VoucherRepository voucherRepository;
     private final VoucherUsageRepository voucherUsageRepository;
-    private final Email emailService;
+    private final GhnService ghnService;
+    private final AsyncOrderService asyncOrderService;
 
     @Override
     @Transactional
@@ -51,11 +50,6 @@ public class OrderService implements IOrderService {
         if (orderDTO.getCartItems() == null || orderDTO.getCartItems().isEmpty()) {
             throw new Exception("Cart items are null or empty");
         }
-        // Convert orderDTO => Order
-        // Dùng thư viện Model Mapper
-        // Tạo 1 luồng bằng ánh xạ riêng để kiểm soát việc ánh xạ
-        // modelMapper.typeMap(OrderDTO.class,Order.class)
-        // .addMappings(mapper -> mapper.skip(Order::setId));
         Long shippingCost = switch (orderDTO.getShippingMethod()) {
             case "Tiêu chuẩn" -> 30000L;
             case "Nhanh" -> 40000L;
@@ -96,16 +90,6 @@ public class OrderService implements IOrderService {
                 throw new Exception("Voucher đã hết lượt sử dụng");
             }
 
-            // Check user usage limit - Temporarily disabled to allow reuse
-            /*
-             * Long userUsageCount =
-             * voucherUsageRepository.countByVoucherIdAndUserId(voucher.getId(),
-             * user.getId());
-             * if (userUsageCount >= 1) {
-             * throw new Exception("Bạn đã sử dụng voucher này rồi");
-             * }
-             */
-
             // Calculate discount
             discountAmount = (baseTotal * voucher.getDiscountPercentage()) / 100;
             if (voucher.getMaxDiscountAmount() != null && discountAmount > voucher.getMaxDiscountAmount()) {
@@ -141,19 +125,9 @@ public class OrderService implements IOrderService {
                 .discountAmount(discountAmount)
                 .active(true)
                 .shippingDate(LocalDate.now().plusDays(3))
+                .districtId(orderDTO.getDistrictId())
+                .wardCode(orderDTO.getWardCode())
                 .build();
-        // modelMapper.map(orderDTO,order);
-        // order.setUser(user);
-        // order.setOrderDate(LocalDate.now());
-        // order.setStatus(OrderStatus.PENDING);
-        // Kiểm tra shipping date phải >= hôm nay
-        // LocalDate shippingDate = orderDTO.getShippingDate() == null ? LocalDate.now()
-        // : orderDTO.getShippingDate();
-        // if(shippingDate.isBefore(LocalDate.now())){
-        // throw new DataNotFoundException("Date must be at least today !");
-        // }
-        // order.setActive(true);
-        // order.setShippingDate(shippingDate);
 
         orderRepository.save(order);
 
@@ -212,20 +186,8 @@ public class OrderService implements IOrderService {
         // Lưu danh sách OrderDetail vào cơ sở dữ liệu
         orderDetailRepository.saveAll(orderDetails);
 
-        // Gửi mail thông báo cho người dùng (không throw exception nếu thất bại)
-        try {
-            String to = order.getEmail();
-            String subject = "Đặt hàng thành công từ Locker Korea - Đơn hàng #" + order.getId();
-            String content = BuilderEmailContent.buildOrderEmailContent(order);
-            boolean sendMail = emailService.sendEmail(to, subject, content);
-
-            if (!sendMail) {
-                System.err.println("Warning: Failed to send order confirmation email to " + to);
-            }
-        } catch (Exception emailException) {
-            // Log email error but don't fail the order creation
-            System.err.println("Warning: Exception while sending email: " + emailException.getMessage());
-        }
+        // Offload email sending and GHN waybill creation to async service
+        asyncOrderService.processAfterOrderCreation(order, orderDTO.getDistrictId(), orderDTO.getWardCode());
 
         return OrderIdResponse.fromOrder(order);
     }
@@ -233,7 +195,16 @@ public class OrderService implements IOrderService {
     @Override
     public OrderResponse getOrder(Long id) {
         Order order = orderRepository.findByIdWithDetails(id).orElse(null);
-        return OrderResponse.fromOrder(order);
+        if (order == null) return null;
+        OrderResponse response = OrderResponse.fromOrder(order);
+        try {
+            if (order.getTrackingNumber() != null && "GHN".equals(order.getCarrier())) {
+                response.setTrackingInfo(ghnService.getOrderInfo(order.getTrackingNumber()));
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching tracking info: " + e.getMessage());
+        }
+        return response;
     }
 
     @Override
@@ -242,21 +213,37 @@ public class OrderService implements IOrderService {
         User user = userService.getUserDetailsFromToken(extractedToken);
 
         // Allow ADMIN and STAFF to view any order
+        Order order = orderRepository.findByIdWithDetails(orderId).orElse(null);
+        if (order == null) {
+             throw new Exception("Cannot find order with id = " + orderId);
+        }
+
         if (user.getRole() != null && 
             (user.getRole().getName().equals(Role.ADMIN) || user.getRole().getName().equals(Role.STAFF))) {
-            return OrderResponse.fromOrder(orderRepository.findByIdWithDetails(orderId)
-                    .orElseThrow(() -> new Exception("Cannot find order with id = " + orderId)));
+            OrderResponse response = OrderResponse.fromOrder(order);
+            try {
+                if (order.getTrackingNumber() != null && "GHN".equals(order.getCarrier())) {
+                    response.setTrackingInfo(ghnService.getOrderInfo(order.getTrackingNumber()));
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching tracking info: " + e.getMessage());
+            }
+            return response;
         }
 
         // Regular users can only view their own orders
-        Order order = orderRepository.findByIdWithDetails(orderId).orElse(null);
-        if (order == null) {
-            throw new Exception("Cannot find order with id = " + orderId);
-        }
         if (!user.getId().equals(order.getUser().getId())) {
             throw new Exception("Cannot get order of another user");
         }
-        return OrderResponse.fromOrder(order);
+        OrderResponse response = OrderResponse.fromOrder(order);
+        try {
+             if (order.getTrackingNumber() != null && "GHN".equals(order.getCarrier())) {
+                 response.setTrackingInfo(ghnService.getOrderInfo(order.getTrackingNumber()));
+             }
+         } catch (Exception e) {
+             System.err.println("Error fetching tracking info: " + e.getMessage());
+         }
+        return response;
     }
 
     @Override
@@ -341,5 +328,37 @@ public class OrderService implements IOrderService {
     @Override
     public List<Order> getOrdersByDateRange(LocalDate startDate, LocalDate endDate) {
         return orderRepository.findByOrderDateBetween(startDate, endDate);
+    }
+
+    @Override
+    @Transactional
+    public Order createWaybill(Long orderId, Integer districtId, String wardCode) throws Exception {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new DataNotFoundException("Order not found"));
+        
+        if (order.getTrackingNumber() != null && !order.getTrackingNumber().isEmpty()) {
+             throw new Exception("Order already has a waybill: " + order.getTrackingNumber());
+        }
+
+        String trackingCode = ghnService.createOrder(order, districtId, wardCode);
+        order.setTrackingNumber(trackingCode);
+        order.setCarrier("GHN");
+        return orderRepository.save(order);
+    }
+
+    @Override
+    public Object getTrackingInfo(Long orderId) throws Exception {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new DataNotFoundException("Order not found"));
+            
+        if (order.getTrackingNumber() == null) {
+            return null;
+        }
+        
+        if ("GHN".equals(order.getCarrier())) {
+            return ghnService.getOrderInfo(order.getTrackingNumber());
+        }
+        
+        return null;
     }
 }

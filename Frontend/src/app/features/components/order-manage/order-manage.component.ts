@@ -110,6 +110,12 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     { name: 'Thanh toán qua VNPAY', key: 'VNPAY' }
   ];
   public isCreatingOrder: boolean = false;
+  
+  // Waybill dialog
+  public showWaybillDialog: boolean = false;
+  public waybillForm: FormGroup;
+  public selectedOrderForWaybill: any = null;
+  public isCreatingWaybill: boolean = false;
 
   constructor(
     private orderService: OrderService,
@@ -135,6 +141,11 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
       shipping_method: ['Tiêu chuẩn', [Validators.required]],
       payment_method: ['Cash', [Validators.required]],
       productSearch: ['']
+    });
+
+    this.waybillForm = this.fb.group({
+        district_id: [null, [Validators.required]],
+        ward_code: ['', [Validators.required]]
     });
   }
 
@@ -526,5 +537,39 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
         this.isCreatingOrder = false;
       })
     ).subscribe();
+  }
+
+  openWaybillDialog(order: any) {
+      this.selectedOrderForWaybill = order;
+      this.showWaybillDialog = true;
+      this.waybillForm.reset({
+          district_id: order.district_id,
+          ward_code: order.ward_code
+      });
+  }
+
+  createWaybill() {
+      if (this.waybillForm.invalid || !this.selectedOrderForWaybill) {
+          return;
+      }
+
+      this.isCreatingWaybill = true;
+      const { district_id, ward_code } = this.waybillForm.value;
+
+      this.orderService.createWaybill(this.selectedOrderForWaybill.id, district_id, ward_code).pipe(
+          tap(() => {
+              this.toastService.success('Tạo vận đơn thành công!');
+              this.showWaybillDialog = false;
+              this.loadOrders();
+          }),
+          catchError((err) => {
+              const errorMessage = err?.error?.message || err?.error || 'Không thể tạo vận đơn';
+              this.toastService.fail(errorMessage);
+              return of(err);
+          }),
+          finalize(() => {
+              this.isCreatingWaybill = false;
+          })
+      ).subscribe();
   }
 }

@@ -66,6 +66,18 @@ public class Order {
     @Column(name = "vnp_TransactionNo")
     private String vnpTransactionNo;
 
+    @Column(name = "tracking_number")
+    private String trackingNumber;
+
+    @Column(name = "carrier")
+    private String carrier;
+
+    @Column(name = "district_id")
+    private Integer districtId;
+
+    @Column(name = "ward_code")
+    private String wardCode;
+
     @Column(name = "active")
     private Boolean active;
 

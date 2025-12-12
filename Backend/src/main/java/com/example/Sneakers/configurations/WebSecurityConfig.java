@@ -45,7 +45,8 @@ public class WebSecurityConfig {
                                                                 String.format("%s/users/register", apiPrefix),
                                                                 String.format("%s/users/login", apiPrefix),
                                                                 String.format("%s/users/forgot-password", apiPrefix),
-                                                                String.format("%s/users/reset-password", apiPrefix)
+                                                                String.format("%s/users/reset-password", apiPrefix),
+                                                                "/error"
                                                         ).permitAll()
                                                         
                                                         .requestMatchers(GET,
@@ -64,6 +65,12 @@ public class WebSecurityConfig {
                                                         .requestMatchers(
                                                                 String.format("%s/ai/chat/**", apiPrefix)
                                                         ).permitAll()
+                                                        
+                                                        // GHN Location endpoints - Public for testing/integration
+                                                        .requestMatchers(
+                                                                String.format("%s/ghn/**", apiPrefix),
+                                                                String.format("%s/carts/**", apiPrefix)
+                                                        ).permitAll()
 
                                                         // AI Admin endpoints
                                                         .requestMatchers(
@@ -72,7 +79,7 @@ public class WebSecurityConfig {
 
                                                         .requestMatchers(POST,
                                                                 String.format("%s/orders/**", apiPrefix)
-                                                        ).hasAnyRole("USER", "ADMIN")
+                                                        ).hasAnyRole("USER", "ADMIN", "STAFF")
 
                                                         .anyRequest().authenticated();
 

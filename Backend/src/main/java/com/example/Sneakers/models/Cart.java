@@ -24,6 +24,9 @@ public class Cart {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "session_id")
+    private String sessionId;
+
     private Long quantity;
 
     private Long size;

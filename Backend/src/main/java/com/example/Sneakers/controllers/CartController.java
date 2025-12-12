@@ -31,7 +31,8 @@ public class CartController {
     @PostMapping("")
     public ResponseEntity<?> createCart(
             @Valid @RequestBody CartItemDTO cartItemDTO,
-            @RequestHeader("Authorization") String token,
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "x-guest-session-id", required = false) String sessionId,
             BindingResult result
     ) throws Exception {
         try {
@@ -40,7 +41,7 @@ public class CartController {
                         .stream().map(FieldError::getDefaultMessage).toList();
                 return ResponseEntity.badRequest().body(errorMessages);
             }
-            Cart cart = cartService.createCart(cartItemDTO,token);
+            Cart cart = cartService.createCart(cartItemDTO, token, sessionId);
             return ResponseEntity.ok(CartResponse.fromCart(cart));
         }
         catch (Exception e){
@@ -50,10 +51,11 @@ public class CartController {
 
     @GetMapping("")
     public ResponseEntity<?> getCartByUserId(
-            @RequestHeader("Authorization") String token
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "x-guest-session-id", required = false) String sessionId
     ){
         try {
-            ListCartResponse listCartResponse = cartService.getCartsByUserId(token);
+            ListCartResponse listCartResponse = cartService.getCarts(token, sessionId);
             return ResponseEntity.ok(listCartResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -63,9 +65,10 @@ public class CartController {
     public ResponseEntity<?> updateCart(
             @PathVariable Long id,
             @Valid @RequestBody CartItemDTO cartItemDTO,
-            @RequestHeader("Authorization") String token){
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "x-guest-session-id", required = false) String sessionId){
         try {
-            Cart updatedCart = cartService.updateCart(id,cartItemDTO,token);
+            Cart updatedCart = cartService.updateCart(id, cartItemDTO, token, sessionId);
             return ResponseEntity.ok(CartResponse.fromCart(updatedCart));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -74,11 +77,12 @@ public class CartController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCart(
             @Valid @PathVariable("id") Long id,
-            @RequestHeader("Authorization") String token
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "x-guest-session-id", required = false) String sessionId
     ){
         try {
             cartService.deleteCart(id);
-            ListCartResponse listCartResponse = cartService.getCartsByUserId(token);
+            ListCartResponse listCartResponse = cartService.getCarts(token, sessionId);
             return ResponseEntity.ok(listCartResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -87,11 +91,12 @@ public class CartController {
 
     @DeleteMapping("")
     public ResponseEntity<?> deleteCartByUserId(
-            @RequestHeader("Authorization") String token
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestHeader(value = "x-guest-session-id", required = false) String sessionId
     ){
         try {
-            cartService.deleteCartByUserId(token);
-            ListCartResponse listCartResponse = cartService.getCartsByUserId(token);
+            cartService.deleteCartByUserOrSession(token, sessionId);
+            ListCartResponse listCartResponse = cartService.getCarts(token, sessionId);
             return ResponseEntity.ok(listCartResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

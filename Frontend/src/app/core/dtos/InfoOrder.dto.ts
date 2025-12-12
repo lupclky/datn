@@ -18,5 +18,10 @@ export interface InfoOrderDto {
         name: string,
         discount_percentage: number
     },
-    discount_amount?: number
+    discount_amount?: number;
+    tracking_number?: string;
+    carrier?: string;
+    tracking_info?: any;
+    district_id?: number;
+    ward_code?: string;
 }

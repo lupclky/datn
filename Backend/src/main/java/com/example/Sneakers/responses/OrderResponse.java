@@ -72,6 +72,21 @@ public class OrderResponse {
     @JsonProperty("total_products")
     private int totalProducts;
 
+    @JsonProperty("tracking_number")
+    private String trackingNumber;
+
+    @JsonProperty("carrier")
+    private String carrier;
+
+    @JsonProperty("tracking_info")
+    private Object trackingInfo;
+
+    @JsonProperty("district_id")
+    private Integer districtId;
+
+    @JsonProperty("ward_code")
+    private String wardCode;
+
     @Data
     @Builder
     @AllArgsConstructor
@@ -105,6 +120,10 @@ public class OrderResponse {
                 .paymentMethod(order.getPaymentMethod())
                 .discountAmount(order.getDiscountAmount())
                 .orderDetails(orderDetailResponses)
+                .trackingNumber(order.getTrackingNumber())
+                .carrier(order.getCarrier())
+                .districtId(order.getDistrictId())
+                .wardCode(order.getWardCode())
                 .build();
 
         // Map voucher information if present

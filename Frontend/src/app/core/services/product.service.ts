@@ -21,9 +21,27 @@ export class ProductService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    } else {
+      let sessionId = localStorage.getItem('guest_session_id');
+      if (!sessionId) {
+        sessionId = this.generateSessionId();
+        localStorage.setItem('guest_session_id', sessionId);
+      }
+      headers = headers.set('x-guest-session-id', sessionId);
+    }
+    return headers;
+  }
+
+  private generateSessionId(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
     });
   }
 

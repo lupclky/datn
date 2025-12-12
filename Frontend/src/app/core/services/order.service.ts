@@ -160,4 +160,12 @@ export class OrderService {
       headers: this.getHeaders(),
     });
   }
+
+  createWaybill(orderId: number, districtId: number, wardCode: string) {
+    return this.httpClient.post<InfoOrderDto>(
+      `${this.apiUrl}/orders/${orderId}/create-waybill`,
+      { district_id: districtId, ward_code: wardCode },
+      { headers: this.getHeaders() }
+    );
+  }
 }

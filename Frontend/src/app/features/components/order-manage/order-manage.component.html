@@ -131,7 +131,16 @@
                                     icon="pi pi-eye"
                                     class="p-button-rounded p-button-info p-button-text"
                                     pTooltip="Xem chi tiết" 
-                                    [routerLink]="['/order-detail', order.id]">
+                                    [routerLink]="['/admin/orders', order.id]">
+                            </button>
+                            <button pButton 
+                                    pRipple 
+                                    type="button" 
+                                    icon="pi pi-truck"
+                                    class="p-button-rounded p-button-success p-button-text"
+                                    pTooltip="Tạo vận đơn GHN"
+                                    *ngIf="!order.tracking_number"
+                                    (click)="openWaybillDialog(order)">
                             </button>
                         </td>
                     </tr>
@@ -487,6 +496,64 @@
                     icon="pi pi-check" 
                     class="p-button-success"
                     (click)="confirmAddProductWithQuantity()">
+            </button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Create Waybill Dialog -->
+    <p-dialog 
+        header="Tạo vận đơn GHN" 
+        [(visible)]="showWaybillDialog" 
+        [modal]="true" 
+        [style]="{width: '500px'}" 
+        [draggable]="false" 
+        [resizable]="false">
+        
+        <div [formGroup]="waybillForm" class="p-fluid grid" style="margin-top: 1rem;">
+             <div class="field col-12">
+                <label>Đơn hàng: #{{ selectedOrderForWaybill?.id }}</label>
+                <p>Khách hàng: {{ selectedOrderForWaybill?.fullname }}</p>
+                <p>Địa chỉ: {{ selectedOrderForWaybill?.address }}</p>
+            </div>
+            
+            <div class="field col-12">
+                <label for="district_id">District ID (GHN) <span class="required">*</span></label>
+                <p-inputNumber 
+                    id="district_id" 
+                    formControlName="district_id" 
+                    [useGrouping]="false"
+                    placeholder="Nhập ID Quận/Huyện">
+                </p-inputNumber>
+                <small class="p-error" *ngIf="waybillForm.get('district_id')?.invalid && waybillForm.get('district_id')?.touched">
+                    District ID là bắt buộc
+                </small>
+            </div>
+            
+            <div class="field col-12">
+                <label for="ward_code">Ward Code (GHN) <span class="required">*</span></label>
+                <input 
+                    type="text" 
+                    pInputText 
+                    id="ward_code" 
+                    formControlName="ward_code" 
+                    placeholder="Nhập Mã Phường/Xã">
+                <small class="p-error" *ngIf="waybillForm.get('ward_code')?.invalid && waybillForm.get('ward_code')?.touched">
+                    Ward Code là bắt buộc
+                </small>
+            </div>
+        </div>
+        
+        <ng-template pTemplate="footer">
+            <button pButton pRipple type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="showWaybillDialog = false"></button>
+            <button pButton 
+                    pRipple 
+                    type="button" 
+                    label="Tạo vận đơn" 
+                    icon="pi pi-check" 
+                    class="p-button-success"
+                    (click)="createWaybill()"
+                    [disabled]="waybillForm.invalid || isCreatingWaybill">
+                <i class="pi pi-spin pi-spinner" *ngIf="isCreatingWaybill" style="margin-right: 0.5rem;"></i>
             </button>
         </ng-template>
     </p-dialog>

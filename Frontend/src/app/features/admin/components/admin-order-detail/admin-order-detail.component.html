@@ -33,13 +33,22 @@
                 <p><strong>Mã hóa đơn:</strong> {{ orderInfor.id }}</p>
                 <p><strong>Ngày đặt:</strong> {{ orderInfor.order_date | date: 'dd/MM/yyyy HH:mm' }}</p>
                 <p><strong>Phương thức thanh toán:</strong> {{ orderInfor.payment_method }}</p>
-                <div class="order-status" [ngClass]="'status-' + orderInfor.status">
-                  @if (orderInfor.status === 'pending') { <span>Đang chờ</span> }
-                  @if (orderInfor.status === 'processing') { <span>Đang xử lý</span> }
-                  @if (orderInfor.status === 'shipped') { <span>Đang giao hàng</span> }
-                  @if (orderInfor.status === 'delivered' || orderInfor.status === 'success') { <span>Đã giao</span> }
-                  @if (orderInfor.status === 'cancelled') { <span>Đã hủy</span> }
-                  @if (orderInfor.status === 'payment_failed') { <span>Thanh toán thất bại</span> }
+                
+                <!-- Admin Status Update -->
+                <div class="admin-status-control mt-3">
+                    <p class="mb-2"><strong>Trạng thái hiện tại:</strong></p>
+                    <div class="flex justify-content-end align-items-center gap-2">
+                        <p-dropdown [options]="orderStatusOptions" 
+                                    [(ngModel)]="selectedStatus" 
+                                    optionLabel="label" 
+                                    optionValue="value"
+                                    appendTo="body"
+                                    [style]="{'width':'200px'}"></p-dropdown>
+                        <button pButton icon="pi pi-check" 
+                                (click)="updateOrderStatus()" 
+                                class="p-button-success" 
+                                pTooltip="Cập nhật trạng thái"></button>
+                    </div>
                 </div>
               </div>
             </div>

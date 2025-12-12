@@ -172,11 +172,51 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
 
   ngAfterViewInit(): void {
     this.commonService.intermediateObservable.pipe(
+      tap(() => {
+        // Reload user info and token from localStorage
+        if (typeof localStorage !== 'undefined') {
+          this.token = localStorage.getItem('token');
+          const userInforStr = localStorage.getItem("userInfor");
+          if (userInforStr) {
+            const userInfor = JSON.parse(userInforStr);
+            this.roleId = parseInt(userInfor.role_id || '0');
+            this.userName = userInfor.fullname;
+          } else if (this.token) {
+             // If token exists but no user info, try to fetch it
+             this.fetchUserInfo();
+          } else {
+            // Logout state
+            this.token = null;
+            this.userName = undefined;
+            this.roleId = 0;
+            this.quantityInCart = 0;
+            this.products = [];
+          }
+        }
+      }),
       switchMap(() => {
-        return this.getCart();
+        if (this.token) {
+            return this.getCart();
+        }
+        return of(null);
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
+  }
+
+  fetchUserInfo() {
+    if (this.token != null) {
+      this.userService.getInforUser(this.token).pipe(
+        filter((userInfo: UserDto) => !!userInfo),
+        tap((userInfo: UserDto) => {
+          this.userName = userInfo.fullname;
+          this.roleId = userInfo.role.id;
+          localStorage.setItem("userInfor", JSON.stringify(userInfo));
+        }),
+        takeUntil(this.destroyed$),
+        catchError((err) => of(err))
+      ).subscribe();
+    }
   }
   
   signOut(){

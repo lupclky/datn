@@ -59,4 +59,13 @@ public class OrderDTO {
 
     @JsonProperty("voucher_code")
     private String voucherCode;
+
+    @JsonProperty("province_id")
+    private Integer provinceId;
+
+    @JsonProperty("district_id")
+    private Integer districtId;
+
+    @JsonProperty("ward_code")
+    private String wardCode;
 }

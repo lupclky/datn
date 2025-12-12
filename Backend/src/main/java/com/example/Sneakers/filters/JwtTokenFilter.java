@@ -104,6 +104,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (requestURI.contains("/vouchers")) {
             return true;
         }
+        
+        // Bypass for carts endpoints
+        if (requestPath.contains("/carts")) {
+            return true;
+        }
 
         if (requestPath.equals(String.format("%s/orders", apiPrefix))
                 && requestMethod.equals("GET")) {

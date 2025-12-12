@@ -86,8 +86,7 @@ export const routes: Routes = [
       },
       {
         path: 'shoppingCart',
-        component: ShoppingCartComponent,
-        canActivate: [AuthGuard]
+        component: ShoppingCartComponent
       },
       {
         path: 'detailProduct/:id',

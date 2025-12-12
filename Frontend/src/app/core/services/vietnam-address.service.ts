@@ -1,185 +1,147 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, of, shareReplay } from 'rxjs';
-
-export interface Province {
-  code: number;
-  name: string;
-  name_en: string;
-  full_name: string;
-  full_name_en: string;
-  code_name: string;
-}
-
-export interface District {
-  code: number;
-  name: string;
-  name_en: string;
-  full_name: string;
-  full_name_en: string;
-  code_name: string;
-  province_code: number;
-}
-
-export interface Ward {
-  code: number;
-  name: string;
-  name_en: string;
-  full_name: string;
-  full_name_en: string;
-  code_name: string;
-  district_code: number;
-}
+import { environment } from '../../../environments/environment.development';
 
 export interface AddressDropdownOption {
   label: string;
-  value: number;
+  value: number | string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class VietnamAddressService {
-  // Sử dụng proxy để tránh CORS trong development
-  // Trong production, cần cấu hình reverse proxy trên server
-  private apiUrl = '/api/provinces';
+  private apiUrl = `${environment.apiUrl}/ghn`;
   
-  // Cache để tránh gọi API nhiều lần
+  // Cache to avoid calling API multiple times
   private provincesCache$?: Observable<AddressDropdownOption[]>;
   private districtsCache = new Map<number, Observable<AddressDropdownOption[]>>();
   private wardsCache = new Map<number, Observable<AddressDropdownOption[]>>();
-  private provinceDataCache = new Map<number, Province>();
-  private districtDataCache = new Map<number, District>();
-  private wardDataCache = new Map<number, Ward>();
+  
+  // Name lookups
+  private provinceNameCache = new Map<number, string>();
+  private districtNameCache = new Map<number, string>();
+  private wardNameCache = new Map<string, string>();
 
   constructor(private http: HttpClient) { }
 
   /**
-   * Lấy danh sách tất cả tỉnh/thành phố (có cache)
+   * Get all provinces
    */
   getProvinces(): Observable<AddressDropdownOption[]> {
     if (!this.provincesCache$) {
-      this.provincesCache$ = this.http.get<Province[]>(`${this.apiUrl}/p/?depth=1`).pipe(
-        map(provinces => {
-          // Lưu vào cache để sử dụng sau
-          provinces.forEach(p => this.provinceDataCache.set(p.code, p));
+      this.provincesCache$ = this.http.get<any[]>(`${this.apiUrl}/provinces`).pipe(
+        map(response => {
+          if (!Array.isArray(response)) return [];
           
-          return provinces.map(p => ({
-            label: p.name,
-            value: p.code
-          })).sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+          return response.map(p => {
+            this.provinceNameCache.set(p.ProvinceID, p.ProvinceName);
+            return {
+              label: p.ProvinceName,
+              value: p.ProvinceID
+            };
+          }).sort((a, b) => a.label.localeCompare(b.label, 'vi'));
         }),
-        shareReplay(1) // Cache kết quả, chỉ gọi API 1 lần
+        shareReplay(1)
       );
     }
     return this.provincesCache$;
   }
 
   /**
-   * Lấy danh sách quận/huyện theo mã tỉnh/thành phố (có cache)
+   * Get districts by province ID
    */
-  getDistricts(provinceCode: number): Observable<AddressDropdownOption[]> {
-    if (!this.districtsCache.has(provinceCode)) {
-      const districts$ = this.http.get<{ districts: District[] }>(`${this.apiUrl}/p/${provinceCode}?depth=2`).pipe(
+  getDistricts(provinceId: number): Observable<AddressDropdownOption[]> {
+    if (!this.districtsCache.has(provinceId)) {
+      const districts$ = this.http.get<any[]>(`${this.apiUrl}/districts?province_id=${provinceId}`).pipe(
         map(response => {
-          // Lưu vào cache để sử dụng sau
-          response.districts.forEach(d => this.districtDataCache.set(d.code, d));
+          if (!Array.isArray(response)) return [];
           
-          return response.districts.map(d => ({
-            label: d.name,
-            value: d.code
-          })).sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+          return response.map(d => {
+            this.districtNameCache.set(d.DistrictID, d.DistrictName);
+            return {
+              label: d.DistrictName,
+              value: d.DistrictID
+            };
+          }).sort((a, b) => a.label.localeCompare(b.label, 'vi'));
         }),
-        shareReplay(1) // Cache kết quả
+        shareReplay(1)
       );
-      this.districtsCache.set(provinceCode, districts$);
+      this.districtsCache.set(provinceId, districts$);
     }
-    return this.districtsCache.get(provinceCode)!;
+    return this.districtsCache.get(provinceId)!;
   }
 
   /**
-   * Lấy danh sách phường/xã theo mã quận/huyện (có cache)
+   * Get wards by district ID
    */
-  getWards(districtCode: number): Observable<AddressDropdownOption[]> {
-    if (!this.wardsCache.has(districtCode)) {
-      const wards$ = this.http.get<{ wards: Ward[] }>(`${this.apiUrl}/d/${districtCode}?depth=2`).pipe(
+  getWards(districtId: number): Observable<AddressDropdownOption[]> {
+    if (!this.wardsCache.has(districtId)) {
+      const wards$ = this.http.get<any[]>(`${this.apiUrl}/wards?district_id=${districtId}`).pipe(
         map(response => {
-          // Lưu vào cache để sử dụng sau
-          response.wards.forEach(w => this.wardDataCache.set(w.code, w));
+          if (!Array.isArray(response)) return [];
           
-          return response.wards.map(w => ({
-            label: w.name,
-            value: w.code
-          })).sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+          return response.map(w => {
+            this.wardNameCache.set(w.WardCode, w.WardName);
+            return {
+              label: w.WardName,
+              value: w.WardCode
+            };
+          }).sort((a, b) => a.label.localeCompare(b.label, 'vi'));
         }),
-        shareReplay(1) // Cache kết quả
+        shareReplay(1)
       );
-      this.wardsCache.set(districtCode, wards$);
+      this.wardsCache.set(districtId, wards$);
     }
-    return this.wardsCache.get(districtCode)!;
+    return this.wardsCache.get(districtId)!;
   }
 
   /**
-   * Lấy tên tỉnh/thành phố theo code (sử dụng cache nếu có)
+   * Get province name by ID
    */
-  getProvinceName(provinceCode: number): Observable<string> {
-    // Kiểm tra cache trước
-    if (this.provinceDataCache.has(provinceCode)) {
-      return of(this.provinceDataCache.get(provinceCode)!.name);
+  getProvinceName(provinceId: number): Observable<string> {
+    if (this.provinceNameCache.has(provinceId)) {
+      return of(this.provinceNameCache.get(provinceId)!);
     }
-    
-    return this.http.get<Province>(`${this.apiUrl}/p/${provinceCode}`).pipe(
-      map(province => {
-        this.provinceDataCache.set(provinceCode, province);
-        return province.name;
-      })
+    // Fallback if cache missed (re-fetch provinces or just return empty/ID)
+    return this.getProvinces().pipe(
+      map(() => this.provinceNameCache.get(provinceId) || '')
     );
   }
 
   /**
-   * Lấy tên quận/huyện theo code (sử dụng cache nếu có)
+   * Get district name by ID
    */
-  getDistrictName(districtCode: number): Observable<string> {
-    // Kiểm tra cache trước
-    if (this.districtDataCache.has(districtCode)) {
-      return of(this.districtDataCache.get(districtCode)!.name);
+  getDistrictName(districtId: number): Observable<string> {
+    if (this.districtNameCache.has(districtId)) {
+      return of(this.districtNameCache.get(districtId)!);
     }
-    
-    return this.http.get<District>(`${this.apiUrl}/d/${districtCode}`).pipe(
-      map(district => {
-        this.districtDataCache.set(districtCode, district);
-        return district.name;
-      })
-    );
+    // We can't easily fetch just one district name without province ID.
+    // Assuming the flow is always Province -> District selection, cache should be populated.
+    return of(''); 
   }
 
   /**
-   * Lấy tên phường/xã theo code (sử dụng cache nếu có)
+   * Get ward name by Code
    */
-  getWardName(wardCode: number): Observable<string> {
-    // Kiểm tra cache trước
-    if (this.wardDataCache.has(wardCode)) {
-      return of(this.wardDataCache.get(wardCode)!.name);
+  getWardName(wardCode: string): Observable<string> {
+    if (this.wardNameCache.has(wardCode)) {
+      return of(this.wardNameCache.get(wardCode)!);
     }
-    
-    return this.http.get<Ward>(`${this.apiUrl}/w/${wardCode}`).pipe(
-      map(ward => {
-        this.wardDataCache.set(wardCode, ward);
-        return ward.name;
-      })
-    );
+    return of('');
   }
 
   /**
-   * Xóa cache (sử dụng khi cần refresh dữ liệu)
+   * Clear cache
    */
   clearCache(): void {
     this.provincesCache$ = undefined;
     this.districtsCache.clear();
     this.wardsCache.clear();
-    this.provinceDataCache.clear();
-    this.districtDataCache.clear();
-    this.wardDataCache.clear();
+    this.provinceNameCache.clear();
+    this.districtNameCache.clear();
+    this.wardNameCache.clear();
   }
 }
 

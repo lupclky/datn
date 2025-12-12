@@ -1,37 +1,42 @@
 import { Component, OnInit } from '@angular/core';
-import { BaseComponent } from '../../../core/commonComponent/base.component';
-import { CommonService } from '../../../core/services/common.service';
-import { catchError, filter, of, switchMap, tap } from 'rxjs';
-import { OrderService } from '../../../core/services/order.service';
-import { InfoOrderDto } from '../../../core/dtos/InfoOrder.dto';
-import { OrderDetailDto } from '../../../core/dtos/OrderDetail.dto';
-import { CurrencyPipe,DatePipe,NgClass } from '@angular/common';
+import { BaseComponent } from '../../../../core/commonComponent/base.component';
+import { CommonService } from '../../../../core/services/common.service';
+import { catchError, filter, of, tap } from 'rxjs';
+import { OrderService } from '../../../../core/services/order.service';
+import { InfoOrderDto } from '../../../../core/dtos/InfoOrder.dto';
+import { OrderDetailDto } from '../../../../core/dtos/OrderDetail.dto';
+import { CurrencyPipe, DatePipe, NgClass, NgIf } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { environment } from '../../../../environments/environment.development';
-import { ToastService } from '../../../core/services/toast.service';
+import { environment } from '../../../../../environments/environment.development';
+import { ToastService } from '../../../../core/services/toast.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { ProductService } from '../../../core/services/product.service';
-import { Observable } from 'rxjs';
 import { TimelineModule } from 'primeng/timeline';
 import { CardModule } from 'primeng/card';
+import { DropdownModule } from 'primeng/dropdown';
+import { ButtonModule } from 'primeng/button';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-order-detail',
+  selector: 'app-admin-order-detail',
   standalone: true,
   imports: [
     CurrencyPipe,
     DatePipe,
     NgClass,
+    NgIf,
     ToastModule,
     TimelineModule,
-    CardModule
+    CardModule,
+    DropdownModule,
+    ButtonModule,
+    FormsModule
   ],
   providers: [ToastService, MessageService],
-  templateUrl: './order-detail.component.html',
-  styleUrl: './order-detail.component.scss'
+  templateUrl: './admin-order-detail.component.html',
+  styleUrl: './admin-order-detail.component.scss'
 })
-export class OrderDetailComponent extends BaseComponent implements OnInit {
+export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
   public orderInfor!: InfoOrderDto;
   public productOrderd!: OrderDetailDto[];
   public totalMoney: number = 0;
@@ -46,13 +51,23 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
   public orderEvents: any[] = [];
   public currentStatusIndex: number = 0;
 
+  // Admin specific properties
+  public orderStatusOptions = [
+    { label: 'Đang chờ', value: 'pending' },
+    { label: 'Đang xử lý', value: 'processing' },
+    { label: 'Đang giao hàng', value: 'shipped' },
+    { label: 'Đã giao', value: 'delivered' },
+    { label: 'Đã hủy', value: 'cancelled' },
+    { label: 'Thanh toán thất bại', value: 'payment_failed' }
+  ];
+  public selectedStatus: string = '';
+
   constructor(
     private commonService: CommonService,
     private orderService: OrderService,
     private activatedRouter: ActivatedRoute,
     private router: Router,
-    private toastService: ToastService,
-    private productService: ProductService
+    private toastService: ToastService
   ) {
     super();
   }
@@ -60,66 +75,12 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
   ngOnInit(): void {
     const idFromUrl = this.activatedRouter.snapshot.paramMap.get('id');
     if (!idFromUrl) {
-        // Handle case where ID is missing from URL
         this.toastService.fail('Không tìm thấy mã đơn hàng.');
-        this.router.navigate(['/history']);
+        this.router.navigate(['/admin/orders']); // Navigate to admin orders list
         return;
     }
     this.id = idFromUrl;
-    
-    // Handle VNPAY return first
-    this.activatedRouter.queryParams.subscribe(params => {
-      const paymentStatus = params['vnp_ResponseCode'];
-      if (paymentStatus) {
-        this.handleVnpayReturn(paymentStatus, this.id);
-      } else {
-        // Normal page load
-        this.loadOrderDetail(this.id);
-      }
-    });
-  }
-
-  handleVnpayReturn(status: string, orderId: string): void {
-    const orderIdNum = parseInt(orderId, 10);
-    
-    // Clean URL query params immediately to prevent re-triggering
-    this.router.navigate([], {
-      relativeTo: this.activatedRouter,
-      queryParams: {},
-      replaceUrl: true
-    });
-    
-    if (status === '00') {
-      this.orderService.updateOrderStatus(orderIdNum, 'paid').pipe(
-        switchMap(() => this.productService.deleteAllProductsFromCart())
-      ).subscribe({
-        next: () => {
-          this.toastService.success('Thanh toán thành công! Giỏ hàng đã được xóa.');
-          localStorage.removeItem('productOrder');
-          this.commonService.intermediateObservable.next(true);
-
-          // Force reload after a short delay to ensure state is fresh
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        },
-        error: (err) => {
-          this.toastService.fail('Có lỗi xảy ra khi hoàn tất đơn hàng. Vui lòng liên hệ hỗ trợ.');
-          this.loadOrderDetail(orderId);
-        }
-      });
-    } else {
-      this.orderService.updateOrderStatus(orderIdNum, 'payment_failed').subscribe({
-        next: () => {
-          this.toastService.fail('Thanh toán VNPAY thất bại hoặc đã bị hủy.');
-          this.loadOrderDetail(orderId);
-        },
-        error: (err) => {
-          this.toastService.fail('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.');
-          this.loadOrderDetail(orderId);
-        }
-      });
-    }
+    this.loadOrderDetail(this.id);
   }
 
   loadOrderDetail(orderId: string): void {
@@ -129,6 +90,8 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
         this.orderInfor = orderInfor;
         this.productOrderd = orderInfor.order_details;
         this.notion = orderInfor.note;
+        this.selectedStatus = orderInfor.status;
+
         switch (orderInfor.shipping_method) {
           case "Tiêu chuẩn":
             this.shipCost = 30000;
@@ -162,13 +125,27 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
           this.finalTotal = this.totalMoney - this.discountAmount + this.shipCost;
         }
 
-        // Initialize Timeline Events
         this.initializeTimeline(orderInfor);
       }),
       catchError((err) => {
         this.toastService.fail('Không thể tải thông tin đơn hàng.');
         return of(err)
       }),
+    ).subscribe();
+  }
+
+  updateOrderStatus(): void {
+    if (!this.selectedStatus) return;
+    
+    this.orderService.updateOrderStatus(parseInt(this.id), this.selectedStatus).pipe(
+        tap(() => {
+            this.toastService.success('Cập nhật trạng thái đơn hàng thành công');
+            this.loadOrderDetail(this.id); // Reload to refresh timeline
+        }),
+        catchError((err) => {
+            this.toastService.fail('Cập nhật trạng thái thất bại: ' + err.message);
+            return of(err);
+        })
     ).subscribe();
   }
 
@@ -187,16 +164,12 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
         ghnStatus = order.tracking_info.status.toLowerCase();
     }
 
-    // Update colors based on progress
-    // Step 1: Placed (Always active)
     this.markActive(0);
 
-    // Step 2: Confirmed (Active if not pending/cancelled/payment_failed)
     if (order.status !== 'pending' && order.status !== 'cancelled' && order.status !== 'payment_failed') {
         this.markActive(1);
     }
 
-    // Step 3: Ready to pick (GHN status exists)
     if (ghnStatus || order.tracking_number) {
         this.markActive(2);
         if (ghnStatus === 'ready_to_pick') {
@@ -204,7 +177,6 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
         }
     }
 
-    // Step 4: Shipping
     const shippingStatuses = ['picking', 'storing', 'transporting', 'sorting', 'picked'];
     if (shippingStatuses.includes(ghnStatus) || ghnStatus === 'delivering' || ghnStatus === 'delivered') {
         this.markActive(3);
@@ -215,19 +187,17 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
         if (ghnStatus === 'sorting') this.orderEvents[3].status = 'Đang phân loại';
     }
 
-    // Step 5: Delivering
     if (ghnStatus === 'delivering' || ghnStatus === 'delivered') {
         this.markActive(4);
     }
 
-    // Step 6: Delivered
     if (ghnStatus === 'delivered' || order.status === 'delivered') {
         this.markActive(5);
     }
   }
 
   markActive(index: number) {
-      this.orderEvents[index].color = '#673AB7'; // Active color
+      this.orderEvents[index].color = '#673AB7';
   }
 
   getGhnStatusText(status: string): string {

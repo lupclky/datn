@@ -1,14 +1,12 @@
 package com.example.Sneakers.controllers;
 
 import com.example.Sneakers.components.LocalizationUtils;
-import com.example.Sneakers.dtos.CartItemDTO;
 import com.example.Sneakers.dtos.DashboardStatsDTO;
 import com.example.Sneakers.dtos.OrderDTO;
 import com.example.Sneakers.dtos.StatusDTO;
 import com.example.Sneakers.models.Order;
 import com.example.Sneakers.responses.*;
 import com.example.Sneakers.services.IOrderService;
-import com.example.Sneakers.services.OrderService;
 import com.example.Sneakers.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -147,6 +145,25 @@ public class OrderController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/{id}/create-waybill")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> createWaybill(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> request) {
+        try {
+            Integer districtId = (Integer) request.get("district_id");
+            String wardCode = (String) request.get("ward_code");
+            if (districtId == null || wardCode == null) {
+                return ResponseEntity.badRequest().body(Map.of("message", "district_id and ward_code are required"));
+            }
+            Order order = orderService.createWaybill(id, districtId, wardCode);
+            return ResponseEntity.ok(OrderResponse.fromOrder(order));
+        } catch (Exception e) {
+             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")

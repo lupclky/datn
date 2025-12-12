@@ -1,7 +1,6 @@
 package com.example.Sneakers.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
 
@@ -21,7 +20,5 @@ public class CartItemDTO {
     private Long quantity;
 
     @JsonProperty("size")
-    @Min(value = 36,message = "Size must be >= 36 and <= 44")
-    @Max(value = 44,message = "Size must be >= 36 and <= 44")
     private Long size;
 }

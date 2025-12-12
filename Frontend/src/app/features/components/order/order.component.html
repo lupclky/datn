@@ -105,7 +105,6 @@
                   optionLabel="label"
                   optionValue="value"
                   (onChange)="onDistrictChange($event)"
-                  [disabled]="!selectedProvince"
                   [showClear]="false"
                   styleClass="w-100">
                 </p-dropdown>
@@ -118,7 +117,6 @@
                   optionLabel="label"
                   optionValue="value"
                   (onChange)="onWardChange($event)"
-                  [disabled]="!selectedDistrict"
                   [showClear]="false"
                   styleClass="w-100">
                 </p-dropdown>
@@ -158,7 +156,23 @@
       <!-- Shipping Method -->
       <div class="info-card">
         <h2 class="section-title">Phương thức vận chuyển</h2>
-        <p-dropdown [options]="methodShipping" [(ngModel)]="methodShippingValue" optionLabel="name" [showClear]="false" class="shipping-dropdown"></p-dropdown>
+        <div class="shipping-methods">
+          @for (item of methodShipping; track item) {
+          <div class="shipping-option" [class.selected]="methodShippingValue.code === item.code" (click)="methodShippingValue = item">
+            <p-radioButton name="shippingMethod" [value]="item" [(ngModel)]="methodShippingValue" [inputId]="item.code"></p-radioButton>
+            <label [for]="item.code" class="shipping-label">
+              <span class="method-name">{{item.name}}</span>
+              <span class="method-price">{{item.price === 0 ? 'Miễn phí' : (item.price | currency:'VND':'symbol':'1.0-0')}}</span>
+            </label>
+          </div>
+          }
+        </div>
+        @if (methodShippingValue.code === 'HT') {
+          <div class="shipping-note">
+            <i class="pi pi-info-circle"></i>
+            <span>Chỉ áp dụng cho Hà Nội và Hồ Chí Minh</span>
+          </div>
+        }
       </div>
 
       <!-- Payment Method -->

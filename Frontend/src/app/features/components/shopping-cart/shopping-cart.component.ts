@@ -6,7 +6,7 @@ import { ProductsInCartDto } from '../../../core/dtos/productsInCart.dto';
 import { ProductFromCartDto } from '../../../core/dtos/ProductFromCart.dto';
 import { CurrencyPipe } from '@angular/common';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { ButtonModule } from 'primeng/button';
 import { CommonService } from '../../../core/services/common.service';
@@ -15,10 +15,15 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { ProductToCartDto } from '../../../core/dtos/productToCart.dto';
 import { ToastService } from '../../../core/services/toast.service';
 import { ToastModule } from 'primeng/toast';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { environment } from '../../../../environments/environment.development';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DividerModule } from 'primeng/divider';
+import { DialogModule } from 'primeng/dialog';
+import { UserService } from '../../../core/services/user.service';
+import { PasswordModule } from 'primeng/password';
+import { InputTextModule } from 'primeng/inputtext';
+import { UserDto } from '../../../core/dtos/user.dto';
 
 @Component({
   selector: 'app-shopping-cart',
@@ -27,12 +32,17 @@ import { DividerModule } from 'primeng/divider';
     CurrencyPipe,
     InputNumberModule,
     FormsModule,
+    ReactiveFormsModule,
     KeyFilterModule,
     ButtonModule,
     ConfirmDialogModule,
     ToastModule,
     CheckboxModule,
-    DividerModule
+    DividerModule,
+    DialogModule,
+    PasswordModule,
+    InputTextModule,
+    RouterModule
   ],
   providers:[
     ConfirmationService,
@@ -53,15 +63,27 @@ export class ShoppingCartComponent extends BaseComponent implements OnInit, Afte
   public productToOrder: ProductsInCartDto[] =[];
   public apiImage: string = environment.apiImage;
   
+  // Login Dialog Props
+  public showLoginDialog: boolean = false;
+  public loginForm: FormGroup;
+  public showPassword = false;
+
 constructor(
   private productService: ProductService,
-  private commonService: CommonService,
+  privatecommonService: CommonService,
   private confirmationService: ConfirmationService,
   private readonly messageService: MessageService,
   private toastService: ToastService,
-  private router: Router
+  private router: Router,
+  private fb: FormBuilder,
+  private userService: UserService,
+  private commonService: CommonService
 ) {
   super();
+  this.loginForm = this.fb.group({
+    userName: [, Validators.required],
+    password: [, Validators.required]
+  });
 }
   ngOnInit(): void {
     this.productService.getProductFromCart().pipe(
@@ -265,31 +287,73 @@ constructor(
   sendProductToOrder(){
     console.log('sendProductToOrder called');
     console.log('productToOrder length:', this.productToOrder.length);
-    console.log('productToOrder:', this.productToOrder);
     
     if (this.productToOrder.length === 0){
-      console.log('No products selected, showing error toast');
       this.toastService.fail("Vui lòng chọn sản phẩm để thanh toán");
       return;
-    } 
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // Not logged in: Show Login Dialog
+        this.showLoginDialog = true;
+        return;
+    }
     
+    this.proceedToOrder();
+  }
+
+  proceedToOrder() {
     try {
       const existingOrder = localStorage.getItem("productOrder");
-      console.log('Existing order in localStorage:', existingOrder);
       
       if (existingOrder == null){
-        console.log('No existing order, setting new order and navigating');
         localStorage.setItem("productOrder", JSON.stringify(this.productToOrder));
-        console.log('Order saved to localStorage, navigating to /order');
         this.router.navigate(['/order']);
       } else {
-        console.log('Existing order found, showing confirmation dialog');
         this.confirmChangeOrder();
       }
     } catch (error) {
       console.error('Error in sendProductToOrder:', error);
       this.toastService.fail("Có lỗi xảy ra, vui lòng thử lại");
     }
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  onLoginSubmit() {
+    if (this.loginForm.invalid) {
+      this.toastService.fail("Vui lòng kiểm tra lại thông tin");
+      return;
+    }
+
+    this.userService.login({
+      phone_number: this.loginForm.value.userName,
+      password: this.loginForm.value.password
+    }).pipe(
+      tap((loginVal: any) => {
+        this.toastService.success(loginVal.message);
+        localStorage.setItem("token", loginVal.token);
+        this.showLoginDialog = false;
+      }),
+      switchMap((loginVal: any) => {
+        return this.userService.getInforUser(loginVal.token);
+      }),
+      tap((userInfor: UserDto) => {
+        localStorage.setItem("userInfor", JSON.stringify(userInfor));
+        // Notify other components about login
+        this.commonService.intermediateObservable.next(true);
+        // After successful login, proceed to order
+        this.proceedToOrder();
+      }),
+      catchError((error) => {
+        this.toastService.fail(error.error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+        return of(null);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
   }
 
   getProductImageUrl(product: ProductsInCartDto): string {

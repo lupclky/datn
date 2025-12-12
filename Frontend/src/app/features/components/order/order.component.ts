@@ -104,7 +104,7 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
   public wards: AddressDropdownOption[] = [];
   public selectedProvince: number | null = null;
   public selectedDistrict: number | null = null;
-  public selectedWard: number | null = null;
+  public selectedWard: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -122,8 +122,8 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     this.inforShipForm = this.fb.group({
       fullName: ['', Validators.required],
       province: [null, Validators.required],
-      district: [null, Validators.required],
-      ward: [null, Validators.required],
+      district: [{value: null, disabled: true}, Validators.required],
+      ward: [{value: null, disabled: true}, Validators.required],
       street: ['', Validators.required],
       phoneNumber: ['', [Validators.required, Validators.minLength(5)]],
       email: ['', [Validators.email]],
@@ -147,8 +147,7 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     this.finalCost = this.totalCost; // Initialize final cost
 
     this.methodShipping = [
-      {name: 'Tiêu chuẩn', code: 'TC', price: 30000},
-      {name: 'Nhanh', code:'N', price: 40000},
+      {name: 'Nhanh', code:'N', price: 0},
       {name: 'Hỏa tốc', code: 'HT', price: 60000}
     ];
     this.methodShippingValue = this.methodShipping[0];
@@ -247,7 +246,10 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
           })),
           sub_total: Math.round(this.totalCost),
           total_money: Math.round(this.finalCost + this.methodShippingValue.price),
-          ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
+          ...(this.isVoucherApplied && { voucher_code: this.voucherCode }),
+          district_id: this.inforShipForm.value.district,
+          province_id: this.inforShipForm.value.province,
+          ward_code: this.inforShipForm.value.ward
         };
 
         return this.orderService.postOrder(orderData);
@@ -293,7 +295,10 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
           })),
           sub_total: Math.round(this.totalCost),
           total_money: Math.round(this.finalCost + this.methodShippingValue.price),
-          ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
+          ...(this.isVoucherApplied && { voucher_code: this.voucherCode }),
+          district_id: this.inforShipForm.value.district,
+          province_id: this.inforShipForm.value.province,
+          ward_code: this.inforShipForm.value.ward
         };
 
         return this.orderService.postOrder(orderData);
@@ -338,7 +343,10 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
           })),
           sub_total: Math.round(this.totalCost),
           total_money: Math.round(this.finalCost + this.methodShippingValue.price),
-          ...(this.isVoucherApplied && { voucher_code: this.voucherCode })
+          ...(this.isVoucherApplied && { voucher_code: this.voucherCode }),
+          district_id: this.inforShipForm.value.district,
+          province_id: this.inforShipForm.value.province,
+          ward_code: this.inforShipForm.value.ward
         };
 
         return this.orderService.postOrder(orderData);
@@ -449,8 +457,11 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
       district: null,
       ward: null
     });
+    this.inforShipForm.get('district')?.disable();
+    this.inforShipForm.get('ward')?.disable();
 
     if (provinceCode) {
+      this.inforShipForm.get('district')?.enable();
       this.vietnamAddressService.getDistricts(provinceCode).pipe(
         tap((districts) => {
           this.districts = districts;
@@ -475,8 +486,10 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     this.inforShipForm.patchValue({
       ward: null
     });
+    this.inforShipForm.get('ward')?.disable();
 
     if (districtCode) {
+      this.inforShipForm.get('ward')?.enable();
       this.vietnamAddressService.getWards(districtCode).pipe(
         tap((wards) => {
           this.wards = wards;

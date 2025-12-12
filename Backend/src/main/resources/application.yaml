@@ -34,7 +34,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: "leonelpessiu2810@gmail.com"
-    password: "lap28102003"
+    password: "xxtb czbm rxyv mrax"
     properties:
       mail:
         smtp:
@@ -84,3 +84,9 @@ payment:
     hashSecret: "FT254A9XGNV0X8WQR7PK2YTI5HI3SPNA" # Replace with your HashSecret
     url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
     returnUrl: "http://localhost:8089/api/v1/vnpay/payment-callback"
+
+ghn:
+  api:
+    token: "dce052f9-d73a-11f0-a3d6-dac90fb956b5" # Replace with your GHN Token
+    shop-id: "198428" # Replace with your GHN Shop ID
+    url: "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create"
