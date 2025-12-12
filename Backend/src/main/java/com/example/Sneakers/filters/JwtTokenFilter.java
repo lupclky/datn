@@ -97,8 +97,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return false;
         }
 
-        // Bypass for all AI endpoints (GET and POST)
-        if (requestURI.contains("/ai/")) {
+        // Bypass for AI chat endpoints only (public access)
+        if (requestURI.contains("/ai/chat/")) {
             return true;
         }
         if (requestURI.contains("/vouchers")) {

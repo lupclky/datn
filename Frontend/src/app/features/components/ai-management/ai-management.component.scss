@@ -76,6 +76,11 @@
         background: #fee2e2;
         color: #991b1b;
       }
+      
+      &.indexing {
+        background: #dbeafe;
+        color: #1e40af;
+      }
     }
 
     .stat-item {
@@ -99,6 +104,35 @@
         font-weight: 600;
         color: #0f172a;
       }
+    }
+  }
+  
+  // Progress Section (New)
+  .progress-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+    
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    .progress-bar-container {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+
+        .progress-bar {
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.3s ease;
+        }
     }
   }
 
@@ -171,7 +205,7 @@
       padding: 0.5rem;
       border-radius: 4px;
       transition: all 0.2s;
-
+      
       &:hover {
         background: #e2e8f0;
         color: #ef4444;
@@ -214,4 +248,3 @@
     }
   }
 }
-

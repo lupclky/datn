@@ -4,6 +4,8 @@ import com.example.Sneakers.ai.services.VectorSearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -21,23 +23,30 @@ public class AIInitializationController {
     @PostMapping("/index-all")
     public ResponseEntity<Map<String, Object>> indexAllData() {
         try {
-            log.info("Starting to index all data for AI");
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = auth != null ? auth.getName() : "Anonymous";
+            
+            if (vectorSearchService.isIndexing()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "Indexing is already in progress.");
+                return ResponseEntity.badRequest().body(response);
+            }
 
-            // Index all products
-            vectorSearchService.indexAllProducts();
-
-            // Index all categories
-            vectorSearchService.indexAllCategories();
+            log.info("User '{}' triggered async indexing.", currentUsername);
+            
+            // Start Async Process
+            vectorSearchService.indexAllDataAsync();
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("message", "Successfully indexed all products and categories");
+            response.put("message", "Async indexing started.");
             response.put("timestamp", System.currentTimeMillis());
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("Failed to index data", e);
+            log.error("Failed to start indexing", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -50,11 +59,17 @@ public class AIInitializationController {
     public ResponseEntity<Map<String, Object>> getIndexStatus() {
         try {
             long documentCount = vectorSearchService.getDocumentCount();
+            boolean isIndexing = vectorSearchService.isIndexing();
+            String currentStatus = vectorSearchService.getIndexingStatus();
+            int progress = vectorSearchService.getIndexingProgress();
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("documentCount", documentCount);
-            response.put("status", documentCount > 0 ? "initialized" : "not_initialized");
+            response.put("status", isIndexing ? "indexing" : "idle"); // simple status for frontend badges
+            response.put("isIndexing", isIndexing);
+            response.put("currentAction", currentStatus); // Detailed status message
+            response.put("progress", progress); // 0-100
             response.put("timestamp", System.currentTimeMillis());
 
             return ResponseEntity.ok(response);
@@ -72,9 +87,13 @@ public class AIInitializationController {
     @DeleteMapping("/clear-index")
     public ResponseEntity<Map<String, Object>> clearIndex() {
         try {
-            log.warn("Clearing all indexed documents");
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = auth != null ? auth.getName() : "Anonymous";
+            log.warn("User '{}' requested to CLEAR all indexed documents.", currentUsername);
 
             vectorSearchService.clearAllDocuments();
+            
+            log.info("User '{}' successfully cleared all indexed documents.", currentUsername);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);

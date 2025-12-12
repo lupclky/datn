@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { AiService, ChatResponse } from '../../services/ai.service';
 import { ChatService, ChatMessage as StaffChatMessage } from '../../services/chat.service';
 import { UserService } from '../../services/user.service';
@@ -59,7 +58,6 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
     private chatService: ChatService,
     private userService: UserService,
     private toastService: ToastService,
-    private httpClient: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     super();
@@ -91,9 +89,6 @@ Bạn có thể hỏi tôi những câu như:
 Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     
     this.addMessage(welcomeMessage, 'bot');
-    
-    // Check if AI is initialized
-    this.checkAIStatus();
     
     // Load staff messages if in staff mode
     this.loadStaffMessages();
@@ -509,61 +504,6 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     }
   }
 
-  private checkAIStatus(): void {
-    // Check if AI index is initialized
-    const apiUrl = environment.apiUrl;
-    this.httpClient.get<{success: boolean; status: string; documentCount: number}>(`${apiUrl}/ai/initialize/status`)
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.status === 'initialized') {
-            console.log(`AI database đã sẵn sàng với ${response.documentCount} sản phẩm`);
-          } else if (response.success && response.status === 'not_initialized') {
-            console.warn('AI database chưa được khởi tạo');
-          }
-        },
-        error: (error: any) => {
-          console.error('Failed to check AI status:', error);
-          // Không hiển thị lỗi này cho user vì không quan trọng lắm
-        }
-      });
-  }
-
-  initializeAI(): void {
-    if (!confirm('Bạn có chắc chắn muốn khởi tạo lại database AI? Quá trình này có thể mất vài phút.')) {
-      return;
-    }
-    
-    this.isLoading.set(true);
-    this.addMessage('⏳ Đang khởi tạo database AI với toàn bộ sản phẩm... Vui lòng đợi trong giây lát.', 'bot');
-    
-    const apiUrl = environment.apiUrl;
-    this.httpClient.post<{success: boolean; message: string}>(`${apiUrl}/ai/initialize/index-all`, {})
-      .pipe(finalize(() => this.isLoading.set(false)))
-      .subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.addMessage('✅ Khởi tạo database AI thành công! Tôi đã có quyền truy cập vào toàn bộ sản phẩm. Bạn có thể bắt đầu hỏi tôi về bất kỳ sản phẩm nào.', 'bot');
-          } else {
-            this.addMessage('❌ Không thể khởi tạo database AI. Vui lòng thử lại sau.', 'bot', true);
-          }
-        },
-        error: (error: any) => {
-          console.error('Failed to initialize AI:', error);
-          let errorMessage = '❌ Lỗi khi khởi tạo database AI.';
-          
-          if (error.status === 0) {
-            errorMessage += ' Không thể kết nối đến server.';
-          } else if (error.status === 500) {
-            errorMessage += ' Lỗi máy chủ. Kiểm tra Google Cloud credentials và ChromaDB.';
-          } else if (error.error?.error) {
-            errorMessage = `❌ ${error.error.error}`;
-          }
-          
-          this.addMessage(errorMessage, 'bot', true);
-        }
-      });
-  }
-
   openImagePreview(imageUrl: string): void {
     window.open(imageUrl, '_blank');
   }
@@ -601,4 +541,4 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     // Optionally show a placeholder or error message
     img.style.display = 'none';
   }
-} 
+}

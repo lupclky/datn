@@ -8,6 +8,14 @@ import java.util.Map;
 
 public interface VectorSearchService {
 
+    // Monitoring methods
+    boolean isIndexing();
+    String getIndexingStatus();
+    int getIndexingProgress(); // 0-100
+    
+    // Main Async Method
+    void indexAllDataAsync();
+
     // Product indexing methods
     void indexProduct(Product product);
 

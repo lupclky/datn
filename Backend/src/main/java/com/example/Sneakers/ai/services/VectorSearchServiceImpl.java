@@ -10,18 +10,21 @@ import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,10 +37,100 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    // Monitoring state
+    private final AtomicBoolean isIndexing = new AtomicBoolean(false);
+    private final AtomicReference<String> indexingStatus = new AtomicReference<>("Idle");
+    private final AtomicInteger indexingProgress = new AtomicInteger(0);
+
+    @Override
+    public boolean isIndexing() {
+        return isIndexing.get();
+    }
+
+    @Override
+    public String getIndexingStatus() {
+        return indexingStatus.get();
+    }
+
+    @Override
+    public int getIndexingProgress() {
+        return indexingProgress.get();
+    }
+
+    @Override
+    @Async
+    public void indexAllDataAsync() {
+        if (isIndexing.getAndSet(true)) {
+            log.warn("Indexing already in progress, skipping request.");
+            return;
+        }
+
+        try {
+            indexingProgress.set(0);
+            indexingStatus.set("Starting initialization...");
+            log.info("Starting async indexing of all data");
+
+            List<Product> products = productRepository.findAllWithFeatures();
+            List<Category> categories = categoryRepository.findAll();
+            
+            int totalItems = products.size() + categories.size();
+            int processedCount = 0;
+
+            if (totalItems == 0) {
+                indexingProgress.set(100);
+                indexingStatus.set("No data to index.");
+                return;
+            }
+
+            // Index Products
+            log.info("Indexing {} products...", products.size());
+            for (Product product : products) {
+                try {
+                    indexingStatus.set("Indexing product: " + product.getName());
+                    indexProduct(product);
+                } catch (Exception e) {
+                    log.error("Failed to index product: {}", product.getName(), e);
+                }
+                processedCount++;
+                updateProgress(processedCount, totalItems);
+            }
+
+            // Index Categories
+            log.info("Indexing {} categories...", categories.size());
+            for (Category category : categories) {
+                try {
+                    indexingStatus.set("Indexing category: " + category.getName());
+                    indexCategory(category);
+                } catch (Exception e) {
+                    log.error("Failed to index category: {}", category.getName(), e);
+                }
+                processedCount++;
+                updateProgress(processedCount, totalItems);
+            }
+
+            log.info("Completed async indexing.");
+            indexingStatus.set("Completed successfully.");
+            indexingProgress.set(100);
+
+        } catch (Exception e) {
+            log.error("Async indexing failed", e);
+            indexingStatus.set("Failed: " + e.getMessage());
+        } finally {
+            isIndexing.set(false);
+        }
+    }
+
+    private void updateProgress(int current, int total) {
+        if (total > 0) {
+            int percent = (int) (((double) current / total) * 100);
+            indexingProgress.set(percent);
+        }
+    }
+
     @Override
     @Transactional(readOnly = true)
     public void indexProduct(Product product) {
-        log.info("Indexing product: {}", product.getName());
+        log.debug("Indexing product: {}", product.getName());
 
         String content = formatProductContent(product);
         Map<String, String> metadata = createProductMetadata(product);
@@ -46,31 +139,18 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         TextSegment segment = TextSegment.from(content, Metadata.from(metadata));
 
         chromaEmbeddingStore.add(embedding, segment);
-        log.info("Successfully indexed product: {}", product.getName());
     }
 
     @Override
     @Transactional(readOnly = true)
     public void indexAllProducts() {
-        log.info("Starting to index all products");
-        List<Product> products = productRepository.findAll();
-
-        for (Product product : products) {
-            try {
-                indexProduct(product);
-            } catch (Exception e) {
-                log.error("Failed to index product: {}", product.getName(), e);
-            }
-        }
-
-        log.info("Completed indexing {} products", products.size());
+        // Synchronous wrapper or deprecated
+        indexAllDataAsync();
     }
 
     @Override
     @Transactional(readOnly = true)
     public void updateProductIndex(Product product) {
-        // For now, we'll delete and re-add
-        // In production, you might want to implement proper update logic
         deleteProductFromIndex(product.getId());
         indexProduct(product);
     }
@@ -78,16 +158,13 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     @Override
     public void deleteProductFromIndex(Long productId) {
         log.info("Deleting product from index: {}", productId);
-        // ChromaDB doesn't have direct delete by metadata, so this is a simplified
-        // version
-        // In production, you'd want to maintain a mapping of product IDs to embedding
-        // IDs
+        // ChromaDB specific implementation needed for real delete
     }
 
     @Override
     @Transactional(readOnly = true)
     public void indexCategory(Category category) {
-        log.info("Indexing category: {}", category.getName());
+        log.debug("Indexing category: {}", category.getName());
 
         String content = String.format("Category: %s", category.getName());
         Map<String, String> metadata = new HashMap<>();
@@ -104,18 +181,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     @Override
     @Transactional(readOnly = true)
     public void indexAllCategories() {
-        log.info("Starting to index all categories");
-        List<Category> categories = categoryRepository.findAll();
-
-        for (Category category : categories) {
-            try {
-                indexCategory(category);
-            } catch (Exception e) {
-                log.error("Failed to index category: {}", category.getName(), e);
-            }
-        }
-
-        log.info("Completed indexing {} categories", categories.size());
+        // Already handled in indexAllDataAsync
     }
 
     @Override
@@ -127,7 +193,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                 queryEmbedding,
                 topK,
-                0.7, // minimum score
+                0.6, // minimum score
                 null // no filter
         );
 
@@ -141,19 +207,14 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     @Override
     public List<Document> searchProductsByCategory(String query, String categoryName, int topK) {
         log.debug("Searching products in category: {} with query: {}", categoryName, query);
-
-        // Create a query that includes the category context
         String enhancedQuery = String.format("%s in %s category", query, categoryName);
-
         return searchProducts(enhancedQuery, topK);
     }
 
     @Override
     public List<Document> searchProductsByPriceRange(String query, Long minPrice, Long maxPrice, int topK) {
         log.debug("Searching products with price range: {} - {} and query: {}", minPrice, maxPrice, query);
-
-        // For now, we'll use the basic search and filter results
-        // In production, you'd want to use metadata filtering in ChromaDB
+        // Simplified filtering
         return searchProducts(query, topK * 2).stream()
                 .filter(doc -> {
                     try {
@@ -196,13 +257,12 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     @Override
     public void clearAllDocuments() {
         log.warn("Clearing all documents from vector store");
-        // This would need to be implemented based on ChromaDB's API
-        // For now, it's a placeholder
+        // Placeholder
     }
 
     @Override
     public long getDocumentCount() {
-        // This would need to be implemented based on ChromaDB's API
+        // Placeholder
         return 0;
     }
 

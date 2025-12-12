@@ -1,0 +1,126 @@
+@startuml UC26_AI_Indexing
+title 26) Tích hợp AI cho nội dung & chỉ mục
+actor Admin
+participant "Admin UI" as AdminUI
+participant "AIInitializationController" as API
+participant "IndexService" as Indexer
+database "ChromaDB" as Chroma
+Admin -> AdminUI : Click "Index all products"
+AdminUI -> API : POST /api/v1/ai/initialize/index-all
+API -> Indexer : triggerIndexAll()
+loop For each product/category
+    Indexer -> Chroma : Upsert vectors
+end
+Chroma --> Indexer : Ack
+Indexer --> API : Indexing status
+API --> AdminUI : 200 + status
+AdminUI --> Admin : Show success/progress
+@enduml
+
+@startuml UC27_AI_Product_Assistant
+title 27) AI tư vấn sản phẩm / tìm kiếm ngữ nghĩa / khuyến nghị
+actor User
+participant "Chatbot UI" as ChatUI
+participant "AIChatController" as API
+participant "Vertex AI" as Vertex
+database "ChromaDB" as Chroma
+User -> ChatUI : Nhập câu hỏi
+ChatUI -> API : POST /api/v1/ai/chat/product-assistant
+API -> Chroma : Semantic search (products)
+Chroma --> API : Top K matches
+API -> Vertex : Prompt + context (matches)
+Vertex --> API : LLM response
+API --> ChatUI : Answer + references
+ChatUI --> User : Hiển thị trả lời/gợi ý
+@enduml
+
+@startuml UC28_AI_Image_Analysis
+title 28) Phân tích hình ảnh sản phẩm
+actor User
+participant "Chatbot UI" as ChatUI
+participant "AIChatController" as API
+participant "Vertex AI Vision" as Vertex
+database "ChromaDB" as Chroma
+User -> ChatUI : Upload ảnh sản phẩm
+ChatUI -> API : POST /api/v1/ai/chat/image (multipart)
+API -> Vertex : Vision analyze(image)
+Vertex --> API : Labels/features
+API -> Chroma : Similarity search with features
+Chroma --> API : Candidate products
+API --> ChatUI : Recommendations
+ChatUI --> User : Hiển thị gợi ý tương tự
+@enduml
+
+@startuml UC29_AI_Generate_News
+title 29) Sinh nội dung Tin tức bằng AI
+actor Admin
+participant AdminUI
+participant "AIChatController" as API
+participant "Vertex AI" as Vertex
+Admin -> AdminUI : Nhập chủ đề bài viết
+AdminUI -> API : POST /api/v1/ai/chat/generate-news
+API -> Vertex : Prompt generate news
+Vertex --> API : Draft content
+API --> AdminUI : Draft + metadata
+AdminUI --> Admin : Cho phép chỉnh sửa/lưu
+@enduml
+
+@startuml UC30_AI_Product_Description
+title 30) Sinh mô tả sản phẩm bằng AI
+actor Admin
+participant AdminUI
+participant "AIChatController" as API
+participant "Vertex AI" as Vertex
+Admin -> AdminUI : Chọn sản phẩm, yêu cầu mô tả
+AdminUI -> API : POST /api/v1/ai/chat/generate-product-description
+API -> Vertex : Prompt với thông tin sản phẩm
+Vertex --> API : Generated description
+API --> AdminUI : Description text
+AdminUI --> Admin : Review/ghi đè mô tả sản phẩm
+@enduml
+
+@startuml UC31_AI_Warranty_Advice
+title 31) Tư vấn Bảo hành bằng AI
+actor User
+participant ChatUI
+participant "AIChatController" as API
+participant "Vertex AI" as Vertex
+User -> ChatUI : Mô tả vấn đề bảo hành
+ChatUI -> API : POST /api/v1/ai/chat/warranty-advice
+API -> Vertex : Prompt với tri thức bảo hành
+Vertex --> API : Advice steps
+API --> ChatUI : Hướng dẫn bảo hành
+ChatUI --> User : Trả lời + bước thực hiện
+@enduml
+
+@startuml UC32_AI_Diagnose_Issue
+title 32) Chẩn đoán lỗi khóa bằng AI
+actor User
+participant ChatUI
+participant "AIChatController" as API
+participant "Vertex AI" as Vertex
+User -> ChatUI : Mô tả triệu chứng khóa
+ChatUI -> API : POST /api/v1/ai/chat/diagnose-issue
+API -> Vertex : Prompt với kịch bản lỗi
+Vertex --> API : Diagnosis + fix suggestions
+API --> ChatUI : Kết quả chẩn đoán
+ChatUI --> User : Hiển thị chẩn đoán/khuyến nghị
+@enduml
+
+@startuml UC33_AI_Indexing_Listener
+title 33) Tự động chỉ mục dữ liệu khi CRUD sản phẩm (listener)
+participant "ProductController/Service" as ProductSvc
+participant "Domain Event" as EventBus
+participant "VectorIndexService" as Indexer
+database "ChromaDB" as Chroma
+ProductSvc --> EventBus : Emit ProductCreated/Updated/Deleted
+EventBus --> Indexer : Deliver event
+alt Created/Updated
+    Indexer -> Chroma : Upsert product vectors
+else Deleted
+    Indexer -> Chroma : Remove product vectors
+end
+Chroma --> Indexer : Ack
+Indexer --> EventBus : Success/failure status
+@enduml
+

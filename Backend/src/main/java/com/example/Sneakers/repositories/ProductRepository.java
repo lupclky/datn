@@ -18,6 +18,10 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages")
     List<Product> findAllWithImages();
 
+    // Used for AI indexing to avoid LazyInitializationException
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productFeatures pf LEFT JOIN FETCH pf.feature LEFT JOIN FETCH p.category")
+    List<Product> findAllWithFeatures();
+
     boolean existsByName(String name);
 
     long countByQuantityGreaterThan(Long quantity);

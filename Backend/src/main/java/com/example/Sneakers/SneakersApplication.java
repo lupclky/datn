@@ -3,12 +3,14 @@ package com.example.Sneakers;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication(exclude = {
 	SecurityAutoConfiguration.class,
 	org.springframework.ai.autoconfigure.vectorstore.chroma.ChromaVectorStoreAutoConfiguration.class
 })
-public class 	SneakersApplication {
+@EnableAsync
+public class SneakersApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SneakersApplication.class, args);

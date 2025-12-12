@@ -31,8 +31,16 @@ spring:
     exclude:
       - org.springframework.ai.autoconfigure.vectorstore.chroma.ChromaVectorStoreAutoConfiguration
   mail:
-    username: "leonelpessiu2810@gmail.com" # TODO: Update with your email
-    password: "lap28102003" # TODO: Update with your app password
+    host: smtp.gmail.com
+    port: 587
+    username: "leonelpessiu2810@gmail.com"
+    password: "lap28102003"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 api:
   prefix: /api/v1
 jwt:
@@ -72,7 +80,7 @@ stripe:
 # VNPAY Configuration (Test Mode)
 payment:
   vnpay:
-    tmnCode: "JHQEESRJ" # Replace with your TmnCode
-    hashSecret: "075M0OLSGSFKL8BEIT81CFM9WGATXYCA" # Replace with your HashSecret
+    tmnCode: "R5QX2TZO" # Replace with your TmnCode
+    hashSecret: "FT254A9XGNV0X8WQR7PK2YTI5HI3SPNA" # Replace with your HashSecret
     url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
     returnUrl: "http://localhost:8089/api/v1/vnpay/payment-callback"

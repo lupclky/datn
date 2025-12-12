@@ -59,6 +59,16 @@ public class WebSecurityConfig {
                                                                 String.format("%s/vnpay/payment-callback", apiPrefix),
                                                                 String.format("%s/lock-features/**", apiPrefix)
                                                         ).permitAll()
+                                                        
+                                                        // AI Chat endpoints - Public
+                                                        .requestMatchers(
+                                                                String.format("%s/ai/chat/**", apiPrefix)
+                                                        ).permitAll()
+
+                                                        // AI Admin endpoints
+                                                        .requestMatchers(
+                                                                String.format("%s/ai/initialize/**", apiPrefix)
+                                                        ).hasAnyRole("ADMIN")
 
                                                         .requestMatchers(POST,
                                                                 String.format("%s/orders/**", apiPrefix)
