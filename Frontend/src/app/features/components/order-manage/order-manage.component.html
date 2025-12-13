@@ -3,7 +3,7 @@
     <p-confirmDialog></p-confirmDialog>
 
     <div class="order-header">
-        <h2>Quản lý đơn hàng</h2>
+        <h2>{{ isStaff ? 'Đơn hàng được phân công' : 'Quản lý đơn hàng' }}</h2>
         <div class="header-actions">
             <button pButton 
                     pRipple 
@@ -11,6 +11,7 @@
                     label="Tạo đơn hàng mới" 
                     icon="pi pi-plus" 
                     class="p-button-success p-button-sm"
+                    *ngIf="!isStaff"
                     (click)="openCreateOrderDialog()">
             </button>
             <div class="header-search-container" (click)="showSearchDialog = true" pTooltip="Tìm kiếm & Lọc nâng cao" tooltipPosition="bottom">
@@ -121,8 +122,12 @@
                                         optionValue="value"
                                         (onChange)="onOrderStateChange($event, order.id)"
                                         [placeholder]="getPlaceholderByOrderStatus(order.status)"
+                                        *ngIf="!isStaff"
                                         appendTo="body">
                             </p-dropdown>
+                            <span *ngIf="isStaff" [ngClass]="'status-' + order.status">
+                                {{ getPlaceholderByOrderStatus(order.status) }}
+                            </span>
                         </td>
                         <td>
                             <button pButton 
@@ -139,7 +144,7 @@
                                     icon="pi pi-truck"
                                     class="p-button-rounded p-button-success p-button-text"
                                     pTooltip="Tạo vận đơn GHN"
-                                    *ngIf="!order.tracking_number"
+                                    *ngIf="!isStaff && !order.tracking_number"
                                     (click)="openWaybillDialog(order)">
                             </button>
                         </td>

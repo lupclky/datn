@@ -24,9 +24,10 @@ public interface IOrderService {
     Order updateOrder(Long id, OrderDTO orderDTO) throws DataNotFoundException;
     void deleteOrder(Long id);
     List<OrderHistoryResponse> findByUserId(String token) throws Exception;
-    List<OrderHistoryResponse> getAllOrders();
+    List<OrderHistoryResponse> getAllOrders(String token);
     Page<Order> getOrdersByKeyword(String keyword, String status, LocalDate startDate, LocalDate endDate, Pageable pageable);
     Order updateOrderStatus(Long orderId, String status) throws DataNotFoundException;
+    void assignStaff(Long orderId, Long staffId) throws Exception;
     Long getTotalRevenue();
     DashboardStatsDTO getDashboardStats();
     List<Order> findByUserId(Long userId);

@@ -23,3 +23,4 @@ CHROMA_BASE_URL=http://localhost:8000
 # Ensure GOOGLE_APPLICATION_CREDENTIALS environment variable points to your JSON key file if running locally outside of GCP.
 
 
+

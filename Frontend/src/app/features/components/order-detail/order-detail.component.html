@@ -12,9 +12,16 @@
                 <p class="store-tagline">Chuyên cung cấp khóa vân tay cao cấp</p>
               </div>
               <div class="invoice-actions">
-                <button (click)="printInvoice()" class="print-btn">
-                  <i class="bi bi-printer-fill"></i>
-                  <span>In Hóa Đơn</span>
+                <button pButton 
+                        pRipple 
+                        type="button" 
+                        icon="pi pi-download" 
+                        label="Tải hóa đơn PDF" 
+                        class="p-button-success"
+                        [loading]="isGeneratingPDF"
+                        [disabled]="isGeneratingPDF"
+                        (click)="downloadInvoicePDF()"
+                        style="margin-right: 0.5rem;">
                 </button>
               </div>
             </div>
@@ -43,6 +50,28 @@
                 </div>
               </div>
             </div>
+
+            <!-- Staff Installation Info Section -->
+            @if(orderInfor.assigned_staff) {
+              <div class="staff-installation-section mt-4 p-3 border rounded" style="background-color: #e3f2fd; border-left: 4px solid #2196F3 !important;">
+                <h5 class="section-title mb-3" style="color: #1976D2;">
+                  <i class="pi pi-user" style="margin-right: 0.5rem;"></i>
+                  Thông tin nhân viên lắp đặt
+                </h5>
+                <div class="row">
+                  <div class="col-md-6">
+                    <p class="mb-2"><strong>Họ tên:</strong> <span class="text-primary font-bold">{{ orderInfor.assigned_staff.fullname }}</span></p>
+                  </div>
+                  <div class="col-md-6">
+                    <p class="mb-2"><strong>Số điện thoại:</strong> 
+                      <a href="tel:{{ orderInfor.assigned_staff.phone_number }}" class="text-primary font-bold" style="text-decoration: none;">
+                        {{ orderInfor.assigned_staff.phone_number }}
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
 
             <!-- Order Items Table -->
             <div class="order-items-table">

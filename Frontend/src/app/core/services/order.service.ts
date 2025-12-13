@@ -183,4 +183,11 @@ export class OrderService {
       { headers: this.getHeaders() }
     );
   }
+
+  assignStaff(orderId: number, staffId: number) {
+    return this.httpClient.put(`${this.apiUrl}/orders/${orderId}/assign-staff`, {}, {
+      headers: this.getHeaders(),
+      params: new HttpParams().set('staffId', staffId.toString())
+    });
+  }
 }

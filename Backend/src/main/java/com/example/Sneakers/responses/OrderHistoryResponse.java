@@ -45,6 +45,9 @@ public class OrderHistoryResponse {
     @JsonProperty("payment_method")
     private String paymentMethod;
 
+    @JsonProperty("assigned_staff_name")
+    private String assignedStaffName;
+
     public static OrderHistoryResponse fromOrder(Order order){
         OrderHistoryResponseBuilder builder = OrderHistoryResponse.builder()
                 .id(order.getId())
@@ -55,6 +58,10 @@ public class OrderHistoryResponse {
                 .fullname(order.getFullName())
                 .phoneNumber(order.getPhoneNumber())
                 .paymentMethod(order.getPaymentMethod());
+
+        if (order.getAssignedStaff() != null) {
+            builder.assignedStaffName(order.getAssignedStaff().getFullName());
+        }
 
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
             // Lấy thumbnail của sản phẩm đầu tiên

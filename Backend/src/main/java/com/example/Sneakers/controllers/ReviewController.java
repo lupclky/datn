@@ -134,8 +134,10 @@ public class ReviewController {
             @RequestParam(required = false) Long productId) {
         try {
             System.out.println("ReviewController.getAllReviews() - Request received");
-            System.out.println("ReviewController.getAllReviews() - Authentication: " + 
-                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+            Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                System.out.println("ReviewController.getAllReviews() - User: " + auth.getName() + ", Roles: " + auth.getAuthorities());
+            }
             Page<ReviewResponse> reviews = reviewService.getAllReviews(page, size, keyword, productId);
             System.out.println("ReviewController.getAllReviews() - Returning " + reviews.getTotalElements() + " reviews");
             return ResponseEntity.ok(reviews);

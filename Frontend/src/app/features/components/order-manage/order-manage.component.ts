@@ -88,6 +88,7 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   public sortField: string = 'id';
   public sortOrder: number = -1; // -1 for desc, 1 for asc
   public showSearchDialog: boolean = false;
+  public isStaff: boolean = false; // Flag to check if user is STAFF
   
   // Create new order dialog
   public showCreateOrderDialog: boolean = false;
@@ -187,7 +188,10 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
       return false;
     }
     
-    console.log('OrderManageComponent.checkPermissions() - Access granted for roleId:', user.role.id);
+    // Set isStaff flag
+    this.isStaff = user.role.id === 3;
+    
+    console.log('OrderManageComponent.checkPermissions() - Access granted for roleId:', user.role.id, 'isStaff:', this.isStaff);
     return true;
   }
 
@@ -217,6 +221,79 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
       return;
     }
 
+    // If user is STAFF, use getAllOrders API which filters by assigned staff
+    if (this.isStaff) {
+      this.loading = true;
+      this.orderService.getAllOrders().pipe(
+        tap((orders: HistoryOrderDto[]) => {
+          // Apply client-side filtering if needed
+          let filteredOrders = orders;
+          const { keyword, status, dateRange } = this.searchForm.value;
+          
+          if (keyword) {
+            const searchLower = keyword.toLowerCase();
+            filteredOrders = filteredOrders.filter(order => 
+              order.fullname?.toLowerCase().includes(searchLower) ||
+              order.email?.toLowerCase().includes(searchLower) ||
+              order.phone_number?.includes(keyword) ||
+              order.id?.toString().includes(keyword)
+            );
+          }
+          
+          if (status) {
+            filteredOrders = filteredOrders.filter(order => order.status === status);
+          }
+          
+          if (dateRange && dateRange[0] && dateRange[1]) {
+            const startDate = new Date(dateRange[0]);
+            const endDate = new Date(dateRange[1]);
+            endDate.setHours(23, 59, 59, 999);
+            
+            filteredOrders = filteredOrders.filter(order => {
+              const orderDate = new Date(order.order_date);
+              return orderDate >= startDate && orderDate <= endDate;
+            });
+          }
+          
+          // Sort orders
+          filteredOrders.sort((a, b) => {
+            const aValue = a[this.sortField as keyof HistoryOrderDto];
+            const bValue = b[this.sortField as keyof HistoryOrderDto];
+            
+            // Handle undefined/null values
+            if (aValue === undefined || aValue === null) {
+              return 1; // Put undefined values at the end
+            }
+            if (bValue === undefined || bValue === null) {
+              return -1; // Put undefined values at the end
+            }
+            
+            // Compare values
+            if (this.sortOrder === -1) {
+              return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+            } else {
+              return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+            }
+          });
+          
+          // Apply pagination
+          const startIndex = this.page * this.pageSize;
+          const endIndex = startIndex + this.pageSize;
+          this.allOrders = filteredOrders.slice(startIndex, endIndex);
+          this.totalRecords = filteredOrders.length;
+          this.loading = false;
+        }),
+        catchError(err => {
+          const errorMessage = err?.error?.message || 'Không thể tải danh sách đơn hàng';
+          this.toastService.fail(errorMessage);
+          this.loading = false;
+          return of(err);
+        })
+      ).subscribe();
+      return;
+    }
+
+    // For ADMIN, use the existing keyword search API
     let sortField = this.sortField;
     let sortOrder = this.sortOrder;
 

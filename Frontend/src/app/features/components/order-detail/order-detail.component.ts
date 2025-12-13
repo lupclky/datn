@@ -12,6 +12,8 @@ import { ToastService } from '../../../core/services/toast.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ProductService } from '../../../core/services/product.service';
+import { InvoicePdfService } from '../../../core/services/invoice-pdf.service';
+import { ButtonModule } from 'primeng/button';
 import { Observable } from 'rxjs';
 import { TimelineModule } from 'primeng/timeline';
 import { CardModule } from 'primeng/card';
@@ -25,7 +27,8 @@ import { CardModule } from 'primeng/card';
     NgClass,
     ToastModule,
     TimelineModule,
-    CardModule
+    CardModule,
+    ButtonModule
   ],
   providers: [ToastService, MessageService],
   templateUrl: './order-detail.component.html',
@@ -46,13 +49,16 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
   public orderEvents: any[] = [];
   public currentStatusIndex: number = 0;
 
+  public isGeneratingPDF: boolean = false;
+
   constructor(
     private commonService: CommonService,
     private orderService: OrderService,
     private activatedRouter: ActivatedRoute,
     private router: Router,
     private toastService: ToastService,
-    private productService: ProductService
+    private productService: ProductService,
+    private invoicePdfService: InvoicePdfService
   ) {
     super();
   }
@@ -129,26 +135,16 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
         this.orderInfor = orderInfor;
         this.productOrderd = orderInfor.order_details;
         this.notion = orderInfor.note;
-        switch (orderInfor.shipping_method) {
-          case "Tiêu chuẩn":
-            this.shipCost = 30000;
-            break;
-          case "Nhanh":
-            this.shipCost = 40000;
-            break;
-          case "Hỏa tốc":
-            this.shipCost = 60000;
-            break;
-          default:
-            break;
-        }
+        
         this.totalMoney = 0;
         this.productOrderd.forEach((item) => {
           this.totalMoney += item.total_money;
         });
+        
         if (orderInfor.discount_amount) {
           this.discountAmount = orderInfor.discount_amount;
         }
+        
         if (orderInfor.voucher) {
           this.voucherInfo = {
             code: orderInfor.voucher.code,
@@ -156,9 +152,28 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
             percentage: orderInfor.voucher.discount_percentage
           };
         }
+
         if (orderInfor.total_money) {
           this.finalTotal = orderInfor.total_money;
+          // Calculate actual shipping cost from total
+          this.shipCost = this.finalTotal - (this.totalMoney - this.discountAmount);
+          if (this.shipCost < 0) this.shipCost = 0;
         } else {
+          // Fallback for legacy orders
+          switch (orderInfor.shipping_method) {
+            case "Tiêu chuẩn":
+              this.shipCost = 30000;
+              break;
+            case "Nhanh":
+              this.shipCost = 0;
+              break;
+            case "Hỏa tốc":
+              this.shipCost = 60000;
+              break;
+            default:
+              this.shipCost = 0;
+              break;
+          }
           this.finalTotal = this.totalMoney - this.discountAmount + this.shipCost;
         }
 
@@ -255,7 +270,31 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
     return statusMap[status.toLowerCase()] || status;
   }
 
-  printInvoice(): void {
-    window.print();
+
+  async downloadInvoicePDF(): Promise<void> {
+    if (!this.orderInfor || !this.productOrderd) {
+      this.toastService.fail('Không thể tải hóa đơn. Vui lòng thử lại sau.');
+      return;
+    }
+
+    this.isGeneratingPDF = true;
+    try {
+      await this.invoicePdfService.generateInvoicePDF(
+        this.orderInfor,
+        this.productOrderd,
+        this.totalMoney,
+        this.shipCost,
+        this.discountAmount,
+        this.finalTotal,
+        this.voucherInfo,
+        this.apiImage
+      );
+      this.toastService.success('Đã tải hóa đơn thành công!');
+    } catch (error: any) {
+      console.error('Error generating PDF:', error);
+      this.toastService.fail(error.message || 'Không thể tạo file PDF. Vui lòng thử lại.');
+    } finally {
+      this.isGeneratingPDF = false;
+    }
   }
 }

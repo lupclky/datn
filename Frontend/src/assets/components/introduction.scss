@@ -4,9 +4,7 @@
   .intro-header {
     height: 300px;
     width: 100%;
-    background: url("../images/introCover.jpg") no-repeat;
-    background-size: 100%;
-    background-position: 31% 40%;
+    background-color: #333; /* Fallback color */
     margin-top: 40px;
 
     .intro-header-wrap {

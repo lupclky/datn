@@ -1,21 +1,30 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from '../../../../core/commonComponent/base.component';
 import { CommonService } from '../../../../core/services/common.service';
-import { catchError, filter, of, tap } from 'rxjs';
+import { catchError, filter, of, tap, finalize } from 'rxjs';
 import { OrderService } from '../../../../core/services/order.service';
 import { InfoOrderDto } from '../../../../core/dtos/InfoOrder.dto';
 import { OrderDetailDto } from '../../../../core/dtos/OrderDetail.dto';
 import { CurrencyPipe, DatePipe, NgClass, NgIf } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { environment } from '../../../../../environments/environment.development';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { InvoicePdfService } from '../../../../core/services/invoice-pdf.service';
 import { TimelineModule } from 'primeng/timeline';
 import { CardModule } from 'primeng/card';
 import { DropdownModule } from 'primeng/dropdown';
 import { ButtonModule } from 'primeng/button';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
+
+import { UserService } from '../../../../core/services/user.service';
 
 @Component({
   selector: 'app-admin-order-detail',
@@ -30,7 +39,15 @@ import { FormsModule } from '@angular/forms';
     CardModule,
     DropdownModule,
     ButtonModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule,
+    TableModule,
+    DialogModule,
+    InputNumberModule,
+    InputTextModule,
+    TooltipModule,
+    TagModule,
+    RouterModule
   ],
   providers: [ToastService, MessageService],
   templateUrl: './admin-order-detail.component.html',
@@ -62,25 +79,86 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
   ];
   public selectedStatus: string = '';
 
+  // Waybill creation
+  public showWaybillDialog: boolean = false;
+  public waybillForm!: FormGroup;
+  public isCreatingWaybill: boolean = false;
+  public isGeneratingPDF: boolean = false;
+
+  // Staff assignment
+  public staffList: any[] = [];
+  public selectedStaff: any = null;
+  public showAssignStaffDialog: boolean = false;
+  public isAdmin: boolean = false;
+
   constructor(
     private commonService: CommonService,
     private orderService: OrderService,
     private activatedRouter: ActivatedRoute,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private fb: FormBuilder,
+    private invoicePdfService: InvoicePdfService,
+    private userService: UserService
   ) {
     super();
+    this.waybillForm = this.fb.group({
+      district_id: [null, Validators.required],
+      ward_code: ['', Validators.required],
+      length: [20, Validators.min(1)],
+      width: [20, Validators.min(1)],
+      height: [10, Validators.min(1)],
+      weight: [200, Validators.min(1)]
+    });
   }
 
   ngOnInit(): void {
     const idFromUrl = this.activatedRouter.snapshot.paramMap.get('id');
     if (!idFromUrl) {
         this.toastService.fail('Không tìm thấy mã đơn hàng.');
-        this.router.navigate(['/admin/orders']); // Navigate to admin orders list
+        this.router.navigate(['/orderManage']);
         return;
     }
     this.id = idFromUrl;
+    
+    // Check if user is ADMIN
+    const userInfo = localStorage.getItem('userInfor');
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      this.isAdmin = user.role && user.role.id === 2; // 2 = ADMIN
+    }
+    
     this.loadOrderDetail(this.id);
+    
+    // Only load staff list if user is ADMIN
+    if (this.isAdmin) {
+      this.getStaffList();
+    }
+  }
+
+  getStaffList() {
+    this.userService.getAllUser().subscribe({
+      next: (users: any[]) => {
+        this.staffList = users.filter(u => u.role && u.role.name === 'STAFF');
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  openAssignStaffDialog() {
+    this.showAssignStaffDialog = true;
+  }
+
+  assignStaff() {
+    if (!this.selectedStaff) return;
+    this.orderService.assignStaff(parseInt(this.id), this.selectedStaff.id).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Thành công', 'Đã phân công nhân viên');
+        this.showAssignStaffDialog = false;
+        this.loadOrderDetail(this.id); // Refresh order
+      },
+      error: (err) => this.toastService.showError('Lỗi', err.error || 'Không thể phân công')
+    });
   }
 
   loadOrderDetail(orderId: string): void {
@@ -136,7 +214,14 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
         this.initializeTimeline(orderInfor);
       }),
       catchError((err) => {
-        this.toastService.fail('Không thể tải thông tin đơn hàng.');
+        const errorMessage = err?.error?.message || err?.error || 'Không thể tải thông tin đơn hàng.';
+        this.toastService.fail(errorMessage);
+        // Navigate back to order list if access denied
+        if (errorMessage.includes('assigned') || errorMessage.includes('Cannot get order')) {
+          setTimeout(() => {
+            this.router.navigate(['/orderManage']);
+          }, 2000);
+        }
         return of(err)
       }),
     ).subscribe();
@@ -233,7 +318,108 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
     return statusMap[status.toLowerCase()] || status;
   }
 
-  printInvoice(): void {
-    window.print();
+
+  async downloadInvoicePDF(): Promise<void> {
+    if (!this.orderInfor || !this.productOrderd) {
+      this.toastService.fail('Không thể tải hóa đơn. Vui lòng thử lại sau.');
+      return;
+    }
+
+    this.isGeneratingPDF = true;
+    try {
+      await this.invoicePdfService.generateInvoicePDF(
+        this.orderInfor,
+        this.productOrderd,
+        this.totalMoney,
+        this.shipCost,
+        this.discountAmount,
+        this.finalTotal,
+        this.voucherInfo,
+        this.apiImage
+      );
+      this.toastService.success('Đã tải hóa đơn thành công!');
+    } catch (error: any) {
+      console.error('Error generating PDF:', error);
+      this.toastService.fail(error.message || 'Không thể tạo file PDF. Vui lòng thử lại.');
+    } finally {
+      this.isGeneratingPDF = false;
+    }
+  }
+
+  openWaybillDialog(): void {
+    if (this.orderInfor.tracking_number) {
+      this.toastService.warn('Đơn hàng đã có vận đơn: ' + this.orderInfor.tracking_number);
+      return;
+    }
+    this.showWaybillDialog = true;
+    this.waybillForm.patchValue({
+      district_id: this.orderInfor.district_id || null,
+      ward_code: this.orderInfor.ward_code || '',
+      length: 20,
+      width: 20,
+      height: 10,
+      weight: 200
+    });
+  }
+
+  createWaybill(): void {
+    if (this.waybillForm.invalid) {
+      this.toastService.fail('Vui lòng nhập đầy đủ thông tin bắt buộc');
+      return;
+    }
+
+    this.isCreatingWaybill = true;
+    const formValue = this.waybillForm.value;
+
+    this.orderService.createWaybill(
+      parseInt(this.id),
+      formValue.district_id,
+      formValue.ward_code,
+      formValue.length,
+      formValue.width,
+      formValue.height,
+      formValue.weight
+    ).pipe(
+      tap(() => {
+        this.toastService.success('Tạo vận đơn thành công! Email đã được gửi cho khách hàng.');
+        this.showWaybillDialog = false;
+        this.loadOrderDetail(this.id); // Reload to get tracking number
+      }),
+      catchError((err) => {
+        const errorMessage = err?.error?.message || err?.error || 'Không thể tạo vận đơn';
+        this.toastService.fail(errorMessage);
+        return of(err);
+      }),
+      finalize(() => {
+        this.isCreatingWaybill = false;
+      })
+    ).subscribe();
+  }
+
+  getStatusSeverity(status: string): string {
+    switch(status) {
+      case 'pending': return 'warning';
+      case 'processing': return 'info';
+      case 'shipped': return 'primary';
+      case 'delivered': return 'success';
+      case 'cancelled': return 'danger';
+      case 'payment_failed': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    const option = this.orderStatusOptions.find(opt => opt.value === status);
+    return option ? option.label : status;
+  }
+
+  getPaymentMethodSeverity(method: string): string {
+    switch(method?.toUpperCase()) {
+      case 'CASH': return 'warning';
+      case 'STRIPE': return 'success';
+      case 'VNPAY': return 'info';
+      case 'BANKING': return 'primary';
+      default: return 'secondary';
+    }
   }
 }

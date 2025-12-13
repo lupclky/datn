@@ -19,6 +19,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "LEFT JOIN FETCH o.orderDetails od " +
            "LEFT JOIN FETCH od.product " +
            "LEFT JOIN FETCH o.voucher " +
+           "LEFT JOIN FETCH o.assignedStaff " +
            "WHERE o.id = :orderId")
     Optional<Order> findByIdWithDetails(@Param("orderId") Long orderId);
     
@@ -114,4 +115,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByOrderDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     Optional<Order> findByVnpTxnRef(String vnpTxnRef);
+
+    List<Order> findByAssignedStaffId(Long staffId);
 }

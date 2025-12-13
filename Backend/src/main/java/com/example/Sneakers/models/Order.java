@@ -94,4 +94,8 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<VoucherUsage> voucherUsages;
+
+    @ManyToOne
+    @JoinColumn(name = "assigned_staff_id")
+    private User assignedStaff;
 }

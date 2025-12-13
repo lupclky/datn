@@ -6,8 +6,10 @@ export interface HistoryOrderDto {
     total_products: number,
     product_name: string,
     order_date: Date,
-    buyer_name: string,
+    fullname: string,  // Changed from buyer_name to match backend
     phone_number: string,
     email: string,
-    brand: string
+    brand?: string,
+    payment_method?: string,
+    assigned_staff_name?: string
 }

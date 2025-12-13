@@ -214,14 +214,29 @@ public class OrderService implements IOrderService {
         String extractedToken = token.substring(7);
         User user = userService.getUserDetailsFromToken(extractedToken);
 
-        // Allow ADMIN and STAFF to view any order
         Order order = orderRepository.findByIdWithDetails(orderId).orElse(null);
         if (order == null) {
              throw new Exception("Cannot find order with id = " + orderId);
         }
 
-        if (user.getRole() != null && 
-            (user.getRole().getName().equals(Role.ADMIN) || user.getRole().getName().equals(Role.STAFF))) {
+        // Allow ADMIN to view any order
+        if (user.getRole() != null && user.getRole().getName().equals(Role.ADMIN)) {
+            OrderResponse response = OrderResponse.fromOrder(order);
+            try {
+                if (order.getTrackingNumber() != null && "GHN".equals(order.getCarrier())) {
+                    response.setTrackingInfo(ghnService.getOrderInfo(order.getTrackingNumber()));
+                }
+            } catch (Exception e) {
+                System.err.println("Error fetching tracking info: " + e.getMessage());
+            }
+            return response;
+        }
+
+        // Allow STAFF to view only assigned orders
+        if (user.getRole() != null && user.getRole().getName().equals(Role.STAFF)) {
+            if (order.getAssignedStaff() == null || !order.getAssignedStaff().getId().equals(user.getId())) {
+                throw new Exception("You can only view orders assigned to you");
+            }
             OrderResponse response = OrderResponse.fromOrder(order);
             try {
                 if (order.getTrackingNumber() != null && "GHN".equals(order.getCarrier())) {
@@ -274,6 +289,7 @@ public class OrderService implements IOrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<OrderHistoryResponse> findByUserId(String token) throws Exception {
         String extractedToken = token.substring(7);
         User user = userService.getUserDetailsFromToken(extractedToken);
@@ -283,11 +299,59 @@ public class OrderService implements IOrderService {
     }
 
     @Override
-    public List<OrderHistoryResponse> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<OrderHistoryResponse> getAllOrders(String token) {
+        String extractedToken = token.substring(7);
+        User user;
+        try {
+            user = userService.getUserDetailsFromToken(extractedToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid token");
+        }
+
+        List<Order> orders;
+        if (user.getRole().getName().equals(Role.ADMIN)) {
+            orders = orderRepository.findAll();
+        } else if (user.getRole().getName().equals(Role.STAFF)) {
+            orders = orderRepository.findByAssignedStaffId(user.getId());
+        } else {
+            orders = new ArrayList<>();
+        }
+
         return orders.stream()
                 .map(OrderHistoryResponse::fromOrder)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void assignStaff(Long orderId, Long staffId) throws Exception {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new DataNotFoundException("Order not found"));
+        User staff = userRepository.findById(staffId)
+                .orElseThrow(() -> new DataNotFoundException("Staff not found"));
+        
+        if (staff.getRole() == null || !staff.getRole().getName().equals(Role.STAFF)) {
+            throw new Exception("User is not a staff member");
+        }
+
+        order.setAssignedStaff(staff);
+        Order savedOrder = orderRepository.save(order);
+        
+        // Send email notification to customer about assigned staff
+        try {
+            String to = order.getEmail();
+            String subject = "Nhân viên lắp đặt đã được phân công - Đơn hàng #" + order.getId() + " - Locker Korea";
+            String content = BuilderEmailContent.buildStaffAssignmentEmailContent(savedOrder);
+            boolean sendMail = emailService.sendEmail(to, subject, content);
+            
+            if (!sendMail) {
+                System.err.println("Warning: Failed to send staff assignment email to " + to);
+            }
+        } catch (Exception emailException) {
+            System.err.println("Warning: Exception while sending staff assignment email: " + emailException.getMessage());
+            // Don't throw exception - staff assignment succeeded, email failure is non-critical
+        }
     }
 
     @Override

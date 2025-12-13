@@ -1,169 +1,358 @@
 @if(orderInfor){
-  <div class="order-detail-container">
-    <div class="container py-5">
-      <div class="row justify-content-center">
-        <div class="col-lg-10">
-          <div class="invoice-card" id="printable-area">
-            <!-- Invoice Header -->
-            <div class="invoice-header">
-              <div class="invoice-branding">
-                <img src="assets/images/hvmlogo.gif" alt="Korea Lock Store Logo" class="invoice-logo">
-                <h3 class="store-name">Korea Lock Store</h3>
-                <p class="store-tagline">Chuyên cung cấp khóa vân tay cao cấp</p>
-              </div>
-              <div class="invoice-actions">
-                <button (click)="printInvoice()" class="print-btn">
-                  <i class="bi bi-printer-fill"></i>
-                  <span>In Hóa Đơn</span>
+  <div class="admin-order-detail-container">
+    <p-toast></p-toast>
+    
+    <!-- Header with Back Button and Actions -->
+    <div class="page-header">
+      <div class="header-left">
+        <button pButton 
+                pRipple 
+                type="button" 
+                icon="pi pi-arrow-left" 
+                label="Quay lại" 
+                class="p-button-text p-button-secondary"
+                routerLink="/orderManage">
+        </button>
+        <h2 class="page-title">Chi tiết đơn hàng #{{ orderInfor.id }}</h2>
+      </div>
+      <div class="header-actions">
+        <button pButton 
+                pRipple 
+                type="button" 
+                icon="pi pi-download" 
+                label="Tải hóa đơn PDF" 
+                class="p-button-success"
+                [loading]="isGeneratingPDF"
+                [disabled]="isGeneratingPDF"
+                (click)="downloadInvoicePDF()"
+                style="margin-right: 0.5rem;">
+        </button>
+        @if (orderInfor.shipping_method === 'Hỏa tốc' && isAdmin) {
+          <button pButton 
+                  pRipple 
+                  type="button" 
+                  icon="pi pi-user-plus" 
+                  label="Phân công lắp đặt" 
+                  class="p-button-info"
+                  (click)="openAssignStaffDialog()"
+                  style="margin-right: 0.5rem;">
+          </button>
+        }
+        @if (!orderInfor.tracking_number && orderInfor.shipping_method !== 'Hỏa tốc') {
+          <button pButton 
+                  pRipple 
+                  type="button" 
+                  icon="pi pi-truck" 
+                  label="Tạo vận đơn" 
+                  class="p-button-success"
+                  (click)="openWaybillDialog()">
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Left Column: Order Info & Customer -->
+      <div class="left-column">
+        <!-- Order Overview Card -->
+        <p-card header="Thông tin đơn hàng" styleClass="info-card">
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Mã đơn hàng:</label>
+              <span class="value">#{{ orderInfor.id }}</span>
+            </div>
+            <div class="info-item">
+              <label>Ngày đặt:</label>
+              <span class="value">{{ orderInfor.order_date | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="info-item">
+              <label>Phương thức thanh toán:</label>
+              <p-tag [value]="orderInfor.payment_method" [severity]="getPaymentMethodSeverity(orderInfor.payment_method)"></p-tag>
+            </div>
+            <div class="info-item">
+              <label>Phương thức vận chuyển:</label>
+              <span class="value">{{ orderInfor.shipping_method || 'N/A' }}</span>
+            </div>
+            <div class="info-item" *ngIf="orderInfor.assigned_staff">
+              <label>Nhân viên lắp đặt:</label>
+              <span class="value">{{ orderInfor.assigned_staff.fullname }} ({{ orderInfor.assigned_staff.phone_number }})</span>
+            </div>
+            <div class="info-item full-width">
+              <label>Trạng thái đơn hàng:</label>
+              <div class="status-control">
+                <p-dropdown [options]="orderStatusOptions" 
+                            [(ngModel)]="selectedStatus" 
+                            optionLabel="label" 
+                            optionValue="value"
+                            appendTo="body"
+                            [style]="{'width':'200px'}">
+                </p-dropdown>
+                <button pButton 
+                        icon="pi pi-check" 
+                        (click)="updateOrderStatus()" 
+                        class="p-button-success p-button-sm" 
+                        pTooltip="Cập nhật trạng thái">
                 </button>
               </div>
             </div>
+          </div>
+        </p-card>
 
-            <!-- Customer & Order Info -->
-            <div class="customer-order-info">
-              <div class="info-section">
-                <h5 class="section-title">Thông tin khách hàng:</h5>
-                <p><strong>Họ tên:</strong> {{ orderInfor.fullname }}</p>
-                <p><strong>Số điện thoại:</strong> {{ orderInfor.phone_number }}</p>
-                <p><strong>Email:</strong> {{ orderInfor.email }}</p>
-                <p><strong>Địa chỉ:</strong> {{ orderInfor.address }}</p>
-              </div>
-              <div class="info-section text-end">
-                <h5 class="section-title">Chi tiết hóa đơn:</h5>
-                <p><strong>Mã hóa đơn:</strong> {{ orderInfor.id }}</p>
-                <p><strong>Ngày đặt:</strong> {{ orderInfor.order_date | date: 'dd/MM/yyyy HH:mm' }}</p>
-                <p><strong>Phương thức thanh toán:</strong> {{ orderInfor.payment_method }}</p>
-                
-                <!-- Admin Status Update -->
-                <div class="admin-status-control mt-3">
-                    <p class="mb-2"><strong>Trạng thái hiện tại:</strong></p>
-                    <div class="flex justify-content-end align-items-center gap-2">
-                        <p-dropdown [options]="orderStatusOptions" 
-                                    [(ngModel)]="selectedStatus" 
-                                    optionLabel="label" 
-                                    optionValue="value"
-                                    appendTo="body"
-                                    [style]="{'width':'200px'}"></p-dropdown>
-                        <button pButton icon="pi pi-check" 
-                                (click)="updateOrderStatus()" 
-                                class="p-button-success" 
-                                pTooltip="Cập nhật trạng thái"></button>
-                    </div>
-                </div>
-              </div>
+        <!-- Customer Info Card -->
+        <p-card header="Thông tin khách hàng" styleClass="info-card">
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Họ tên:</label>
+              <span class="value">{{ orderInfor.fullname }}</span>
             </div>
-
-            <!-- Order Items Table -->
-            <div class="order-items-table">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Sản phẩm</th>
-                    <th>Đơn giá</th>
-                    <th>Số lượng</th>
-                    <th class="text-end">Tổng cộng</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for(item of productOrderd; track item){
-                    <tr>
-                      <td>
-                        <div class="product-info">
-                          <img [src]="apiImage + item.product?.thumbnail" alt="{{ item.product?.name }}" class="product-thumbnail">
-                          <div class="product-details">
-                            <span class="product-name">{{ item.product?.name }}</span>
-                            @if(item.product?.brand) {
-                              <small class="product-brand text-muted">Thương hiệu: {{ item.product?.brand }}</small>
-                            }
-                          </div>
-                        </div>
-                      </td>
-                      <td>{{ item.price | currency:'VND':'symbol':'1.0-0' }}</td>
-                      <td>{{ item.number_of_products }}</td>
-                      <td class="text-end">{{ item.total_money | currency:'VND':'symbol':'1.0-0' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+            <div class="info-item">
+              <label>Email:</label>
+              <span class="value">{{ orderInfor.email }}</span>
             </div>
-
-            <!-- Order Summary -->
-            <div class="order-summary">
-              <div class="summary-details">
-                <div class="summary-item">
-                  <span>Tạm tính</span>
-                  <span class="font-bold">{{ totalMoney | currency:'VND':'symbol':'1.0-0' }}</span>
-                </div>
-                @if (voucherInfo) {
-                  <div class="summary-item">
-                    <span>Giảm giá ({{ voucherInfo.code }} - {{ voucherInfo.percentage }}%)</span>
-                    <span class="font-bold text-danger">-{{ discountAmount | currency:'VND':'symbol':'1.0-0' }}</span>
-                  </div>
-                }
-                <div class="summary-item">
-                  <span>Phí vận chuyển</span>
-                  <span class="font-bold">{{ shipCost | currency:'VND':'symbol':'1.0-0' }}</span>
-                </div>
-                <div class="summary-item total">
-                  <span>Tổng thanh toán</span>
-                  <span class="font-bold text-primary">{{ finalTotal | currency:'VND':'symbol':'1.0-0' }}</span>
-                </div>
-              </div>
+            <div class="info-item">
+              <label>Số điện thoại:</label>
+              <span class="value">{{ orderInfor.phone_number }}</span>
             </div>
-
-            <!-- Tracking Info -->
-            @if(orderInfor.tracking_number) {
-              <div class="tracking-info-section mt-4 p-3 border rounded">
-                  <h5 class="section-title mb-3">Thông tin vận chuyển ({{orderInfor.carrier}})</h5>
-                  
-                  <!-- Timeline -->
-                  <div class="mb-4">
-                      <p-timeline [value]="orderEvents" layout="horizontal" align="top">
-                          <ng-template pTemplate="marker" let-event>
-                              <span class="custom-marker p-shadow-2" [style.backgroundColor]="event.color">
-                                  <i [ngClass]="event.icon"></i>
-                              </span>
-                          </ng-template>
-                          <ng-template pTemplate="content" let-event>
-                              <small class="text-muted" *ngIf="event.date">{{event.date | date: 'dd/MM/yyyy HH:mm'}}</small>
-                              <div [style.color]="event.color" class="font-bold">{{event.status}}</div>
-                          </ng-template>
-                      </p-timeline>
-                  </div>
-
-                  <div class="grid">
-                      <div class="col-12 md:col-6">
-                          <p class="mb-2"><strong>Mã vận đơn:</strong> <span class="text-primary font-bold">{{ orderInfor.tracking_number }}</span></p>
-                      </div>
-                      @if(orderInfor.tracking_info) {
-                          <div class="col-12 md:col-6">
-                              <p class="mb-2"><strong>Trạng thái:</strong> {{ getGhnStatusText(orderInfor.tracking_info.status) }}</p>
-                          </div>
-                          <div class="col-12">
-                              <p class="mb-2"><strong>Dự kiến giao:</strong> {{ orderInfor.tracking_info.expected_delivery_time | date:'dd/MM/yyyy' }}</p>
-                          </div>
-                      }
-                  </div>
+            <div class="info-item full-width">
+              <label>Địa chỉ giao hàng:</label>
+              <span class="value">{{ orderInfor.address }}</span>
+            </div>
+            @if (notion) {
+              <div class="info-item full-width">
+                <label>Ghi chú:</label>
+                <span class="value">{{ notion }}</span>
               </div>
             }
-            
-            <!-- Notes & Footer -->
-            <div class="invoice-footer">
-              @if(notion){
-                <div class="notes-section">
-                  <h6>Ghi chú:</h6>
-                  <p>{{ notion }}</p>
-                </div>
-              }
-              <div class="thank-you-message">
-                <p>Cảm ơn bạn đã tin tưởng và lựa chọn Korea Lock Store!</p>
-                <p>Chúng tôi đã gửi thông tin xác nhận đến email của bạn.</p>
-               
+          </div>
+        </p-card>
+
+        <!-- Shipping Info Card -->
+        @if(orderInfor.tracking_number) {
+          <p-card header="Thông tin vận chuyển" styleClass="info-card">
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Mã vận đơn:</label>
+                <span class="value tracking-code">{{ orderInfor.tracking_number }}</span>
               </div>
+              <div class="info-item">
+                <label>Đơn vị vận chuyển:</label>
+                <span class="value">{{ orderInfor.carrier || 'GHN' }}</span>
+              </div>
+              @if(orderInfor.tracking_info) {
+                <div class="info-item">
+                  <label>Trạng thái:</label>
+                  <span class="value">{{ getGhnStatusText(orderInfor.tracking_info.status) }}</span>
+                </div>
+                @if(orderInfor.tracking_info.expected_delivery_time) {
+                  <div class="info-item">
+                    <label>Dự kiến giao:</label>
+                    <span class="value">{{ orderInfor.tracking_info.expected_delivery_time | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                }
+              }
+            </div>
+            
+            <!-- Timeline -->
+            <div class="timeline-section">
+              <p-timeline [value]="orderEvents" layout="horizontal" align="top">
+                <ng-template pTemplate="marker" let-event>
+                  <span class="custom-marker" [style.backgroundColor]="event.color">
+                    <i [ngClass]="event.icon"></i>
+                  </span>
+                </ng-template>
+                <ng-template pTemplate="content" let-event>
+                  <small class="text-muted" *ngIf="event.date">{{event.date | date: 'dd/MM/yyyy HH:mm'}}</small>
+                  <div [style.color]="event.color" class="font-bold">{{event.status}}</div>
+                </ng-template>
+              </p-timeline>
+            </div>
+          </p-card>
+        }
+      </div>
+
+      <!-- Right Column: Products & Summary -->
+      <div class="right-column">
+        <!-- Products Card -->
+        <p-card header="Sản phẩm trong đơn hàng" styleClass="products-card">
+          <p-table [value]="productOrderd" [paginator]="false" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Sản phẩm</th>
+                <th style="width: 120px; text-align: center;">Số lượng</th>
+                <th style="width: 150px; text-align: right;">Đơn giá</th>
+                <th style="width: 150px; text-align: right;">Thành tiền</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+              <tr>
+                <td>
+                  <div class="product-info">
+                    <img [src]="apiImage + item.product?.thumbnail" 
+                         [alt]="item.product?.name" 
+                         class="product-thumbnail">
+                    <div class="product-details">
+                      <span class="product-name">{{ item.product?.name }}</span>
+                      @if(item.product?.brand) {
+                        <small class="product-brand">Thương hiệu: {{ item.product?.brand }}</small>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td style="text-align: center;">{{ item.number_of_products }}</td>
+                <td style="text-align: right;">{{ item.price | currency:'VND':'symbol':'1.0-0' }}</td>
+                <td style="text-align: right; font-weight: 600;">
+                  {{ item.total_money | currency:'VND':'symbol':'1.0-0' }}
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+
+        <!-- Order Summary Card -->
+        <p-card header="Tóm tắt thanh toán" styleClass="summary-card">
+          <div class="summary-list">
+            <div class="summary-row">
+              <span>Tạm tính:</span>
+              <span class="amount">{{ totalMoney | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+            @if (voucherInfo) {
+              <div class="summary-row discount">
+                <span>Giảm giá ({{ voucherInfo.code }} - {{ voucherInfo.percentage }}%):</span>
+                <span class="amount">-{{ discountAmount | currency:'VND':'symbol':'1.0-0' }}</span>
+              </div>
+            }
+            <div class="summary-row">
+              <span>Phí vận chuyển:</span>
+              <span class="amount">{{ shipCost | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="summary-row total">
+              <span>Tổng thanh toán:</span>
+              <span class="amount total-amount">{{ finalTotal | currency:'VND':'symbol':'1.0-0' }}</span>
             </div>
           </div>
-        </div>
+        </p-card>
       </div>
     </div>
   </div>
 }
+
+<!-- Create Waybill Dialog -->
+<p-dialog 
+    header="Tạo vận đơn GHN" 
+    [(visible)]="showWaybillDialog" 
+    [modal]="true" 
+    [style]="{width: '500px'}" 
+    [draggable]="false" 
+    [resizable]="false">
+    
+    <div [formGroup]="waybillForm" class="p-fluid grid" style="margin-top: 1rem;">
+        <div class="field col-12">
+            <label>Đơn hàng: #{{ orderInfor?.id }}</label>
+            <p>Khách hàng: {{ orderInfor?.fullname }}</p>
+            <p>Địa chỉ: {{ orderInfor?.address }}</p>
+        </div>
+        
+        <div class="field col-12">
+            <label for="district_id">District ID (GHN) <span class="required">*</span></label>
+            <p-inputNumber 
+                id="district_id" 
+                formControlName="district_id" 
+                [useGrouping]="false"
+                placeholder="Nhập ID Quận/Huyện">
+            </p-inputNumber>
+            <small class="p-error" *ngIf="waybillForm.get('district_id')?.invalid && waybillForm.get('district_id')?.touched">
+                District ID là bắt buộc
+            </small>
+        </div>
+        
+        <div class="field col-12">
+            <label for="ward_code">Ward Code (GHN) <span class="required">*</span></label>
+            <input 
+                type="text" 
+                pInputText 
+                id="ward_code" 
+                formControlName="ward_code" 
+                placeholder="Nhập Mã Phường/Xã">
+            <small class="p-error" *ngIf="waybillForm.get('ward_code')?.invalid && waybillForm.get('ward_code')?.touched">
+                Ward Code là bắt buộc
+            </small>
+        </div>
+
+        <!-- Dimensions and Weight -->
+        <div class="field col-6 md:col-3">
+            <label for="length">Dài (cm)</label>
+            <p-inputNumber id="length" formControlName="length" [min]="1" placeholder="20"></p-inputNumber>
+        </div>
+        <div class="field col-6 md:col-3">
+            <label for="width">Rộng (cm)</label>
+            <p-inputNumber id="width" formControlName="width" [min]="1" placeholder="20"></p-inputNumber>
+        </div>
+        <div class="field col-6 md:col-3">
+            <label for="height">Cao (cm)</label>
+            <p-inputNumber id="height" formControlName="height" [min]="1" placeholder="10"></p-inputNumber>
+        </div>
+        <div class="field col-6 md:col-3">
+            <label for="weight">Nặng (g)</label>
+            <p-inputNumber id="weight" formControlName="weight" [min]="1" placeholder="200"></p-inputNumber>
+        </div>
+    </div>
+    
+    <ng-template pTemplate="footer">
+        <button pButton 
+                pRipple 
+                type="button" 
+                label="Hủy" 
+                icon="pi pi-times" 
+                class="p-button-text"
+                (click)="showWaybillDialog = false">
+        </button>
+        <button pButton 
+                pRipple 
+                type="button" 
+                label="Tạo vận đơn" 
+                icon="pi pi-check" 
+                class="p-button-success"
+                (click)="createWaybill()"
+                [disabled]="waybillForm.invalid || isCreatingWaybill">
+            <i class="pi pi-spin pi-spinner" *ngIf="isCreatingWaybill" style="margin-right: 0.5rem;"></i>
+        </button>
+    </ng-template>
+</p-dialog>
+
+<!-- Assign Staff Dialog -->
+<p-dialog header="Phân công nhân viên lắp đặt" 
+          [(visible)]="showAssignStaffDialog" 
+          [modal]="true" 
+          [style]="{width: '400px'}"
+          [draggable]="false" 
+          [resizable]="false">
+    <div class="p-fluid">
+        <div class="field">
+            <label for="staff">Chọn nhân viên</label>
+            <p-dropdown [options]="staffList" 
+                        [(ngModel)]="selectedStaff" 
+                        optionLabel="fullname" 
+                        placeholder="Chọn nhân viên"
+                        [filter]="true"
+                        filterBy="fullname"
+                        appendTo="body">
+                <ng-template pTemplate="selectedItem">
+                    <div *ngIf="selectedStaff">
+                        <div>{{selectedStaff.fullname}} - {{selectedStaff.phone_number}}</div>
+                    </div>
+                </ng-template>
+                <ng-template let-staff pTemplate="item">
+                    <div>
+                        <div>{{staff.fullname}}</div>
+                        <div class="text-sm text-500">{{staff.phone_number}}</div>
+                    </div>
+                </ng-template>
+            </p-dropdown>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton label="Hủy" icon="pi pi-times" (click)="showAssignStaffDialog = false" class="p-button-text"></button>
+        <button pButton label="Lưu" icon="pi pi-check" (click)="assignStaff()" autofocus></button>
+    </ng-template>
+</p-dialog>

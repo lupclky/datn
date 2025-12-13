@@ -33,9 +33,11 @@ interface OrderHistoryResponse {
   order_date: string;
   thumbnail: string;
   total_products: number;
-  buyer_name: string;
+  fullname: string;  // Changed from buyer_name to match backend
   phone_number: string;
-  orderDetails: OrderDetail[];
+  orderDetails?: OrderDetail[];
+  payment_method?: string;
+  assigned_staff_name?: string;
 }
 
 @Injectable({

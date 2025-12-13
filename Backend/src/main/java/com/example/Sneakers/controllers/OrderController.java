@@ -53,10 +53,27 @@ public class OrderController {
     public ResponseEntity<?> getALlOrders(
             @RequestHeader("Authorization") String token){
         try {
-            List<OrderHistoryResponse> orders = orderService.getAllOrders();
+            List<OrderHistoryResponse> orders = orderService.getAllOrders(token);
             return ResponseEntity.ok(orders);
         }
         catch (Exception e ){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/assign-staff")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> assignStaff(
+            @PathVariable("id") Long orderId,
+            @RequestParam("staffId") Long staffId) {
+        try {
+            orderService.assignStaff(orderId, staffId);
+            return ResponseEntity.ok(MessageResponse
+                    .builder()
+                    .message("Staff assigned successfully")
+                    .build());
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -83,6 +100,7 @@ public class OrderController {
         }
     }
     @GetMapping("/user/{id}")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     public ResponseEntity<?> getOrderByIdAndUser(
             @Valid @PathVariable("id") Long orderId,
             @RequestHeader("Authorization") String token){

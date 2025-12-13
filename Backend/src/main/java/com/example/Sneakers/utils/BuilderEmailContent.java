@@ -95,4 +95,43 @@ public class BuilderEmailContent {
         
         return content.toString();
     }
+
+    public static String buildStaffAssignmentEmailContent(Order order) {
+        StringBuilder content = new StringBuilder();
+        content.append("<html><body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>");
+        content.append("<div style='max-width: 600px; margin: 0 auto; padding: 20px;'>");
+        content.append("<h1 style='color: #673AB7; border-bottom: 3px solid #673AB7; padding-bottom: 10px;'>Nhân viên lắp đặt đã được phân công - Locker Korea</h1>");
+        content.append("<p>Xin chào <strong>" + order.getFullName() + "</strong>,</p>");
+        content.append("<p>Chúng tôi xin thông báo rằng nhân viên lắp đặt cho đơn hàng <strong>#" + order.getId() + "</strong> của bạn đã được phân công.</p>");
+        
+        if (order.getAssignedStaff() != null) {
+            content.append("<div style='background-color: #e3f2fd; border-left: 4px solid #2196F3; padding: 20px; margin: 20px 0; border-radius: 5px;'>");
+            content.append("<h2 style='color: #1976D2; margin-top: 0;'>Thông tin nhân viên lắp đặt:</h2>");
+            content.append("<p style='font-size: 18px; margin: 10px 0;'><strong>Họ tên:</strong> " + order.getAssignedStaff().getFullName() + "</p>");
+            content.append("<p style='font-size: 18px; margin: 10px 0;'><strong>Số điện thoại:</strong> " + order.getAssignedStaff().getPhoneNumber() + "</p>");
+            content.append("</div>");
+        }
+        
+        content.append("<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;'>");
+        content.append("<p><strong>Mã đơn hàng:</strong> #" + order.getId() + "</p>");
+        content.append("<p><strong>Địa chỉ lắp đặt:</strong> " + order.getAddress() + "</p>");
+        content.append("<p><strong>Số điện thoại liên hệ:</strong> " + order.getPhoneNumber() + "</p>");
+        content.append("</div>");
+        
+        content.append("<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px;'>");
+        content.append("<p style='margin: 0;'><strong>💡 Lưu ý:</strong></p>");
+        content.append("<ul style='margin: 10px 0; padding-left: 20px;'>");
+        content.append("<li>Nhân viên lắp đặt sẽ liên hệ với bạn trước khi đến để xác nhận thời gian lắp đặt.</li>");
+        content.append("<li>Vui lòng giữ số điện thoại luôn bật để nhận cuộc gọi từ nhân viên.</li>");
+        content.append("<li>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi hoặc nhân viên lắp đặt trực tiếp.</li>");
+        content.append("</ul>");
+        content.append("</div>");
+        
+        content.append("<p>Cảm ơn bạn đã tin tưởng và lựa chọn Locker Korea!</p>");
+        content.append("<hr style='margin: 30px 0; border: none; border-top: 1px solid #eee;'/>");
+        content.append("<p style='color: #666; font-size: 12px;'>Trân trọng,<br/><strong>Đội ngũ Locker Korea</strong></p>");
+        content.append("</div></body></html>");
+        
+        return content.toString();
+    }
 }

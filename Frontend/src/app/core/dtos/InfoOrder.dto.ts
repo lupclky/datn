@@ -24,4 +24,9 @@ export interface InfoOrderDto {
     tracking_info?: any;
     district_id?: number;
     ward_code?: string;
+    assigned_staff?: {
+        id: number;
+        fullname: string;
+        phone_number: string;
+    };
 }

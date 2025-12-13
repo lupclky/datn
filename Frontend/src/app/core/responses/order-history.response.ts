@@ -8,4 +8,5 @@ export interface OrderHistoryResponse {
   thumbnail: string;
   total_products: number;
   payment_method: string;
-} 
+  assigned_staff_name?: string;
+}

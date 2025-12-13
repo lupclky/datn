@@ -17,15 +17,6 @@ import { MessageService } from 'primeng/api';
 import { ToastService } from '../../../core/services/toast.service';
 import { environment } from '../../../../environments/environment.development';
 
-interface CustomerSummary {
-  userId: number;
-  userName: string;
-  lastMessage: string;
-  unreadCount: number;
-  isGuest: boolean;
-  lastMessageAt?: string | null;
-}
-
 @Component({
   selector: 'app-staff-chat',
   standalone: true,
@@ -52,13 +43,8 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
   selectedCustomerName: string = '';
   newMessage: string = '';
   isLoading: boolean = false;
-  customers: CustomerSummary[] = [];
+  customers: { userId: number; userName: string; lastMessage: string; unreadCount: number }[] = [];
   private shouldScroll = false;
-  private messageSignature: string | null = null;
-  private customersSignature: string | null = null;
-  private refreshIntervalId: ReturnType<typeof setInterval> | null = null;
-  private selectedConversationMarker: string | null = null;
-  private isFetchingConversation: boolean = false;
   selectedFile: File | null = null;
   filePreview: string | null = null;
   isConversationClosed: boolean = false;
@@ -74,47 +60,13 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
   ngOnInit(): void {
     this.loadCustomerMessages();
     // Auto refresh every 5 seconds
-    this.refreshIntervalId = setInterval(() => {
-      this.pollUpdates();
+    setInterval(() => {
+      if (this.selectedCustomerId) {
+        this.loadConversation(this.selectedCustomerId);
+      } else {
+        this.loadCustomerMessages();
+      }
     }, 5000);
-  }
-
-  override ngOnDestroy(): void {
-    if (this.refreshIntervalId) {
-      clearInterval(this.refreshIntervalId);
-      this.refreshIntervalId = null;
-    }
-    super.ngOnDestroy();
-  }
-
-  private pollUpdates(): void {
-    this.chatService.getAllActiveConversations().pipe(
-      tap((conversations) => {
-        const customerSummaries = this.buildCustomersListFromConversations(conversations);
-        const selectedSummary = this.selectedCustomerId !== null
-          ? customerSummaries.find(summary => summary.userId === this.selectedCustomerId)
-          : undefined;
-        const newMarker = selectedSummary ? this.computeConversationMarker(selectedSummary) : null;
-        const shouldRefreshConversation = this.selectedCustomerId !== null &&
-          newMarker !== null &&
-          newMarker !== this.selectedConversationMarker;
-
-        if (this.selectedCustomerId !== null && !selectedSummary) {
-          this.selectedConversationMarker = null;
-        }
-
-        this.updateCustomersIfChanged(customerSummaries);
-
-        if (shouldRefreshConversation && this.selectedCustomerId !== null) {
-          this.loadConversation(this.selectedCustomerId, { silent: true });
-        }
-      }),
-      catchError((err) => {
-        console.error('Error polling chat conversations:', err);
-        return of([]);
-      }),
-      takeUntil(this.destroyed$)
-    ).subscribe();
   }
 
   ngAfterViewChecked(): void {
@@ -129,8 +81,7 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
     // Get all active conversations
     this.chatService.getAllActiveConversations().pipe(
       tap((conversations) => {
-        const customerSummaries = this.buildCustomersListFromConversations(conversations);
-        this.updateCustomersIfChanged(customerSummaries);
+        this.buildCustomersListFromConversations(conversations);
       }),
       catchError((err) => {
         this.toastService.fail('Không thể tải danh sách cuộc trò chuyện');
@@ -143,95 +94,52 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
     ).subscribe();
   }
 
-  private buildCustomersListFromConversations(conversations: any[]): CustomerSummary[] {
+  buildCustomersListFromConversations(conversations: any[]): void {
     // Group conversations by customerId to avoid duplicates
-    const customerMap = new Map<number, CustomerSummary>();
+    const customerMap = new Map<number, any>();
     
     conversations.forEach(conv => {
       const customerId = conv.customer_id || 0;
       
+      // Only keep the most recent conversation for each customer
       if (!customerMap.has(customerId)) {
-        const customerName = conv.customer_name ||
-          (customerId > 0 ? `Khách hàng #${customerId}` : 'Khách vãng lai');
-        const lastMessageText = conv.last_message_preview || conv.last_message || '';
-        const unreadCount = typeof conv.unread_count === 'number' ? conv.unread_count : 0;
+        const customerName = conv.customer_name || 
+                            (customerId > 0 ? `Khách hàng #${customerId}` : 'Khách vãng lai');
         
         customerMap.set(customerId, {
           userId: customerId,
           userName: customerName,
-          lastMessage: lastMessageText,
-          unreadCount: unreadCount,
+          lastMessage: '',
+          unreadCount: 0,
           isGuest: customerId === 0,
           lastMessageAt: conv.last_message_at
         });
       }
     });
     
-    return Array.from(customerMap.values())
+    // Convert map to array and sort by last message time
+    this.customers = Array.from(customerMap.values())
       .filter(c => c.userId !== undefined)
       .sort((a, b) => {
         const timeA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
         const timeB = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
-        return timeB - timeA;
+        return timeB - timeA; // Most recent first
       });
-  }
-
-  private updateCustomersIfChanged(customers: CustomerSummary[]): void {
-    const signature = this.computeCustomersSignature(customers);
-    if (signature !== this.customersSignature) {
-      this.customers = customers;
-      this.customersSignature = signature;
-    }
-  }
-
-  private computeCustomersSignature(customers: CustomerSummary[]): string {
-    if (!customers.length) {
-      return '0';
-    }
-
-    return customers.map(c =>
-      `${c.userId}:${c.lastMessageAt ?? 'no-time'}:${c.unreadCount ?? 0}`
-    ).join('|');
-  }
-
-  private computeConversationMarker(summary: CustomerSummary): string {
-    return this.buildConversationMarker(summary.userId, summary.lastMessageAt);
-  }
-
-  private buildConversationMarker(customerId: number, timestamp?: string | null): string {
-    return `${customerId}:${timestamp ?? 'no-time'}`;
   }
 
   selectCustomer(customerId: number, customerName: string): void {
     this.selectedCustomerId = customerId;
     this.selectedCustomerName = customerName;
-    this.messageSignature = null;
-    this.messages = [];
-    const summary = this.customers.find(c => c.userId === customerId);
-    this.selectedConversationMarker = summary ? this.computeConversationMarker(summary) : null;
     this.loadConversation(customerId);
   }
 
-  loadConversation(customerId: number, options?: { silent?: boolean }): void {
+  loadConversation(customerId: number): void {
     if (!customerId && customerId !== 0) {
       console.error('Invalid customerId:', customerId);
       return;
     }
-    const silent = options?.silent ?? false;
-    if (silent && this.isFetchingConversation) {
-      return;
-    }
-    this.isFetchingConversation = true;
-    if (!silent) {
-      this.isLoading = true;
-    }
-
-    const endLoading = () => {
-      if (!silent) {
-        this.isLoading = false;
-      }
-      this.isFetchingConversation = false;
-    };
+    
+    this.isLoading = true;
     
     // Get customer conversations and load messages from the first (most recent) one
     this.chatService.getCustomerConversations(customerId).pipe(
@@ -242,13 +150,9 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
           if (activeConversation && activeConversation.id) {
             this.chatService.getConversationMessages(activeConversation.id).pipe(
               tap((messages) => {
+                this.messages = messages;
                 this.isConversationClosed = activeConversation.is_closed || false;
-                this.updateMessagesIfChanged(messages);
-
-                 const lastTimestamp = messages.length
-                   ? (messages[messages.length - 1].updatedAt || messages[messages.length - 1].createdAt || activeConversation.last_message_at)
-                   : (activeConversation.last_message_at || null);
-                 this.selectedConversationMarker = this.buildConversationMarker(customerId, lastTimestamp);
+                this.shouldScroll = true;
                 
                 // Mark conversation as read
                 if (activeConversation.id) {
@@ -263,25 +167,23 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
                 return of([]);
               }),
               finalize(() => {
-                endLoading();
+                this.isLoading = false;
               }),
               takeUntil(this.destroyed$)
             ).subscribe();
           } else {
-            this.updateMessagesIfChanged([]);
-            this.selectedConversationMarker = this.buildConversationMarker(customerId, null);
-            endLoading();
+            this.messages = [];
+            this.isLoading = false;
           }
         } else {
-          this.updateMessagesIfChanged([]);
-          this.selectedConversationMarker = this.buildConversationMarker(customerId, null);
-          endLoading();
+          this.messages = [];
+          this.isLoading = false;
         }
       }),
       catchError((err) => {
         console.error('Error loading customer conversations:', err);
         this.toastService.fail('Không thể tải cuộc trò chuyện');
-        endLoading();
+        this.isLoading = false;
         return of([]);
       }),
       takeUntil(this.destroyed$)
@@ -311,6 +213,7 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
           this.newMessage = '';
           this.loadConversation(this.selectedCustomerId!);
           this.loadCustomerMessages();
+          this.shouldScroll = true;
         }),
         catchError((err) => {
           console.error('Error sending message:', err);
@@ -375,6 +278,7 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
         this.filePreview = null;
         this.loadConversation(this.selectedCustomerId!);
         this.loadCustomerMessages();
+        this.shouldScroll = true;
       }),
       catchError((err) => {
         console.error('Error sending file:', err);
@@ -383,31 +287,6 @@ export class StaffChatComponent extends BaseComponent implements OnInit, OnDestr
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
-  }
-
-  private updateMessagesIfChanged(newMessages: ChatMessage[]): void {
-    const sortedMessages = [...newMessages].sort((a, b) => {
-      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return timeA - timeB;
-    });
-
-    const signature = this.computeMessageSignature(sortedMessages);
-    if (signature !== this.messageSignature) {
-      this.messages = sortedMessages;
-      this.messageSignature = signature;
-      this.shouldScroll = true;
-    }
-  }
-
-  private computeMessageSignature(messages: ChatMessage[]): string {
-    if (!messages.length) {
-      return '0';
-    }
-
-    const last = messages[messages.length - 1];
-    const lastIdentifier = `${last.id ?? 'no-id'}:${last.updatedAt ?? last.createdAt ?? 'no-date'}`;
-    return `${messages.length}:${lastIdentifier}`;
   }
 
   scrollToBottom(): void {

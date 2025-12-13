@@ -39,9 +39,7 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   isLoading: boolean = false;
   isOpen: boolean = false;
   currentUserId: number = 0;
-  isAuthenticated: boolean = false;
   private shouldScroll = false;
-  private messageListSignature: string | null = null;
   selectedFile: File | null = null;
   filePreview: string | null = null;
   showClosedByStaffBanner: boolean = false;
@@ -56,21 +54,12 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
     if (typeof localStorage !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token) {
-        this.isAuthenticated = true;
         this.userService.getInforUser(token).pipe(
           tap(user => {
             this.currentUserId = user.id || 0;
           }),
-          catchError(err => {
-            console.error('Error fetching user info for chat:', err);
-            this.isAuthenticated = false;
-            this.currentUserId = 0;
-            return of(null);
-          }),
           takeUntil(this.destroyed$)
         ).subscribe();
-      } else {
-        this.isAuthenticated = false;
       }
     }
   }
@@ -87,37 +76,6 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   toggleChat(): void {
-    if (!this.isAuthenticated) {
-      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
-      if (!token) {
-        this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
-        return;
-      }
-
-      this.userService.getInforUser(token).pipe(
-        tap(user => {
-          this.currentUserId = user.id || 0;
-          this.isAuthenticated = !!this.currentUserId;
-
-          if (this.isAuthenticated) {
-            this.isOpen = true;
-            this.loadMessages();
-          } else {
-            this.toastService.warn('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-          }
-        }),
-        catchError(err => {
-          console.error('Error verifying user before opening chat:', err);
-          this.isAuthenticated = false;
-          this.currentUserId = 0;
-          this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
-          return of(null);
-        }),
-        takeUntil(this.destroyed$)
-      ).subscribe();
-      return;
-    }
-
     this.isOpen = !this.isOpen;
     if (this.isOpen) {
       this.loadMessages();
@@ -125,28 +83,14 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   loadMessages(): void {
-    if (!this.isAuthenticated) {
-      return;
-    }
-
     if (!this.currentUserId) {
       const token = localStorage.getItem('token');
-      if (!token) {
-        this.isAuthenticated = false;
-        return;
-      }
+      if (!token) return;
       
       this.userService.getInforUser(token).pipe(
         tap(user => {
           this.currentUserId = user.id || 0;
-          this.isAuthenticated = !!this.currentUserId;
           this.loadMessagesInternal();
-        }),
-        catchError(err => {
-          console.error('Error refreshing user info for chat:', err);
-          this.isAuthenticated = false;
-          this.currentUserId = 0;
-          return of(null);
         }),
         takeUntil(this.destroyed$)
       ).subscribe();
@@ -162,18 +106,18 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
     // Use staffId = 0 to indicate "any staff" - backend will return all messages for this customer
     this.chatService.getMessages().pipe(
       tap((messages) => {
-        const relevantMessages = messages.filter(m =>
-          m.senderId === this.currentUserId ||
+        // Filter messages for current customer
+        this.messages = messages.filter(m => 
+          m.senderId === this.currentUserId || 
           m.receiverId === this.currentUserId ||
-          (m.isStaffMessage && m.receiverId === null)
+          (m.isStaffMessage && m.receiverId === null) // Public messages from staff
         ).sort((a, b) => {
           const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return timeA - timeB;
         });
-
-        this.updateMessagesIfChanged(relevantMessages);
-
+        this.shouldScroll = true;
+        
         // Check conversation status to show banner if closed by staff
         this.checkConversationStatus();
       }),
@@ -190,11 +134,6 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   sendMessage(): void {
-    if (!this.isAuthenticated) {
-      this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
-      return;
-    }
-
     if ((!this.newMessage.trim() && !this.selectedFile)) {
       return;
     }
@@ -208,10 +147,10 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
         messageType: 'TEXT',
         isStaffMessage: false
       }, false).pipe(
-        tap((sentMessage) => {
+        tap(() => {
           this.newMessage = '';
-          this.appendMessageLocally(sentMessage);
-          this.checkConversationStatus();
+          this.loadMessages();
+          this.shouldScroll = true;
         }),
         catchError((err) => {
           this.toastService.fail('Không thể gửi tin nhắn');
@@ -223,11 +162,6 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   onFileSelected(event: Event): void {
-    if (!this.isAuthenticated) {
-      this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
-      return;
-    }
-
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
@@ -259,11 +193,6 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
   }
 
   sendFileMessage(): void {
-    if (!this.isAuthenticated) {
-      this.toastService.warn('Vui lòng đăng nhập để chat với nhân viên.');
-      return;
-    }
-
     if (!this.selectedFile) return;
 
     const formData = new FormData();
@@ -276,12 +205,12 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
     const headers: any = {};
 
     this.chatService.sendFileMessage(formData, headers).pipe(
-      tap((sentMessage) => {
+      tap(() => {
         this.newMessage = '';
         this.selectedFile = null;
         this.filePreview = null;
-        this.appendMessageLocally(sentMessage);
-        this.checkConversationStatus();
+        this.loadMessages();
+        this.shouldScroll = true;
       }),
       catchError((err) => {
         console.error('Error sending file:', err);
@@ -330,7 +259,6 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
 
     // Xóa lịch sử hiển thị ngay lập tức
     this.messages = [];
-    this.messageListSignature = null;
     this.showClosedByStaffBanner = false;
     
     this.chatService.endCustomerSession().pipe(
@@ -364,45 +292,6 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
-  }
-
-  private updateMessagesIfChanged(newMessages: ChatMessage[]): void {
-    const signature = this.computeMessageSignature(newMessages);
-    if (signature !== this.messageListSignature) {
-      this.messages = newMessages;
-      this.messageListSignature = signature;
-      this.shouldScroll = true;
-    }
-  }
-
-  private appendMessageLocally(message: ChatMessage | null | undefined): void {
-    if (!message) {
-      return;
-    }
-
-    const exists = message.id
-      ? this.messages.some(m => m.id === message.id)
-      : false;
-
-    const updatedMessages = exists
-      ? this.messages
-      : [...this.messages, message].sort((a, b) => {
-          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return timeA - timeB;
-        });
-
-    this.updateMessagesIfChanged(updatedMessages);
-  }
-
-  private computeMessageSignature(messages: ChatMessage[]): string {
-    if (!messages.length) {
-      return '0';
-    }
-
-    const last = messages[messages.length - 1];
-    const lastIdentifier = `${last.id ?? 'no-id'}:${last.updatedAt ?? last.createdAt ?? 'no-date'}`;
-    return `${messages.length}:${lastIdentifier}`;
   }
 
   scrollToBottom(): void {

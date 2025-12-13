@@ -87,6 +87,9 @@ public class OrderResponse {
     @JsonProperty("ward_code")
     private String wardCode;
 
+    @JsonProperty("assigned_staff")
+    private StaffInfo assignedStaff;
+
     @Data
     @Builder
     @AllArgsConstructor
@@ -96,6 +99,17 @@ public class OrderResponse {
         private String name;
         @JsonProperty("discount_percentage")
         private Integer discountPercentage;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class StaffInfo {
+        private Long id;
+        private String fullname;
+        @JsonProperty("phone_number")
+        private String phoneNumber;
     }
 
     public static OrderResponse fromOrder(Order order) {
@@ -134,6 +148,16 @@ public class OrderResponse {
                     .discountPercentage(order.getVoucher().getDiscountPercentage())
                     .build();
             orderResponse.setVoucher(voucherInfo);
+        }
+
+        // Map assigned staff information if present
+        if (order.getAssignedStaff() != null) {
+            StaffInfo staffInfo = StaffInfo.builder()
+                    .id(order.getAssignedStaff().getId())
+                    .fullname(order.getAssignedStaff().getFullName())
+                    .phoneNumber(order.getAssignedStaff().getPhoneNumber())
+                    .build();
+            orderResponse.setAssignedStaff(staffInfo);
         }
 
         if (order.getOrderDetails() != null && !order.getOrderDetails().isEmpty()) {
