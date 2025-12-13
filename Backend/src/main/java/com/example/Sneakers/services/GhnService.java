@@ -28,6 +28,12 @@ public class GhnService {
     @Value("${ghn.api.url}")
     private String ghnUrl;
 
+    @Value("${ghn.api.from-district-id:1454}")
+    private int fromDistrictId;
+
+    @Value("${ghn.api.from-ward-code:}")
+    private String fromWardCode;
+
     // Get Available Services
     public Integer getAvailableServiceId(int fromDistrict, int toDistrict) {
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services";
@@ -74,16 +80,27 @@ public class GhnService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Get dynamic service ID
-        int fromDistrictId = 1454; // Example: Quận 3, HCM (Shop location)
+        // int fromDistrictId = 1454; // Use configured value
         int serviceTypeId = getAvailableServiceId(fromDistrictId, toDistrictId);
 
         Map<String, Object> body = new HashMap<>();
+        try {
+            body.put("shop_id", Integer.parseInt(shopId));
+        } catch (NumberFormatException e) {
+            // ignore or handle if shopId is not int
+        }
         body.put("payment_type_id", 1); // 1: Bên gửi trả phí, 2: Bên nhận trả phí
         body.put("note", order.getNote() != null ? order.getNote() : "Cho xem hàng không cho thử");
         body.put("required_note", "KHONGCHOXEMHANG"); // Tùy chọn
         body.put("from_name", "Locker Korea");
         body.put("from_phone", "0909090909"); // Hardcode or config
         body.put("from_address", "Hồ Chí Minh"); // Hardcode or config
+        if (fromWardCode != null && !fromWardCode.isEmpty()) {
+            body.put("from_ward_code", fromWardCode);
+        }
+        body.put("from_district_id", fromDistrictId);
+        // client_phone is often required if from_phone is not enough to identify sender profile
+        body.put("client_phone", "0909090909"); 
         
         body.put("to_name", order.getFullName());
         body.put("to_phone", order.getPhoneNumber());

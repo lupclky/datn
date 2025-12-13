@@ -344,6 +344,21 @@
         border-color: var(--primary-color);
       }
 
+      &.disabled-payment {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: #f9fafb;
+        
+        &:hover {
+          background-color: #f9fafb;
+          border-color: var(--surface-border);
+        }
+        
+        label {
+          cursor: not-allowed;
+        }
+      }
+
       .payment-logo {
         width: 40px;
         height: 20px;

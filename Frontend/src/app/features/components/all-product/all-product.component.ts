@@ -614,7 +614,7 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
     } else {
         // Fallback về client-side pagination cho các trường hợp khác (search, category filter)
         // Vì search/category hiện tại đang trả về full list
-        this.updateDisplayedProducts();
+    this.updateDisplayedProducts();
     }
   }
 
@@ -632,9 +632,9 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
     if (skipSlice) {
         this.displayedProducts = sortedProducts;
     } else {
-        const startIndex = this.first;
-        const endIndex = startIndex + this.rows;
-        this.displayedProducts = sortedProducts.slice(startIndex, endIndex);
+    const startIndex = this.first;
+    const endIndex = startIndex + this.rows;
+    this.displayedProducts = sortedProducts.slice(startIndex, endIndex);
     }
     */
    

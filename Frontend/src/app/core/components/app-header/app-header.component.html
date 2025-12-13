@@ -13,6 +13,43 @@
         </a>
       </div>
       
+      <!-- Product Category Menu Button -->
+      <div class="category-menu-container" (mouseleave)="onMenuMouseLeave()">
+        <button class="category-btn" (mouseenter)="onMenuMouseEnter()" (click)="toggleCategoryMenu()">
+          <i class="pi pi-bars"></i>
+          <span>DANH MỤC</span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="category-dropdown" *ngIf="isCategoryMenuOpen">
+          <ul class="category-list">
+            <!-- Dynamic Categories -->
+            <li *ngFor="let cat of categories" class="category-item" (click)="onCategorySelect(cat.id.toString())">
+              <span>{{cat.name}}</span>
+              <i class="pi pi-angle-right"></i>
+            </li>
+
+            <!-- Brand Section -->
+            <!-- Feature Section -->
+            <li class="category-item has-submenu">
+              <span>Khóa thông minh theo tính năng</span>
+              <i class="pi pi-angle-right"></i>
+              
+               <!-- Submenu for Features -->
+               <div class="submenu">
+                <ul>
+                  <li *ngFor="let feat of features" (click)="onFeatureSelect(feat.id?.toString() || '')">
+                    {{feat.name}}
+                  </li>
+                </ul>
+              </div>
+            </li>
+            
+            <!-- Static/Other items from image -->
+          </ul>
+        </div>
+      </div>
+      
     </div>
 
     <!-- Center Section: Search -->

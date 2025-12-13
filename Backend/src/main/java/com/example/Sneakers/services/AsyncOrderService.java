@@ -31,29 +31,23 @@ public class AsyncOrderService {
             System.err.println("Warning: Exception while sending email: " + emailException.getMessage());
         }
 
-        // 2. Auto-create GHN Waybill if district and ward are provided and shipping method is NOT "Hỏa tốc"
-        // Note: Shipping method check should match the name sent from frontend ("Nhanh", "Hỏa tốc")
-        if (districtId != null && wardCode != null && !"Hỏa tốc".equalsIgnoreCase(order.getShippingMethod())) {
-            try {
-                // Determine COD amount based on payment method logic is handled inside GhnService.createOrder using order data
-                String trackingCode = ghnService.createOrder(order, districtId, wardCode, null, null, null, null);
-                
-                // Update order with tracking number
-                // Fetch fresh from DB to ensure we don't overwrite other parallel updates (though unlikely for new order)
-                // or just use repo to update specific fields if we had a custom query.
-                // Standard save is fine here.
-                Order orderToUpdate = orderRepository.findById(order.getId()).orElse(null);
-                if (orderToUpdate != null) {
-                    orderToUpdate.setTrackingNumber(trackingCode);
-                    orderToUpdate.setCarrier("GHN");
-                    orderRepository.save(orderToUpdate);
-                    System.out.println("Async GHN Waybill created: " + trackingCode + " for Order ID: " + order.getId());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Failed to auto-create GHN order in background: " + e.getMessage());
-            }
+        // 2. Auto-create GHN Waybill
+        // User request: "kể cả stripe và vnpay vẫn tạo vận đơn thủ công" -> Disable auto-creation entirely.
+        // if (districtId != null && wardCode != null && !"Hỏa tốc".equalsIgnoreCase(order.getShippingMethod())) {
+        //    ...
+        // }
+        // Keeping the code commented out or removing the logic block.
+        
+        /* 
+        boolean isCod = "Cash".equalsIgnoreCase(order.getPaymentMethod());
+        if (districtId != null && wardCode != null && !"Hỏa tốc".equalsIgnoreCase(order.getShippingMethod()) && !isCod) {
+             try {
+                // ... logic ...
+             } catch (Exception e) {
+                 // ...
+             }
         }
+        */
     }
 }
 

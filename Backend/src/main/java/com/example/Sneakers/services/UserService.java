@@ -232,13 +232,18 @@ public class UserService implements IUserService{
         userRepository.save(user);
 
         String resetLink = "http://localhost:4200/reset-password?token=" + token;
-        String subject = "Password Reset Request";
-        String content = "<h1>Password Reset Request</h1>"
-                + "<p>Hi " + user.getFullName() + ",</p>"
-                + "<p>You requested to reset your password. Click the link below to reset it:</p>"
-                + "<a href=\"" + resetLink + "\">Reset Password</a>"
-                + "<p>This link will expire in 15 minutes.</p>"
-                + "<p>If you did not request a password reset, please ignore this email.</p>";
+        String subject = "Yêu cầu đặt lại mật khẩu - Locker Korea";
+        String content = "<html><body style='font-family: Arial, sans-serif;'>"
+                + "<h1 style='color: #673AB7;'>Yêu cầu đặt lại mật khẩu</h1>"
+                + "<p>Xin chào <strong>" + user.getFullName() + "</strong>,</p>"
+                + "<p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình tại Locker Korea.</p>"
+                + "<p>Vui lòng nhấp vào liên kết bên dưới để đặt lại mật khẩu:</p>"
+                + "<p style='margin: 20px 0;'><a href=\"" + resetLink + "\" style='background-color: #673AB7; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;'>Đặt lại mật khẩu</a></p>"
+                + "<p><strong>Lưu ý:</strong> Liên kết này sẽ hết hạn sau <strong>15 phút</strong>.</p>"
+                + "<p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Tài khoản của bạn vẫn an toàn.</p>"
+                + "<hr style='margin: 30px 0; border: none; border-top: 1px solid #eee;'/>"
+                + "<p style='color: #666; font-size: 12px;'>Trân trọng,<br/>Đội ngũ Locker Korea</p>"
+                + "</body></html>";
 
         email.sendEmail(userEmail, subject, content);
     }

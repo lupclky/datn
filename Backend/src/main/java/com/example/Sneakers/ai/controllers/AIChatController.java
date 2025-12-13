@@ -176,9 +176,11 @@ public class AIChatController {
             if (!revenueTrend.isEmpty()) {
                 double totalRev30 = revenueTrend.stream().mapToDouble(DailyRevenueDTO::getRevenue).sum();
                 statsContext.append(String.format("- Tổng doanh thu 30 ngày: %,.0f VND\n", totalRev30));
-                // Add first and last to show trend direction roughly
-                statsContext.append(String.format("- Bắt đầu (%s): %,.0f VND\n", revenueTrend.get(0).getDate(), revenueTrend.get(0).getRevenue()));
-                statsContext.append(String.format("- Kết thúc (%s): %,.0f VND\n", revenueTrend.get(revenueTrend.size()-1).getDate(), revenueTrend.get(revenueTrend.size()-1).getRevenue()));
+                
+                statsContext.append("Chi tiết doanh thu từng ngày:\n");
+                for (DailyRevenueDTO daily : revenueTrend) {
+                    statsContext.append(String.format("  + Ngày %s: %,.0f VND\n", daily.getDate(), daily.getRevenue()));
+                }
             }
             
             statsContext.append("\n--- TOP 5 SẢN PHẨM BÁN CHẠY ---\n");

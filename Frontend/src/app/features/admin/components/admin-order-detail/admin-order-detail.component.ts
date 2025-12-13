@@ -92,26 +92,15 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
         this.notion = orderInfor.note;
         this.selectedStatus = orderInfor.status;
 
-        switch (orderInfor.shipping_method) {
-          case "Tiêu chuẩn":
-            this.shipCost = 30000;
-            break;
-          case "Nhanh":
-            this.shipCost = 40000;
-            break;
-          case "Hỏa tốc":
-            this.shipCost = 60000;
-            break;
-          default:
-            break;
-        }
         this.totalMoney = 0;
         this.productOrderd.forEach((item) => {
           this.totalMoney += item.total_money;
         });
+        
         if (orderInfor.discount_amount) {
           this.discountAmount = orderInfor.discount_amount;
         }
+        
         if (orderInfor.voucher) {
           this.voucherInfo = {
             code: orderInfor.voucher.code,
@@ -119,10 +108,29 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
             percentage: orderInfor.voucher.discount_percentage
           };
         }
+
         if (orderInfor.total_money) {
           this.finalTotal = orderInfor.total_money;
+          // Calculate actual shipping cost from total
+          this.shipCost = this.finalTotal - (this.totalMoney - this.discountAmount);
+          if (this.shipCost < 0) this.shipCost = 0;
         } else {
-          this.finalTotal = this.totalMoney - this.discountAmount + this.shipCost;
+            // Fallback for legacy orders without total_money
+            switch (orderInfor.shipping_method) {
+                case "Tiêu chuẩn":
+                  this.shipCost = 30000;
+                  break;
+                case "Nhanh":
+                  this.shipCost = 40000;
+                  break;
+                case "Hỏa tốc":
+                  this.shipCost = 60000;
+                  break;
+                default:
+                  this.shipCost = 0;
+                  break;
+            }
+            this.finalTotal = this.totalMoney - this.discountAmount + this.shipCost;
         }
 
         this.initializeTimeline(orderInfor);

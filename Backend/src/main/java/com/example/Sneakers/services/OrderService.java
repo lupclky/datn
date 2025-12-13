@@ -13,6 +13,7 @@ import com.example.Sneakers.repositories.VoucherRepository;
 import com.example.Sneakers.repositories.VoucherUsageRepository;
 import com.example.Sneakers.responses.*;
 import com.example.Sneakers.utils.Email;
+import com.example.Sneakers.utils.BuilderEmailContent;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,7 @@ public class OrderService implements IOrderService {
     private final VoucherUsageRepository voucherUsageRepository;
     private final GhnService ghnService;
     private final AsyncOrderService asyncOrderService;
+    private final Email emailService;
 
     @Override
     @Transactional
@@ -348,7 +350,24 @@ public class OrderService implements IOrderService {
         order.setDistrictId(districtId);
         order.setWardCode(wardCode);
         
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        
+        // Send waybill email to customer
+        try {
+            String to = order.getEmail();
+            String subject = "Mã vận đơn đơn hàng #" + order.getId() + " - Locker Korea";
+            String content = BuilderEmailContent.buildWaybillEmailContent(savedOrder);
+            boolean sendMail = emailService.sendEmail(to, subject, content);
+            
+            if (!sendMail) {
+                System.err.println("Warning: Failed to send waybill email to " + to);
+            }
+        } catch (Exception emailException) {
+            System.err.println("Warning: Exception while sending waybill email: " + emailException.getMessage());
+            // Don't throw exception - waybill creation succeeded, email failure is non-critical
+        }
+        
+        return savedOrder;
     }
 
     @Override

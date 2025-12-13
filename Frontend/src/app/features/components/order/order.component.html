@@ -158,8 +158,8 @@
         <h2 class="section-title">Phương thức vận chuyển</h2>
         <div class="shipping-methods">
           @for (item of methodShipping; track item) {
-          <div class="shipping-option" [class.selected]="methodShippingValue.code === item.code" (click)="methodShippingValue = item">
-            <p-radioButton name="shippingMethod" [value]="item" [(ngModel)]="methodShippingValue" [inputId]="item.code"></p-radioButton>
+          <div class="shipping-option" [class.selected]="methodShippingValue.code === item.code" (click)="methodShippingValue = item; onShippingChange()">
+            <p-radioButton name="shippingMethod" [value]="item" [(ngModel)]="methodShippingValue" (ngModelChange)="onShippingChange()" [inputId]="item.code"></p-radioButton>
             <label [for]="item.code" class="shipping-label">
               <span class="method-name">{{item.name}}</span>
               <span class="method-price">{{item.price === 0 ? 'Miễn phí' : (item.price | currency:'VND':'symbol':'1.0-0')}}</span>
@@ -180,10 +180,20 @@
         <h2 class="section-title">Phương thức thanh toán</h2>
         <div class="payment-methods">
           @for (item of paymentMethods; track item) {
-          <div class="payment-option">
-            <p-radioButton name="paymentMethod" [value]="item" [(ngModel)]="selectedPayMethod" [inputId]="item.key"></p-radioButton>
+          <div class="payment-option" [class.disabled-payment]="item.key === 'Cash' && (finalCost + methodShippingValue.price) >= 50000000">
+            <p-radioButton name="paymentMethod" 
+                           [value]="item" 
+                           [(ngModel)]="selectedPayMethod" 
+                           [inputId]="item.key"
+                           [disabled]="item.key === 'Cash' && (finalCost + methodShippingValue.price) >= 50000000">
+            </p-radioButton>
             <img [src]="item.logo" [alt]="item.name" class="payment-logo">
-              <label [for]="item.key" class="p-radiobutton-label">{{item.name}}</label>
+            <label [for]="item.key" class="p-radiobutton-label">
+              {{item.name}}
+              <span *ngIf="item.key === 'Cash' && (finalCost + methodShippingValue.price) >= 50000000" style="color: #ef4444; font-size: 0.85rem; display: block; margin-top: 4px;">
+                (Không áp dụng cho đơn hàng &ge; 50.000.000đ)
+              </span>
+            </label>
           </div>
           }
         </div>

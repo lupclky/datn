@@ -12,6 +12,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
 @Component
 public class Email {
@@ -51,8 +52,8 @@ public class Email {
 			msg.setFrom(from);
 			// Người nhận
 			msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to,false));
-			// Tiêu đề email
-			msg.setSubject(subject);
+			// Tiêu đề email - Encode UTF-8 để hiển thị đúng tiếng Việt
+			msg.setSubject(MimeUtility.encodeText(subject, "UTF-8", "B"));
 			// Thời gian gửi
 			msg.setSentDate(new Date());
 			// Nội dung tin nhắn email

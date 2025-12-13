@@ -26,7 +26,9 @@ import { environment } from '../../../../environments/environment.development';
 import { UserDto } from '../../dtos/user.dto';
 import { Subject } from 'rxjs';
 import { ProductDto } from '../../dtos/product.dto';
-import { AllProductDto } from '../../dtos/AllProduct.dto';
+import { CategoriesService } from '../../services/categories.service';
+import { CategoriesDto } from '../../dtos/categories.dto';
+import { LockFeatureService, LockFeature } from '../../services/lock-feature.service';
 
 @Component({
   selector: 'app-header',
@@ -72,6 +74,21 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   public isMenuOpen = false;
   public isMobileSearchActive = false;
   public isSidebarOpen = true; // Sidebar defaults to open on desktop
+  
+  // Category Menu Properties
+  public isCategoryMenuOpen = false;
+  public categories: CategoriesDto[] = [];
+  public features: LockFeature[] = [];
+  public brandOptions = [
+    { label: 'Samsung', value: 'samsung' },
+    { label: 'Kaadas', value: 'kaadas' },
+    { label: 'Xiaomi', value: 'xiaomi' },
+    { label: 'Dessmann', value: 'dessmann' },
+    { label: 'Unicor', value: 'unicor' },
+    { label: 'Hafele', value: 'hafele' },
+    { label: 'Yale', value: 'yale' },
+    { label: 'Epic', value: 'epic' }
+  ];
 
   constructor(
     private userService : UserService,
@@ -80,7 +97,9 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
     private toastService: ToastService,
     private detailProductService : DetailProductService,
     private productService: ProductService,
-    private commonService: CommonService
+    private commonService: CommonService,
+    private categoriesService: CategoriesService,
+    private lockFeatureService: LockFeatureService
   ) {
     super();
     if (typeof localStorage !== 'undefined') {
@@ -110,6 +129,9 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   }
 
   ngOnInit(): void {
+    // Load menu data
+    this.loadMenuData();
+
     // Emit initial state
     this.sidebarToggled.emit(this.isSidebarOpen);
 
@@ -380,5 +402,65 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
     
     // Default image if no images available
     return 'assets/images/no-image.png';
+  }
+
+  loadMenuData() {
+    // Load Categories
+    this.categoriesService.getCategories().pipe(
+      takeUntil(this.destroyed$),
+      tap(cats => this.categories = cats)
+    ).subscribe();
+
+    // Load Features
+    this.lockFeatureService.getActiveFeatures().pipe(
+      takeUntil(this.destroyed$),
+      tap(feats => this.features = feats)
+    ).subscribe();
+  }
+
+  toggleCategoryMenu() {
+    this.isCategoryMenuOpen = !this.isCategoryMenuOpen;
+  }
+  
+  onCategorySelect(categoryId: string) {
+    this.isCategoryMenuOpen = false;
+    // Use setTimeout to ensure the menu closes visually before navigation or on mobile touch
+    setTimeout(() => {
+        this.router.navigate(['/allProduct'], { queryParams: { category: categoryId } });
+    }, 50);
+  }
+
+  onFeatureSelect(featureId: string) {
+    this.isCategoryMenuOpen = false;
+    setTimeout(() => {
+        this.router.navigate(['/allProduct'], { queryParams: { feature: featureId } });
+    }, 50);
+  }
+
+  onBrandSelect(brand: string) {
+    this.isCategoryMenuOpen = false;
+    setTimeout(() => {
+        this.router.navigate(['/allProduct'], { queryParams: { keyword: brand } });
+    }, 50);
+  }
+
+  navigateAndClose(path: string[]) {
+    this.isCategoryMenuOpen = false;
+    setTimeout(() => {
+        this.router.navigate(path);
+    }, 50);
+  }
+
+  // Hover handlers that only work on desktop to prevent mobile ghost clicks
+  onMenuMouseEnter() {
+    if (window.innerWidth > 768) {
+      this.isCategoryMenuOpen = true;
+    }
+  }
+
+  onMenuMouseLeave() {
+    if (window.innerWidth > 768) {
+      this.isCategoryMenuOpen = false;
+    }
   }
 }

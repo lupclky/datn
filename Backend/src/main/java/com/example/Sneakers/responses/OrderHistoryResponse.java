@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 @Getter
@@ -28,8 +28,8 @@ public class OrderHistoryResponse {
     private String productName;
 
     @JsonProperty("order_date")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime orderDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate orderDate;
 
     private String thumbnail;
 
@@ -51,7 +51,7 @@ public class OrderHistoryResponse {
                 .userId(order.getUser().getId())
                 .status(order.getStatus())
                 .totalMoney(order.getTotalMoney())
-                .orderDate(order.getOrderDate())
+                .orderDate(order.getOrderDate().toLocalDate())
                 .fullname(order.getFullName())
                 .phoneNumber(order.getPhoneNumber())
                 .paymentMethod(order.getPaymentMethod());

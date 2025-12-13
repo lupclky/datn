@@ -85,6 +85,138 @@ $m3-sys-dark-outline-variant: #49454F;
   }
 }
 
+/* Product Category Menu */
+.category-menu-container {
+  position: relative;
+  z-index: 1100;
+
+  .category-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: $m3-sys-dark-on-surface;
+    border: 1px solid $m3-sys-dark-outline;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+
+    &:hover, &:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: $m3-sys-dark-primary;
+      color: $m3-sys-dark-primary;
+    }
+
+    i {
+      font-size: 1.1rem;
+    }
+  }
+
+  .category-dropdown {
+    position: absolute;
+    top: 100%; // Attached directly below the button
+    left: 0;
+    width: 250px; // Slightly reduced width
+    background: #232f34; // Dark Slate Grey matching image
+    border-radius: 0 0 4px 4px; // Rounded bottom only
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    padding: 0;
+    overflow: visible;
+    margin-top: 0; // No gap
+
+    // Header of dropdown matching sample style
+    &::before {
+      content: '';
+      display: block;
+      height: 2px;
+      background: #FF9800; // Orange top border
+      width: 100%;
+    }
+
+    .category-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      .category-item {
+        padding: 10px 14px; // Reduced padding
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #fff;
+        font-size: 0.9rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        cursor: pointer;
+        transition: background 0.2s;
+        position: relative;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: rgba(255,255,255,0.05);
+          color: #FF9800; // Orange Highlight
+        }
+
+        // Submenu handling
+        &.has-submenu {
+          &:hover {
+            .submenu {
+              display: block;
+              opacity: 1;
+              visibility: visible;
+              transform: translateX(0);
+            }
+          }
+        }
+
+        .submenu {
+          position: absolute;
+          left: 100%; // Flyout right
+          top: 0;
+          width: 220px;
+          background: #232f34; // Same dark bg
+          box-shadow: 4px 0 16px rgba(0,0,0,0.3);
+          border-left: 2px solid #FF9800;
+          display: none; 
+          opacity: 0;
+          visibility: hidden;
+          transform: translateX(-10px);
+          transition: all 0.2s ease;
+          z-index: 1101;
+
+          ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+
+            li {
+              padding: 10px 14px;
+              color: #fff;
+              border-bottom: 1px solid rgba(255,255,255,0.08);
+              transition: color 0.2s;
+              font-size: 0.9rem;
+
+              &:hover {
+                color: #FF9800;
+                background: rgba(255,255,255,0.05);
+              }
+
+              &:last-child {
+                border-bottom: none;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 /* Center search column */
 .header-search {
   flex: 1 1 auto;
@@ -641,7 +773,83 @@ $m3-sys-dark-outline-variant: #49454F;
   // Left section gets remaining space but allows right section to overlap if needed
   .header-left {
     flex: 1;
-    overflow: hidden;
+    overflow: visible; // Allow dropdown to show
+  }
+
+  // Adjust Category Menu for Mobile
+  .category-menu-container {
+    .category-btn {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border: none; // Remove border on mobile for cleaner look
+      
+      span { display: none; } // Hide text on mobile
+    }
+
+    .category-dropdown {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 64px);
+      border-radius: 0;
+      overflow-y: auto;
+      background: #141218; // Force exact color match with header variable value
+      box-shadow: none;
+      z-index: 1050; 
+      
+      // Mobile Submenu style: simple expansion or nested
+      .category-list {
+        background: #141218; // Force exact color match
+        
+        .category-item {
+          padding: 14px 20px; 
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          font-size: 0.95rem; 
+          color: $m3-sys-dark-on-surface;
+          background: transparent; 
+          
+          &.has-submenu {
+             // On mobile, click to toggle is better, but keeping hover logic minimal
+          }
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .submenu {
+            position: static;
+            width: 100%;
+            opacity: 1;
+            visibility: visible;
+            display: none; 
+            transform: none;
+            box-shadow: none;
+            border-left: 3px solid $m3-sys-dark-primary; 
+            background: rgba(255, 255, 255, 0.03); // Very subtle contrast overlay
+            margin-top: 0;
+            
+            ul li {
+                padding: 12px 24px 12px 32px; 
+                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+                color: $m3-sys-dark-on-surface; 
+                font-size: 0.9rem;
+                
+                &:last-child {
+                    border-bottom: none;
+                }
+            }
+          }
+
+          // Show submenu on active/hover
+          &:active, &:focus, &:hover {
+             background: rgba(208, 188, 255, 0.05); 
+             color: $m3-sys-dark-primary;
+             .submenu { display: block; }
+          }
+        }
+      }
+    }
   }
 
   // Position Right Section ABSOLUTELY to force it to the right

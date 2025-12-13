@@ -357,26 +357,24 @@ public class AIProductAssistantService {
 
     private String createDashboardInsightsPrompt(String statsContext) {
         return String.format("""
-                Bạn là một chuyên gia phân tích dữ liệu kinh doanh và chiến lược bán lẻ cho cửa hàng khóa điện tử Locker Korea.
+                Đóng vai chuyên gia kinh tế và chiến lược kinh doanh cao cấp của Locker Korea.
                 
-                Dưới đây là dữ liệu thống kê hiện tại của cửa hàng:
+                Dựa trên dữ liệu thống kê kinh doanh dưới đây:
                 %s
                 
-                Hãy phân tích dữ liệu này và đưa ra "Đề xuất AI" để cải thiện hiệu quả kinh doanh.
+                Hãy phân tích sâu và đưa ra đề xuất kế hoạch hành động chi tiết.
                 
-                Quy tắc trả lời:
-                1. Trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn, súc tích.
-                2. Bắt đầu bằng 1 nhận xét tổng quan về tình hình kinh doanh (Tốt/Khá/Cần cải thiện).
-                3. Đưa ra 3-4 đề xuất cụ thể, hành động được ngay (Actionable Insights). Ví dụ:
-                   - Nếu doanh thu giảm: Đề xuất chạy khuyến mãi, flash sale.
-                   - Nếu sản phẩm tồn kho nhiều: Đề xuất combo, giảm giá xả kho.
-                   - Nếu sản phẩm bán chạy: Đề xuất nhập thêm, chạy quảng cáo thêm.
-                4. Phân tích xu hướng nếu có dữ liệu lịch sử (tăng/giảm).
-                5. Giọng điệu khách quan, dựa trên số liệu.
-                6. Định dạng rõ ràng với bullet points hoặc emoji.
-                7. Độ dài: 200-300 từ.
+                Yêu cầu phân tích:
+                1. Đánh giá sức khỏe tài chính: Phân tích xu hướng dòng tiền, biến động doanh thu theo ngày.
+                2. Nhận diện vấn đề/Cơ hội: Chỉ ra các ngày doanh thu đột biến (cao/thấp) và đưa ra giả thuyết nguyên nhân.
+                3. Chiến lược sản phẩm: Dựa trên Top sản phẩm bán chạy, đề xuất chiến lược nhập hàng, pricing hoặc bundling.
                 
-                Hãy đóng vai trò là một cố vấn chiến lược thông minh, giúp chủ cửa hàng ra quyết định nhanh chóng.
+                Đề xuất kế hoạch hành động (Action Plan):
+                - Ngắn hạn (Tuần tới): Cần làm gì ngay? (VD: Marketing, xả hàng, chăm sóc khách hàng cũ...)
+                - Trung hạn (Tháng tới): Chiến lược cải thiện doanh thu bền vững.
+                
+                Văn phong: Chuyên nghiệp, sắc sảo, dùng từ ngữ kinh tế/thương mại.
+                Định dạng: Đoạn văn đơn giản để cho người không hiểu nhiều về kinh tế có thể hiểu.
                 """, statsContext);
     }
 
@@ -390,7 +388,7 @@ public class AIProductAssistantService {
                 
                 Quy tắc trả lời:
                 1. Trả lời bằng tiếng Việt, giọng điệu chuyên nghiệp và thân thiện
-                2. Nếu câu hỏi về thời gian bảo hành: thông thường 12-24 tháng tùy hãng
+                2. Nếu câu hỏi về thời gian bảo hành: bảo hành đổi mới trong 30 ngày, bảo hành cửa hàng 12 tháng
                 3. Nếu về phạm vi bảo hành: giải thích những gì được bảo hành (lỗi phần cứng, phần mềm) và không được bảo hành (lỗi do người dùng, thiên tai, hỏng do nước)
                 4. Nếu về quy trình bảo hành: hướng dẫn các bước (liên hệ, kiểm tra, sửa chữa/đổi mới)
                 5. Nếu về điều kiện bảo hành: cần hóa đơn, tem bảo hành, không tự ý sửa chữa

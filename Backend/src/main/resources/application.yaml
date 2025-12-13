@@ -90,6 +90,8 @@ ghn:
     token: "dce052f9-d73a-11f0-a3d6-dac90fb956b5" # Replace with your GHN Token
     shop-id: "198428" # Replace with your GHN Shop ID
     url: "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create"
+    from-district-id: 3440
+    from-ward-code: "13006"
 
 facebook:
   page-id: "945215165331759"

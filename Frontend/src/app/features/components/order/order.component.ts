@@ -89,7 +89,6 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
 
   public paymentMethods = [
     { name: 'Thanh toán khi nhận hàng', key: 'Cash', logo: 'assets/images/payment-icons/cash.svg' },
-    { name: 'Chuyển khoản ngân hàng', key: 'Banking', logo: 'assets/images/payment-icons/bank.svg' },
     { name: 'Thanh toán bằng thẻ Visa/Mastercard', key: 'Stripe', logo: 'assets/images/payment-icons/stripe.svg' },
     { name: 'Thanh toán qua VNPAY', key: 'VNPAY', logo: 'assets/images/payment-icons/vnpay.svg' }
   ];
@@ -152,6 +151,7 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     ];
     this.methodShippingValue = this.methodShipping[0];
     this.selectedPayMethod = this.paymentMethods[0];
+    this.checkPaymentMethodValidity();
 
     // Load provinces on init
     this.loadProvinces();
@@ -159,6 +159,20 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
 
   selectPaymentMethod(method: {name: string, key: string, logo: string}) {
     this.selectedPayMethod = method;
+  }
+  
+  checkPaymentMethodValidity() {
+    const totalOrderValue = this.finalCost + this.methodShippingValue.price;
+    if (totalOrderValue >= 50000000 && this.selectedPayMethod.key === 'Cash') {
+      const alternative = this.paymentMethods.find(m => m.key !== 'Cash');
+      if (alternative) {
+        this.selectedPayMethod = alternative;
+      }
+    }
+  }
+
+  onShippingChange() {
+    this.checkPaymentMethodValidity();
   }
 
   ngAfterViewInit(): void {
@@ -181,6 +195,7 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
           this.discountAmount = response.discount_amount || 0;
           this.finalCost = response.final_total || this.totalCost;
           this.appliedVoucherName = response.voucher_name || '';
+          this.checkPaymentMethodValidity();
           this.toastService.success(response.message || 'Áp dụng voucher thành công');
         } else {
           this.resetVoucher();
@@ -207,20 +222,30 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
     this.finalCost = this.totalCost;
     this.voucherCode = '';
     this.appliedVoucherName = '';
+    this.checkPaymentMethodValidity();
   }
 
   order(){
     if (this.inforShipForm.invalid){
       this.toastService.fail("Vui lòng nhập đầy đủ thông tin giao hàng");
-    } else {
-      if (this.selectedPayMethod.key === 'Stripe') {
+      this.inforShipForm.markAllAsTouched();
+      return;
+    }
+
+    // Validation: Disable COD for orders >= 50,000,000 VND
+    const totalOrderValue = this.finalCost + this.methodShippingValue.price;
+    if (this.selectedPayMethod.key === 'Cash' && totalOrderValue >= 50000000) {
+      this.toastService.fail("Đơn hàng từ 50 triệu đồng trở lên không được thanh toán khi nhận hàng (COD). Vui lòng chọn phương thức thanh toán khác.");
+      return;
+    }
+
+    if (this.selectedPayMethod.key === 'Stripe') {
         this.processStripeOrder();
       } else if (this.selectedPayMethod.key === 'VNPAY') {
         this.processVnpayOrder();
       } else {
         this.processRegularOrder();
       }
-    }
   }
 
   private processStripeOrder(): void {
