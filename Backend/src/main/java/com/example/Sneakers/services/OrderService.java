@@ -332,7 +332,7 @@ public class OrderService implements IOrderService {
 
     @Override
     @Transactional
-    public Order createWaybill(Long orderId, Integer districtId, String wardCode) throws Exception {
+    public Order createWaybill(Long orderId, Integer districtId, String wardCode, Integer length, Integer width, Integer height, Integer weight) throws Exception {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new DataNotFoundException("Order not found"));
         
@@ -340,9 +340,14 @@ public class OrderService implements IOrderService {
              throw new Exception("Order already has a waybill: " + order.getTrackingNumber());
         }
 
-        String trackingCode = ghnService.createOrder(order, districtId, wardCode);
+        String trackingCode = ghnService.createOrder(order, districtId, wardCode, length, width, height, weight);
         order.setTrackingNumber(trackingCode);
         order.setCarrier("GHN");
+        
+        // Update order district and ward if provided
+        order.setDistrictId(districtId);
+        order.setWardCode(wardCode);
+        
         return orderRepository.save(order);
     }
 

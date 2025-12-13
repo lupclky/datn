@@ -5,8 +5,12 @@
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h3 class="mb-0">Quản lý Tin tức</h3>
-      <button pButton type="button" label="Thêm tin tức" icon="pi pi-plus" 
-              class="p-button-success" (click)="openNewDialog()"></button>
+      <div class="d-flex gap-2">
+        <button pButton type="button" label="Cập nhật Facebook" icon="pi pi-refresh" 
+                class="p-button-outlined p-button-secondary" (click)="manualSyncFacebook()"></button>
+        <button pButton type="button" label="Thêm tin tức" icon="pi pi-plus" 
+                class="p-button-success" (click)="openNewDialog()"></button>
+      </div>
     </div>
 
     <div class="card-body">

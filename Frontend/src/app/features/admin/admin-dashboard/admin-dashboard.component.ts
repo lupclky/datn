@@ -16,6 +16,9 @@ import { PrimeNGConfig } from 'primeng/api';
 // Register Chart.js components
 Chart.register(...registerables);
 
+import { AiService } from '../../../core/services/ai.service';
+import { ToastService } from '../../../core/services/toast.service';
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -37,6 +40,39 @@ Chart.register(...registerables);
       </div>
 
       <div class="dashboard-content">
+        <!-- AI Insights Section -->
+        <div class="ai-insights-section mb-4">
+          <p-card styleClass="ai-card">
+            <ng-template pTemplate="header">
+              <div class="ai-header p-3 flex align-items-center justify-content-between">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-sparkles text-primary text-xl"></i>
+                  <h3 class="m-0 text-primary">KVK Intelligence</h3>
+                </div>
+                <button pButton icon="pi pi-refresh" label="Phân tích ngay" 
+                        class="p-button-rounded p-button-outlined" 
+                        [loading]="isAnalyzing"
+                        (click)="generateInsights()"></button>
+              </div>
+            </ng-template>
+            
+            <div class="ai-content p-3">
+              <div *ngIf="!aiInsights && !isAnalyzing" class="text-center text-500 py-4">
+                <i class="pi pi-chart-line text-4xl mb-2"></i>
+                <p>Nhấn "Phân tích ngay" để nhận đề xuất từ KVK Intelligence dựa trên dữ liệu hiện tại.</p>
+              </div>
+
+              <div *ngIf="isAnalyzing" class="flex flex-column align-items-center py-4">
+                <i class="pi pi-spin pi-spinner text-4xl text-primary mb-2"></i>
+                <p class="text-primary">Đang phân tích dữ liệu bán hàng...</p>
+              </div>
+
+              <div *ngIf="aiInsights" class="ai-result markdown-body" [innerHTML]="formatInsights(aiInsights)">
+              </div>
+            </div>
+          </p-card>
+        </div>
+
         <!-- Statistics Cards -->
         <div class="statistics-cards">
           <div class="card total-revenue">
@@ -738,15 +774,48 @@ export class AdminDashboardComponent implements OnInit {
   private monthlyChart: Chart | null = null;
   private yearlyChart: Chart | null = null;
 
+  // AI Insights
+  aiInsights: string | null = null;
+  isAnalyzing: boolean = false;
+
   constructor(
     private statisticsService: StatisticsService,
     private orderService: OrderService,
-    private primeNGConfig: PrimeNGConfig
+    private primeNGConfig: PrimeNGConfig,
+    private aiService: AiService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
     this.primeNGConfig.setTranslation(this.calendarConfig);
     this.loadDashboardData();
+  }
+
+  generateInsights() {
+    this.isAnalyzing = true;
+    this.aiService.generateDashboardInsights().subscribe({
+      next: (response: any) => {
+        if (response && response.success) {
+          this.aiInsights = response.insights;
+        } else {
+          this.toastService.showError('Lỗi', 'Không thể tạo đề xuất AI');
+        }
+        this.isAnalyzing = false;
+      },
+      error: (error) => {
+        console.error('Error generating insights:', error);
+        this.toastService.showError('Lỗi', 'Có lỗi xảy ra khi kết nối với AI');
+        this.isAnalyzing = false;
+      }
+    });
+  }
+
+  formatInsights(text: string): string {
+    if (!text) return '';
+    // Simple markdown to HTML conversion for basic formatting
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n/g, '<br>');
   }
 
   private loadDashboardData() {

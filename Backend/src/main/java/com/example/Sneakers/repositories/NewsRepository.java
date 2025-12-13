@@ -35,5 +35,8 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     // Get distinct categories
     @Query("SELECT DISTINCT n.category FROM News n WHERE n.status = :status AND n.category IS NOT NULL ORDER BY n.category")
     List<String> findDistinctCategoriesByStatus(@Param("status") NewsStatus status);
+
+    // Find news that have been scheduled on Facebook
+    List<News> findByFacebookPostIdIsNotNullAndFacebookScheduledAtIsNotNull();
 }
 

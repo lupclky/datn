@@ -35,7 +35,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail,Long> {
            "JOIN products p ON od.product_id = p.id " +
            "JOIN orders o ON od.order_id = o.id " +
            "WHERE o.status IN ('pending', 'shipped', 'delivered') AND o.active = true " +
-           "AND DATE(o.order_date) BETWEEN :startDate AND :endDate " +
+           "AND DATE(o.order_date) >= DATE(:startDate) AND DATE(o.order_date) <= DATE(:endDate) " +
            "GROUP BY p.id, p.name " +
            "HAVING SUM(od.number_of_products) > 0 " +
            "ORDER BY total_sold DESC " +
@@ -66,7 +66,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail,Long> {
            "JOIN categories c ON p.category_id = c.id " +
            "JOIN orders o ON od.order_id = o.id " +
            "WHERE o.status IN ('pending', 'shipped', 'delivered') AND o.active = true " +
-           "AND DATE(o.order_date) BETWEEN :startDate AND :endDate " +
+           "AND DATE(o.order_date) >= DATE(:startDate) AND DATE(o.order_date) <= DATE(:endDate) " +
            "GROUP BY c.id, c.name " +
            "HAVING SUM(od.number_of_products) > 0 " +
            "ORDER BY total_sold DESC " +
@@ -79,7 +79,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail,Long> {
            "FROM order_details od " +
            "JOIN orders o ON od.order_id = o.id " +
            "JOIN products p ON od.product_id = p.id " +
-           "WHERE DATE(o.order_date) = :date " +
+           "WHERE DATE(o.order_date) = DATE(:date) " +
            "AND o.status IN ('pending', 'shipped', 'delivered') AND o.active = true " +
            "GROUP BY od.product_id, p.name " +
            "HAVING SUM(od.number_of_products) > 0 " +

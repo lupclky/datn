@@ -256,7 +256,7 @@ public class ProductController {
         logger.info(String.format("keyword =  %s, category_id = %d, page = %d, limit = %d",
                 keyword, categoryId, page, limit));
 
-        Page<ProductResponse> productPage = productService.getAllProducts(keyword, categoryId, pageRequest);
+        Page<ProductResponse> productPage = productService.getAllProducts(keyword, categoryId, null, null, pageRequest);
 
         int totalPages = productPage.getTotalPages();
         List<ProductResponse> products = productPage.getContent();
@@ -308,26 +308,38 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> allProducts() {
+    public ResponseEntity<?> allProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int limit,
+            @RequestParam(defaultValue = "id,desc") String sort,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0", name = "category_id") Long categoryId,
+            @RequestParam(name = "min_price", required = false) Long minPrice,
+            @RequestParam(name = "max_price", required = false) Long maxPrice) {
         try {
-            List<ProductResponse> productResponses = new ArrayList<>();
-            List<Product> products = productService.allProducts();
-            for (Product product : products) {
-                ProductResponse response = ProductResponse.fromProduct(product);
-                Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
-                Long totalReviews = reviewRepository.countByProductId(product.getId());
-                response.setAverageRating(avgRating != null ? avgRating : 0.0);
-                response.setTotalReviews(totalReviews);
-                productResponses.add(response);
-            }
-            return ResponseEntity.ok(ListProductResponse.builder()
-                    .products(productResponses)
-                    .totalProducts(productService.totalProducts())
+            // Parse sort param (format: "field,direction")
+            String[] sortParams = sort.split(",");
+            String sortField = sortParams[0];
+            String sortDirection = sortParams.length > 1 ? sortParams[1] : "desc";
+            
+            Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            
+            // Prioritize in-stock products, then apply user sort
+            Sort sortBy = Sort.by(Sort.Direction.DESC, "inStock")
+                    .and(Sort.by(direction, sortField));
+
+            // Sử dụng pagination thay vì load tất cả
+            PageRequest pageRequest = PageRequest.of(page, limit, sortBy);
+            Page<ProductResponse> productPage = productService.getAllProducts(keyword, categoryId, minPrice, maxPrice, pageRequest);
+
+            return ResponseEntity.ok(ProductListResponse.builder()
+                    .products(productPage.getContent())
+                    .totalProducts(productPage.getTotalElements()) // Use totalElements from page for filtered results
+                    .totalPages(productPage.getTotalPages())
                     .build());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
     }
 
     @GetMapping("/price")

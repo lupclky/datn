@@ -2,6 +2,7 @@ package com.example.Sneakers.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.util.List;
 
@@ -36,6 +37,10 @@ public class Product extends BaseEntity {
 
     @Column(name = "quantity")
     private Long quantity;
+
+    // Virtual column for sorting: true (1) if quantity > 0, else false (0)
+    @Formula("(CASE WHEN quantity > 0 THEN 1 ELSE 0 END)")
+    private Boolean inStock;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProductImage> productImages;

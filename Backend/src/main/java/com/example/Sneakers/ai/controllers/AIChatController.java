@@ -15,6 +15,11 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.example.Sneakers.services.StatisticsService;
+import com.example.Sneakers.dtos.DashboardStatsDTO;
+import com.example.Sneakers.dtos.DailyRevenueDTO;
+import com.example.Sneakers.dtos.ProductSoldStatisticsDTO;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("${api.prefix}/ai/chat")
@@ -25,6 +30,7 @@ public class AIChatController {
 
     private final ChatModel geminiChatModel;
     private final AIProductAssistantService aiProductAssistantService;
+    private final StatisticsService statisticsService; // Inject StatisticsService
 
     @PostMapping("/text")
     public ResponseEntity<Map<String, Object>> chatWithText(@RequestBody Map<String, String> request) {
@@ -132,6 +138,68 @@ public class AIChatController {
 
         } catch (Exception e) {
             log.error("Error in product assistant", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("success", false);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/dashboard-insights")
+    public ResponseEntity<Map<String, Object>> generateDashboardInsights() {
+        try {
+            log.info("Collecting data for dashboard insights...");
+            
+            // 1. Get General Dashboard Stats (Total Revenue, Orders, Products Sold)
+            // Note: We need a method in StatisticsService or OrderService to get this.
+            // Assuming StatisticsService has access to these repositories or methods.
+            // Let's manually construct context from available StatisticsService methods.
+            
+            LocalDate today = LocalDate.now();
+            LocalDate thirtyDaysAgo = today.minusDays(30);
+            
+            // Daily Revenue Trend (Last 30 days)
+            List<DailyRevenueDTO> revenueTrend = statisticsService.getRevenueByDateRange(thirtyDaysAgo, today);
+            
+            // Top Selling Products (Last 30 days roughly, or generally)
+            List<ProductSoldStatisticsDTO> topProducts = statisticsService.getTopProductSold(5);
+            
+            // Today's Overview
+            var todayOverview = statisticsService.getTodayOverview();
+            
+            StringBuilder statsContext = new StringBuilder();
+            statsContext.append("--- TỔNG QUAN HÔM NAY ---\n");
+            statsContext.append(String.format("- Đơn hàng hôm nay: %d\n", todayOverview.getOrdersToday()));
+            statsContext.append(String.format("- Doanh thu hôm nay: %,.0f VND\n", todayOverview.getRevenueToday()));
+            
+            statsContext.append("\n--- XU HƯỚNG DOANH THU (30 NGÀY QUA) ---\n");
+            if (!revenueTrend.isEmpty()) {
+                double totalRev30 = revenueTrend.stream().mapToDouble(DailyRevenueDTO::getRevenue).sum();
+                statsContext.append(String.format("- Tổng doanh thu 30 ngày: %,.0f VND\n", totalRev30));
+                // Add first and last to show trend direction roughly
+                statsContext.append(String.format("- Bắt đầu (%s): %,.0f VND\n", revenueTrend.get(0).getDate(), revenueTrend.get(0).getRevenue()));
+                statsContext.append(String.format("- Kết thúc (%s): %,.0f VND\n", revenueTrend.get(revenueTrend.size()-1).getDate(), revenueTrend.get(revenueTrend.size()-1).getRevenue()));
+            }
+            
+            statsContext.append("\n--- TOP 5 SẢN PHẨM BÁN CHẠY ---\n");
+            for (ProductSoldStatisticsDTO p : topProducts) {
+                statsContext.append(String.format("- %s (Đã bán: %d)\n", p.getProductName(), p.getTotalSold()));
+            }
+            
+            log.info("Stats Context prepared: \n{}", statsContext.toString());
+            
+            // Generate insights
+            String insights = aiProductAssistantService.generateDashboardInsights(statsContext.toString());
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("insights", insights);
+            result.put("success", true);
+            result.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            log.error("Error generating dashboard insights", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             errorResponse.put("success", false);

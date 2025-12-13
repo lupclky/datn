@@ -358,7 +358,11 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   }
 
   goBack(){
-    this.router.navigate(["/"]);
+    if (this.roleId === 2) {
+      this.router.navigate(["/productManage"]);
+    } else {
+      this.router.navigate(["/"]);
+    }
   }
 
   trackByImageId(index: number, image: any): number {

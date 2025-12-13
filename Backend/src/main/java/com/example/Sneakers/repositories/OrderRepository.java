@@ -55,12 +55,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             nativeQuery = true)
     Double getDailyRevenue(@Param("date") LocalDate date);
 
-    @Query(value = "SELECT o.order_date, COALESCE(SUM(o.total_money - COALESCE(o.discount_amount, 0)), 0) " +
+    @Query(value = "SELECT DATE(o.order_date) as order_day, COALESCE(SUM(o.total_money - COALESCE(o.discount_amount, 0)), 0) " +
            "FROM orders o " +
-           "WHERE o.order_date BETWEEN :startDate AND :endDate " +
+           "WHERE DATE(o.order_date) BETWEEN :startDate AND :endDate " +
            "AND o.status IN ('pending', 'shipped', 'delivered') AND o.active = true " +
-           "GROUP BY o.order_date " +
-           "ORDER BY o.order_date",
+           "GROUP BY DATE(o.order_date) " +
+           "ORDER BY DATE(o.order_date)",
            nativeQuery = true)
     List<Object[]> getRevenueByDateRange(
             @Param("startDate") LocalDate startDate,

@@ -36,7 +36,7 @@ public class AsyncOrderService {
         if (districtId != null && wardCode != null && !"Hỏa tốc".equalsIgnoreCase(order.getShippingMethod())) {
             try {
                 // Determine COD amount based on payment method logic is handled inside GhnService.createOrder using order data
-                String trackingCode = ghnService.createOrder(order, districtId, wardCode);
+                String trackingCode = ghnService.createOrder(order, districtId, wardCode, null, null, null, null);
                 
                 // Update order with tracking number
                 // Fetch fresh from DB to ensure we don't overwrite other parallel updates (though unlikely for new order)

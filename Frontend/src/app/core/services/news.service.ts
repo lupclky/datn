@@ -171,5 +171,14 @@ export class NewsService {
       params: params
     });
   }
+
+  /**
+   * Sync Facebook posts status (admin only)
+   */
+  syncFacebookPosts(): Observable<any> {
+    return this.httpClient.post(`${this.apiUrl}/news/admin/sync-facebook`, {}, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }
 

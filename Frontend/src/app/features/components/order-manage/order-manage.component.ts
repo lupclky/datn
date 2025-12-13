@@ -145,7 +145,11 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
 
     this.waybillForm = this.fb.group({
         district_id: [null, [Validators.required]],
-        ward_code: ['', [Validators.required]]
+        ward_code: ['', [Validators.required]],
+        length: [20, [Validators.required, Validators.min(1)]],
+        width: [20, [Validators.required, Validators.min(1)]],
+        height: [10, [Validators.required, Validators.min(1)]],
+        weight: [200, [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -544,8 +548,23 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
       this.showWaybillDialog = true;
       this.waybillForm.reset({
           district_id: order.district_id,
-          ward_code: order.ward_code
+          ward_code: order.ward_code,
+          length: 20,
+          width: 20,
+          height: 10,
+          weight: 200
       });
+  }
+
+  saveWaybillInfo() {
+      if (this.waybillForm.invalid || !this.selectedOrderForWaybill) {
+          return;
+      }
+      
+      const { district_id, ward_code } = this.waybillForm.value;
+      // Just update local or call API to save address if needed without creating waybill
+      // For now, we simulate saving by just closing and letting user know it's ready
+      this.toastService.info('Thông tin đã được nhập. Nhấn "Tạo vận đơn ngay" để gửi sang GHN.');
   }
 
   createWaybill() {
@@ -554,9 +573,17 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
       }
 
       this.isCreatingWaybill = true;
-      const { district_id, ward_code } = this.waybillForm.value;
+      const formValue = this.waybillForm.value;
 
-      this.orderService.createWaybill(this.selectedOrderForWaybill.id, district_id, ward_code).pipe(
+      this.orderService.createWaybill(
+          this.selectedOrderForWaybill.id, 
+          formValue.district_id, 
+          formValue.ward_code,
+          formValue.length,
+          formValue.width,
+          formValue.height,
+          formValue.weight
+        ).pipe(
           tap(() => {
               this.toastService.success('Tạo vận đơn thành công!');
               this.showWaybillDialog = false;

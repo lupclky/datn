@@ -43,13 +43,14 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
   public products: ProductDto[] = [];
   public displayedProducts: ProductDto[] = []; // Products for current page
   public sortOptions: MenuItem[] = [
-    { label: 'Giá từ thấp đến cao', value: 'price' },
-    { label: 'Giá từ cao đến thấp', value: '!price' },
+    { label: 'Mới nhất', value: 'id,desc' },
+    { label: 'Giá: Thấp đến Cao', value: 'price,asc' },
+    { label: 'Giá: Cao đến Thấp', value: 'price,desc' },
+    { label: 'Đánh giá cao', value: 'rating,desc' }
   ];
   public categoriesOptions: MenuItem[] = [];
   public productsHighlight: ProductDto[] = [];
-  public sortOrder!: number;
-  public sortField!: string;
+  public sortField: string = 'id,desc';
   public priceFilterValue: number[] = [1, 100];
   public apiImage: string = environment.apiImage;
   public isLoading: boolean = false;
@@ -202,7 +203,8 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
         if (this.isSearchMode && this.searchKeyword) {
           this.loadProductsBySearch(this.searchKeyword);
         } else {
-          this.loadProductsByCategory();
+          // Unified loading
+          this.loadAllProductsWithPagination();
         }
       }),
       catchError((error) => {
@@ -211,7 +213,8 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
         if (this.isSearchMode && this.searchKeyword) {
           this.loadProductsBySearch(this.searchKeyword);
         } else {
-          this.loadProductsByCategory();
+          // Unified loading
+          this.loadAllProductsWithPagination();
         }
         return of([]);
       })
@@ -272,9 +275,85 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
         })
       ).subscribe();
     } else {
-      // Load tất cả sản phẩm theo khoảng giá mặc định
-      this.filterPrice();
+      // Load sản phẩm với pagination mặc định
+      this.loadAllProductsWithPagination();
     }
+  }
+
+  private loadAllProductsWithPagination(): void {
+    this.isLoading = true;
+    const page = Math.floor(this.first / this.rows);
+    
+    // Determine category ID
+    let categoryId = 0;
+    if (this.selectedCategory && this.selectedCategory !== 'all') {
+        categoryId = parseInt(this.selectedCategory, 10);
+    }
+
+    const minPrice = this.priceFilterValue[0] * 500000;
+    const maxPrice = this.priceFilterValue[1] * 500000;
+
+    // Use search keyword if in search mode
+    const keyword = this.isSearchMode ? this.searchKeyword : '';
+
+    // Gọi API với pagination, sort và filters
+    this.productService.getAllProduct(page, this.rows, this.sortField, keyword, categoryId, minPrice, maxPrice).pipe(
+      takeUntil(this.destroyed$),
+      tap((response: AllProductDto) => {
+        if (response && response.products) {
+          // Products của trang hiện tại từ server
+          this.products = response.products;
+          this.totalRecords = response.totalProducts; // Tổng số record từ backend
+          
+          // Apply feature filter client-side (vẫn cần thiết vì backend chưa filter feature)
+          this.applyFeatureFilter();
+          
+          this.productsHighlight = this.products.filter(p => p.quantity > 0).slice(0, 5);
+          this.error = null;
+        } else {
+          this.error = 'Không tìm thấy sản phẩm';
+          this.products = [];
+          this.displayedProducts = [];
+          this.totalRecords = 0;
+        }
+      }),
+      catchError((error) => {
+        console.error('Error loading products:', error);
+        this.error = 'Có lỗi xảy ra khi tải sản phẩm';
+        return of(null);
+      }),
+      finalize(() => {
+        this.isLoading = false;
+      })
+    ).subscribe();
+  }
+
+  private applyFeatureFilter(): void {
+    let filteredProducts = [...this.products];
+
+    // Filter by multiple features if selected (desktop)
+    if (this.selectedFeatures.length > 0) {
+      filteredProducts = filteredProducts.filter(product => {
+        return this.selectedFeatures.some(featureId => 
+          this.productMatchesFeature(product, featureId)
+        );
+      });
+    } 
+    // Filter by single feature (mobile dropdown)
+    else if (this.selectedFeature && this.selectedFeature !== 'all') {
+      filteredProducts = this.filterByFeature(filteredProducts, this.selectedFeature);
+    }
+    
+    // Filter by brand if selected (client-side)
+    if (this.selectedBrands.length > 0) {
+      filteredProducts = filteredProducts.filter(product => 
+        this.selectedBrands.some(brand => 
+          product.name.toLowerCase().includes(brand.toLowerCase())
+        )
+      );
+    }
+
+    this.displayedProducts = filteredProducts;
   }
 
   private applyFilters(): void {
@@ -400,29 +479,11 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
   }
 
   onSortChange(event: any) {
-    let value = event.value;
-    if (value.indexOf("!") === 0) {
-      this.sortOrder = -1;
-      this.sortField = value.substring(1, value.length);
-    } else {
-      this.sortOrder = 1;
-      this.sortField = value;
-    }
+    this.sortField = event.value;
     
-    // Sort products by price and availability
-    this.products.sort((a, b) => {
-      // First sort by availability
-      const availabilitySort = this.sortByAvailability([a, b]);
-      if (availabilitySort[0] === a) return -1;
-      if (availabilitySort[0] === b) return 1;
-      
-      // Then sort by price
-      const aValue = a[this.sortField as keyof ProductDto] ?? 0;
-      const bValue = b[this.sortField as keyof ProductDto] ?? 0;
-      return this.sortOrder * (aValue > bValue ? 1 : -1);
-    });
-    
-    this.updateDisplayedProducts();
+    // Server-side sort for everything now
+    this.first = 0; // Reset về trang đầu
+    this.loadAllProductsWithPagination();
   }
 
   onCategorySelect(categoryId: any) {
@@ -442,7 +503,8 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
     });
 
     // Load products
-    this.loadProductsByCategory();
+    this.first = 0;
+    this.loadAllProductsWithPagination();
   }
 
   onFeatureChange(event: any){
@@ -545,15 +607,38 @@ export class AllProductComponent extends BaseComponent implements OnInit, AfterV
   onPageChange(event: any) {
     this.first = event.first;
     this.rows = event.rows;
-    this.updateDisplayedProducts();
+    
+    // Nếu đang không search và không filter category, dùng server-side pagination
+    if (!this.isSearchMode && (!this.selectedCategory || this.selectedCategory === 'all')) {
+         this.loadAllProductsWithPagination();
+    } else {
+        // Fallback về client-side pagination cho các trường hợp khác (search, category filter)
+        // Vì search/category hiện tại đang trả về full list
+        this.updateDisplayedProducts();
+    }
   }
 
-  private updateDisplayedProducts() {
+  private updateDisplayedProducts(skipSlice: boolean = false) {
     // Sắp xếp ưu tiên sản phẩm còn hàng
-    const sortedProducts = this.sortByAvailability(this.products);
+    // const sortedProducts = this.sortByAvailability(this.products);
+    // Backend đã sort sẵn, không cần sort lại ở client trừ khi filter feature
     
-    const startIndex = this.first;
-    const endIndex = startIndex + this.rows;
-    this.displayedProducts = sortedProducts.slice(startIndex, endIndex);
+    // Tuy nhiên, logic applyFeatureFilter đang update trực tiếp displayedProducts
+    // Nên hàm này chỉ cần gán products vào displayedProducts nếu không có logic gì đặc biệt
+    
+    // Logic cũ:
+    /*
+    const sortedProducts = this.sortByAvailability(this.products);
+    if (skipSlice) {
+        this.displayedProducts = sortedProducts;
+    } else {
+        const startIndex = this.first;
+        const endIndex = startIndex + this.rows;
+        this.displayedProducts = sortedProducts.slice(startIndex, endIndex);
+    }
+    */
+   
+    // Logic mới: Server trả về đúng 1 page đã sort
+    this.displayedProducts = this.products;
   }
 }

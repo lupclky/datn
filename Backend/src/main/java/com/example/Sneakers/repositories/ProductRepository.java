@@ -31,10 +31,14 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages WHERE " +
             "(:categoryId IS NULL OR :categoryId = 0 OR p.category.id = :categoryId) " +
-            "AND (:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword% OR p.description LIKE %:keyword%)")
+            "AND (:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword% OR p.description LIKE %:keyword%) " +
+            "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
     Page<Product> searchProducts(
             @Param("categoryId") Long categoryId,
             @Param("keyword") String keyword,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
             Pageable pageable);
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
     Optional<Product> getDetailProduct(@Param("productId") Long productId);
@@ -56,4 +60,18 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.category.id = :categoryId")
     List<Product> getProductsByCategory(@Param("categoryId") Long categoryId);
+
+    @Query("SELECT p.id FROM Product p LEFT JOIN Review r ON r.product = p " +
+            "WHERE (:categoryId IS NULL OR :categoryId = 0 OR p.category.id = :categoryId) " +
+            "AND (:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword% OR p.description LIKE %:keyword%) " +
+            "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR p.price <= :maxPrice) " +
+            "GROUP BY p.id " +
+            "ORDER BY CASE WHEN p.quantity > 0 THEN 1 ELSE 0 END DESC, AVG(COALESCE(r.rating, 0)) DESC, p.id DESC")
+    Page<Long> findProductIdsSortedByRating(
+            @Param("categoryId") Long categoryId,
+            @Param("keyword") String keyword,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
+            Pageable pageable);
 }

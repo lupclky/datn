@@ -161,10 +161,25 @@ export class OrderService {
     });
   }
 
-  createWaybill(orderId: number, districtId: number, wardCode: string) {
+  createWaybill(
+    orderId: number, 
+    districtId: number, 
+    wardCode: string,
+    length: number = 20,
+    width: number = 20,
+    height: number = 10,
+    weight: number = 200
+  ) {
     return this.httpClient.post<InfoOrderDto>(
       `${this.apiUrl}/orders/${orderId}/create-waybill`,
-      { district_id: districtId, ward_code: wardCode },
+      { 
+        district_id: districtId, 
+        ward_code: wardCode,
+        length: length,
+        width: width,
+        height: height,
+        weight: weight
+      },
       { headers: this.getHeaders() }
     );
   }

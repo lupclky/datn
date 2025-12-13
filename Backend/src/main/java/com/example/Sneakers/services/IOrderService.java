@@ -32,6 +32,6 @@ public interface IOrderService {
     List<Order> findByUserId(Long userId);
     long countOrders();
     List<Order> getOrdersByDateRange(LocalDate startDate, LocalDate endDate);
-    Order createWaybill(Long orderId, Integer districtId, String wardCode) throws Exception;
+    Order createWaybill(Long orderId, Integer districtId, String wardCode, Integer length, Integer width, Integer height, Integer weight) throws Exception;
     Object getTrackingInfo(Long orderId) throws Exception;
 }

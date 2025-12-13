@@ -101,7 +101,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (requestURI.contains("/ai/chat/")) {
             return true;
         }
-        if (requestURI.contains("/vouchers")) {
+        if (requestURI.contains("/vouchers") && requestMethod.equals("GET")) {
             return true;
         }
         

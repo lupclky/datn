@@ -346,6 +346,40 @@ public class AIProductAssistantService {
         return response.aiMessage().text();
     }
 
+    public String generateDashboardInsights(String statsContext) {
+        log.info("Generating dashboard insights based on stats");
+        
+        String prompt = createDashboardInsightsPrompt(statsContext);
+        var response = geminiChatModel.chat(UserMessage.from(prompt));
+        
+        return response.aiMessage().text();
+    }
+
+    private String createDashboardInsightsPrompt(String statsContext) {
+        return String.format("""
+                Bạn là một chuyên gia phân tích dữ liệu kinh doanh và chiến lược bán lẻ cho cửa hàng khóa điện tử Locker Korea.
+                
+                Dưới đây là dữ liệu thống kê hiện tại của cửa hàng:
+                %s
+                
+                Hãy phân tích dữ liệu này và đưa ra "Đề xuất AI" để cải thiện hiệu quả kinh doanh.
+                
+                Quy tắc trả lời:
+                1. Trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn, súc tích.
+                2. Bắt đầu bằng 1 nhận xét tổng quan về tình hình kinh doanh (Tốt/Khá/Cần cải thiện).
+                3. Đưa ra 3-4 đề xuất cụ thể, hành động được ngay (Actionable Insights). Ví dụ:
+                   - Nếu doanh thu giảm: Đề xuất chạy khuyến mãi, flash sale.
+                   - Nếu sản phẩm tồn kho nhiều: Đề xuất combo, giảm giá xả kho.
+                   - Nếu sản phẩm bán chạy: Đề xuất nhập thêm, chạy quảng cáo thêm.
+                4. Phân tích xu hướng nếu có dữ liệu lịch sử (tăng/giảm).
+                5. Giọng điệu khách quan, dựa trên số liệu.
+                6. Định dạng rõ ràng với bullet points hoặc emoji.
+                7. Độ dài: 200-300 từ.
+                
+                Hãy đóng vai trò là một cố vấn chiến lược thông minh, giúp chủ cửa hàng ra quyết định nhanh chóng.
+                """, statsContext);
+    }
+
     private String createWarrantyPrompt(String query) {
         return String.format("""
                 Bạn là chuyên viên tư vấn chính sách bảo hành của Locker Korea, chuyên về khóa điện tử và khóa vân tay.

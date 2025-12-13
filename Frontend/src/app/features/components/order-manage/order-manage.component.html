@@ -541,14 +541,32 @@
                     Ward Code là bắt buộc
                 </small>
             </div>
+
+            <!-- Dimensions and Weight -->
+            <div class="field col-6 md:col-3">
+                <label for="length">Dài (cm)</label>
+                <p-inputNumber id="length" formControlName="length" [min]="1" placeholder="20"></p-inputNumber>
+            </div>
+            <div class="field col-6 md:col-3">
+                <label for="width">Rộng (cm)</label>
+                <p-inputNumber id="width" formControlName="width" [min]="1" placeholder="20"></p-inputNumber>
+            </div>
+            <div class="field col-6 md:col-3">
+                <label for="height">Cao (cm)</label>
+                <p-inputNumber id="height" formControlName="height" [min]="1" placeholder="10"></p-inputNumber>
+            </div>
+            <div class="field col-6 md:col-3">
+                <label for="weight">Nặng (g)</label>
+                <p-inputNumber id="weight" formControlName="weight" [min]="1" placeholder="200"></p-inputNumber>
+            </div>
         </div>
         
         <ng-template pTemplate="footer">
-            <button pButton pRipple type="button" label="Hủy" icon="pi pi-times" class="p-button-text" (click)="showWaybillDialog = false"></button>
+            <button pButton pRipple type="button" label="Lưu thông tin" icon="pi pi-save" class="p-button-outlined" (click)="saveWaybillInfo()"></button>
             <button pButton 
                     pRipple 
                     type="button" 
-                    label="Tạo vận đơn" 
+                    label="Tạo vận đơn ngay" 
                     icon="pi pi-check" 
                     class="p-button-success"
                     (click)="createWaybill()"

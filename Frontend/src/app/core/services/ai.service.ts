@@ -123,4 +123,24 @@ export class AiService {
       { issue: issueDescription }
     );
   }
+
+  generateDashboardInsights(): Observable<any> {
+    return this.httpClient.post<any>(
+      `${this.apiUrl}/ai/chat/dashboard-insights`, 
+      {},
+      { headers: this.getAuthHeaders() }
+    );
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    // Refresh token from storage
+    if (typeof localStorage !== 'undefined') {
+      this.token = localStorage.getItem('token');
+    }
+    
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.token}`
+    });
+  }
 } 

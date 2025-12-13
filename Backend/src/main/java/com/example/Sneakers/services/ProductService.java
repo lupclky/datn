@@ -9,26 +9,26 @@ import com.example.Sneakers.exceptions.InvalidParamException;
 import com.example.Sneakers.models.Category;
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.ProductImage;
-import com.example.Sneakers.repositories.CategoryRepository;
-import com.example.Sneakers.repositories.ProductFeatureRepository;
-import com.example.Sneakers.repositories.ProductImageRepository;
-import com.example.Sneakers.repositories.ProductRepository;
-import com.example.Sneakers.repositories.ReviewRepository;
-import com.example.Sneakers.services.ProductFeatureService;
+import com.example.Sneakers.repositories.*;
 import com.example.Sneakers.responses.ListProductResponse;
 import com.example.Sneakers.responses.ProductResponse;
+import com.example.Sneakers.services.ProductFeatureService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -79,18 +79,72 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public Page<ProductResponse> getAllProducts(String keyword, Long categoryId, PageRequest pageRequest) {
-        // Lấy danh sách sản phẩm theo trang (page), giới hạn (limit), và categoryId
-        // (nếu có)
+    public Page<ProductResponse> getAllProducts(String keyword, Long categoryId, Long minPrice, Long maxPrice, PageRequest pageRequest) {
         Page<Product> productPage;
-        productPage = productRepository.searchProducts(categoryId, keyword, pageRequest);
+
+        // Check for rating sort
+        boolean isSortByRating = pageRequest.getSort().stream()
+                .anyMatch(order -> order.getProperty().equals("rating"));
+
+        if (isSortByRating) {
+            // 1. Get IDs sorted by rating (paginated)
+            PageRequest pageRequestForIds = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize());
+            
+            Page<Long> productIdsPage = productRepository.findProductIdsSortedByRating(categoryId, keyword, minPrice, maxPrice, pageRequestForIds);
+            
+            List<Long> sortedIds = productIdsPage.getContent();
+            
+            if (sortedIds.isEmpty()) {
+                productPage = Page.empty(pageRequest);
+            } else {
+                // 2. Fetch full entities
+                List<Product> products = productRepository.findProductsByIds(sortedIds);
+                
+                // 3. Re-sort in memory
+                Map<Long, Product> productMap = products.stream()
+                        .collect(Collectors.toMap(Product::getId, p -> p));
+                
+                List<Product> sortedProducts = new ArrayList<>();
+                for (Long id : sortedIds) {
+                    if (productMap.containsKey(id)) {
+                        sortedProducts.add(productMap.get(id));
+                    }
+                }
+                
+                productPage = new PageImpl<>(sortedProducts, pageRequest, productIdsPage.getTotalElements());
+            }
+        } else {
+            // Search with price range support
+            productPage = productRepository.searchProducts(categoryId, keyword, minPrice, maxPrice, pageRequest);
+        }
+
+        // Batch fetch ratings (rest of method remains same)
+        List<Long> productIds = productPage.getContent().stream()
+                .map(Product::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Object[]> ratingStatsMap = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            ratingStatsMap = reviewRepository.getRatingStatsByProductIds(productIds)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            row -> (Long) row[0],
+                            row -> new Object[]{row[1], row[2]}
+                    ));
+        }
+
+        final Map<Long, Object[]> finalRatingStatsMap = ratingStatsMap;
         return productPage.map(product -> {
             ProductResponse response = ProductResponse.fromProduct(product);
-            // Add rating stats
-            Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
-            Long totalReviews = reviewRepository.countByProductId(product.getId());
-            response.setAverageRating(avgRating != null ? avgRating : 0.0);
-            response.setTotalReviews(totalReviews);
+            // Add rating stats from batch map
+            Object[] stats = finalRatingStatsMap.get(product.getId());
+            if (stats != null) {
+                response.setAverageRating(stats[0] != null ? (Double) stats[0] : 0.0);
+                response.setTotalReviews((Long) stats[1]);
+            } else {
+                response.setAverageRating(0.0);
+                response.setTotalReviews(0L);
+            }
             return response;
         });
     }

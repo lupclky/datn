@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { Router, RouterModule } from '@angular/router';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
@@ -53,6 +53,7 @@ import { AllProductDto } from '../../dtos/AllProduct.dto';
   styleUrl: './app-header.component.scss'
 })
 export class AppHeaderComponent extends BaseComponent implements AfterViewInit,OnInit{
+  @Output() sidebarToggled = new EventEmitter<boolean>();
   public token: string | null = null;
   public roleId: number = 100;
   public itemsMenuAvatar: MenuItem[] | undefined;
@@ -109,6 +110,9 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   }
 
   ngOnInit(): void {
+    // Emit initial state
+    this.sidebarToggled.emit(this.isSidebarOpen);
+
     this.detailProductService.quantityProductsInCart.pipe(
       filter((quantity : number) => !!quantity),
       tap((quantity : number) => {
@@ -310,8 +314,17 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
     this.isMenuOpen = !this.isMenuOpen;
   }
 
+  closeSidebarMobile() {
+    // Only auto-close on mobile devices (width < 768px)
+    if (window.innerWidth < 768) {
+      this.isSidebarOpen = false;
+      this.sidebarToggled.emit(this.isSidebarOpen);
+    }
+  }
+
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
+    this.sidebarToggled.emit(this.isSidebarOpen);
   }
 
   initMenu() {

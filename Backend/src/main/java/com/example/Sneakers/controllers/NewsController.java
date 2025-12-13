@@ -396,6 +396,25 @@ public class NewsController {
     }
 
     /**
+     * Sync Facebook posts status (admin only)
+     * Checks if scheduled posts have been published
+     */
+    @PostMapping("/admin/sync-facebook")
+    @PreAuthorize("hasRole('ROLE_STAFF') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> syncFacebookPosts() {
+        try {
+            newsService.syncFacebookPosts();
+            return ResponseEntity.ok(MessageResponse.builder()
+                    .message("Facebook posts synced successfully")
+                    .build());
+        } catch (Exception e) {
+            logger.error("Error syncing facebook posts: ", e);
+            return ResponseEntity.badRequest().body("Failed to sync: " + e.getMessage());
+        }
+    }
+
+
+    /**
      * Get image by filename
      */
     @GetMapping("/images/{imageName}")

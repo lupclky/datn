@@ -67,7 +67,7 @@ public class GhnService {
         return 2; // Default fallback to Standard
     }
 
-    public String createOrder(Order order, Integer toDistrictId, String toWardCode) throws Exception {
+    public String createOrder(Order order, Integer toDistrictId, String toWardCode, Integer length, Integer width, Integer height, Integer weight) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.set("token", ghnToken);
         headers.set("ShopId", shopId);
@@ -112,10 +112,10 @@ public class GhnService {
         body.put("items", items);
 
         // Package params (required)
-        body.put("weight", 200 * items.size());
-        body.put("length", 20);
-        body.put("width", 20);
-        body.put("height", 10);
+        body.put("weight", weight != null ? weight : 200 * items.size());
+        body.put("length", length != null ? length : 20);
+        body.put("width", width != null ? width : 20);
+        body.put("height", height != null ? height : 10);
         body.put("service_type_id", serviceTypeId); // Dynamic service ID
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);

@@ -164,7 +164,7 @@ public class NewsService implements INewsService {
 
     @Override
     @Transactional
-    public void shareNewsToFacebook(Long id, Long scheduledTime) throws DataNotFoundException {
+    public void shareNewsToFacebook(Long id, Long scheduledTime) throws Exception {
         News news = getNewsById(id);
         
         // Use a configured base URL or default to localhost for dev
@@ -216,6 +216,28 @@ public class NewsService implements INewsService {
         } catch (Exception e) {
             // Log error but don't fail the request as sharing might have succeeded
             System.err.println("Error parsing Facebook response or saving news: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void syncFacebookPosts() {
+        // Find all news that have a facebook post ID and are marked as scheduled (facebookScheduledAt is not null)
+        List<News> scheduledNews = newsRepository.findByFacebookPostIdIsNotNullAndFacebookScheduledAtIsNotNull();
+        
+        for (News news : scheduledNews) {
+            try {
+                // Check if the post is published on Facebook
+                boolean isPublished = facebookService.isPostPublished(news.getFacebookPostId());
+                
+                if (isPublished) {
+                    // If published, clear the scheduled time to indicate it's now live
+                    news.setFacebookScheduledAt(null);
+                    newsRepository.save(news);
+                }
+            } catch (Exception e) {
+                System.err.println("Error syncing FB post " + news.getFacebookPostId() + ": " + e.getMessage());
+            }
         }
     }
 

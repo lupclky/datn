@@ -154,10 +154,17 @@ public class OrderController {
         try {
             Integer districtId = (Integer) request.get("district_id");
             String wardCode = (String) request.get("ward_code");
+            
+            // Get dimensions (optional, default in service if null)
+            Integer length = request.get("length") != null ? (Integer) request.get("length") : 20;
+            Integer width = request.get("width") != null ? (Integer) request.get("width") : 20;
+            Integer height = request.get("height") != null ? (Integer) request.get("height") : 10;
+            Integer weight = request.get("weight") != null ? (Integer) request.get("weight") : 200;
+
             if (districtId == null || wardCode == null) {
                 return ResponseEntity.badRequest().body(Map.of("message", "district_id and ward_code are required"));
             }
-            Order order = orderService.createWaybill(id, districtId, wardCode);
+            Order order = orderService.createWaybill(id, districtId, wardCode, length, width, height, weight);
             return ResponseEntity.ok(OrderResponse.fromOrder(order));
         } catch (Exception e) {
              return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

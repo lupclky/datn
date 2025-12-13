@@ -102,8 +102,41 @@ export class NewsManageComponent implements OnInit {
       }).catch(error => {
         console.error('Error importing CKEditor:', error);
       });
+      
+      // Auto-sync Facebook status on load
+      this.syncFacebookStatus();
     }
     this.loadNews();
+  }
+
+  syncFacebookStatus(): void {
+    this.newsService.syncFacebookPosts().subscribe({
+      next: () => {
+        console.log('Facebook status synced');
+        // Always reload to get the latest status
+        this.loadNews();
+      },
+      error: (error) => {
+        console.error('Failed to sync Facebook status:', error);
+      }
+    });
+  }
+
+  manualSyncFacebook(): void {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+    this.newsService.syncFacebookPosts().subscribe({
+      next: () => {
+        this.toastService.showSuccess('Thành công', 'Đã cập nhật trạng thái từ Facebook');
+        this.loadNews();
+      },
+      error: (error) => {
+        console.error('Failed to sync Facebook status:', error);
+        this.toastService.showError('Lỗi', 'Không thể cập nhật trạng thái từ Facebook');
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   initForm(): void {

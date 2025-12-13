@@ -41,6 +41,7 @@ export class AppLayoutComponent extends BaseComponent implements AfterViewInit, 
   private lastScrollTop = 0;
   public isHeaderHidden = false;
   public roleId: number = 0;
+  public isSidebarOpen: boolean = true;
 
   constructor(
     private loadingService: LoadingService,
@@ -117,5 +118,9 @@ export class AppLayoutComponent extends BaseComponent implements AfterViewInit, 
       this.isHeaderHidden = false;
     }
     this.lastScrollTop = st <= 0 ? 0 : st;
+  }
+
+  onSidebarToggle(isOpen: boolean) {
+    this.isSidebarOpen = isOpen;
   }
 }

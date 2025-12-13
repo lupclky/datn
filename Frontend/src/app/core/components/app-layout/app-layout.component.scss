@@ -30,21 +30,42 @@
   margin-top: 80px; /* header height */
   background: #f8f9fa;
   min-height: calc(100vh - 80px);
-  transition: margin-left 0.3s ease;
-}
+  transition: margin-left 0.3s cubic-bezier(0.2, 0.0, 0, 1.0);
+  margin-left: 0;
 
-/* When admin sidebar exists, add left margin to content */
-:host:has(.admin-sidebar) .layout-main-content,
-.layout-header-section:has(.admin-sidebar) ~ .layout-main-content {
-  margin-left: 260px;
-}
+  &.sidebar-open {
+    margin-left: 280px;
+  }
 
-/* Alternative: use ng-deep if :has() doesn't work in all browsers */
-:ng-deep {
-  body:has(.admin-sidebar) .layout-main-content {
-    margin-left: 260px;
+  &.sidebar-closed {
+    margin-left: 0;
   }
 }
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .layout-main-content {
+    margin-top: 72px;
+    min-height: calc(100vh - 72px);
+    
+    &.sidebar-open {
+       margin-left: 280px; // Or whatever responsive width sidebar takes
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-main-content {
+    margin-top: 64px;
+    min-height: calc(100vh - 64px);
+    
+    /* On mobile, sidebar usually covers content, so no margin needed or it behaves differently */
+    &.sidebar-open {
+      margin-left: 0;
+    }
+  }
+}
+
 
 /* Remove any default margins and ensure seamless connection */
 :host {
