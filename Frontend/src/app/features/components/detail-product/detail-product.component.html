@@ -11,7 +11,10 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a routerLink="/all-product">Sản phẩm</a></li>
+            <li class="breadcrumb-item"><a routerLink="/allProduct">Tất cả sản phẩm</a></li>
+            <li class="breadcrumb-item" *ngIf="categoryNameOfProduct">
+              <a [routerLink]="['/allProduct']" [queryParams]="{category: categoryId}">{{categoryNameOfProduct}}</a>
+            </li>
             <li class="breadcrumb-item active" aria-current="page">{{mainProduct.name}}</li>
           </ol>
         </nav>
