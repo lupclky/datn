@@ -6,9 +6,12 @@
   <div class="layout-main-content" [class.sidebar-open]="isSidebarOpen && (roleId === 2 || roleId === 3)" [class.sidebar-closed]="(!isSidebarOpen) && (roleId === 2 || roleId === 3)">
     <router-outlet></router-outlet>
   </div>
-  <div class="layout-footer">
-    <app-footer></app-footer>
-  </div>
+  <!-- Footer - Ẩn cho admin và staff -->
+  @if(roleId !== 2 && roleId !== 3) {
+    <div class="layout-footer">
+      <app-footer></app-footer>
+    </div>
+  }
   <!-- KVK Intelligence - chỉ hiển thị cho user thông thường -->
   @if(roleId == 1 || roleId == 0) {
     <app-ai-chatbot></app-ai-chatbot>

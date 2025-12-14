@@ -7,4 +7,5 @@ export interface ProductUploadReq {
     quantity: number,
     add_quantity?: boolean, // If true, add quantity to existing; if false or undefined, replace quantity
     featureIds?: number[],
+    thumbnail?: string, // Thumbnail image URL
 }

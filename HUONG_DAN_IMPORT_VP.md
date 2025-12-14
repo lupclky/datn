@@ -128,3 +128,4 @@ Nếu vẫn gặp lỗi:
 - **XMI import** có thể mất một số thông tin (relationships, styles)
 - Sau khi import, nên kiểm tra và chỉnh sửa lại để đảm bảo đầy đủ
 
+

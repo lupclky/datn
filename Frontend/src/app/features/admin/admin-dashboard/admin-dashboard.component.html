@@ -1,0 +1,283 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Thống kê tổng quan</h1>
+    <p class="dashboard-subtitle">Tổng quan về hoạt động kinh doanh của bạn</p>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- AI Insights Section -->
+    <div class="ai-insights-section">
+      <p-card styleClass="ai-card">
+        <ng-template pTemplate="header">
+          <div class="ai-header">
+            <div class="ai-header-content">
+              <div class="ai-logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" fill="url(#aiGradient)" opacity="0.2"/>
+                  <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" fill="url(#aiGradient)"/>
+                  <circle cx="8" cy="8" r="1.5" fill="url(#aiGradient)"/>
+                  <circle cx="16" cy="8" r="1.5" fill="url(#aiGradient)"/>
+                  <circle cx="8" cy="16" r="1.5" fill="url(#aiGradient)"/>
+                  <circle cx="16" cy="16" r="1.5" fill="url(#aiGradient)"/>
+                  <defs>
+                    <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#1976D2;stop-opacity:1" />
+                      <stop offset="100%" style="stop-color:#42A5F5;stop-opacity:1" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <h3>KVK Intelligence</h3>
+            </div>
+            <button pButton 
+                    icon="pi pi-refresh" 
+                    label="Phân tích ngay" 
+                    class="analyze-btn"
+                    [loading]="isAnalyzing"
+                    (click)="generateInsights()"></button>
+          </div>
+        </ng-template>
+        
+        <div class="ai-content">
+          <div *ngIf="!aiInsights && !isAnalyzing" class="ai-empty-state">
+            <i class="pi pi-chart-line empty-icon"></i>
+            <p>Nhấn "Phân tích ngay" để nhận đề xuất từ KVK Intelligence dựa trên dữ liệu hiện tại.</p>
+          </div>
+
+          <div *ngIf="isAnalyzing" class="ai-loading">
+            <i class="pi pi-spin pi-spinner loading-icon"></i>
+            <p>Đang phân tích dữ liệu bán hàng...</p>
+          </div>
+
+          <div *ngIf="aiInsights" class="ai-result markdown-body" [innerHTML]="formatInsights(aiInsights)">
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="statistics-cards">
+      <div class="stat-card stat-total-revenue">
+        <p-card styleClass="stat-card-inner">
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <i class="pi pi-money-bill card-icon"></i>
+            </div>
+            <div class="stat-info">
+              <h2>{{ totalRevenue | number:'1.0-0' }}</h2>
+              <div class="stat-label">Tổng doanh thu (VNĐ)</div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <div class="stat-card stat-orders">
+        <p-card styleClass="stat-card-inner">
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <i class="pi pi-shopping-bag card-icon"></i>
+            </div>
+            <div class="stat-info">
+              <h2>{{ ordersToday | number:'1.0-0' }}</h2>
+              <div class="stat-label">Đơn hàng hôm nay</div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <div class="stat-card stat-daily-revenue">
+        <p-card styleClass="stat-card-inner">
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <i class="pi pi-chart-line card-icon"></i>
+            </div>
+            <div class="stat-info">
+              <h2>{{ dailyRevenue | number:'1.0-0' }}</h2>
+              <div class="stat-label">Doanh thu hôm nay (dự kiến) (VNĐ)</div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <div class="stat-card stat-total-products">
+        <p-card styleClass="stat-card-inner">
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <i class="pi pi-box card-icon"></i>
+            </div>
+            <div class="stat-info">
+              <h2>{{ totalProducts | number:'1.0-0' }}</h2>
+              <div class="stat-label">Tổng sản phẩm</div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <div class="stat-card stat-sold-products">
+        <p-card styleClass="stat-card-inner">
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <i class="pi pi-shopping-cart card-icon"></i>
+            </div>
+            <div class="stat-info">
+              <h2>{{ soldProducts | number:'1.0-0' }}</h2>
+              <div class="stat-label">Sản phẩm đã bán</div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+
+      <div class="stat-card stat-available-products">
+        <p-card styleClass="stat-card-inner">
+          <div class="card-content">
+            <div class="card-icon-wrapper">
+              <i class="pi pi-inbox card-icon"></i>
+            </div>
+            <div class="stat-info">
+              <h2>{{ availableProducts | number:'1.0-0' }}</h2>
+              <div class="stat-label">Sản phẩm trong kho</div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Revenue Statistics and Top Stock Products - 2 Columns -->
+    <div class="statistics-grid">
+      <!-- Revenue Statistics -->
+      <div class="revenue-statistics">
+        <p-card header="Thống kê doanh thu" styleClass="statistics-card">
+          <p-tabView>
+            <p-tabPanel header="Theo ngày">
+              <div class="chart-container">
+                <div class="calendar-container">
+                  <label class="date-range-label">Chọn khoảng thời gian:</label>
+                  <p-calendar [(ngModel)]="dateRange" 
+                            selectionMode="range" 
+                            [showButtonBar]="true" 
+                            (onSelect)="onDateRangeSelect()"
+                            styleClass="statistics-calendar"
+                            appendTo="body"
+                            [numberOfMonths]="1"
+                            [touchUI]="true"
+                            [showIcon]="true"
+                            [readonlyInput]="true"
+                            [firstDayOfWeek]="1"
+                            dateFormat="dd/mm/yy"
+                            placeholder="Chọn ngày"
+                            [showOtherMonths]="false"
+                            [yearNavigator]="true"
+                            [monthNavigator]="true"
+                            yearRange="2000:2030">
+                  </p-calendar>
+                </div>
+                <div class="chart-wrapper">
+                  <canvas #dailyRevenueChart></canvas>
+                </div>
+              </div>
+            </p-tabPanel>
+            <p-tabPanel header="Theo tháng">
+              <div class="chart-container">
+                <div class="calendar-container">
+                  <label class="date-range-label">Chọn khoảng thời gian:</label>
+                  <p-calendar [(ngModel)]="monthRange" 
+                            selectionMode="range" 
+                            view="month" 
+                            [showButtonBar]="true" 
+                            (onSelect)="onMonthRangeSelect()"
+                            styleClass="statistics-calendar"
+                            appendTo="body"
+                            [numberOfMonths]="1"
+                            [touchUI]="true"
+                            [showIcon]="true"
+                            [readonlyInput]="true"
+                            dateFormat="mm/yy"
+                            placeholder="Chọn tháng"
+                            [yearNavigator]="true"
+                            [monthNavigator]="true"
+                            yearRange="2000:2030">
+                  </p-calendar>
+                </div>
+                <div class="chart-wrapper">
+                  <canvas #monthlyRevenueChart></canvas>
+                </div>
+              </div>
+            </p-tabPanel>
+            <p-tabPanel header="Theo năm">
+              <div class="chart-container">
+                <div class="calendar-container">
+                  <label class="date-range-label">Chọn khoảng thời gian:</label>
+                  <p-calendar [(ngModel)]="yearRange" 
+                            selectionMode="range" 
+                            view="year" 
+                            [showButtonBar]="true" 
+                            (onSelect)="onYearRangeSelect()"
+                            styleClass="statistics-calendar"
+                            appendTo="body"
+                            [numberOfMonths]="1"
+                            [touchUI]="true"
+                            [showIcon]="true"
+                            [readonlyInput]="true"
+                            dateFormat="yy"
+                            placeholder="Chọn năm"
+                            [yearNavigator]="true"
+                            yearRange="2000:2030">
+                  </p-calendar>
+                </div>
+                <div class="chart-wrapper">
+                  <canvas #yearlyRevenueChart></canvas>
+                </div>
+              </div>
+            </p-tabPanel>
+          </p-tabView>
+        </p-card>
+      </div>
+
+      <!-- Top Stock Products -->
+      <div class="top-stock-products">
+        <p-card header="Top 10 sản phẩm tồn kho nhiều nhất" styleClass="statistics-card">
+          <div class="stock-products-list">
+            <p-table [value]="topStockProducts" [paginator]="false" styleClass="p-datatable-sm compact-table">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 40px;">STT</th>
+                  <th>Sản phẩm</th>
+                  <th style="width: 100px; text-align: right;">Số lượng</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-product let-i="rowIndex">
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <div class="product-details-col">
+                      <div class="product-name">{{ product.productName }}</div>
+                      <div class="product-category">{{ product.categoryName }}</div>
+                    </div>
+                  </td>
+                  <td style="text-align: right; font-weight: 600;">
+                    {{ product.quantity | number:'1.0-0' }}
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="empty">
+                <tr>
+                  <td colspan="3" style="text-align: center; padding: 1rem;">
+                    <p>Không có dữ liệu</p>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Best Selling Statistics -->
+    <div class="best-selling-section">
+      <p-card header="Thống kê sản phẩm bán chạy" styleClass="statistics-card">
+        <app-best-selling-statistics></app-best-selling-statistics>
+      </p-card>
+    </div>
+  </div>
+</div>
+

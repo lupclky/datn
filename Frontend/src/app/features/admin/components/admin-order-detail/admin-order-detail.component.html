@@ -68,8 +68,29 @@
             </div>
             <div class="info-item">
               <label>Phương thức thanh toán:</label>
-              <p-tag [value]="orderInfor.payment_method" [severity]="getPaymentMethodSeverity(orderInfor.payment_method)"></p-tag>
+              <p-tag [value]="getPaymentMethodLabel(orderInfor.payment_method)" [severity]="getPaymentMethodSeverity(orderInfor.payment_method)"></p-tag>
             </div>
+            <!-- Payment Codes -->
+            @if (orderInfor.payment_intent_id) {
+              <div class="info-item">
+                <label>Payment Intent ID (Stripe):</label>
+                <span class="value payment-code">{{ orderInfor.payment_intent_id }}</span>
+              </div>
+            }
+            @if (orderInfor.payment_method && orderInfor.payment_method.includes('VNPAY')) {
+              @if (orderInfor.vnp_txn_ref) {
+                <div class="info-item">
+                  <label>Mã tham chiếu VNPay (TxnRef):</label>
+                  <span class="value payment-code">{{ orderInfor.vnp_txn_ref }}</span>
+                </div>
+              }
+              @if (orderInfor.vnp_transaction_no) {
+                <div class="info-item">
+                  <label>Mã giao dịch VNPay (TransactionNo):</label>
+                  <span class="value payment-code">{{ orderInfor.vnp_transaction_no }}</span>
+                </div>
+              }
+            }
             <div class="info-item">
               <label>Phương thức vận chuyển:</label>
               <span class="value">{{ orderInfor.shipping_method || 'N/A' }}</span>

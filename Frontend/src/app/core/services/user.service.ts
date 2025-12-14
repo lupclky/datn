@@ -174,4 +174,10 @@ export class UserService {
       headers: this.getHeaders()
     });
   }
+
+  loginWithGoogle(idToken: string): Observable<loginDetailDto> {
+    return this.httpClient.post<loginDetailDto>(`${this.apiUrl}/login/google`, { 
+      id_token: idToken 
+    });
+  }
 }

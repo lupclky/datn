@@ -29,4 +29,7 @@ export interface InfoOrderDto {
         fullname: string;
         phone_number: string;
     };
+    payment_intent_id?: string;
+    vnp_txn_ref?: string;
+    vnp_transaction_no?: string;
 }

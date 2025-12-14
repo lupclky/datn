@@ -7,6 +7,7 @@ import com.example.Sneakers.dtos.ProductStatisticsDTO;
 import com.example.Sneakers.dtos.BrandSoldStatisticsDTO;
 import com.example.Sneakers.dtos.ProductSoldStatisticsDTO;
 import com.example.Sneakers.dtos.TodayOverviewDTO;
+import com.example.Sneakers.dtos.TopStockProductDTO;
 import com.example.Sneakers.services.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -108,5 +109,11 @@ public class StatisticsController {
     @GetMapping("/orders-today")
     public ResponseEntity<Long> getOrdersToday() {
         return ResponseEntity.ok(statisticsService.getOrdersToday());
+    }
+
+    @GetMapping("/top-stock-products")
+    public ResponseEntity<List<TopStockProductDTO>> getTopStockProducts(
+            @RequestParam(defaultValue = "10") int topN) {
+        return ResponseEntity.ok(statisticsService.getTopStockProducts(topN));
     }
 } 

@@ -89,6 +89,7 @@ export class ProductManageComponent implements OnInit {
   isUploading: boolean = false;
   apiImage: string = environment.apiImage;
   isGeneratingDescription: boolean = false;
+  selectedThumbnail: string | null = null; // Selected thumbnail (preview URL)
 
   public Editor: any = null;
   private isBrowser: boolean;
@@ -131,17 +132,19 @@ export class ProductManageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.isBrowser) {
-      import('@ckeditor/ckeditor5-build-classic').then(editor => {
-        this.Editor = editor.default;
-        this.cdr.markForCheck();
-      }).catch(error => {
-        console.error('Error loading CKEditor:', error);
-      });
-    }
     this.loadProducts();
     this.loadCategories();
     this.loadFeatures();
+    
+    if (this.isBrowser) {
+      import('@ckeditor/ckeditor5-build-classic').then(editor => {
+        this.Editor = editor.default;
+        this.cdr.detectChanges();
+      }).catch(error => {
+        console.error('Error loading CKEditor:', error);
+        this.toastService.showError('Lỗi', 'Không thể tải trình chỉnh sửa văn bản');
+      });
+    }
   }
 
   initForm(): void {
@@ -294,6 +297,7 @@ export class ProductManageComponent implements OnInit {
     this.selectedProductId = null;
     this.selectedFiles = [];
     this.imagePreviews = [];
+    this.selectedThumbnail = null;
     this.selectedFeatures = [];
     this.productForm.reset({ discount: 0, quantity: 0, price: 0 });
     this.displayDialog = true;
@@ -301,10 +305,6 @@ export class ProductManageComponent implements OnInit {
   }
 
   openEditDialog(product: ProductDto): void {
-    this.router.navigate(['/detailProduct', product.id]);
-  }
-
-  viewProduct(product: ProductDto): void {
     this.router.navigate(['/detailProduct', product.id]);
   }
 
@@ -321,15 +321,32 @@ export class ProductManageComponent implements OnInit {
       this.imagePreviews = [];
 
       // Create previews
-      this.selectedFiles.forEach(file => {
+      this.selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          this.imagePreviews.push(e.target.result);
+          const previewUrl = e.target.result;
+          this.imagePreviews.push(previewUrl);
+          // Set first image as thumbnail by default
+          if (index === 0 && !this.selectedThumbnail) {
+            this.selectedThumbnail = previewUrl;
+          }
           this.cdr.markForCheck();
         };
         reader.readAsDataURL(file);
       });
     }
+  }
+
+  selectThumbnail(previewUrl: string): void {
+    this.selectedThumbnail = previewUrl;
+  }
+
+  private finishUpload(): void {
+    this.isUploading = false;
+    this.toastService.showSuccess('Thành công', 'Tạo sản phẩm và upload ảnh thành công');
+    this.displayDialog = false;
+    this.loadProducts();
+    this.cdr.markForCheck();
   }
 
   async saveProduct(): Promise<void> {
@@ -377,18 +394,60 @@ export class ProductManageComponent implements OnInit {
     this.isUploading = true;
     this.cdr.markForCheck();
 
+    // Reorder files: put selected thumbnail first (if selected)
+    const filesToUpload = [...this.selectedFiles];
+    const previewsToUpload = [...this.imagePreviews];
+    
+    if (this.selectedThumbnail) {
+      const thumbnailIndex = this.imagePreviews.indexOf(this.selectedThumbnail);
+      if (thumbnailIndex >= 0 && thumbnailIndex < filesToUpload.length) {
+        // Move thumbnail file and preview to first position
+        const thumbnailFile = filesToUpload[thumbnailIndex];
+        const thumbnailPreview = previewsToUpload[thumbnailIndex];
+        filesToUpload.splice(thumbnailIndex, 1);
+        previewsToUpload.splice(thumbnailIndex, 1);
+        filesToUpload.unshift(thumbnailFile);
+        previewsToUpload.unshift(thumbnailPreview);
+      }
+    }
+
     const formData = new FormData();
-    this.selectedFiles.forEach(file => {
+    filesToUpload.forEach(file => {
       formData.append('files', file);
     });
 
     this.productService.uploadImageProduct(formData, productId).subscribe({
-      next: (response: {message: string}) => {
-        this.isUploading = false;
-        this.toastService.showSuccess('Thành công', 'Tạo sản phẩm và upload ảnh thành công');
-        this.displayDialog = false;
-        this.loadProducts();
-        this.cdr.markForCheck();
+      next: (response: any) => {
+        // Response is an array of ProductImage objects in the order they were uploaded
+        // Since we moved thumbnail to first position, response[0] should be the thumbnail
+        if (this.selectedThumbnail && response && Array.isArray(response) && response.length > 0) {
+          // The first uploaded image (response[0]) is our selected thumbnail
+          const thumbnailImage = response[0];
+          
+          if (thumbnailImage && thumbnailImage.image_url) {
+            // Backend automatically sets first image as thumbnail, but we ensure it's our selected one
+            // If the selected thumbnail was already first, no need to update
+            const originalSelectedIndex = this.imagePreviews.indexOf(this.selectedThumbnail);
+            if (originalSelectedIndex !== 0) {
+              // User selected a different image as thumbnail, and we've moved it to first
+              // Backend should have set it as thumbnail, but we verify/update just in case
+              this.productService.updateProductThumbnail(productId, thumbnailImage.image_url).subscribe({
+                next: () => {
+                  this.finishUpload();
+                },
+                error: (err: any) => {
+                  console.error('Error updating thumbnail:', err);
+                  // Continue anyway, backend may have already set it
+                  this.finishUpload();
+                }
+              });
+              return;
+            }
+          }
+        }
+        
+        // No thumbnail selected or thumbnail was already first, backend handles it
+        this.finishUpload();
       },
       error: (error: any) => {
         console.error('Error uploading images:', error);

@@ -78,4 +78,9 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             @Param("minPrice") Long minPrice,
             @Param("maxPrice") Long maxPrice,
             Pageable pageable);
+
+    @Query("SELECT p.id, p.name, p.thumbnail, p.quantity, p.price, c.name " +
+            "FROM Product p LEFT JOIN p.category c " +
+            "ORDER BY p.quantity DESC")
+    List<Object[]> findTopProductsByStock(Pageable pageable);
 }

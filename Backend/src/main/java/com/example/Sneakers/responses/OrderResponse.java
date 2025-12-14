@@ -90,6 +90,15 @@ public class OrderResponse {
     @JsonProperty("assigned_staff")
     private StaffInfo assignedStaff;
 
+    @JsonProperty("payment_intent_id")
+    private String paymentIntentId;
+
+    @JsonProperty("vnp_txn_ref")
+    private String vnpTxnRef;
+
+    @JsonProperty("vnp_transaction_no")
+    private String vnpTransactionNo;
+
     @Data
     @Builder
     @AllArgsConstructor
@@ -138,6 +147,9 @@ public class OrderResponse {
                 .carrier(order.getCarrier())
                 .districtId(order.getDistrictId())
                 .wardCode(order.getWardCode())
+                .paymentIntentId(order.getPaymentIntentId())
+                .vnpTxnRef(order.getVnpTxnRef())
+                .vnpTransactionNo(order.getVnpTransactionNo())
                 .build();
 
         // Map voucher information if present

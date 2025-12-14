@@ -42,6 +42,15 @@ export interface ProductSoldStatistics {
   totalSold: number;
 }
 
+export interface TopStockProduct {
+  productId: number;
+  productName: string;
+  thumbnail: string | null;
+  quantity: number;
+  price: number;
+  categoryName: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -119,5 +128,11 @@ export class StatisticsService {
       params = { ...params, startDate, endDate };
     }
     return this.http.get<ProductSoldStatistics[]>(`${this.apiUrl}/statistics/top-product-sold`, { params });
+  }
+
+  getTopStockProducts(topN: number = 10): Observable<TopStockProduct[]> {
+    return this.http.get<TopStockProduct[]>(`${this.apiUrl}/statistics/top-stock-products`, {
+      params: { topN }
+    });
   }
 } 

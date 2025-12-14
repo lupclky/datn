@@ -20,4 +20,6 @@ public interface IUserService {
     void forgotPassword(String email) throws Exception;
     void resetPassword(String token, String newPassword) throws Exception;
     void changePassword(String token, String currentPassword, String newPassword) throws Exception;
+    String loginWithGoogle(String idToken) throws Exception;
+    com.example.Sneakers.responses.LoginResponse loginWithGoogleResponse(String idToken) throws Exception;
 }

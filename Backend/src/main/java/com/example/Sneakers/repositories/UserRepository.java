@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     Optional<User> findByResetPasswordToken(String token);
 
+    Optional<User> findByGoogleAccountId(int googleAccountId);
+
     @Modifying
     @Transactional
     @Query("UPDATE User u SET u.active = :active WHERE u.id = :id")

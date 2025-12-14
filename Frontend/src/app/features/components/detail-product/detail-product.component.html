@@ -439,18 +439,34 @@
             <div class="current-images-grid" *ngIf="images && images.length > 0">
               <h4>Tất cả ảnh ({{ images.length }})</h4>
               <div class="images-grid">
-                <div *ngFor="let image of images; trackBy: trackByImageId" class="image-item">
+                <div *ngFor="let image of images; trackBy: trackByImageId" 
+                     class="image-item" 
+                     [class.selected-thumbnail]="selectedThumbnail === image.image_url">
                   <img [src]="apiImage + image.image_url" alt="Product image" class="image-preview">
                   <div class="image-info">
                     <span class="image-id">ID: {{ image.id }}</span>
-                    <button pButton 
-                            pRipple 
-                            type="button" 
-                            icon="pi pi-trash"
-                            class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                            pTooltip="Xóa ảnh này" 
-                            (click)="deleteImage(image.id)">
-                    </button>
+                    <div class="image-actions">
+                      <button pButton 
+                              pRipple 
+                              type="button" 
+                              [icon]="selectedThumbnail === image.image_url ? 'pi pi-check-circle' : 'pi pi-check'"
+                              [class]="selectedThumbnail === image.image_url ? 'p-button-rounded p-button-success p-button-sm' : 'p-button-rounded p-button-text p-button-success p-button-sm'"
+                              pTooltip="Chọn làm thumbnail" 
+                              (click)="selectThumbnail(image.image_url)">
+                      </button>
+                      <button pButton 
+                              pRipple 
+                              type="button" 
+                              icon="pi pi-trash"
+                              class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                              pTooltip="Xóa ảnh này" 
+                              (click)="deleteImage(image.id)">
+                      </button>
+                    </div>
+                  </div>
+                  <div class="thumbnail-badge" *ngIf="selectedThumbnail === image.image_url">
+                    <i class="pi pi-check-circle"></i>
+                    <span>Thumbnail</span>
                   </div>
                 </div>
               </div>
@@ -463,33 +479,40 @@
           </p-card>
 
           <!-- Admin: Reviews & Comments Viewer under images column -->
-          <p-card styleClass="mt-3">
+          <p-card styleClass="reviews-card mt-3">
             <ng-template pTemplate="header">
               <h3>Đánh giá & Bình luận</h3>
             </ng-template>
-            <div class="d-flex align-items-center gap-3 mb-3">
-              <p-rating [(ngModel)]="averageRating" [readonly]="true" [cancel]="false"></p-rating>
-              <span class="text-muted">{{averageRating | number:'1.1-1'}} / 5 ({{totalReviews}} đánh giá)</span>
+            <div class="reviews-summary">
+              <div class="rating-display">
+                <p-rating [(ngModel)]="averageRating" [readonly]="true" [cancel]="false"></p-rating>
+                <span class="rating-text">{{averageRating | number:'1.1-1'}} / 5 ({{totalReviews}} đánh giá)</span>
+              </div>
             </div>
-            <div class="reviews-list">
+            <div class="admin-reviews-list">
               @if(reviews.length > 0) {
                 @for(review of reviews; track review.id) {
-                  <div class="review-item border rounded p-3 mb-2">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <div class="d-flex align-items-center gap-2">
+                  <div class="admin-review-item">
+                    <div class="review-header">
+                      <div class="reviewer-info">
                         <i class="pi pi-user"></i>
-                        <strong>{{review.userName || 'Khách hàng'}}</strong>
+                        <span class="reviewer-name">{{review.userName || 'Khách hàng'}}</span>
                       </div>
-                      <span class="text-muted">{{review.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                      <span class="review-date">{{review.createdAt | date:'dd/MM/yyyy HH:mm'}}</span>
                     </div>
-                    <div class="mb-2">
+                    <div class="review-rating">
                       <p-rating [(ngModel)]="review.rating" [readonly]="true" [cancel]="false"></p-rating>
                     </div>
-                    <p class="mb-0">{{review.comment}}</p>
+                    <div class="review-comment">
+                      <p>{{review.comment}}</p>
+                    </div>
                   </div>
                 }
               } @else {
-                <p class="text-muted mb-0">Chưa có đánh giá nào cho sản phẩm này.</p>
+                <div class="no-reviews">
+                  <i class="pi pi-inbox"></i>
+                  <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                </div>
               }
             </div>
           </p-card>
@@ -643,7 +666,9 @@
                                 name="files[]"
                                 [multiple]="true" 
                                 accept="image/*" 
-                                [maxFileSize]="1000000"
+                                [maxFileSize]="5000000"
+                                (onSelect)="onFilesSelected($event)"
+                                (onError)="onFileUploadError($event)"
                                 chooseLabel="Chọn ảnh"
                                 [showUploadButton]="false"
                                 cancelButtonLabel="Hủy">
@@ -651,7 +676,11 @@
                         <!-- We use the default file list provided by the component -->
                     </ng-template>
                   </p-fileUpload>
-                  <small class="upload-hint">Chọn một hoặc nhiều ảnh để thêm. Tối đa 1MB mỗi ảnh.</small>
+                  <small class="upload-hint">
+                    Chọn một hoặc nhiều ảnh để thêm. 
+                    Tối đa 5 ảnh (hiện có: {{ images?.length || 0 }}/5). 
+                    Mỗi ảnh tối đa 5MB.
+                  </small>
                 </div>
 
                 <div class="field">

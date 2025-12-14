@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.Sneakers.dtos.ForgotPasswordDTO;
 import com.example.Sneakers.dtos.ResetPasswordDTO;
 import com.example.Sneakers.dtos.ChangePasswordDTO;
+import com.example.Sneakers.dtos.GoogleLoginDTO;
 
 import java.util.List;
 import java.util.Objects;
@@ -241,6 +242,33 @@ public class UserController {
                     .build());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/login/google")
+    public ResponseEntity<LoginResponse> loginWithGoogle(
+            @Valid @RequestBody GoogleLoginDTO googleLoginDTO,
+            BindingResult bindingResult
+    ) {
+        try {
+            if (bindingResult.hasErrors()) {
+                List<String> errorMessages = bindingResult.getFieldErrors()
+                        .stream()
+                        .map(FieldError::getDefaultMessage)
+                        .toList();
+                return ResponseEntity.badRequest().body(
+                        LoginResponse.builder()
+                                .message(String.join("; ", errorMessages))
+                                .build());
+            }
+            LoginResponse response = userService.loginWithGoogleResponse(googleLoginDTO.getIdToken());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    LoginResponse.builder()
+                            .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage()))
+                            .build()
+            );
         }
     }
 }

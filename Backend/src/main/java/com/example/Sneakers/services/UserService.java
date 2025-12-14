@@ -60,6 +60,11 @@ public class UserService implements IUserService{
         if(role.getName().toUpperCase().equals(Role.ADMIN)) {
             throw new PermissionDenyException("You cannot register an admin account");
         }
+
+        // Check if email already exists - if registering from Google, email will match
+        // Backend will handle linking by email in loginWithGoogleResponse
+        // Here we just create the user normally
+
         //convert from userDTO => user
         User newUser = User.builder()
                 .fullName(userDTO.getFullName())
@@ -79,6 +84,9 @@ public class UserService implements IUserService{
             String password = userDTO.getPassword();
             String encodedPassword = passwordEncoder.encode(password);
             newUser.setPassword(encodedPassword);
+        } else {
+            // For Google/Facebook users, set empty password
+            newUser.setPassword("");
         }
         return userRepository.save(newUser);
     }
@@ -283,5 +291,214 @@ public class UserService implements IUserService{
         // Update password
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    @Override
+    public String loginWithGoogle(String idToken) throws Exception {
+        try {
+            // Verify Google ID token using HTTP request to Google's tokeninfo endpoint
+            // This is a simpler approach that doesn't require complex library setup
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken))
+                    .GET()
+                    .build();
+            
+            java.net.http.HttpResponse<String> response = client.send(request, 
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() != 200) {
+                throw new BadCredentialsException("Invalid Google token");
+            }
+            
+            // Parse JSON response
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode jsonNode = objectMapper.readTree(response.body());
+            
+            // Extract user information
+            String email = jsonNode.has("email") ? jsonNode.get("email").asText() : null;
+            String name = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
+            String googleId = jsonNode.has("sub") ? jsonNode.get("sub").asText() : null;
+            
+            if (googleId == null) {
+                throw new BadCredentialsException("Invalid Google token: missing user ID");
+            }
+            
+            // Convert Google ID to integer (use hash if too long)
+            int googleAccountId;
+            try {
+                // Try to parse as long first, then convert to int
+                long googleIdLong = Long.parseLong(googleId);
+                googleAccountId = (int) (googleIdLong % Integer.MAX_VALUE);
+            } catch (NumberFormatException e) {
+                // If not numeric, use hash code
+                googleAccountId = Math.abs(googleId.hashCode());
+            }
+            
+            // Check if user exists with this Google account ID
+            Optional<User> existingUserOpt = userRepository.findByGoogleAccountId(googleAccountId);
+            
+            User user;
+            if (existingUserOpt.isPresent()) {
+                // User exists, login
+                user = existingUserOpt.get();
+                if (!Boolean.TRUE.equals(user.isActive())) {
+                    throw new BadCredentialsException(localizationUtils.getLocalizedMessage(MessageKeys.USER_IS_LOCKED));
+                }
+            } else {
+                // New user, create account
+                // Check if email already exists
+                if (email != null && !email.isEmpty()) {
+                    Optional<User> userByEmail = userRepository.findByEmail(email);
+                    if (userByEmail.isPresent()) {
+                        // Link Google account to existing user
+                        user = userByEmail.get();
+                        user.setGoogleAccountId(googleAccountId);
+                        if (user.getFullName() == null || user.getFullName().isEmpty()) {
+                            user.setFullName(name != null ? name : "Google User");
+                        }
+                        userRepository.save(user);
+                    } else {
+                        // Create new user with email
+                        user = createGoogleUser(email, name, googleAccountId);
+                    }
+                } else {
+                    // Create new user without email
+                    user = createGoogleUser(null, name, googleAccountId);
+                }
+            }
+            
+            // Generate JWT token
+            return jwtTokenUtil.generateToken(user);
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid Google token: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public com.example.Sneakers.responses.LoginResponse loginWithGoogleResponse(String idToken) throws Exception {
+        try {
+            // Verify Google ID token
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken))
+                    .GET()
+                    .build();
+            
+            java.net.http.HttpResponse<String> response = client.send(request, 
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() != 200) {
+                throw new BadCredentialsException("Invalid Google token");
+            }
+            
+            // Parse JSON response
+            com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode jsonNode = objectMapper.readTree(response.body());
+            
+            // Extract user information
+            String email = jsonNode.has("email") ? jsonNode.get("email").asText() : null;
+            String name = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
+            String googleId = jsonNode.has("sub") ? jsonNode.get("sub").asText() : null;
+            
+            if (googleId == null) {
+                throw new BadCredentialsException("Invalid Google token: missing user ID");
+            }
+            
+            // Convert Google ID to integer
+            int googleAccountId;
+            try {
+                long googleIdLong = Long.parseLong(googleId);
+                googleAccountId = (int) (googleIdLong % Integer.MAX_VALUE);
+            } catch (NumberFormatException e) {
+                googleAccountId = Math.abs(googleId.hashCode());
+            }
+            
+            // Check if user exists with this Google account ID
+            Optional<User> existingUserOpt = userRepository.findByGoogleAccountId(googleAccountId);
+            
+            boolean isNewUser = false;
+            User user;
+            
+            if (existingUserOpt.isPresent()) {
+                // User exists, login
+                user = existingUserOpt.get();
+                if (!Boolean.TRUE.equals(user.isActive())) {
+                    throw new BadCredentialsException(localizationUtils.getLocalizedMessage(MessageKeys.USER_IS_LOCKED));
+                }
+            } else {
+                // Check if email already exists
+                if (email != null && !email.isEmpty()) {
+                    Optional<User> userByEmail = userRepository.findByEmail(email);
+                    if (userByEmail.isPresent()) {
+                        // Link Google account to existing user
+                        user = userByEmail.get();
+                        user.setGoogleAccountId(googleAccountId);
+                        if (user.getFullName() == null || user.getFullName().isEmpty()) {
+                            user.setFullName(name != null ? name : "Google User");
+                        }
+                        userRepository.save(user);
+                    } else {
+                        // New user with email - return info for registration
+                        isNewUser = true;
+                        String token = null;
+                        return com.example.Sneakers.responses.LoginResponse.builder()
+                                .message("Vui lòng hoàn tất đăng ký với thông tin Google")
+                                .token(token)
+                                .isNewUser(true)
+                                .googleEmail(email)
+                                .googleName(name)
+                                .build();
+                    }
+                } else {
+                    // New user without email - return info for registration
+                    isNewUser = true;
+                    String token = null;
+                    return com.example.Sneakers.responses.LoginResponse.builder()
+                            .message("Vui lòng hoàn tất đăng ký với thông tin Google")
+                            .token(token)
+                            .isNewUser(true)
+                            .googleEmail(null)
+                            .googleName(name)
+                            .build();
+                }
+            }
+            
+            // Generate JWT token for existing user
+            String token = jwtTokenUtil.generateToken(user);
+            return com.example.Sneakers.responses.LoginResponse.builder()
+                    .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_SUCCESSFULLY))
+                    .token(token)
+                    .isNewUser(false)
+                    .googleEmail(email)
+                    .googleName(name)
+                    .build();
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid Google token: " + e.getMessage());
+        }
+    }
+    
+    private User createGoogleUser(String email, String name, int googleAccountId) throws Exception {
+        Role defaultRole = roleRepository.findById(1L)
+                .orElseThrow(() -> new DataNotFoundException(
+                        localizationUtils.getLocalizedMessage(MessageKeys.ROLE_DOES_NOT_EXISTS)));
+        
+        // Generate a unique phone number for Google users (they might not have one)
+        String phoneNumber = "GOOGLE_" + googleAccountId;
+        int counter = 0;
+        while (userRepository.existsByPhoneNumber(phoneNumber)) {
+            phoneNumber = "GOOGLE_" + googleAccountId + "_" + counter++;
+        }
+        
+        User user = User.builder()
+                .fullName(name != null ? name : "Google User")
+                .phoneNumber(phoneNumber)
+                .email(email != null ? email : "")
+                .googleAccountId(googleAccountId)
+                .password("") // No password for Google users
+                .active(true)
+                .role(defaultRole)
+                .build();
+        return userRepository.save(user);
     }
 }

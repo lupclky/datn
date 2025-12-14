@@ -1176,10 +1176,28 @@
 }
   
   // Admin Edit View
+  // Material 3 Design Tokens (Light Theme - White/Gray)
+  $md-sys-color-surface: #FEFBFF;
+  $md-sys-color-surface-container: #F3F4F6;
+  $md-sys-color-surface-container-high: #E5E7EB;
+  $md-sys-color-primary: #424242;
+  $md-sys-color-on-primary: #FFFFFF;
+  $md-sys-color-primary-container: #E5E7EB;
+  $md-sys-color-on-primary-container: #1F2937;
+  $md-sys-color-on-surface: #1C1B1F;
+  $md-sys-color-on-surface-variant: #49454F;
+  $md-sys-color-outline: #79747E;
+  $md-sys-color-outline-variant: #CAC4D0;
+  $md-sys-color-error: #BA1A1A;
+  $md-sys-color-on-error: #FFFFFF;
+
   .admin-edit-container {
     max-width: 100%;
     margin: 0 auto;
     padding: 1rem;
+    background: $md-sys-color-surface;
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
   
     @media (min-width: 1200px) {
       max-width: 1400px;
@@ -1191,24 +1209,53 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 12px;
-      border: 1px solid #e9ecef;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem 2rem;
+      background: $md-sys-color-surface-container;
+      border-radius: 28px;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      transition: box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   
       h2 {
         margin: 0;
-        color: #495057;
-        font-weight: 600;
-        font-size: 1.75rem;
+        color: $md-sys-color-on-surface;
+        font-weight: 400;
+        font-size: 2rem;
+        letter-spacing: 0px;
+        line-height: 1.2;
       }
 
       .header-actions {
         display: flex;
-        gap: 1rem;
+        gap: 0.75rem;
         align-items: center;
         flex-wrap: wrap;
+
+        ::ng-deep .p-button {
+          border-radius: 20px;
+          padding: 0.625rem 1.5rem;
+          font-weight: 500;
+          font-size: 0.875rem;
+          letter-spacing: 0.1px;
+          text-transform: none;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+          transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+          &:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+          }
+
+          &.p-button-outlined {
+            border-width: 1px;
+            background: transparent;
+          }
+
+          &.p-button-raised {
+            background: $md-sys-color-primary;
+            border-color: $md-sys-color-primary;
+            color: $md-sys-color-on-primary;
+          }
+        }
 
         @media (max-width: 768px) {
           flex-direction: column;
@@ -1224,22 +1271,52 @@
 
     .admin-content {
       display: flex;
-      flex-wrap: wrap; // Allow wrapping on small screens
-      gap: 2rem; // Space between columns
+      flex-wrap: wrap;
+      gap: 1.5rem;
 
       .admin-images-column {
-        flex: 1 1 40%; // Flex-grow, flex-shrink, basis
+        flex: 1 1 40%;
         min-width: 350px;
       }
 
       .admin-form-column {
-        flex: 1 1 55%; // Flex-grow, flex-shrink, basis
+        flex: 1 1 55%;
         min-width: 400px;
       }
     }
 
-    .images-card, .edit-form-card {
+    ::ng-deep .images-card,
+    ::ng-deep .edit-form-card {
       height: 100%;
+      border-radius: 28px;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      background: $md-sys-color-surface;
+      overflow: hidden;
+      transition: box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+      &:hover {
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      }
+
+      .p-card-header {
+        background: $md-sys-color-surface-container-high;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid $md-sys-color-outline-variant;
+
+        h3 {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 400;
+          color: $md-sys-color-on-surface;
+          letter-spacing: 0px;
+        }
+      }
+
+      .p-card-body {
+        padding: 2rem;
+        background: $md-sys-color-surface;
+      }
     }
 
     // Styles for components within the admin form
@@ -1254,9 +1331,22 @@
 
       .image-item {
         position: relative;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
+        border: 1px solid $md-sys-color-outline-variant;
+        border-radius: 12px;
         overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        cursor: pointer;
+        background: $md-sys-color-surface-container;
+
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          transform: translateY(-2px);
+        }
+
+        &.selected-thumbnail {
+          border: 2px solid $md-sys-color-primary;
+          box-shadow: 0 0 0 3px rgba(66, 66, 66, 0.12);
+        }
 
         .image-preview {
           width: 100%;
@@ -1270,17 +1360,48 @@
           bottom: 0;
           left: 0;
           right: 0;
-          background: rgba(0,0,0,0.5);
+          background: rgba(0,0,0,0.7);
           color: white;
-          padding: 0.25rem;
+          padding: 0.5rem;
           font-size: 0.75rem;
           display: flex;
           justify-content: space-between;
           align-items: center;
 
+          .image-id {
+            font-weight: 500;
+          }
+
+          .image-actions {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+          }
+
           .p-button {
-            width: 1.5rem;
-            height: 1.5rem;
+            width: 1.75rem;
+            height: 1.75rem;
+            padding: 0;
+          }
+        }
+
+        .thumbnail-badge {
+          position: absolute;
+          top: 0.25rem;
+          right: 0.25rem;
+          background: $md-sys-color-primary;
+          color: $md-sys-color-on-primary;
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.7rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
+          i {
+            font-size: 0.875rem;
           }
         }
       }
@@ -1289,8 +1410,14 @@
     .empty-images {
       text-align: center;
       padding: 3rem;
-      border: 2px dashed #dce4e9;
-      border-radius: 6px;
+      border: 2px dashed $md-sys-color-outline-variant;
+      border-radius: 12px;
+      background: $md-sys-color-surface-container;
+      color: $md-sys-color-on-surface-variant;
+
+      i {
+        color: $md-sys-color-outline;
+      }
     }
 
     .upload-section {
@@ -1362,70 +1489,124 @@
       margin-top: 1.5rem;
     }
 
+    .edit-form {
+      .field {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: $md-sys-color-on-surface-variant;
+          letter-spacing: 0.1px;
+        }
+
+        ::ng-deep {
+          .p-inputtext,
+          .p-inputnumber-input,
+          .p-dropdown,
+          .p-multiselect {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid $md-sys-color-outline-variant;
+            background: $md-sys-color-surface;
+            color: $md-sys-color-on-surface;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+            &:hover {
+              border-color: $md-sys-color-outline;
+            }
+
+            &:focus,
+            &.p-focus {
+              border-color: $md-sys-color-primary;
+              box-shadow: 0 0 0 2px rgba(66, 66, 66, 0.12);
+              outline: none;
+            }
+          }
+
+          .p-dropdown-panel,
+          .p-multiselect-panel {
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid $md-sys-color-outline-variant;
+          }
+        }
+
+        .form-hint,
+        .upload-hint {
+          display: block;
+          margin-top: 0.5rem;
+          font-size: 0.75rem;
+          color: $md-sys-color-on-surface-variant;
+          line-height: 1.4;
+        }
+      }
+    }
+
     :host ::ng-deep .admin-form-column .ck-editor {
-      border-radius: 16px;
+      border-radius: 4px;
       overflow: hidden;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      border: 1px solid $md-sys-color-outline-variant;
     }
 
     :host ::ng-deep .admin-form-column .ck-editor__editable_inline {
-      min-height: 260px;
-      max-height: 480px;
+      min-height: 240px;
+      max-height: 420px;
       overflow-y: auto;
       padding: 1rem;
-      border-radius: 12px;
-      background: #fff;
+      border-radius: 4px;
+      background: $md-sys-color-surface;
+      color: $md-sys-color-on-surface;
     }
 
-    // New Quantity Card Styles
-    .new-quantity-card {
+    // New Quantity Card Styles - Simplified
+    ::ng-deep .new-quantity-card {
       margin-top: 1.5rem;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 123, 255, 0.12);
-      border: 1px solid #e3f2fd;
-      background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      animation: slideInUp 0.4s ease-out;
+      border-radius: 12px;
+      border: 1px solid $md-sys-color-outline-variant;
+      background: $md-sys-color-surface;
+      box-shadow: none;
 
-      &:hover {
-        box-shadow: 0 12px 32px rgba(0, 123, 255, 0.18);
-        transform: translateY(-2px);
-      }
-
-      ::ng-deep .p-card-header {
-        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-        color: white;
-        padding: 1.25rem 1.5rem;
-        border-bottom: none;
+      .p-card-header {
+        background: $md-sys-color-surface-container;
+        color: $md-sys-color-on-surface;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid $md-sys-color-outline-variant;
 
         h4 {
           margin: 0;
-          font-size: 1.25rem;
-          font-weight: 600;
+          font-size: 1rem;
+          font-weight: 500;
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.5rem;
+          letter-spacing: 0px;
 
           i {
-            font-size: 1.5rem;
-            animation: bounce 2s infinite;
+            font-size: 1.125rem;
+            color: $md-sys-color-on-surface-variant;
           }
         }
       }
 
-      ::ng-deep .p-card-body {
+      .p-card-body {
         padding: 1.5rem;
-        background: #fff;
+        background: $md-sys-color-surface;
       }
 
       .field {
         label {
-          font-weight: 600;
-          color: #495057;
-          margin-bottom: 0.75rem;
+          font-weight: 500;
+          color: $md-sys-color-on-surface-variant;
+          margin-bottom: 0.5rem;
           display: block;
-          font-size: 1rem;
+          font-size: 0.875rem;
+          letter-spacing: 0.1px;
         }
 
         ::ng-deep .p-inputnumber {
@@ -1433,56 +1614,43 @@
 
           .p-inputnumber-input {
             width: 100%;
-            padding: 0.875rem 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            border: 1px solid $md-sys-color-outline-variant;
+            border-radius: 4px;
+            background: $md-sys-color-surface;
+            color: $md-sys-color-on-surface;
+
+            &:hover {
+              border-color: $md-sys-color-outline;
+            }
 
             &:focus {
-              border-color: #007bff;
-              background: #fff;
-              box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+              border-color: $md-sys-color-primary;
+              box-shadow: 0 0 0 2px rgba(66, 66, 66, 0.12);
+              outline: none;
             }
           }
 
           .p-button {
-            background: #007bff;
-            border-color: #007bff;
-            color: white;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-
-            &:hover {
-              background: #0056b3;
-              border-color: #0056b3;
-              transform: scale(1.05);
-            }
+            background: $md-sys-color-primary;
+            border-color: $md-sys-color-primary;
+            color: $md-sys-color-on-primary;
+            border-radius: 4px;
           }
         }
 
         .form-hint {
           display: block;
-          margin-top: 0.75rem;
-          padding: 1rem;
-          background: linear-gradient(135deg, #e3f2fd 0%, #f0f7ff 100%);
-          border-left: 4px solid #007bff;
-          border-radius: 8px;
-          color: #495057;
-          font-size: 0.9rem;
-          line-height: 1.6;
+          margin-top: 0.5rem;
+          color: $md-sys-color-on-surface-variant;
+          font-size: 0.75rem;
+          line-height: 1.4;
 
           strong {
-            color: #007bff;
-            font-size: 1.1rem;
-            display: inline-block;
-            margin-top: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+            color: $md-sys-color-on-surface;
+            font-weight: 500;
           }
         }
       }
@@ -1520,41 +1688,39 @@
 
     // Quantity Mode Toggle
     .quantity-mode-toggle {
-      padding: 1.25rem;
-      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-      border: 2px solid #e9ecef;
+      padding: 1rem 1.5rem;
+      background: $md-sys-color-surface-container;
+      border: 1px solid $md-sys-color-outline-variant;
       border-radius: 12px;
       display: flex;
       align-items: flex-start;
       gap: 1rem;
-      transition: all 0.3s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
       cursor: pointer;
 
       &:hover {
-        border-color: #007bff;
-        background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
-        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+        border-color: $md-sys-color-outline;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
       }
 
       ::ng-deep .p-checkbox {
         margin-top: 0.25rem;
 
         .p-checkbox-box {
-          width: 1.5rem;
-          height: 1.5rem;
-          border: 2px solid #dee2e6;
-          border-radius: 6px;
-          transition: all 0.3s ease;
+          width: 1.25rem;
+          height: 1.25rem;
+          border: 2px solid $md-sys-color-outline;
+          border-radius: 2px;
+          transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
 
           &.p-highlight {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            border-color: #007bff;
-            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            background: $md-sys-color-primary;
+            border-color: $md-sys-color-primary;
           }
 
           .p-checkbox-icon {
-            color: white;
-            font-weight: 700;
+            color: $md-sys-color-on-primary;
+            font-size: 0.875rem;
           }
         }
       }
@@ -1566,16 +1732,17 @@
 
         strong {
           display: block;
-          color: #212529;
-          font-size: 1rem;
-          font-weight: 600;
+          color: $md-sys-color-on-surface;
+          font-size: 0.875rem;
+          font-weight: 500;
           margin-bottom: 0.25rem;
+          letter-spacing: 0.1px;
         }
 
         small {
           display: block;
-          color: #6c757d;
-          font-size: 0.875rem;
+          color: $md-sys-color-on-surface-variant;
+          font-size: 0.75rem;
           line-height: 1.4;
         }
       }
@@ -1585,9 +1752,161 @@
     .form-hint {
       display: block;
       margin-top: 0.5rem;
-      color: #6c757d;
-      font-size: 0.875rem;
-      line-height: 1.5;
+      color: $md-sys-color-on-surface-variant;
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    // Reviews & Comments Card
+    ::ng-deep .reviews-card {
+      border-radius: 28px;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      background: $md-sys-color-surface;
+      overflow: hidden;
+      transition: box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+      &:hover {
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      }
+
+      .p-card-header {
+        background: $md-sys-color-surface-container-high;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid $md-sys-color-outline-variant;
+
+        h3 {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 400;
+          color: $md-sys-color-on-surface;
+          letter-spacing: 0px;
+        }
+      }
+
+      .p-card-body {
+        padding: 2rem;
+        background: $md-sys-color-surface;
+      }
+    }
+
+    .reviews-summary {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid $md-sys-color-outline-variant;
+
+      .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+
+        ::ng-deep .p-rating {
+          .p-rating-icon {
+            color: $md-sys-color-primary;
+            font-size: 1.25rem;
+          }
+        }
+
+        .rating-text {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: $md-sys-color-on-surface-variant;
+          letter-spacing: 0.1px;
+        }
+      }
+    }
+
+    .admin-reviews-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .admin-review-item {
+        background: $md-sys-color-surface-container;
+        border: 1px solid $md-sys-color-outline-variant;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+        &:hover {
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+          border-color: $md-sys-color-outline;
+        }
+
+        .review-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+
+          .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            i {
+              font-size: 1.25rem;
+              color: $md-sys-color-on-surface-variant;
+            }
+
+            .reviewer-name {
+              font-size: 0.875rem;
+              font-weight: 500;
+              color: $md-sys-color-on-surface;
+              letter-spacing: 0.1px;
+            }
+          }
+
+          .review-date {
+            font-size: 0.75rem;
+            color: $md-sys-color-on-surface-variant;
+            letter-spacing: 0.1px;
+          }
+        }
+
+        .review-rating {
+          margin-bottom: 0.75rem;
+
+          ::ng-deep .p-rating {
+            .p-rating-icon {
+              color: $md-sys-color-primary;
+              font-size: 1rem;
+            }
+          }
+        }
+
+        .review-comment {
+          p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: $md-sys-color-on-surface;
+            line-height: 1.5;
+            letter-spacing: 0.1px;
+          }
+        }
+      }
+
+      .no-reviews {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: $md-sys-color-on-surface-variant;
+
+        i {
+          font-size: 3rem;
+          color: $md-sys-color-outline;
+          margin-bottom: 1rem;
+          display: block;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.875rem;
+          letter-spacing: 0.1px;
+        }
+      }
     }
 
     // Animation for new quantity card

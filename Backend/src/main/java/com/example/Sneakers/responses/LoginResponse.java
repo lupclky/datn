@@ -14,4 +14,13 @@ public class LoginResponse {
 
     @JsonProperty("token")
     private String token;
+
+    @JsonProperty("is_new_user")
+    private Boolean isNewUser;
+
+    @JsonProperty("google_email")
+    private String googleEmail;
+
+    @JsonProperty("google_name")
+    private String googleName;
 }

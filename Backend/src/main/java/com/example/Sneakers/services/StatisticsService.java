@@ -7,6 +7,7 @@ import com.example.Sneakers.dtos.YearlyRevenueDTO;
 import com.example.Sneakers.dtos.ProductStatisticsDTO;
 import com.example.Sneakers.dtos.BrandSoldStatisticsDTO;
 import com.example.Sneakers.dtos.ProductSoldStatisticsDTO;
+import com.example.Sneakers.dtos.TopStockProductDTO;
 import com.example.Sneakers.repositories.OrderRepository;
 import com.example.Sneakers.repositories.OrderDetailRepository;
 import com.example.Sneakers.repositories.ProductRepository;
@@ -227,5 +228,35 @@ public class StatisticsService {
 
     public Long getOrdersToday() {
         return orderRepository.countOrdersByDate(LocalDate.now());
+    }
+
+    public List<TopStockProductDTO> getTopStockProducts(int topN) {
+        try {
+            List<Object[]> results = productRepository.findTopProductsByStock(PageRequest.of(0, topN));
+            if (results == null || results.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            return results.stream()
+                    .map(obj -> {
+                        try {
+                            return new TopStockProductDTO(
+                                    obj[0] != null ? ((Number) obj[0]).longValue() : 0L,
+                                    obj[1] != null ? (String) obj[1] : "Unknown",
+                                    obj[2] != null ? (String) obj[2] : null,
+                                    obj[3] != null ? ((Number) obj[3]).longValue() : 0L,
+                                    obj[4] != null ? ((Number) obj[4]).longValue() : 0L,
+                                    obj[5] != null ? (String) obj[5] : "N/A");
+                        } catch (Exception e) {
+                            System.err.println("Error mapping top stock product: " + e.getMessage());
+                            return new TopStockProductDTO(0L, "Error", null, 0L, 0L, "N/A");
+                        }
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error fetching top stock products: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

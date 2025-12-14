@@ -5,7 +5,7 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 1000;
+  z-index: 1001; // Higher than bottom nav (1000)
 }
 
 // Chat button
@@ -70,10 +70,10 @@
   }
 }
 
-// Adjust for mobile with bottom nav
-@media (max-width: 768px) {
+// Adjust for tablet and mobile with bottom nav
+@media (max-width: 1024px) {
   .chat-button-wrapper {
-    bottom: 100px; // Move up to avoid bottom nav (80px + margin)
+    bottom: 100px; // Move up to avoid bottom nav (80px + 20px margin)
     right: 16px;
   }
 }
@@ -174,7 +174,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 1001; // Higher than bottom nav (1000)
   opacity: 0;
   transform: translateY(20px) scale(0.95);
   transition: all 0.3s ease;
@@ -184,6 +184,10 @@
     opacity: 1;
     transform: translateY(0) scale(1);
     pointer-events: all;
+  }
+
+  @media (max-width: 1024px) {
+    bottom: 180px; // Move up above the button and bottom nav
   }
 
   @media (max-width: 480px) {

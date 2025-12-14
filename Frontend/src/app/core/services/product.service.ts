@@ -147,4 +147,20 @@ export class ProductService {
       responseType: 'text' // Expect a text response ("...deleted successfully")
     });
   }
+
+  updateProductThumbnail(productId: number, thumbnailUrl: string): Observable<any> {
+    // Use updateProduct endpoint with thumbnail field
+    const productData: ProductUploadReq = {
+      name: '', // These fields are required but won't be updated
+      price: 0,
+      category_id: 0,
+      description: '',
+      discount: 0,
+      quantity: 0,
+      thumbnail: thumbnailUrl
+    };
+    return this.httpClient.put(`${this.apiUrl}/products/${productId}`, productData, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

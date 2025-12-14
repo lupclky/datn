@@ -147,6 +147,17 @@
 			<artifactId>spring-ai-chroma-store-spring-boot-starter</artifactId>
 			<version>1.0.0-M2</version>
 		</dependency>
+		<!-- Google OAuth Client for verifying ID tokens -->
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-oauth2-http</artifactId>
+			<version>1.19.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

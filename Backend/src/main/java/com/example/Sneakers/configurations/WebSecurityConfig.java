@@ -44,6 +44,7 @@ public class WebSecurityConfig {
                                                         .requestMatchers(
                                                                 String.format("%s/users/register", apiPrefix),
                                                                 String.format("%s/users/login", apiPrefix),
+                                                                String.format("%s/users/login/google", apiPrefix),
                                                                 String.format("%s/users/forgot-password", apiPrefix),
                                                                 String.format("%s/users/reset-password", apiPrefix),
                                                                 "/error"

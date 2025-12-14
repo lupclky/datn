@@ -103,6 +103,18 @@
         color: var(--primary-color);
         letter-spacing: 1px;
       }
+
+      &.payment-code {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        font-family: 'Courier New', monospace;
+        background-color: var(--surface-100);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+        word-break: break-all;
+      }
     }
 
     .status-control {
@@ -280,6 +292,7 @@
     grid-template-columns: 1fr;
   }
 }
+
 
 
 

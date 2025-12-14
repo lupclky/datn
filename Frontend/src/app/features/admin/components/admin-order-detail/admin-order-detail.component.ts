@@ -417,4 +417,22 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
       default: return 'secondary';
     }
   }
+
+  getPaymentMethodLabel(method?: string): string {
+    if (!method) return 'N/A';
+    
+    // Map payment method to display label
+    const methodMap: { [key: string]: string } = {
+      'Thanh toán thẻ thành công': 'Stripe (VISA / MasterCard)',
+      'Stripe (visa/mastercard)': 'Stripe (VISA / MasterCard)',
+      'Stripe Card Payment': 'Stripe (VISA / MasterCard)',
+      'Pending Stripe Payment': 'Stripe (VISA / MasterCard) - Đang chờ',
+      'VNPAY': 'VNPay',
+      'VnPay': 'VNPay',
+      'Thanh toán khi nhận hàng': 'Thanh toán khi nhận hàng (COD)',
+      'Cash': 'Thanh toán khi nhận hàng (COD)'
+    };
+    
+    return methodMap[method] || method;
+  }
 }

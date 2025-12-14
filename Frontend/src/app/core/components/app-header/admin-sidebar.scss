@@ -36,6 +36,21 @@
     padding: 0;
     margin: 0;
   }
+
+  .menu-section-header {
+    padding: 16px 24px 8px;
+    margin: 8px 0 4px;
+    
+    .section-title {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: $m3-sys-dark-on-surface-variant;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.6;
+    }
+  }
   
   .sidebar-link {
     margin: 4px 12px;
@@ -85,6 +100,7 @@
     width: 100%; // Full width on mobile if needed, or keep partial
   }
 }
+
 
 
 

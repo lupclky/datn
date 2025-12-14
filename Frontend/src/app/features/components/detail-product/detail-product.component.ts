@@ -109,6 +109,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public isDescriptionExpanded: boolean = false;
   public showExpandToggle: boolean = false;
   public addQuantityMode: boolean = false; // If true, add quantity; if false, replace quantity
+  public selectedThumbnail: string | null = null; // Selected thumbnail image URL
 
   public Editor: any = null;
 
@@ -137,6 +138,14 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
         });
         this.categoryId = product.category_id?.toString() ?? '';
         this.images = product.product_images;
+        // Set selected thumbnail (use product thumbnail or first image)
+        if (product.thumbnail && product.thumbnail.trim() !== '' && product.thumbnail !== 'null') {
+          this.selectedThumbnail = product.thumbnail;
+        } else if (product.product_images && product.product_images.length > 0) {
+          this.selectedThumbnail = product.product_images[0].image_url;
+        } else {
+          this.selectedThumbnail = null;
+        }
         // Set selected features
         if (product.features && product.features.length > 0) {
           this.selectedFeatures = product.features.map(f => f.id);
@@ -413,6 +422,16 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   }
 
   deleteImage(imageId: number): void {
+    // Find the image to be deleted
+    const imageToDelete = this.images.find(img => img.id === imageId);
+    if (!imageToDelete) return;
+
+    // If the deleted image is the selected thumbnail, reset thumbnail
+    if (this.selectedThumbnail === imageToDelete.image_url) {
+      // Set thumbnail to first remaining image or null
+      const remainingImages = this.images.filter(img => img.id !== imageId);
+      this.selectedThumbnail = remainingImages.length > 0 ? remainingImages[0].image_url : null;
+    }
     this.confirmationService.confirm({
       message: 'Bạn có chắc chắn muốn xóa vĩnh viễn ảnh này?',
       header: 'Xác nhận xóa ảnh',
@@ -468,7 +487,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       discount: this.productForm.value.discount,
       quantity: quantityValue,
       add_quantity: this.addQuantityMode, // Include add_quantity flag
-      featureIds: this.selectedFeatures
+      featureIds: this.selectedFeatures,
+      thumbnail: this.selectedThumbnail || undefined
     };
 
     // Start the update process
@@ -476,6 +496,16 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       switchMap(() => {
         // After product update, handle image upload if necessary
         if (fileUpload && fileUpload.files.length > 0) {
+          // Validate total image count before upload
+          const currentImageCount = this.images?.length || 0;
+          const newImageCount = fileUpload.files.length;
+          const totalCount = currentImageCount + newImageCount;
+
+          if (totalCount > 5) {
+            this.toastService.fail(`Tối đa 5 ảnh. Hiện có ${currentImageCount} ảnh, bạn chỉ có thể thêm tối đa ${5 - currentImageCount} ảnh nữa.`);
+            return of(null);
+          }
+
           const formData = new FormData();
           fileUpload.files.forEach(file => {
             formData.append('files', file);
@@ -695,6 +725,55 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     const target = event.target as HTMLImageElement;
     target.src = 'assets/images/no-image.png';
     target.onerror = null; // Prevent infinite loop
+  }
+
+  selectThumbnail(imageUrl: string): void {
+    this.selectedThumbnail = imageUrl;
+  }
+
+  onFilesSelected(event: any): void {
+    const files = event.currentFiles || event.files || [];
+    if (files.length === 0) return;
+
+    // Check total images count (existing + new)
+    const currentImageCount = this.images?.length || 0;
+    const newImageCount = files.length;
+    const totalCount = currentImageCount + newImageCount;
+
+    if (totalCount > 5) {
+      this.toastService.fail(`Tối đa 5 ảnh. Hiện có ${currentImageCount} ảnh, bạn chỉ có thể thêm tối đa ${5 - currentImageCount} ảnh nữa.`);
+      // Remove excess files
+      const fileUpload = event.originalEvent?.target?.closest('p-fileupload')?.querySelector('input[type="file"]');
+      if (fileUpload) {
+        fileUpload.value = '';
+      }
+      return;
+    }
+
+    // Check file size (5MB = 5000000 bytes)
+    const maxSize = 5000000;
+    const oversizedFiles = files.filter((file: File) => file.size > maxSize);
+    
+    if (oversizedFiles.length > 0) {
+      const oversizedNames = oversizedFiles.map((f: File) => f.name).join(', ');
+      this.toastService.fail(`Các file sau vượt quá 5MB: ${oversizedNames}`);
+      // Remove oversized files
+      const fileUpload = event.originalEvent?.target?.closest('p-fileupload')?.querySelector('input[type="file"]');
+      if (fileUpload) {
+        fileUpload.value = '';
+      }
+      return;
+    }
+  }
+
+  onFileUploadError(event: any): void {
+    if (event.error && event.error.summary) {
+      this.toastService.fail(event.error.summary);
+    } else if (event.error && event.error.message) {
+      this.toastService.fail(event.error.message);
+    } else {
+      this.toastService.fail('Lỗi khi upload ảnh. Vui lòng kiểm tra lại.');
+    }
   }
 
   generateProductDescription(): void {

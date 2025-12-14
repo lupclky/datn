@@ -3,7 +3,7 @@ import { BaseComponent } from '../../core/commonComponent/base.component';
 import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageService } from 'primeng/api';
@@ -61,6 +61,48 @@ export class RegisterComponent extends BaseComponent implements OnInit, AfterVie
 
   ngOnInit(): void {
     this.initForm();
+    this.loadGoogleInfo();
+  }
+
+  private loadGoogleInfo(): void {
+    // Check if coming from Google login
+    const googleInfo = sessionStorage.getItem('googleRegisterInfo');
+    if (googleInfo) {
+      try {
+        const info = JSON.parse(googleInfo);
+        if (info.fromGoogle) {
+          // Pre-fill form with Google information
+          if (info.email) {
+            this.registerForm.patchValue({ email: info.email });
+          }
+          if (info.fullname) {
+            this.registerForm.patchValue({ fullname: info.fullname });
+          }
+          // Keep session storage for registration - will be cleared after successful registration
+          
+          // Show info message
+          this.toastService.success('Thông tin Google đã được điền sẵn. Vui lòng bổ sung thông tin còn lại.');
+        }
+      } catch (e) {
+        console.error('Error parsing Google info:', e);
+      }
+    }
+
+    // Also check query params as fallback
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroyed$)
+    ).subscribe(() => {
+      const queryParams = this.router.parseUrl(this.router.url).queryParams;
+      if (queryParams['fromGoogle'] === 'true') {
+        if (queryParams['email']) {
+          this.registerForm.patchValue({ email: queryParams['email'] });
+        }
+        if (queryParams['name']) {
+          this.registerForm.patchValue({ fullname: queryParams['name'] });
+        }
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -92,6 +134,8 @@ export class RegisterComponent extends BaseComponent implements OnInit, AfterVie
           tap(() => {
             this.toastService.success("Đăng ký thành công");
             this.blockUi();
+            // Clear Google info after successful registration
+            sessionStorage.removeItem('googleRegisterInfo');
           }),
           delay(1000),
           tap(() => {

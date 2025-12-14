@@ -263,3 +263,4 @@ ProductFeature "*" o-- "1" LockFeature
 2. **Product ↔ ProductImage:** Có thể đổi thành **Composition** nếu hình ảnh không có ý nghĩa khi không có Product
 3. **Thêm relationships cho Banner và News:** Nếu cần, có thể thêm quan hệ với User (người tạo)
 
+
