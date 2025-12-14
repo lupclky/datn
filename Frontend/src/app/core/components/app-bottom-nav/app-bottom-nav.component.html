@@ -37,7 +37,9 @@
         #searchInput
         type="text" 
         [(ngModel)]="searchKeyword"
+        (input)="onSearchInput($event)"
         (keydown.enter)="onSearch()"
+        (focus)="showSuggestions = true"
         placeholder="Tìm kiếm sản phẩm..." 
         autocomplete="off"
       >
@@ -46,8 +48,29 @@
     <button class="cancel-btn" (click)="toggleSearch()">Hủy</button>
   </div>
   
-  <div class="search-suggestions" *ngIf="searchKeyword.trim().length > 0">
-    <div class="suggestion-item" (click)="onSearch()">
+  <div class="search-suggestions" *ngIf="showSuggestions && searchKeyword.trim().length > 0">
+    <!-- Product Suggestions -->
+    <div 
+      class="suggestion-item" 
+      *ngFor="let product of searchSuggestions"
+      (click)="selectProduct(product)">
+      <img [src]="getProductImageUrl(product)" 
+           [alt]="product.name" 
+           class="suggestion-image"
+           (error)="$any($event.target).src = 'assets/images/no-image.png'">
+      <div class="suggestion-info">
+        <div class="suggestion-name">{{ product.name }}</div>
+        <div class="suggestion-price">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</div>
+      </div>
+    </div>
+    
+    <!-- No results message -->
+    <div class="no-results" *ngIf="searchSuggestions.length === 0 && searchKeyword.trim().length >= 2">
+      Không tìm thấy sản phẩm nào
+    </div>
+    
+    <!-- Search all results -->
+    <div class="suggestion-item search-all" (click)="onSearch()" *ngIf="searchKeyword.trim().length > 0">
       <i class="pi pi-search"></i>
       <span>Tìm kiếm "{{searchKeyword}}"</span>
     </div>
