@@ -6,6 +6,7 @@ import com.example.Sneakers.dtos.ProductImageDTO;
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.ProductImage;
 import com.example.Sneakers.repositories.ReviewRepository;
+import com.example.Sneakers.repositories.OrderDetailRepository;
 import com.example.Sneakers.responses.ListProductResponse;
 import com.example.Sneakers.responses.ProductListResponse;
 import com.example.Sneakers.responses.ProductResponse;
@@ -49,6 +50,7 @@ public class ProductController {
     private final IProductService productService;
     private final LocalizationUtils localizationUtils;
     private final ReviewRepository reviewRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -279,6 +281,9 @@ public class ProductController {
             Long totalReviews = reviewRepository.countByProductId(productId);
             response.setAverageRating(avgRating != null ? avgRating : 0.0);
             response.setTotalReviews(totalReviews);
+            // Add sold quantity
+            Long soldQuantity = orderDetailRepository.getTotalSoldQuantityByProductId(productId);
+            response.setSoldQuantity(soldQuantity != null ? soldQuantity : 0L);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

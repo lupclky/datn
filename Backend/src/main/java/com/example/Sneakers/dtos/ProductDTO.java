@@ -34,5 +34,8 @@ public class ProductDTO {
     @Min(value = 0, message = "Quantity must be greater than or equal to 0")
     private Long quantity;
 
+    @JsonProperty("add_quantity")
+    private Boolean addQuantity; // If true, add quantity to existing; if false or null, replace quantity
+
     private List<Long> featureIds;
 }

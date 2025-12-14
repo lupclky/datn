@@ -17,9 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -115,11 +112,12 @@ public class StripeService implements IStripeService {
                     Order order = orderRepository.findById(orderId)
                             .orElseThrow(() -> new DataNotFoundException("Order not found with id: " + orderId));
                     
-                    // Update order status to processing
-                    order.setStatus(OrderStatus.PROCESSING);
-                    order.setPaymentMethod("Thanh toán thẻ thành công");
+                    // Update order status to PAID after successful payment
+                    order.setStatus(OrderStatus.PAID);
+                    order.setPaymentMethod("Stripe (visa/mastercard)");
                     order.setPaymentIntentId(intent.getId());
                     orderRepository.save(order);
+                    log.info("Order {} status updated to PAID after successful Stripe payment", orderId);
                 }
             }
 

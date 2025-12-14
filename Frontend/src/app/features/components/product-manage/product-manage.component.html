@@ -140,6 +140,7 @@
         <th style="width: 10rem">Giá</th>
         <th style="width: 8rem">Giảm giá</th>
         <th style="width: 8rem">Số lượng</th>
+        <th style="width: 8rem">Đã bán</th>
         <th style="width: 10rem">Trạng thái</th>
         <th style="width: 12rem">Hành động</th>
       </tr>
@@ -175,6 +176,9 @@
           <span *ngIf="!product.discount || product.discount === 0">0%</span>
         </td>
         <td class="text-center">{{ product.quantity }}</td>
+        <td class="text-center">
+          <span class="product-sold">{{ product.sold_quantity || 0 }}</span>
+        </td>
         <td>
           <p-tag [value]="getStockStatus(product.quantity)" 
                  [severity]="getStockSeverity(product.quantity)">

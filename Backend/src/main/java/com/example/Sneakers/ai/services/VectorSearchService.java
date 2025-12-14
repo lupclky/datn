@@ -3,6 +3,7 @@ package com.example.Sneakers.ai.services;
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.Category;
 import dev.langchain4j.data.document.Document;
+import org.springframework.scheduling.annotation.Async;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,9 @@ public interface VectorSearchService {
     void indexAllProducts();
 
     void updateProductIndex(Product product);
+
+    @Async
+    void updateProductIndexAsync(Long productId);
 
     void deleteProductFromIndex(Long productId);
 

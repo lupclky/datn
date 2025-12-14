@@ -33,6 +33,7 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   isOpen = signal(false);
+  showMenu = signal(false);
   chatMode = signal<'ai' | 'staff'>('ai'); // 'ai' or 'staff'
   messages = signal<ChatMessage[]>([]);
   staffMessages = signal<StaffChatMessage[]>([]);
@@ -131,6 +132,28 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
 
   toggleChat(): void {
     this.isOpen.update(v => !v);
+  }
+
+  toggleMenu(): void {
+    this.showMenu.update(v => !v);
+  }
+
+  openAssistant(): void {
+    this.showMenu.set(false);
+    this.isOpen.set(true);
+    this.chatMode.set('ai');
+  }
+
+  openMessenger(): void {
+    // Open Messenger link
+    window.open('https://m.me/khoavantaykorea', '_blank');
+    this.showMenu.set(false);
+  }
+
+  openZalo(): void {
+    // Open Zalo link
+    window.open('https://zalo.me/0854768836', '_blank');
+    this.showMenu.set(false);
   }
 
   sendMessage(): void {

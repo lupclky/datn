@@ -39,6 +39,7 @@ public class ProductService implements IProductService {
     private final ProductFeatureRepository productFeatureRepository;
     private final ProductFeatureService productFeatureService;
     private final ReviewRepository reviewRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
@@ -134,6 +135,19 @@ public class ProductService implements IProductService {
         }
 
         final Map<Long, Object[]> finalRatingStatsMap = ratingStatsMap;
+        
+        // Batch fetch sold quantities for all products in the page (reuse productIds from above)
+        Map<Long, Long> soldQuantityMap = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            List<Object[]> soldQuantityResults = orderDetailRepository.getTotalSoldQuantityByProductIds(productIds);
+            soldQuantityMap = soldQuantityResults.stream()
+                    .collect(Collectors.toMap(
+                            row -> ((Number) row[0]).longValue(),
+                            row -> ((Number) row[1]).longValue()
+                    ));
+        }
+        
+        final Map<Long, Long> finalSoldQuantityMap = soldQuantityMap;
         return productPage.map(product -> {
             ProductResponse response = ProductResponse.fromProduct(product);
             // Add rating stats from batch map
@@ -145,6 +159,9 @@ public class ProductService implements IProductService {
                 response.setAverageRating(0.0);
                 response.setTotalReviews(0L);
             }
+            // Add sold quantity
+            Long soldQuantity = finalSoldQuantityMap.getOrDefault(product.getId(), 0L);
+            response.setSoldQuantity(soldQuantity);
             return response;
         });
     }
@@ -170,7 +187,21 @@ public class ProductService implements IProductService {
                 existingProduct.setThumbnail(productDTO.getThumbnail());
             }
             existingProduct.setDiscount(productDTO.getDiscount());
-            existingProduct.setQuantity(productDTO.getQuantity());
+            // Handle quantity: if addQuantity is true, add to existing; otherwise replace
+            if (productDTO.getAddQuantity() != null && productDTO.getAddQuantity()) {
+                // Add quantity to existing quantity
+                Long currentQuantity = existingProduct.getQuantity() != null ? existingProduct.getQuantity() : 0L;
+                Long quantityToAdd = productDTO.getQuantity() != null ? productDTO.getQuantity() : 0L;
+                Long newQuantity = currentQuantity + quantityToAdd;
+                // Ensure quantity doesn't go below 0
+                if (newQuantity < 0) {
+                    throw new InvalidParamException("Số lượng sau khi cộng không được nhỏ hơn 0. Số lượng hiện tại: " + currentQuantity + ", số lượng cộng thêm: " + quantityToAdd);
+                }
+                existingProduct.setQuantity(newQuantity);
+            } else {
+                // Replace quantity with new value
+                existingProduct.setQuantity(productDTO.getQuantity());
+            }
             Product updatedProduct = productRepository.save(existingProduct);
 
             // Update features if provided
@@ -231,6 +262,34 @@ public class ProductService implements IProductService {
         return productRepository.count();
     }
 
+    // Helper method to set sold quantity for a product response
+    private void setSoldQuantityForResponse(ProductResponse response, Long productId) {
+        Long soldQuantity = orderDetailRepository.getTotalSoldQuantityByProductId(productId);
+        response.setSoldQuantity(soldQuantity != null ? soldQuantity : 0L);
+    }
+
+    // Helper method to set sold quantity for multiple product responses (batch)
+    private void setSoldQuantityForResponses(List<ProductResponse> responses, List<Product> products) {
+        if (responses.isEmpty() || products.isEmpty()) return;
+        
+        List<Long> productIds = products.stream()
+                .map(Product::getId)
+                .collect(Collectors.toList());
+        
+        List<Object[]> soldQuantityResults = orderDetailRepository.getTotalSoldQuantityByProductIds(productIds);
+        Map<Long, Long> soldQuantityMap = soldQuantityResults.stream()
+                .collect(Collectors.toMap(
+                        row -> ((Number) row[0]).longValue(),
+                        row -> ((Number) row[1]).longValue()
+                ));
+        
+        for (int i = 0; i < responses.size(); i++) {
+            Long productId = products.get(i).getId();
+            Long soldQuantity = soldQuantityMap.getOrDefault(productId, 0L);
+            responses.get(i).setSoldQuantity(soldQuantity);
+        }
+    }
+
     @Override
     public ListProductResponse getProductsByPrice(Long minPrice, Long maxPrice) {
         List<ProductResponse> productResponses = new ArrayList<>();
@@ -243,6 +302,7 @@ public class ProductService implements IProductService {
             response.setTotalReviews(totalReviews);
             productResponses.add(response);
         }
+        setSoldQuantityForResponses(productResponses, products);
         return ListProductResponse.builder()
                 .products(productResponses)
                 .totalProducts(productResponses.size())
@@ -261,6 +321,7 @@ public class ProductService implements IProductService {
             response.setTotalReviews(totalReviews);
             productResponses.add(response);
         }
+        setSoldQuantityForResponses(productResponses, products);
         return ListProductResponse.builder()
                 .products(productResponses)
                 .totalProducts(productResponses.size())
@@ -279,6 +340,7 @@ public class ProductService implements IProductService {
             response.setTotalReviews(totalReviews);
             productResponses.add(response);
         }
+        setSoldQuantityForResponses(productResponses, products);
         return ListProductResponse.builder()
                 .products(productResponses)
                 .totalProducts(productResponses.size())
@@ -304,6 +366,7 @@ public class ProductService implements IProductService {
 
         List<Product> products = productRepository.getProductsByCategory(
                 targetProduct.getCategory().getId());
+        List<Product> filteredProducts = new ArrayList<>();
         int cnt = 0;
         for (Product p : products) {
             if (!Objects.equals(p.getId(), productId)) {
@@ -313,11 +376,13 @@ public class ProductService implements IProductService {
                 response.setAverageRating(avgRating != null ? avgRating : 0.0);
                 response.setTotalReviews(totalReviews);
                 productResponses.add(response);
+                filteredProducts.add(p);
                 cnt++;
             }
             if (cnt == 4)
                 break;
         }
+        setSoldQuantityForResponses(productResponses, filteredProducts);
         return ListProductResponse.builder()
                 .products(productResponses)
                 .totalProducts(productResponses.size())

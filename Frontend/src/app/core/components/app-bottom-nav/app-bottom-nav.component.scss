@@ -24,7 +24,8 @@ $m3-sys-dark-on-secondary-container: #E8DEF8;
   box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.2); // Darker shadow
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 
-  @media (min-width: 769px) {
+  // Hide bottom nav only on large screens (PC)
+  @media (min-width: 1025px) {
     display: none !important;
   }
 

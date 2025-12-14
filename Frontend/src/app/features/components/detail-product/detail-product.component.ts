@@ -37,6 +37,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { LockFeatureService } from '../../../core/services/lock-feature.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { CheckboxModule } from 'primeng/checkbox';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AiService } from '../../../core/services/ai.service';
 import { PLATFORM_ID } from '@angular/core';
@@ -66,7 +67,8 @@ import { isPlatformBrowser } from '@angular/common';
     TooltipModule,
     MultiSelectModule,
     CKEditorModule,
-    DialogModule
+    DialogModule,
+    CheckboxModule
   ],
   templateUrl: './detail-product.component.html',
   styleUrl: './detail-product.component.scss'
@@ -106,8 +108,47 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public isGeneratingDescription: boolean = false;
   public isDescriptionExpanded: boolean = false;
   public showExpandToggle: boolean = false;
+  public addQuantityMode: boolean = false; // If true, add quantity; if false, replace quantity
 
   public Editor: any = null;
+
+  onAddQuantityModeChange(): void {
+    // Reset newQuantity khi tắt chế độ cộng thêm
+    if (!this.addQuantityMode) {
+      this.productForm.patchValue({ newQuantity: 0 });
+    }
+  }
+
+  loadProductData(): void {
+    // Only reload product data instead of full component reload for better performance
+    if (!this.id || this.id === ":id") return;
+    
+    this.productService.getProductById(this.id).pipe(
+      filter((product: ProductDto) => !!product),
+      tap((product: ProductDto) => {
+        this.mainProduct = product;
+        this.productForm.patchValue({
+          productName: product.name,
+          description: product.description,
+          price: product.price,
+          discount: product.discount,
+          quantity: product.quantity,
+          newQuantity: 0
+        });
+        this.categoryId = product.category_id?.toString() ?? '';
+        this.images = product.product_images;
+        // Set selected features
+        if (product.features && product.features.length > 0) {
+          this.selectedFeatures = product.features.map(f => f.id);
+        }
+      }),
+      catchError((err) => {
+        console.error('Error reloading product data:', err);
+        return of(err);
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
+  }
   private isBrowser: boolean;
 
   constructor(
@@ -143,7 +184,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       description: [, Validators.required],
       price:[, Validators.required],
       discount: [, Validators.required],
-      quantity: [, Validators.required]
+      quantity: [, Validators.required],
+      newQuantity: [0] // Số lượng hàng mới nhập (chỉ dùng khi addQuantityMode = true)
     })
   }
   ngAfterViewInit(): void {
@@ -197,7 +239,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
             description: product.description,
             price: product.price,
             discount: product.discount,
-            quantity: product.quantity
+            quantity: product.quantity,
+            newQuantity: 0
           })
           this.categoryId = product.category_id?.toString() ?? '';
           this.images = product.product_images;
@@ -395,12 +438,27 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   }
 
   updateProductAdmin(fileUpload: FileUpload) {
-    if (this.productForm.invalid) {
-      this.toastService.fail("Vui lòng điền đầy đủ thông tin sản phẩm.");
-      return;
+    // Validate form based on mode
+    if (this.addQuantityMode) {
+      // Khi ở chế độ cộng thêm, chỉ cần kiểm tra newQuantity
+      if (!this.productForm.value.newQuantity && this.productForm.value.newQuantity !== 0) {
+        this.toastService.fail("Vui lòng nhập số lượng hàng mới nhập.");
+        return;
+      }
+    } else {
+      // Khi ở chế độ thay thế, kiểm tra form như bình thường
+      if (this.productForm.invalid) {
+        this.toastService.fail("Vui lòng điền đầy đủ thông tin sản phẩm.");
+        return;
+      }
     }
 
     this.loadingService.loading = true;
+
+    // Sử dụng newQuantity nếu ở chế độ cộng thêm, ngược lại dùng quantity
+    const quantityValue = this.addQuantityMode 
+      ? this.productForm.value.newQuantity 
+      : this.productForm.value.quantity;
 
     const updatedProductData: ProductUploadReq = {
       name: this.productForm.value.productName,
@@ -408,7 +466,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       description: this.productForm.value.description,
       category_id: parseInt(this.categoryId, 10),
       discount: this.productForm.value.discount,
-      quantity: this.productForm.value.quantity,
+      quantity: quantityValue,
+      add_quantity: this.addQuantityMode, // Include add_quantity flag
       featureIds: this.selectedFeatures
     };
 
@@ -431,7 +490,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
         // This will run after both product and images (if any) are updated successfully
         this.toastService.success('Cập nhật sản phẩm thành công!');
         fileUpload.clear();
-        this.ngOnInit(); // Refresh component data
+        // Only reload product data instead of full component reload for better performance
+        this.loadProductData();
       }),
       catchError((err) => {
         const errorMessage = err.error?.message || 'Cập nhật sản phẩm thất bại. Vui lòng thử lại.';

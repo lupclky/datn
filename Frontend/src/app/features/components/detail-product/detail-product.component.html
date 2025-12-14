@@ -11,7 +11,7 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a routerLink="/productManage">Sản phẩm</a></li>
+            <li class="breadcrumb-item"><a routerLink="/all-product">Sản phẩm</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{mainProduct.name}}</li>
           </ol>
         </nav>
@@ -67,8 +67,10 @@
                 <span class="meta-item" [ngClass]="{'in-stock': mainProduct.quantity > 0, 'out-of-stock': mainProduct.quantity === 0}">
                   {{mainProduct.quantity > 0 ? 'Còn hàng' : 'Hết hàng'}}
                 </span>
-                @if(mainProduct.quantity > 0) {
-                  <span class="meta-item">Có sẵn: {{mainProduct.quantity}}</span>
+                @if(mainProduct.sold_quantity !== undefined && mainProduct.sold_quantity > 0) {
+                  <span class="meta-item sold-quantity">
+                    Đã bán: {{mainProduct.sold_quantity}}
+                  </span>
                 }
               </div>
               
@@ -385,6 +387,21 @@
                   class="p-button-outlined"
                   (click)="goBack()">
           </button>
+          <button pButton pRipple 
+                  type="button" 
+                  label="Xóa sản phẩm" 
+                  icon="pi pi-trash" 
+                  class="p-button-danger p-button-outlined"
+                  (click)="confirmDelete()">
+          </button>
+          <button pButton pRipple 
+                  type="button" 
+                  label="Cập nhật sản phẩm" 
+                  icon="pi pi-check" 
+                  class="p-button-raised"
+                  (click)="updateProductAdmin(fileUpload)"
+                  [disabled]="!productForm.valid">
+          </button>
         </div>
       </div>
 
@@ -557,15 +574,86 @@
                   <div class="col-12 md:col-4">
                     <div class="field">
                       <label for="quantity">Số lượng</label>
-                      <p-inputNumber id="quantity" 
-                                     formControlName="quantity"
-                                     [min]="0"
-                                     placeholder="0">
-                      </p-inputNumber>
+                      @if(!addQuantityMode) {
+                        <p-inputNumber id="quantity" 
+                                       formControlName="quantity"
+                                       [min]="0"
+                                       placeholder="0">
+                        </p-inputNumber>
+                        <small class="form-hint">
+                          Số lượng nhập sẽ thay thế số lượng hiện có ({{mainProduct?.quantity || 0}})
+                        </small>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Box riêng cho nhập thêm số lượng hàng mới -->
+                @if(addQuantityMode) {
+                  <div class="grid mt-3">
+                    <div class="col-12">
+                      <p-card styleClass="new-quantity-card">
+                        <ng-template pTemplate="header">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="pi pi-box"></i>
+                            <h4 class="mb-0">Nhập thêm số lượng hàng mới</h4>
+                          </div>
+                        </ng-template>
+                        <div class="field">
+                          <label for="newQuantity">Số lượng hàng mới nhập</label>
+                          <p-inputNumber id="newQuantity" 
+                                         formControlName="newQuantity"
+                                         [min]="-999999"
+                                         placeholder="Nhập số lượng (có thể âm để trừ hàng)">
+                          </p-inputNumber>
+                          <small class="form-hint">
+                            Số lượng này sẽ được cộng vào số lượng hiện tại ({{mainProduct?.quantity || 0}})
+                            <br>
+                            <strong>Số lượng sau khi cộng: {{(mainProduct?.quantity || 0) + (productForm.value.newQuantity || 0)}}</strong>
+                          </small>
+                        </div>
+                      </p-card>
+                    </div>
+                  </div>
+                }
+
+                <!-- Toggle để chuyển đổi giữa 2 chế độ -->
+                <div class="grid mt-2">
+                  <div class="col-12">
+                    <div class="quantity-mode-toggle">
+                      <p-checkbox 
+                        [(ngModel)]="addQuantityMode"
+                        [ngModelOptions]="{standalone: true}"
+                        inputId="addQuantityCheckbox"
+                        [binary]="true"
+                        (onChange)="onAddQuantityModeChange()">
+                      </p-checkbox>
+                      <label for="addQuantityCheckbox" class="ml-2">
+                        <strong>Cộng thêm lượng hàng mới nhập</strong>
+                        <small class="d-block text-muted">Bật để nhập thêm số lượng hàng mới vào kho</small>
+                      </label>
                     </div>
                   </div>
                 </div>
   
+                <div class="field">
+                  <label>Thêm ảnh mới</label>
+                  <p-fileUpload #fileUpload
+                                mode="advanced" 
+                                name="files[]"
+                                [multiple]="true" 
+                                accept="image/*" 
+                                [maxFileSize]="1000000"
+                                chooseLabel="Chọn ảnh"
+                                [showUploadButton]="false"
+                                cancelButtonLabel="Hủy">
+                    <ng-template pTemplate="content">
+                        <!-- We use the default file list provided by the component -->
+                    </ng-template>
+                  </p-fileUpload>
+                  <small class="upload-hint">Chọn một hoặc nhiều ảnh để thêm. Tối đa 1MB mỗi ảnh.</small>
+                </div>
+
                 <div class="field">
                   <label for="description">Mô tả sản phẩm (HTML)</label>
                   
@@ -590,46 +678,9 @@
 
                   <ckeditor [editor]="Editor" formControlName="description"></ckeditor>
                 </div>
-  
-                <div class="field">
-                  <label>Thêm ảnh mới</label>
-                  <p-fileUpload #fileUpload
-                                mode="advanced" 
-                                name="files[]"
-                                [multiple]="true" 
-                                accept="image/*" 
-                                [maxFileSize]="1000000"
-                                chooseLabel="Chọn ảnh"
-                                [showUploadButton]="false"
-                                cancelButtonLabel="Hủy">
-                    <ng-template pTemplate="content">
-                        <!-- We use the default file list provided by the component -->
-                    </ng-template>
-                  </p-fileUpload>
-                  <small class="upload-hint">Chọn một hoặc nhiều ảnh để thêm. Tối đa 1MB mỗi ảnh.</small>
-                </div>
               </form>
             </div>
   
-            <ng-template pTemplate="footer">
-              <div class="form-actions">
-                <button pButton pRipple 
-                        type="button" 
-                        label="Xóa sản phẩm" 
-                        icon="pi pi-trash" 
-                        class="p-button-danger p-button-outlined"
-                        (click)="confirmDelete()">
-                </button>
-                <button pButton pRipple 
-                        type="button" 
-                        label="Cập nhật sản phẩm" 
-                        icon="pi pi-check" 
-                        class="p-button-raised"
-                        (click)="updateProductAdmin(fileUpload)"
-                        [disabled]="!productForm.valid">
-                </button>
-              </div>
-            </ng-template>
           </p-card>
         </div>
       </div>

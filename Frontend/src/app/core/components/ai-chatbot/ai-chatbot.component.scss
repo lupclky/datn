@@ -1,21 +1,25 @@
 @import '../../../../assets/abstracts/variable.scss';
 
-// Chat button
-.chat-button {
+// Chat button wrapper
+.chat-button-wrapper {
   position: fixed;
   bottom: 24px;
   right: 24px;
+  z-index: 1000;
+}
+
+// Chat button
+.chat-button {
   min-width: 60px;
   height: 60px;
   padding: 0 16px;
   border-radius: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
-  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,6 +28,7 @@
   &:hover {
     transform: scale(1.05);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    background: #5a6fd8;
     
     .chat-label {
       opacity: 1;
@@ -32,7 +37,7 @@
   }
 
   &.active {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: #764ba2;
     
     .chat-label {
       opacity: 1;
@@ -63,11 +68,97 @@
       max-width: 150px;
     }
   }
+}
 
-  // Adjust for mobile with bottom nav
-  @media (max-width: 768px) {
+// Adjust for mobile with bottom nav
+@media (max-width: 768px) {
+  .chat-button-wrapper {
     bottom: 100px; // Move up to avoid bottom nav (80px + margin)
     right: 16px;
+  }
+}
+
+// Chat menu
+.chat-menu {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+  }
+
+  .menu-item {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    color: #333;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+
+    i {
+      font-size: 18px;
+      color: #667eea;
+    }
+
+    .ai-logo {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #667eea;
+      
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .zalo-logo {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    &:hover {
+      background: #f5f5f5;
+    }
+
+    &:first-child {
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
   }
 }
 

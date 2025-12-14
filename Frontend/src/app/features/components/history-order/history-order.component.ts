@@ -25,6 +25,7 @@ import { MessageService } from 'primeng/api';
 
 // Components
 import { StripePaymentComponent } from '../stripe-payment/stripe-payment.component';
+import { ORDER_STATUS_OPTIONS, getOrderStatusLabel, getOrderStatusSeverity } from '../../../core/constants/order-status.constants';
 
 @Component({
   selector: 'app-history-order',
@@ -58,15 +59,7 @@ export class HistoryOrderComponent implements OnInit {
 
   // Filtering
   searchTerm: string = '';
-  statusOptions = [
-    { label: 'Tất cả', value: '' },
-    { label: 'Đang chờ', value: 'pending' },
-    { label: 'Đang xử lý', value: 'processing' },
-    { label: 'Đang giao', value: 'shipped' },
-    { label: 'Đã giao', value: 'delivered' },
-    { label: 'Đã hủy', value: 'cancelled' },
-    { label: 'Thanh toán thất bại', value: 'payment_failed' }
-  ];
+  statusOptions = ORDER_STATUS_OPTIONS;
   selectedStatus: string = '';
 
   // Pagination
@@ -147,29 +140,11 @@ export class HistoryOrderComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'pending': 'Đang chờ',
-      'processing': 'Đang xử lý',
-      'shipped': 'Đang giao',
-      'delivered': 'Đã giao',
-      'cancelled': 'Đã hủy',
-      'paid': 'Đã thanh toán',
-      'payment_failed': 'Thanh toán thất bại'
-    };
-    return statusMap[status] || 'Không xác định';
+    return getOrderStatusLabel(status);
   }
 
   getStatusSeverity(status: string): 'info' | 'warning' | 'success' | 'danger' | 'primary' {
-    const severityMap: { [key: string]: 'info' | 'warning' | 'success' | 'danger' | 'primary' } = {
-      'pending': 'warning',
-      'processing': 'info',
-      'shipped': 'primary',
-      'delivered': 'success',
-      'paid': 'success',
-      'cancelled': 'danger',
-      'payment_failed': 'danger'
-    };
-    return severityMap[status] || 'info';
+    return getOrderStatusSeverity(status);
   }
 
   viewOrderDetail(orderId: number): void {

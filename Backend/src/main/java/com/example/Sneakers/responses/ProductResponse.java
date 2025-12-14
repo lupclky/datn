@@ -44,6 +44,9 @@ public class ProductResponse extends BaseResponse{
     private Double averageRating;
     
     private Long totalReviews;
+    
+    @JsonProperty("sold_quantity")
+    private Long soldQuantity;
 
     public static ProductResponse fromProduct(Product product){
         List<FeatureResponse> features = product.getProductFeatures() != null ?

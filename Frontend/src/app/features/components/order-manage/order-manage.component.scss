@@ -97,6 +97,22 @@
     }
   }
 
+  // Action button styling
+  .action-btn {
+    min-width: 100px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
   .p-paginator.p-paginator-bottom {
     border-top: 1px solid #e9ecef;
     padding: 1rem;
@@ -163,9 +179,104 @@
   width: 350px;
 }
 
+// Shipping method badge
+.shipping-method-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f0f7ff 100%);
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+// Address cell with tooltip
+.address-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+  color: #495057;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  
+  &:hover {
+    color: #007bff;
+  }
+}
+
+// Order Status Badges with different colors
+.status-pending,
+.status-processing,
+.status-shipped,
+.status-delivered,
+.status-cancelled,
+.status-paid,
+.status-payment_failed {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  border: 2px solid;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+  color: #856404;
+  border-color: #ffc107;
+}
+
+.status-processing {
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  color: #0c5460;
+  border-color: #17a2b8;
+}
+
+.status-shipped {
+  background: linear-gradient(135deg, #cfe2ff 0%, #b6d4fe 100%);
+  color: #084298;
+  border-color: #0d6efd;
+}
+
+.status-delivered {
+  background: linear-gradient(135deg, #d1e7dd 0%, #badbcc 100%);
+  color: #0f5132;
+  border-color: #198754;
+}
+
+.status-paid {
+  background: linear-gradient(135deg, #d1e7dd 0%, #badbcc 100%);
+  color: #0f5132;
+  border-color: #198754;
+}
+
+.status-cancelled {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+  color: #842029;
+  border-color: #dc3545;
+}
+
+.status-payment_failed {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+  color: #842029;
+  border-color: #dc3545;
+}
+
 .payment-method-stripe-success,
 .payment-method-stripe-pending,
 .payment-method-cod,
+.payment-method-vnpay,
 .payment-method-default {
     padding: 5px 10px;
     border-radius: 12px;
@@ -192,10 +303,21 @@
     border: 1px solid #138496;
 }
 
+.payment-method-vnpay {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    border: 2px solid #0d47a1;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3),
+                0 2px 6px rgba(21, 101, 192, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
 .payment-method-default {
     background-color: #6c757d; // Gray
     border: 1px solid #5a6268;
 }
+
 
 // Create Order Dialog Styles
 .header-actions {

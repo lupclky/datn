@@ -511,25 +511,11 @@ export class NewsManageComponent implements OnInit {
           const content = response?.content || '';
           
           if (response && response.success && content && content.trim() !== '') {
-            // Get word count from response or calculate it
-            const wordCount = response.wordCount || content.trim().split(/\s+/).length;
-            const minWords = 800; // Minimum words for news content
-            
-            // Show warning if content is too short or if backend sent warning
-            if (response.warning || wordCount < minWords) {
-              const warningMsg = response.warning || `Cảnh báo: Nội dung chỉ có ${wordCount} từ, có thể chưa đủ chi tiết (tối thiểu: ${minWords} từ).`;
-              this.toastService.warn(warningMsg);
-            }
-            
             // Use setEditorContent to set both form control and Quill editor
             // Wait a bit for dialog to fully render, then set content
             setTimeout(() => {
               this.setEditorContent(content);
-              
-              const successMsg = wordCount >= minWords 
-                ? `Đã tạo nội dung bằng AI (${wordCount} từ)`
-                : `Đã tạo nội dung bằng AI (${wordCount} từ - có thể cần mở rộng thêm)`;
-              this.toastService.showSuccess('Thành công', successMsg);
+              this.toastService.showSuccess('Thành công', 'Đã tạo nội dung bằng AI thành công!');
               this.cdr.markForCheck();
             }, 300);
           } else {

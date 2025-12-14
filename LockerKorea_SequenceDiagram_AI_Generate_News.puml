@@ -1,0 +1,61 @@
+@startuml LockerKorea_AI_Generate_News
+skinparam sequenceMessageAlign center
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+skinparam sequenceParticipant underline
+
+title Sinh Nội Dung Tin Tức Bằng AI
+
+actor "Admin" as Admin
+participant "Giao Diện Quản Lý\nTin Tức (Frontend)" as UI
+participant "AIChatController\n(Backend)" as API
+participant "Gemini AI\n(Google Vertex AI)" as Gemini
+
+Admin -> UI : Nhập tiêu đề tin tức\n+ Chủ đề (tùy chọn)\n+ Từ khóa (tùy chọn)
+activate UI
+UI -> UI : Kiểm tra tiêu đề đã nhập
+UI -> API : POST /api/v1/ai/chat/generate-news\ntitle, topic, keywords
+activate API
+
+API -> API : Kiểm tra và validate tiêu đề\ntiêu đề không được rỗng
+API -> API : Tạo câu lệnh sinh nội dung\ntừ tiêu đề, chủ đề, từ khóa\ncreateNewsGenerationPrompt
+note right of API
+  Câu lệnh bao gồm:
+  - Vai trò: Biên tập viên chuyên nghiệp
+  - Tiêu đề bài viết
+  - Chủ đề (nếu có)
+  - Từ khóa cần đề cập (nếu có)
+  - Yêu cầu:
+    + Viết bằng tiếng Việt
+    + Cấu trúc: Mở bài, Nội dung, Kết luận
+    + Tối thiểu 1000 từ
+    + Format HTML chuẩn
+end note
+
+API -> Gemini : Gửi câu lệnh sinh nội dung\nđể AI tạo bài viết tin tức\nchat với prompt
+activate Gemini
+Gemini -> Gemini : Phân tích tiêu đề và yêu cầu
+Gemini -> Gemini : Tạo nội dung bài viết\nvới cấu trúc rõ ràng
+Gemini -> Gemini : Format nội dung bằng HTML\n(p, h2, strong, ul, blockquote)
+Gemini -> Gemini : Đảm bảo độ dài tối thiểu 1000 từ
+Gemini --> API : Trả về nội dung bài viết\nđã format HTML content
+deactivate Gemini
+
+API -> API : Kiểm tra nội dung có rỗng không
+API -> API : Đếm số từ trong nội dung\nwordCount
+API -> API : Kiểm tra độ dài tối thiểu\ntối thiểu 800 từ
+alt Nội dung quá ngắn dưới 800 từ
+    API -> API : Tạo cảnh báo về độ dài
+    API --> UI : Trả về nội dung + cảnh báo\ncontent, success, warning, wordCount
+else Nội dung đủ dài từ 800 từ trở lên
+    API -> API : Xây dựng đối tượng phản hồi thành công
+    API --> UI : Trả về nội dung bài viết\ncontent, success, timestamp
+end
+deactivate API
+
+UI -> UI : Hiển thị nội dung đã tạo\n+ Cảnh báo (nếu có)
+UI -> UI : Tự động điền nội dung\nvào rich text editor
+UI --> Admin : Hiển thị nội dung bài viết\nđã được AI tạo
+deactivate UI
+
+@enduml

@@ -405,17 +405,19 @@ export class OrderComponent extends BaseComponent implements OnInit,AfterViewIni
 
   onStripePaymentSuccess(paymentIntent: any): void {
     if (paymentIntent.status === 'succeeded') {
-      this.orderService.updateOrderStatus(this.orderId, 'paid').pipe(
-        switchMap(() => this.productService.deleteAllProductsFromCart())
-      ).subscribe({
+      // Backend đã tự động cập nhật trạng thái đơn hàng thành PAID trong confirmPayment()
+      // Chỉ cần xóa giỏ hàng và điều hướng
+      this.productService.deleteAllProductsFromCart().subscribe({
         next: () => {
           this.toastService.success("Thanh toán thành công. Đơn hàng của bạn đã được xác nhận.");
           this.clearCart();
           this.router.navigate(['/history']);
         },
         error: (err) => {
-          console.error('Error in Stripe success flow:', err);
-          this.toastService.warn("Thanh toán thành công nhưng có lỗi khi hoàn tất đơn hàng.");
+          console.error('Error clearing cart after Stripe payment:', err);
+          // Vẫn điều hướng dù có lỗi xóa giỏ hàng
+          this.toastService.success("Thanh toán thành công. Đơn hàng của bạn đã được xác nhận.");
+          this.clearCart();
           this.router.navigate(['/history']);
         }
       });

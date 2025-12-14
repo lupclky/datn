@@ -384,7 +384,9 @@ export class ReturnManageComponent implements OnInit {
     let additionalInfo = '';
     
     if (this.currentAction === 'approve') {
-      const isStripe = this.currentRequest?.payment_method === 'Thanh toán thẻ thành công';
+      const isStripe = this.currentRequest?.payment_method === 'Stripe (visa/mastercard)' || 
+                     this.currentRequest?.payment_method === 'Thanh toán thẻ thành công' ||
+                     this.currentRequest?.payment_method === 'Stripe Card Payment';
       additionalInfo = isStripe 
         ? ' Hệ thống sẽ tự động hoàn tiền qua Stripe và chuyển trạng thái đơn hàng thành <strong>ĐÃ HỦY</strong>.'
         : ' Trạng thái đơn hàng sẽ chuyển thành <strong>CHỜ HOÀN TIỀN</strong> để admin xử lý thủ công.';

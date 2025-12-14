@@ -1,0 +1,77 @@
+@startuml
+skinparam sequenceMessageAlign center
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+skinparam sequenceParticipant underline
+
+title AI Tư Vấn Sản Phẩm - Tìm Kiếm Ngữ Nghĩa & Khuyến Nghị
+
+actor "Người Dùng" as U
+participant "Giao Diện Chatbot\n(Frontend)" as UI
+participant "AIChatController\n(Backend)" as API
+participant "AIProductAssistantService" as AIService
+participant "Gemini AI\n(Google Vertex AI)" as Gemini
+participant "VectorSearchService" as VectorSearch
+database "ChromaDB\n(Cơ Sở Dữ Liệu Vector)" as ChromaDB
+
+U -> UI : Nhập câu hỏi về sản phẩm\n(vd: Tôi cần khóa vân tay giá rẻ)
+activate UI
+UI -> API : POST /api/v1/ai/chat/product-assistant\n{query: câu hỏi}
+activate API
+
+API -> API : Kiểm tra và validate câu hỏi
+API -> AIService : Gọi phương thức xử lý câu hỏi\nvề sản phẩm\n(answerProductQuery)
+activate AIService
+
+AIService -> VectorSearch : Tìm kiếm ngữ nghĩa 5 sản phẩm\ntương tự dựa trên câu hỏi\n(searchProducts)
+activate VectorSearch
+VectorSearch -> ChromaDB : Chuyển đổi câu hỏi thành vector\nvà tìm kiếm tương tự
+activate ChromaDB
+ChromaDB -> ChromaDB : Tính toán độ tương đồng cosine\ngiữa vector câu hỏi và vector sản phẩm
+ChromaDB -> ChromaDB : Sắp xếp và trả về 5 kết quả tốt nhất
+ChromaDB --> VectorSearch : Danh sách 5 sản phẩm hàng đầu\n(List<Document>)
+deactivate ChromaDB
+VectorSearch --> AIService : Trả về tài liệu sản phẩm liên quan\n(relevantDocuments)
+deactivate VectorSearch
+
+AIService -> AIService : Xây dựng ngữ cảnh sản phẩm\ntừ danh sách tài liệu tìm được\n(buildProductContext)
+note right of AIService
+  Trích xuất thông tin sản phẩm:
+  - Tên sản phẩm
+  - Giá (VND)
+  - Danh mục
+  - Phần trăm giảm giá
+  - Mô tả chi tiết
+  - Định dạng thành chuỗi ngữ cảnh
+end note
+
+AIService -> AIService : Tạo câu lệnh nâng cao\nkết hợp câu hỏi + ngữ cảnh sản phẩm\n(createEnhancedPrompt)
+note right of AIService
+  Câu lệnh nâng cao:
+  Bạn là chuyên gia tư vấn khóa điện tử...
+  Câu hỏi: {câuHỏi}
+  Sản phẩm tìm thấy: {ngữCảnhSảnPhẩm}
+  Quy tắc trả lời:
+  - Trả lời bằng tiếng Việt
+  - Ngắn gọn, súc tích (150-300 từ)
+  - Bao gồm: tên, giá, tính năng chính
+  - Giải thích tại sao phù hợp
+end note
+
+AIService -> Gemini : Gửi câu lệnh nâng cao\nđể AI tạo câu trả lời tư vấn\n(chat với enhancedPrompt)
+activate Gemini
+Gemini -> Gemini : Phân tích câu hỏi và\nngữ cảnh sản phẩm
+Gemini -> Gemini : Tạo câu trả lời tư vấn\ncá nhân hóa và khuyến nghị
+Gemini --> AIService : Trả về câu trả lời tư vấn\nbằng tiếng Việt (response)
+deactivate Gemini
+
+AIService --> API : Trả về văn bản câu trả lời\n(responseText)
+deactivate AIService
+API -> API : Xây dựng đối tượng phản hồi\nbao gồm response, success, type, timestamp
+API --> UI : Trả về phản hồi thành công\nvới nội dung câu trả lời AI tư vấn
+deactivate API
+UI -> UI : Hiển thị câu trả lời AI\n+ Danh sách sản phẩm được đề xuất
+UI --> U : Hiển thị câu trả lời tư vấn\nvà khuyến nghị sản phẩm
+deactivate UI
+
+@enduml

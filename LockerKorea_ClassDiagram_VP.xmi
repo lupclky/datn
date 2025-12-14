@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.1" 
+        xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" 
+        xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML">
+  <uml:Model xmi:id="_LockerKorea_Model" name="LockerKorea_ClassDiagram">
+    
+    <!-- Primitive Types -->
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_Long" name="Long"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_String" name="String"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_Integer" name="Integer"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_Boolean" name="Boolean"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_Date" name="Date"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_LocalDateTime" name="LocalDateTime"/>
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_BigDecimal" name="BigDecimal"/>
+    
+    <!-- Classes -->
+    <packagedElement xmi:type="uml:Class" xmi:id="_User" name="User">
+      <ownedAttribute xmi:id="_User_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_fullName" name="fullName" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_phoneNumber" name="phoneNumber" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_address" name="address" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_email" name="email" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_password" name="password" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_active" name="active" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_dateOfBirth" name="dateOfBirth" visibility="private">
+        <type xmi:idref="_Date"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_facebookAccountId" name="facebookAccountId" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_googleAccountId" name="googleAccountId" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_resetPasswordToken" name="resetPasswordToken" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_User_resetPasswordTokenExpiry" name="resetPasswordTokenExpiry" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Role" name="Role">
+      <ownedAttribute xmi:id="_Role_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Role_name" name="name" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Product" name="Product">
+      <ownedAttribute xmi:id="_Product_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_name" name="name" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_price" name="price" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_thumbnail" name="thumbnail" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_description" name="description" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_discount" name="discount" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_quantity" name="quantity" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_inStock" name="inStock" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Product_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Category" name="Category">
+      <ownedAttribute xmi:id="_Category_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Category_name" name="name" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_ProductImage" name="ProductImage">
+      <ownedAttribute xmi:id="_ProductImage_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ProductImage_imageUrl" name="imageUrl" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ProductImage_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ProductImage_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_LockFeature" name="LockFeature">
+      <ownedAttribute xmi:id="_LockFeature_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_LockFeature_name" name="name" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_LockFeature_description" name="description" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_LockFeature_isActive" name="isActive" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_LockFeature_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_LockFeature_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_ProductFeature" name="ProductFeature">
+      <ownedAttribute xmi:id="_ProductFeature_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ProductFeature_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ProductFeature_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Order" name="Order">
+      <ownedAttribute xmi:id="_Order_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_fullName" name="fullName" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_email" name="email" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_phoneNumber" name="phoneNumber" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_address" name="address" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_note" name="note" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_orderDate" name="orderDate" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_status" name="status" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_totalMoney" name="totalMoney" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_shippingMethod" name="shippingMethod" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_shippingDate" name="shippingDate" visibility="private">
+        <type xmi:idref="_Date"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_paymentMethod" name="paymentMethod" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_paymentIntentId" name="paymentIntentId" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_vnpTxnRef" name="vnpTxnRef" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_vnpTransactionNo" name="vnpTransactionNo" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_trackingNumber" name="trackingNumber" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_carrier" name="carrier" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_districtId" name="districtId" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_wardCode" name="wardCode" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_active" name="active" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Order_discountAmount" name="discountAmount" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_OrderDetail" name="OrderDetail">
+      <ownedAttribute xmi:id="_OrderDetail_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_OrderDetail_price" name="price" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_OrderDetail_numberOfProducts" name="numberOfProducts" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_OrderDetail_totalMoney" name="totalMoney" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_OrderDetail_size" name="size" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Cart" name="Cart">
+      <ownedAttribute xmi:id="_Cart_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Cart_quantity" name="quantity" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Cart_size" name="size" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Cart_sessionId" name="sessionId" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Review" name="Review">
+      <ownedAttribute xmi:id="_Review_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Review_rating" name="rating" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Review_comment" name="comment" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Review_staffReply" name="staffReply" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Review_staffReplyAt" name="staffReplyAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Review_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Review_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Voucher" name="Voucher">
+      <ownedAttribute xmi:id="_Voucher_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_code" name="code" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_name" name="name" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_description" name="description" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_discountPercentage" name="discountPercentage" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_minOrderValue" name="minOrderValue" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_maxDiscountAmount" name="maxDiscountAmount" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_quantity" name="quantity" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_remainingQuantity" name="remainingQuantity" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_validFrom" name="validFrom" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_validTo" name="validTo" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_isActive" name="isActive" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Voucher_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_VoucherUsage" name="VoucherUsage">
+      <ownedAttribute xmi:id="_VoucherUsage_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_VoucherUsage_usedAt" name="usedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_ReturnRequest" name="ReturnRequest">
+      <ownedAttribute xmi:id="_ReturnRequest_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ReturnRequest_reason" name="reason" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ReturnRequest_status" name="status" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ReturnRequest_refundAmount" name="refundAmount" visibility="private">
+        <type xmi:idref="_BigDecimal"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ReturnRequest_adminNotes" name="adminNotes" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ReturnRequest_requestedAt" name="requestedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ReturnRequest_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_ChatConversation" name="ChatConversation">
+      <ownedAttribute xmi:id="_ChatConversation_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatConversation_guestSessionId" name="guestSessionId" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatConversation_isClosed" name="isClosed" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatConversation_closedAt" name="closedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatConversation_firstMessageAt" name="firstMessageAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatConversation_lastMessageAt" name="lastMessageAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatConversation_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatConversation_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_ChatMessage" name="ChatMessage">
+      <ownedAttribute xmi:id="_ChatMessage_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_message" name="message" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_messageType" name="messageType" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_isRead" name="isRead" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_isStaffMessage" name="isStaffMessage" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_fileUrl" name="fileUrl" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_fileName" name="fileName" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_guestSessionId" name="guestSessionId" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_ChatMessage_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_Banner" name="Banner">
+      <ownedAttribute xmi:id="_Banner_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_title" name="title" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_description" name="description" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_imageUrl" name="imageUrl" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_buttonText" name="buttonText" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_buttonLink" name="buttonLink" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_buttonStyle" name="buttonStyle" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_displayOrder" name="displayOrder" visibility="private">
+        <type xmi:idref="_Integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_isActive" name="isActive" visibility="private">
+        <type xmi:idref="_Boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_startDate" name="startDate" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_endDate" name="endDate" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_Banner_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Class" xmi:id="_News" name="News">
+      <ownedAttribute xmi:id="_News_id" name="id" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_title" name="title" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_content" name="content" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_summary" name="summary" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_author" name="author" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_category" name="category" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_status" name="status" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_featuredImage" name="featuredImage" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_views" name="views" visibility="private">
+        <type xmi:idref="_Long"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_publishedAt" name="publishedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_facebookPostId" name="facebookPostId" visibility="private">
+        <type xmi:idref="_String"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_facebookScheduledAt" name="facebookScheduledAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_createdAt" name="createdAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_News_updatedAt" name="updatedAt" visibility="private">
+        <type xmi:idref="_LocalDateTime"/>
+      </ownedAttribute>
+    </packagedElement>
+    
+    <!-- Aggregation Relationships -->
+    <packagedElement xmi:type="uml:Association" xmi:id="_assoc_user_role">
+      <memberEnd xmi:idref="_end_user_role_user"/>
+      <memberEnd xmi:idref="_end_user_role_role"/>
+      <ownedEnd xmi:id="_end_user_role_user" type="_User" aggregation="shared" lowerValue="1" upperValue="1"/>
+      <ownedEnd xmi:id="_end_user_role_role" type="_Role" aggregation="none" lowerValue="0" upperValue="*"/>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Association" xmi:id="_assoc_user_order">
+      <memberEnd xmi:idref="_end_user_order_user"/>
+      <memberEnd xmi:idref="_end_user_order_order"/>
+      <ownedEnd xmi:id="_end_user_order_user" type="_User" aggregation="shared" lowerValue="1" upperValue="1"/>
+      <ownedEnd xmi:id="_end_user_order_order" type="_Order" aggregation="none" lowerValue="0" upperValue="*"/>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Association" xmi:id="_assoc_product_category">
+      <memberEnd xmi:idref="_end_product_category_product"/>
+      <memberEnd xmi:idref="_end_product_category_category"/>
+      <ownedEnd xmi:id="_end_product_category_product" type="_Product" aggregation="none" lowerValue="0" upperValue="*"/>
+      <ownedEnd xmi:id="_end_product_category_category" type="_Category" aggregation="shared" lowerValue="1" upperValue="1"/>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Association" xmi:id="_assoc_product_image">
+      <memberEnd xmi:idref="_end_product_image_product"/>
+      <memberEnd xmi:idref="_end_product_image_image"/>
+      <ownedEnd xmi:id="_end_product_image_product" type="_Product" aggregation="shared" lowerValue="1" upperValue="1"/>
+      <ownedEnd xmi:id="_end_product_image_image" type="_ProductImage" aggregation="none" lowerValue="0" upperValue="*"/>
+    </packagedElement>
+    
+    <packagedElement xmi:type="uml:Association" xmi:id="_assoc_order_detail">
+      <memberEnd xmi:idref="_end_order_detail_order"/>
+      <memberEnd xmi:idref="_end_order_detail_od"/>
+      <ownedEnd xmi:id="_end_order_detail_order" type="_Order" aggregation="shared" lowerValue="1" upperValue="1"/>
+      <ownedEnd xmi:id="_end_order_detail_od" type="_OrderDetail" aggregation="none" lowerValue="0" upperValue="*"/>
+    </packagedElement>
+    
+  </uml:Model>
+</xmi:XMI>
+

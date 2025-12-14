@@ -11,5 +11,7 @@ export interface HistoryOrderDto {
     email: string,
     brand?: string,
     payment_method?: string,
+    shipping_method?: string,
+    address?: string,
     assigned_staff_name?: string
 }

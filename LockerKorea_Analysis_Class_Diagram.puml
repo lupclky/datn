@@ -1,0 +1,203 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+class Banner {
+  - id : Long
+  - title : String
+  - description : String
+  - imageUrl : String
+  - buttonText : String
+  - buttonLink : String
+  - buttonStyle : String
+  - displayOrder : Integer
+  - isActive : Boolean
+  - startDate : LocalDateTime
+  - endDate : LocalDateTime
+}
+class BaseEntity {
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+}
+class Cart {
+  - id : Long
+  - sessionId : String
+  - quantity : Long
+  - size : Long
+}
+class Category {
+  - id : Long
+  - name : String
+}
+class ChatConversation {
+  - id : Long
+  - guestSessionId : String
+  - closedAt : LocalDateTime
+  - firstMessageAt : LocalDateTime
+  - lastMessageAt : LocalDateTime
+}
+class ChatMessage {
+  - id : Long
+  - guestSessionId : String
+  - message : String
+  - fileUrl : String
+  - fileName : String
+}
+class LockFeature {
+  - id : Long
+  - name : String
+  - description : String
+}
+class News {
+  - id : Long
+  - title : String
+  - content : String
+  - summary : String
+  - author : String
+  - category : String
+  - status : NewsStatus
+  - featuredImage : String
+  - publishedAt : LocalDateTime
+  - facebookPostId : String
+  - facebookScheduledAt : LocalDateTime
+}
+class Order {
+  - id : Long
+  - fullName : String
+  - email : String
+  - phoneNumber : String
+  - address : String
+  - note : String
+  - orderDate : LocalDateTime
+  - status : String
+  - totalMoney : Long
+  - shippingMethod : String
+  - shippingDate : LocalDate
+  - paymentMethod : String
+  - paymentIntentId : String
+  - vnpTxnRef : String
+  - vnpTransactionNo : String
+  - trackingNumber : String
+  - carrier : String
+  - districtId : Integer
+  - wardCode : String
+  - active : Boolean
+  - discountAmount : Long
+}
+class OrderDetail {
+  - id : Long
+  - price : Long
+  - numberOfProducts : Long
+  - totalMoney : Long
+  - size : Long
+}
+class OrderStatus {
+}
+class Product {
+  - id : Long
+  - name : String
+  - price : Long
+  - thumbnail : String
+  - description : String
+  - discount : Long
+  - quantity : Long
+  - inStock : Boolean
+}
+class ProductFeature {
+  - id : Long
+}
+class ProductImage {
+  - id : Long
+  - imageUrl : String
+}
+class ReturnRequest {
+  - id : Long
+  - reason : String
+  - status : String
+  - refundAmount : BigDecimal
+  - adminNotes : String
+  - updatedAt : LocalDateTime
+}
+class Review {
+  - id : Long
+  - rating : Integer
+  - comment : String
+  - staffReply : String
+}
+class Role {
+  - id : Long
+  - name : String
+}
+class SocialAccount {
+  - id : Long
+  - provider : String
+  - providerId : String
+  - name : String
+  - email : String
+}
+class Token {
+  - id : Long
+  - token : String
+  - tokenType : String
+  - expirationDate : LocalDateTime
+  - revoked : boolean
+  - expired : boolean
+}
+class User {
+  - id : Long
+  - fullName : String
+  - phoneNumber : String
+  - address : String
+  - email : String
+  - password : String
+  - active : boolean
+  - dateOfBirth : Date
+  - facebookAccountId : int
+  - googleAccountId : int
+  - resetPasswordToken : String
+  - resetPasswordTokenExpiry : LocalDateTime
+}
+class Voucher {
+  - id : Long
+  - code : String
+  - name : String
+  - description : String
+  - discountPercentage : Integer
+  - minOrderValue : Long
+  - maxDiscountAmount : Long
+  - quantity : Integer
+  - remainingQuantity : Integer
+  - validFrom : LocalDateTime
+  - validTo : LocalDateTime
+}
+class VoucherUsage {
+  - id : Long
+  - discountAmount : Long
+  - usedAt : LocalDateTime
+}
+Cart "*" --> "1" Product
+Cart "*" --> "1" User
+ChatConversation "*" --> "1" User
+ChatConversation "*" --> "1" User
+ChatConversation "*" --> "1" User
+ChatMessage "*" --> "1" ChatConversation
+ChatMessage "*" --> "1" User
+ChatMessage "*" --> "1" User
+Order "1" *-- "0..*" OrderDetail
+Order "1" *-- "0..*" VoucherUsage
+OrderDetail "*" --> "1" Product
+Product "*" --> "1" Category
+Product "1" *-- "0..*" ProductImage
+Product "1" *-- "0..*" ProductFeature
+ProductFeature "*" --> "1" LockFeature
+ReturnRequest "*" --> "1" Order
+Review "*" --> "1" Product
+Review "*" --> "1" User
+Review "*" --> "1" User
+SocialAccount "*" --> "1" User
+Token "*" --> "1" User
+User "*" --> "1" Role
+User "1" *-- "0..*" Order
+Voucher "1" *-- "0..*" VoucherUsage
+Voucher "1" o-- "0..*" Order
+VoucherUsage "*" --> "1" User
+@enduml

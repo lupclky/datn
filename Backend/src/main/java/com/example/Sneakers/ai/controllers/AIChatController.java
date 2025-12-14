@@ -238,28 +238,13 @@ public class AIChatController {
                 return ResponseEntity.ok(errorResponse);
             }
             
-            // Validate content length (minimum 800 words)
+            // Return content without word count validation
             String trimmedContent = content.trim();
-            int wordCount = trimmedContent.split("\\s+").length;
-            int minWords = 800;
             
-            if (wordCount < minWords) {
-                log.warn("Generated content is too short: {} words (minimum: {}) for title: {}", 
-                        wordCount, minWords, title);
-                // Still return content but with warning
-                Map<String, Object> result = new HashMap<>();
-                result.put("content", trimmedContent);
-                result.put("success", true);
-                result.put("warning", String.format("Nội dung chỉ có %d từ, có thể chưa đủ chi tiết (tối thiểu: %d từ)", wordCount, minWords));
-                result.put("wordCount", wordCount);
-                result.put("timestamp", System.currentTimeMillis());
-                return ResponseEntity.ok(result);
-            }
-            
-            log.info("Successfully generated content, length: {} chars, words: {}", content.length(), wordCount);
+            log.info("Successfully generated content, length: {} chars", content.length());
             
             Map<String, Object> result = new HashMap<>();
-            result.put("content", content);
+            result.put("content", trimmedContent);
             result.put("success", true);
             result.put("timestamp", System.currentTimeMillis());
 
@@ -352,24 +337,15 @@ public class AIChatController {
                 return ResponseEntity.ok(errorResponse);
             }
             
-            // Validate content length (minimum 600 words)
+            // Return content without word count validation
             String trimmedContent = content.trim();
-            int wordCount = trimmedContent.split("\\s+").length;
-            int minWords = 600;
             
             Map<String, Object> result = new HashMap<>();
             result.put("content", trimmedContent);
             result.put("success", true);
-            result.put("wordCount", wordCount);
-            
-            if (wordCount < minWords) {
-                log.warn("Generated product description is short: {} words (minimum: {}) for: {}", 
-                        wordCount, minWords, productName);
-                result.put("warning", String.format("Nội dung chỉ có %d từ, có thể chưa đủ chi tiết (tối thiểu: %d từ)", wordCount, minWords));
-            }
-            
             result.put("timestamp", System.currentTimeMillis());
-            log.info("Successfully generated product description, length: {} chars, words: {}", content.length(), wordCount);
+            
+            log.info("Successfully generated product description, length: {} chars", content.length());
 
             return ResponseEntity.ok(result);
 

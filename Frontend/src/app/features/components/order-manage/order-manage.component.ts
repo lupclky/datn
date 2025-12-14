@@ -30,6 +30,7 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { ORDER_STATUS_OPTIONS, getOrderStatusLabel } from '../../../core/constants/order-status.constants';
 
 @Component({
   selector: 'app-order-manage',
@@ -71,16 +72,10 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   public allOrders: HistoryOrderDto[] = [];
   public loading: boolean = true;
   public apiImage: string = environment.apiImage;
-  public orderStateOptions: MenuItem[] = [
-    { label: 'Tất cả', value: '' },
-    { label: 'Đang chờ', value: 'pending' },
-    { label: 'Đang xử lý', value: 'processing' },
-    { label: 'Đang được giao', value: 'shipped' },
-    { label: 'Đã được giao', value: 'delivered' },
-    { label: 'Đã hủy', value: 'canceled' },
-    { label: 'Thanh toán thành công', value: 'paid' },
-    { label: 'Thanh toán thất bại', value: 'payment_failed' }
-  ];
+  public orderStateOptions: MenuItem[] = ORDER_STATUS_OPTIONS.map(opt => ({
+    label: opt.label,
+    value: opt.value
+  }));
   public searchForm: FormGroup;
   public totalRecords: number = 0;
   public pageSize: number = 15;
@@ -111,12 +106,6 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     { name: 'Thanh toán qua VNPAY', key: 'VNPAY' }
   ];
   public isCreatingOrder: boolean = false;
-  
-  // Waybill dialog
-  public showWaybillDialog: boolean = false;
-  public waybillForm: FormGroup;
-  public selectedOrderForWaybill: any = null;
-  public isCreatingWaybill: boolean = false;
 
   constructor(
     private orderService: OrderService,
@@ -144,14 +133,6 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
       productSearch: ['']
     });
 
-    this.waybillForm = this.fb.group({
-        district_id: [null, [Validators.required]],
-        ward_code: ['', [Validators.required]],
-        length: [20, [Validators.required, Validators.min(1)]],
-        width: [20, [Validators.required, Validators.min(1)]],
-        height: [10, [Validators.required, Validators.min(1)]],
-        weight: [200, [Validators.required, Validators.min(1)]]
-    });
   }
 
   private checkPermissions(): boolean {
@@ -380,16 +361,48 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   }
 
   getPaymentMethodClass(paymentMethod: string): string {
-    if (paymentMethod === 'Stripe Card Payment') {
+    if (paymentMethod === 'Stripe Card Payment' || paymentMethod === 'Stripe (visa/mastercard)' || paymentMethod === 'Thanh toán thẻ thành công') {
       return 'payment-method-stripe-success';
     }
     if (paymentMethod === 'Pending Stripe Payment') {
       return 'payment-method-stripe-pending';
     }
+    if (paymentMethod === 'VNPAY' || paymentMethod === 'VnPay' || paymentMethod?.toLowerCase() === 'vnpay') {
+      return 'payment-method-vnpay';
+    }
     if (paymentMethod === 'Thanh toán khi nhận hàng') {
       return 'payment-method-cod';
     }
     return 'payment-method-default';
+  }
+
+  getPaymentMethodLabel(paymentMethod?: string): string {
+    if (!paymentMethod) return 'N/A';
+    const methodMap: { [key: string]: string } = {
+      'Cash': 'Tiền mặt',
+      'Banking': 'Chuyển khoản',
+      'Stripe': 'Stripe (visa/mastercard)',
+      'VNPAY': 'VNPay',
+      'Stripe Card Payment': 'Stripe (visa/mastercard)',
+      'Stripe (visa/mastercard)': 'Stripe (visa/mastercard)',
+      'Thanh toán thẻ thành công': 'Stripe (visa/mastercard)',
+      'Pending Stripe Payment': 'Chờ thanh toán thẻ',
+      'Thanh toán khi nhận hàng': 'Tiền mặt'
+    };
+    return methodMap[paymentMethod] || paymentMethod;
+  }
+
+  getShippingMethodLabel(shippingMethod?: string): string {
+    if (!shippingMethod) return 'N/A';
+    const methodMap: { [key: string]: string } = {
+      'Tiêu chuẩn': 'Tiêu chuẩn',
+      'Nhanh': 'Nhanh',
+      'Hỏa tốc': 'Hỏa tốc',
+      'Standard': 'Tiêu chuẩn',
+      'Fast': 'Nhanh',
+      'Express': 'Hỏa tốc'
+    };
+    return methodMap[shippingMethod] || shippingMethod;
   }
 
   onOrderStateChange(event: any, orderId: number) {
@@ -416,8 +429,7 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   }
 
   getPlaceholderByOrderStatus(status: string): string {
-    const selectedStatus = this.orderStateOptions.find(opt => opt['value'] === status);
-    return selectedStatus ? selectedStatus.label as string : 'Trạng thái';
+    return getOrderStatusLabel(status);
   }
 
   // Create new order methods
@@ -620,60 +632,4 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     ).subscribe();
   }
 
-  openWaybillDialog(order: any) {
-      this.selectedOrderForWaybill = order;
-      this.showWaybillDialog = true;
-      this.waybillForm.reset({
-          district_id: order.district_id,
-          ward_code: order.ward_code,
-          length: 20,
-          width: 20,
-          height: 10,
-          weight: 200
-      });
-  }
-
-  saveWaybillInfo() {
-      if (this.waybillForm.invalid || !this.selectedOrderForWaybill) {
-          return;
-      }
-      
-      const { district_id, ward_code } = this.waybillForm.value;
-      // Just update local or call API to save address if needed without creating waybill
-      // For now, we simulate saving by just closing and letting user know it's ready
-      this.toastService.info('Thông tin đã được nhập. Nhấn "Tạo vận đơn ngay" để gửi sang GHN.');
-  }
-
-  createWaybill() {
-      if (this.waybillForm.invalid || !this.selectedOrderForWaybill) {
-          return;
-      }
-
-      this.isCreatingWaybill = true;
-      const formValue = this.waybillForm.value;
-
-      this.orderService.createWaybill(
-          this.selectedOrderForWaybill.id, 
-          formValue.district_id, 
-          formValue.ward_code,
-          formValue.length,
-          formValue.width,
-          formValue.height,
-          formValue.weight
-        ).pipe(
-          tap(() => {
-              this.toastService.success('Tạo vận đơn thành công!');
-              this.showWaybillDialog = false;
-              this.loadOrders();
-          }),
-          catchError((err) => {
-              const errorMessage = err?.error?.message || err?.error || 'Không thể tạo vận đơn';
-              this.toastService.fail(errorMessage);
-              return of(err);
-          }),
-          finalize(() => {
-              this.isCreatingWaybill = false;
-          })
-      ).subscribe();
-  }
 }

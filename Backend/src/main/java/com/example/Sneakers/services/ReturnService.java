@@ -89,7 +89,7 @@ public class ReturnService implements IReturnService {
         log.info("Approving return request {} for order {} with payment method: {}", requestId, order.getId(), paymentMethod);
 
         // Handle refund based on payment method
-        if ("Thanh toán thẻ thành công".equals(paymentMethod) || "Stripe".equalsIgnoreCase(paymentMethod)) {
+        if ("Stripe (visa/mastercard)".equals(paymentMethod) || "Thanh toán thẻ thành công".equals(paymentMethod) || "Stripe".equalsIgnoreCase(paymentMethod)) {
             // Auto-refund for Stripe
             log.info("Processing automatic Stripe refund for order: {}", order.getId());
             stripeService.refund(order.getPaymentIntentId());

@@ -271,7 +271,7 @@
                         <td>#{{ order.id }}</td>
                         <td>{{ order.order_date | date:'dd/MM/yyyy HH:mm' }}</td>
                         <td>
-                            <p-tag [value]="order.status" 
+                            <p-tag [value]="getOrderStatusLabel(order.status)" 
                                    [severity]="getOrderStatusSeverity(order.status)">
                             </p-tag>
                         </td>

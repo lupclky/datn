@@ -25,6 +25,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { TagModule } from 'primeng/tag';
 
 import { UserService } from '../../../../core/services/user.service';
+import { ORDER_STATUS_UPDATE_OPTIONS, getOrderStatusLabel } from '../../../../core/constants/order-status.constants';
 
 @Component({
   selector: 'app-admin-order-detail',
@@ -69,14 +70,7 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
   public currentStatusIndex: number = 0;
 
   // Admin specific properties
-  public orderStatusOptions = [
-    { label: 'Đang chờ', value: 'pending' },
-    { label: 'Đang xử lý', value: 'processing' },
-    { label: 'Đang giao hàng', value: 'shipped' },
-    { label: 'Đã giao', value: 'delivered' },
-    { label: 'Đã hủy', value: 'cancelled' },
-    { label: 'Thanh toán thất bại', value: 'payment_failed' }
-  ];
+  public orderStatusOptions = ORDER_STATUS_UPDATE_OPTIONS;
   public selectedStatus: string = '';
 
   // Waybill creation
@@ -168,7 +162,8 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
         this.orderInfor = orderInfor;
         this.productOrderd = orderInfor.order_details;
         this.notion = orderInfor.note;
-        this.selectedStatus = orderInfor.status;
+        // Normalize status: handle 'success' as 'delivered' for backward compatibility
+        this.selectedStatus = orderInfor.status === 'success' ? 'delivered' : orderInfor.status;
 
         this.totalMoney = 0;
         this.productOrderd.forEach((item) => {

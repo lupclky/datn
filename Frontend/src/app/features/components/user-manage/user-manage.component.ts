@@ -30,6 +30,7 @@ import { ProductDto } from '../../../core/dtos/product.dto';
 import { AllProductDto } from '../../../core/dtos/AllProduct.dto';
 import { switchMap } from 'rxjs';
 import { Observable } from 'rxjs';
+import { getOrderStatusLabel, getOrderStatusSeverity } from '../../../core/constants/order-status.constants';
 
 export interface UserOption {
   label: string;
@@ -577,23 +578,12 @@ export class UserManageComponent extends BaseComponent implements OnInit {
     );
   }
 
+  getOrderStatusLabel(status: string): string {
+    return getOrderStatusLabel(status);
+  }
+
   getOrderStatusSeverity(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-      case 'chờ xử lý':
-        return 'warning';
-      case 'processing':
-      case 'đang xử lý':
-        return 'info';
-      case 'completed':
-      case 'hoàn thành':
-        return 'success';
-      case 'cancelled':
-      case 'đã hủy':
-        return 'danger';
-      default:
-        return '';
-    }
+    return getOrderStatusSeverity(status) || '';
   }
 
   viewOrderDetails(order: HistoryOrderDto): void {

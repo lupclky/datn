@@ -5,5 +5,6 @@ export interface ProductUploadReq {
     description: string,
     discount: number,
     quantity: number,
+    add_quantity?: boolean, // If true, add quantity to existing; if false or undefined, replace quantity
     featureIds?: number[],
 }

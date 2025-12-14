@@ -14,14 +14,14 @@
       </div>
       
       <!-- Product Category Menu Button -->
-      <div class="category-menu-container" (mouseleave)="onMenuMouseLeave()" *ngIf="roleId !== 2 && roleId !== 3">
+      <div class="category-menu-container" (mouseleave)="onMenuMouseLeave()" (mouseenter)="onMenuMouseEnter()" *ngIf="roleId !== 2 && roleId !== 3">
         <button class="category-btn" (mouseenter)="onMenuMouseEnter()" (click)="toggleCategoryMenu()">
           <i class="pi pi-bars"></i>
           <span>Danh mục sản phẩm</span>
         </button>
 
         <!-- Dropdown Menu -->
-        <div class="category-dropdown" *ngIf="isCategoryMenuOpen">
+        <div class="category-dropdown" *ngIf="isCategoryMenuOpen" (mouseenter)="onMenuMouseEnter()" (mouseleave)="onMenuMouseLeave()">
           <!-- Main List -->
           <ul class="category-list" [class.hidden-on-mobile]="activeMobileSubmenu">
             <!-- Dynamic Categories -->
@@ -67,7 +67,7 @@
     </div>
 
     <!-- Center Section: Search -->
-    <div class="header-search-container" [class.mobile-active]="isMobileSearchActive">
+    <div class="header-search-container" [class.mobile-active]="isMobileSearchActive" *ngIf="roleId !== 2 && roleId !== 3">
       <div class="header-search">
         <div class="search-container">
           <div class="search-input-wrapper">
@@ -116,10 +116,15 @@
       </button>
     </div>
 
+    <!-- Center Section: Admin/Staff Center Title -->
+    <div class="header-center-title" *ngIf="roleId == 2 || roleId == 3">
+      <h2>{{ roleId == 2 ? 'Admin Center' : 'Staff Center' }}</h2>
+    </div>
+
     <!-- Right Section: User & Cart -->
     <div class="header-right">
 
-      <button class="mobile-search-trigger" (click)="isMobileSearchActive = true">
+      <button class="mobile-search-trigger" (click)="isMobileSearchActive = true" *ngIf="roleId !== 2 && roleId !== 3">
         <i class="pi pi-search"></i>
       </button>
 
@@ -199,7 +204,6 @@
 @if(roleId == 2) {
   <aside class="admin-sidebar" [class.closed]="!isSidebarOpen">
     <div class="sidebar-header">
-      <h3>KVK Admin</h3>
     </div>
     <nav class="sidebar-nav">
       <ul class="sidebar-menu">
@@ -319,35 +323,29 @@
 
 <nav class="navbar navbar-expand-lg" [class.hidden]="roleId == 2 || roleId == 3">
   <div class="container-fluid">
-    <button class="navbar-toggler" type="button" (click)="toggleMenu()">
-      <i class="pi pi-bars" style="font-size: 1.5rem; color: #E6E1E5;"></i>
-    </button>
+    <ul class="navbar-nav w-100 justify-content-center">
+      @if(roleId == 1 || !roleId){
+        <li class="nav-item">
+          <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="pi pi-home"></i>
+            <span class="nav-text">Trang chủ</span>
+          </a>
+        </li>
     
-    <div class="collapse navbar-collapse" [class.show]="isMenuOpen">
-      <ul class="navbar-nav w-100 justify-content-center">
-        @if(roleId == 1 || !roleId){
-          <li class="nav-item">
-            <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-              <i class="pi pi-home"></i>
-              <span class="nav-text">Trang chủ</span>
-            </a>
-          </li>
-      
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/news']" routerLinkActive="active">
-              <i class="pi pi-book"></i>
-              <span class="nav-text">Tin tức</span>
-            </a>
-          </li>
-      
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">
-              <i class="pi pi-th-large"></i>
-              <span class="nav-text">Tất cả sản phẩm</span>
-            </a>
-          </li>
-        }
-      </ul>
-    </div>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/news']" routerLinkActive="active">
+            <i class="pi pi-book"></i>
+            <span class="nav-text">Tin tức</span>
+          </a>
+        </li>
+    
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">
+            <i class="pi pi-th-large"></i>
+            <span class="nav-text">Tất cả sản phẩm</span>
+          </a>
+        </li>
+      }
+    </ul>
   </div>
 </nav>

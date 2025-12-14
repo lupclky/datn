@@ -118,4 +118,23 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail,Long> {
            "ORDER BY SUM(od.number_of_products) DESC " +
            "LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}", nativeQuery = true)
     List<Object[]> getTopProductSold(Pageable pageable);
+
+    // Get total sold quantity for a specific product
+    @Query(value = "SELECT COALESCE(SUM(od.number_of_products), 0) " +
+           "FROM order_details od " +
+           "JOIN orders o ON od.order_id = o.id " +
+           "WHERE od.product_id = :productId " +
+           "AND o.status IN ('pending', 'shipped', 'delivered', 'paid') AND o.active = true", 
+           nativeQuery = true)
+    Long getTotalSoldQuantityByProductId(@Param("productId") Long productId);
+
+    // Get total sold quantity for multiple products (batch query for performance)
+    @Query(value = "SELECT od.product_id, COALESCE(SUM(od.number_of_products), 0) AS total_sold " +
+           "FROM order_details od " +
+           "JOIN orders o ON od.order_id = o.id " +
+           "WHERE od.product_id IN :productIds " +
+           "AND o.status IN ('pending', 'shipped', 'delivered', 'paid') AND o.active = true " +
+           "GROUP BY od.product_id", 
+           nativeQuery = true)
+    List<Object[]> getTotalSoldQuantityByProductIds(@Param("productIds") List<Long> productIds);
 }

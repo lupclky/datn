@@ -22,6 +22,10 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productFeatures pf LEFT JOIN FETCH pf.feature LEFT JOIN FETCH p.category")
     List<Product> findAllWithFeatures();
 
+    // Load single product with all relationships for async indexing
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productFeatures pf LEFT JOIN FETCH pf.feature LEFT JOIN FETCH p.category WHERE p.id = :productId")
+    Optional<Product> findByIdWithFeatures(@Param("productId") Long productId);
+
     boolean existsByName(String name);
 
     long countByQuantityGreaterThan(Long quantity);

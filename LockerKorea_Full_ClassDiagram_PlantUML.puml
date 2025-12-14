@@ -1,0 +1,543 @@
+@startuml LockerKorea_Full_ClassDiagram
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor White
+skinparam classBorderColor Black
+skinparam classArrowColor Black
+skinparam packageBackgroundColor LightYellow
+skinparam packageBorderColor Black
+
+' ============================================
+' PACKAGE: MODELS (Entities)
+' ============================================
+package "Models" {
+  
+  abstract class BaseEntity {
+    - createdAt : LocalDateTime
+    - updatedAt : LocalDateTime
+    {abstract} onCreate()
+    {abstract} onUpdate()
+  }
+  
+  class User extends BaseEntity {
+    - id : Long
+    - fullName : String
+    - phoneNumber : String
+    - address : String
+    - email : String
+    - password : String
+    - active : Boolean
+    - dateOfBirth : Date
+    - facebookAccountId : Integer
+    - googleAccountId : Integer
+    - resetPasswordToken : String
+    - resetPasswordTokenExpiry : LocalDateTime
+    + getAuthorities() : Collection<GrantedAuthority>
+    + getUsername() : String
+    + isAccountNonExpired() : Boolean
+    + isAccountNonLocked() : Boolean
+    + isCredentialsNonExpired() : Boolean
+    + isEnabled() : Boolean
+  }
+  
+  class Role {
+    - id : Long
+    - name : String
+    + {static} ADMIN : String
+    + {static} USER : String
+    + {static} STAFF : String
+  }
+  
+  class Product extends BaseEntity {
+    - id : Long
+    - name : String
+    - price : Long
+    - thumbnail : String
+    - description : String
+    - discount : Long
+    - quantity : Long
+    - inStock : Boolean
+  }
+  
+  class Category {
+    - id : Long
+    - name : String
+  }
+  
+  class ProductImage {
+    - id : Long
+    - imageUrl : String
+    + {static} MAXIMUM_IMAGES_PER_PRODUCT : Integer
+  }
+  
+  class LockFeature extends BaseEntity {
+    - id : Long
+    - name : String
+    - description : String
+    - isActive : Boolean
+  }
+  
+  class ProductFeature extends BaseEntity {
+    - id : Long
+  }
+  
+  class Order {
+    - id : Long
+    - fullName : String
+    - email : String
+    - phoneNumber : String
+    - address : String
+    - note : String
+    - orderDate : LocalDateTime
+    - status : String
+    - totalMoney : Long
+    - shippingMethod : String
+    - shippingDate : Date
+    - paymentMethod : String
+    - paymentIntentId : String
+    - vnpTxnRef : String
+    - vnpTransactionNo : String
+    - trackingNumber : String
+    - carrier : String
+    - districtId : Integer
+    - wardCode : String
+    - active : Boolean
+    - discountAmount : Long
+  }
+  
+  class OrderDetail {
+    - id : Long
+    - price : Long
+    - numberOfProducts : Long
+    - totalMoney : Long
+    - size : Long
+  }
+  
+  class Cart {
+    - id : Long
+    - quantity : Long
+    - size : Long
+    - sessionId : String
+  }
+  
+  class Review extends BaseEntity {
+    - id : Long
+    - rating : Integer
+    - comment : String
+    - staffReply : String
+    - staffReplyAt : LocalDateTime
+  }
+  
+  class Voucher extends BaseEntity {
+    - id : Long
+    - code : String
+    - name : String
+    - description : String
+    - discountPercentage : Integer
+    - minOrderValue : Long
+    - maxDiscountAmount : Long
+    - quantity : Integer
+    - remainingQuantity : Integer
+    - validFrom : LocalDateTime
+    - validTo : LocalDateTime
+    - isActive : Boolean
+    + isValid() : Boolean
+    + canApplyToOrder(orderTotal : Long) : Boolean
+    + calculateDiscount(orderTotal : Long) : Long
+  }
+  
+  class VoucherUsage {
+    - id : Long
+    - usedAt : LocalDateTime
+  }
+  
+  class ReturnRequest {
+    - id : Long
+    - reason : String
+    - status : String
+    - refundAmount : BigDecimal
+    - adminNotes : String
+    - requestedAt : LocalDateTime
+    - updatedAt : LocalDateTime
+  }
+  
+  class ChatConversation extends BaseEntity {
+    - id : Long
+    - guestSessionId : String
+    - isClosed : Boolean
+    - closedAt : LocalDateTime
+    - firstMessageAt : LocalDateTime
+    - lastMessageAt : LocalDateTime
+  }
+  
+  class ChatMessage extends BaseEntity {
+    - id : Long
+    - message : String
+    - messageType : String
+    - isRead : Boolean
+    - isStaffMessage : Boolean
+    - fileUrl : String
+    - fileName : String
+    - guestSessionId : String
+  }
+  
+  class Banner extends BaseEntity {
+    - id : Long
+    - title : String
+    - description : String
+    - imageUrl : String
+    - buttonText : String
+    - buttonLink : String
+    - buttonStyle : String
+    - displayOrder : Integer
+    - isActive : Boolean
+    - startDate : LocalDateTime
+    - endDate : LocalDateTime
+  }
+  
+  class News extends BaseEntity {
+    - id : Long
+    - title : String
+    - content : String
+    - summary : String
+    - author : String
+    - category : String
+    - status : NewsStatus
+    - featuredImage : String
+    - views : Long
+    - publishedAt : LocalDateTime
+    - facebookPostId : String
+    - facebookScheduledAt : LocalDateTime
+  }
+  
+  enum NewsStatus {
+    DRAFT
+    PUBLISHED
+    ARCHIVED
+  }
+  
+  ' Relationships
+  User "1" --> "*" Role : has
+  User "1" --> "*" Order : places
+  User "1" --> "*" Cart : has
+  User "1" --> "*" Review : writes
+  User "1" --> "*" ChatConversation : participates (customer)
+  User "1" --> "*" ChatConversation : handles (staff)
+  User "1" --> "*" ChatMessage : sends
+  User "1" --> "*" ChatMessage : receives
+  User "1" --> "*" Order : assigned (staff)
+  User "1" --> "*" Review : replies (staff)
+  
+  Product "*" --> "1" Category : belongs to
+  Product "1" --> "*" ProductImage : has
+  Product "1" --> "*" ProductFeature : has
+  Product "1" --> "*" OrderDetail : in
+  Product "1" --> "*" Cart : in
+  Product "1" --> "*" Review : reviewed in
+  
+  ProductFeature "*" --> "1" Product : belongs to
+  ProductFeature "*" --> "1" LockFeature : uses
+  
+  Order "1" --> "*" OrderDetail : contains
+  Order "*" --> "1" User : placed by
+  Order "*" --> "1" User : assigned to (staff)
+  Order "*" --> "0..1" Voucher : uses
+  Order "1" --> "*" VoucherUsage : tracks
+  Order "1" --> "*" ReturnRequest : can have
+  
+  OrderDetail "*" --> "1" Order : belongs to
+  OrderDetail "*" --> "1" Product : references
+  
+  Review "*" --> "1" Product : reviews
+  Review "*" --> "1" User : written by
+  Review "*" --> "0..1" User : replied by (staff)
+  
+  Voucher "1" --> "*" VoucherUsage : tracked by
+  Voucher "1" --> "*" Order : applied to
+  
+  VoucherUsage "*" --> "1" Voucher : uses
+  VoucherUsage "*" --> "1" Order : in
+  VoucherUsage "*" --> "1" User : used by
+  
+  ReturnRequest "*" --> "1" Order : for
+  
+  ChatConversation "1" --> "*" ChatMessage : contains
+  ChatConversation "*" --> "0..1" User : customer
+  ChatConversation "*" --> "0..1" User : staff
+  ChatConversation "*" --> "0..1" User : closed by
+  
+  ChatMessage "*" --> "1" ChatConversation : belongs to
+  ChatMessage "*" --> "0..1" User : sender
+  ChatMessage "*" --> "0..1" User : receiver
+  
+}
+
+' ============================================
+' PACKAGE: CONTROLLERS
+' ============================================
+package "Controllers" {
+  class UserController
+  class ProductController
+  class OrderController
+  class CategoryController
+  class CartController
+  class ReviewController
+  class VoucherController
+  class ReturnController
+  class ChatController
+  class BannerController
+  class NewsController
+  class LockFeatureController
+  class ProductFeatureController
+  class StatisticsController
+  class VnpayController
+  class StripeController
+  class RoleController
+  class GhnController
+  class OrderDetailController
+  class AIChatController
+  class VectorSearchController
+  class AIInitializationController
+}
+
+' ============================================
+' PACKAGE: SERVICES
+' ============================================
+package "Services" {
+  
+  interface IUserService
+  interface IProductService
+  interface IOrderService
+  interface ICategoryServices
+  interface ICartService
+  interface IVoucherService
+  interface IReturnService
+  interface IVnPayService
+  interface IStripeService
+  interface IBannerService
+  interface INewsService
+  interface VectorSearchService
+  
+  class UserService implements IUserService
+  class ProductService implements IProductService
+  class OrderService implements IOrderService
+  class CategoryService implements ICategoryServices
+  class CartService implements ICartService
+  class VoucherService implements IVoucherService
+  class ReturnService implements IReturnService
+  class VnPayService implements IVnPayService
+  class StripeService implements IStripeService
+  class BannerService implements IBannerService
+  class NewsService implements INewsService
+  class ReviewService
+  class LockFeatureService
+  class ProductFeatureService
+  class StatisticsService
+  class ChatServiceV2
+  class GhnService
+  class RoleService
+  class FacebookService
+  class VectorSearchServiceImpl implements VectorSearchService
+  class AIProductAssistantService
+  class AsyncOrderService
+}
+
+' ============================================
+' PACKAGE: REPOSITORIES
+' ============================================
+package "Repositories" {
+  interface UserRepository
+  interface ProductRepository
+  interface OrderRepository
+  interface CategoryRepository
+  interface CartRepository
+  interface ReviewRepository
+  interface VoucherRepository
+  interface VoucherUsageRepository
+  interface ReturnRequestRepository
+  interface OrderDetailRepository
+  interface ProductImageRepository
+  interface ProductFeatureRepository
+  interface LockFeatureRepository
+  interface BannerRepository
+  interface NewsRepository
+  interface ChatConversationRepository
+  interface ChatMessageRepository
+  interface RoleRepository
+}
+
+' ============================================
+' PACKAGE: DTOs
+' ============================================
+package "DTOs" {
+  class UserDTO
+  class ProductDTO
+  class OrderDTO
+  class CategoryDTO
+  class CartItemDTO
+  class ReviewDTO
+  class VoucherDTO
+  class ReturnRequestDTO
+  class BannerDTO
+  class NewsDTO
+  class LockFeatureDTO
+  class ProductImageDTO
+  class OrderDetailDTO
+  class UpdateUserDTO
+  class UserLoginDTO
+  class CreateVnpayPaymentDTO
+  class StripePaymentRequestDTO
+  class StripePaymentResponseDTO
+}
+
+' ============================================
+' PACKAGE: EXCEPTIONS
+' ============================================
+package "Exceptions" {
+  class DataNotFoundException
+  class InvalidParamException
+  class PermissionDenyException
+}
+
+' ============================================
+' PACKAGE: COMPONENTS
+' ============================================
+package "Components" {
+  class JwtTokenUtils
+  class LocalizationUtils
+  class VNPayConfig
+  class VNPayUtil
+}
+
+' ============================================
+' PACKAGE: CONFIGURATIONS
+' ============================================
+package "Configurations" {
+  class SecurityConfig
+  class WebConfig
+  class WebSecurityConfig
+  class StripeConfig
+  class MapperConfiguration
+  class LanguageConfig
+}
+
+' ============================================
+' PACKAGE: FILTERS
+' ============================================
+package "Filters" {
+  class JwtTokenFilter
+}
+
+' ============================================
+' RELATIONSHIPS: Controllers -> Services
+' ============================================
+UserController ..> UserService : uses
+ProductController ..> ProductService : uses
+OrderController ..> OrderService : uses
+CategoryController ..> CategoryService : uses
+CartController ..> CartService : uses
+ReviewController ..> ReviewService : uses
+VoucherController ..> VoucherService : uses
+ReturnController ..> ReturnService : uses
+ChatController ..> ChatServiceV2 : uses
+BannerController ..> BannerService : uses
+NewsController ..> NewsService : uses
+LockFeatureController ..> LockFeatureService : uses
+ProductFeatureController ..> ProductFeatureService : uses
+StatisticsController ..> StatisticsService : uses
+VnpayController ..> VnPayService : uses
+StripeController ..> StripeService : uses
+RoleController ..> RoleService : uses
+GhnController ..> GhnService : uses
+AIChatController ..> AIProductAssistantService : uses
+VectorSearchController ..> VectorSearchServiceImpl : uses
+
+' ============================================
+' RELATIONSHIPS: Services -> Repositories
+' ============================================
+UserService ..> UserRepository : uses
+ProductService ..> ProductRepository : uses
+OrderService ..> OrderRepository : uses
+CategoryService ..> CategoryRepository : uses
+CartService ..> CartRepository : uses
+ReviewService ..> ReviewRepository : uses
+VoucherService ..> VoucherRepository : uses
+ReturnService ..> ReturnRequestRepository : uses
+BannerService ..> BannerRepository : uses
+NewsService ..> NewsRepository : uses
+LockFeatureService ..> LockFeatureRepository : uses
+ProductFeatureService ..> ProductFeatureRepository : uses
+ChatServiceV2 ..> ChatConversationRepository : uses
+ChatServiceV2 ..> ChatMessageRepository : uses
+
+' ============================================
+' RELATIONSHIPS: Services -> DTOs
+' ============================================
+UserService ..> UserDTO : uses
+ProductService ..> ProductDTO : uses
+OrderService ..> OrderDTO : uses
+CategoryService ..> CategoryDTO : uses
+CartService ..> CartItemDTO : uses
+VoucherService ..> VoucherDTO : uses
+ReturnService ..> ReturnRequestDTO : uses
+BannerService ..> BannerDTO : uses
+NewsService ..> NewsDTO : uses
+
+' ============================================
+' RELATIONSHIPS: Services -> Models
+' ============================================
+UserService ..> User : manages
+ProductService ..> Product : manages
+OrderService ..> Order : manages
+CategoryService ..> Category : manages
+CartService ..> Cart : manages
+ReviewService ..> Review : manages
+VoucherService ..> Voucher : manages
+ReturnService ..> ReturnRequest : manages
+BannerService ..> Banner : manages
+NewsService ..> News : manages
+
+' ============================================
+' RELATIONSHIPS: Repositories -> Models
+' ============================================
+UserRepository ..> User : manages
+ProductRepository ..> Product : manages
+OrderRepository ..> Order : manages
+CategoryRepository ..> Category : manages
+CartRepository ..> Cart : manages
+ReviewRepository ..> Review : manages
+VoucherRepository ..> Voucher : manages
+ReturnRequestRepository ..> ReturnRequest : manages
+OrderDetailRepository ..> OrderDetail : manages
+ProductImageRepository ..> ProductImage : manages
+ProductFeatureRepository ..> ProductFeature : manages
+LockFeatureRepository ..> LockFeature : manages
+BannerRepository ..> Banner : manages
+NewsRepository ..> News : manages
+ChatConversationRepository ..> ChatConversation : manages
+ChatMessageRepository ..> ChatMessage : manages
+RoleRepository ..> Role : manages
+
+' ============================================
+' RELATIONSHIPS: Controllers -> DTOs
+' ============================================
+UserController ..> UserDTO : uses
+ProductController ..> ProductDTO : uses
+OrderController ..> OrderDTO : uses
+CategoryController ..> CategoryDTO : uses
+CartController ..> CartItemDTO : uses
+ReviewController ..> ReviewDTO : uses
+VoucherController ..> VoucherDTO : uses
+ReturnController ..> ReturnRequestDTO : uses
+BannerController ..> BannerDTO : uses
+NewsController ..> NewsDTO : uses
+
+' ============================================
+' RELATIONSHIPS: Filters & Security
+' ============================================
+JwtTokenFilter ..> JwtTokenUtils : uses
+SecurityConfig ..> JwtTokenFilter : configures
+User ..> UserDetails : implements
+
+@enduml
+

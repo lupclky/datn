@@ -45,6 +45,15 @@ public class OrderHistoryResponse {
     @JsonProperty("payment_method")
     private String paymentMethod;
 
+    @JsonProperty("shipping_method")
+    private String shippingMethod;
+
+    @JsonProperty("address")
+    private String address;
+
+    @JsonProperty("email")
+    private String email;
+
     @JsonProperty("assigned_staff_name")
     private String assignedStaffName;
 
@@ -57,7 +66,10 @@ public class OrderHistoryResponse {
                 .orderDate(order.getOrderDate().toLocalDate())
                 .fullname(order.getFullName())
                 .phoneNumber(order.getPhoneNumber())
-                .paymentMethod(order.getPaymentMethod());
+                .email(order.getEmail())
+                .paymentMethod(order.getPaymentMethod())
+                .shippingMethod(order.getShippingMethod())
+                .address(order.getAddress());
 
         if (order.getAssignedStaff() != null) {
             builder.assignedStaffName(order.getAssignedStaff().getFullName());

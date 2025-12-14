@@ -22,12 +22,15 @@ public class ProductEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleProductSave(ProductSaveEvent event) {
+        // Run indexing asynchronously to not block the response
         try {
             Product product = event.getProduct();
-            log.info("Indexing product after save: {}", product.getName());
-            vectorSearchService.indexProduct(product);
+            Long productId = product.getId();
+            log.info("Scheduling async indexing for product after save: {} (ID: {})", product.getName(), productId);
+            // Pass productId instead of product entity to avoid detached entity issues
+            vectorSearchService.updateProductIndexAsync(productId);
         } catch (Exception e) {
-            log.error("Failed to index product: {}", event.getProduct().getName(), e);
+            log.error("Failed to schedule indexing for product: {}", event.getProduct().getName(), e);
         }
     }
 

@@ -159,6 +159,9 @@
                           <span class="current-price">{{product.price | currency:'VND':'symbol':'1.0-0'}}</span>
                           <span *ngIf="product.discount > 0" class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
                         </div>
+                        <div class="product-sold" *ngIf="product.sold_quantity !== undefined && product.sold_quantity > 0">
+                          <span>Đã bán: {{product.sold_quantity}}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -200,6 +203,11 @@
                             <span class="original-price">{{product.price / (1-product.discount/100) | currency:'VND':'symbol':'1.0-0'}}</span>
                           }
                         </div>
+                        @if(product.sold_quantity !== undefined && product.sold_quantity > 0) {
+                          <div class="product-sold">
+                            <span>Đã bán: {{product.sold_quantity}}</span>
+                          </div>
+                        }
                       </div>
                     </div>
                   </div>

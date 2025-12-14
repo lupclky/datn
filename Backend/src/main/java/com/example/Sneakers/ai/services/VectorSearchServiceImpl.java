@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -153,6 +154,26 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     public void updateProductIndex(Product product) {
         deleteProductFromIndex(product.getId());
         indexProduct(product);
+    }
+
+    @Override
+    @Async
+    public void updateProductIndexAsync(Long productId) {
+        try {
+            // Reload product from database with all relationships to avoid detached entity issues
+            Optional<Product> productOpt = productRepository.findByIdWithFeatures(productId);
+            if (productOpt.isEmpty()) {
+                log.warn("Product not found for indexing: {}", productId);
+                return;
+            }
+            
+            Product product = productOpt.get();
+            log.info("Async indexing product: {} (ID: {})", product.getName(), productId);
+            updateProductIndex(product);
+            log.info("Successfully indexed product: {} (ID: {})", product.getName(), productId);
+        } catch (Exception e) {
+            log.error("Failed to index product asynchronously (ID: {}): {}", productId, e.getMessage(), e);
+        }
     }
 
     @Override

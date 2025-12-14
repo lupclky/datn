@@ -17,6 +17,7 @@ import { ButtonModule } from 'primeng/button';
 import { Observable } from 'rxjs';
 import { TimelineModule } from 'primeng/timeline';
 import { CardModule } from 'primeng/card';
+import { getOrderStatusLabel } from '../../../core/constants/order-status.constants';
 
 @Component({
   selector: 'app-order-detail',
@@ -243,6 +244,10 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
 
   markActive(index: number) {
       this.orderEvents[index].color = '#673AB7'; // Active color
+  }
+
+  getOrderStatusLabel(status: string): string {
+    return getOrderStatusLabel(status === 'success' ? 'delivered' : status);
   }
 
   getGhnStatusText(status: string): string {

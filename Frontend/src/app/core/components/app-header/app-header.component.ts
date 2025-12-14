@@ -467,16 +467,27 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
     }, 50);
   }
 
+  private menuCloseTimeout: any = null;
+
   // Hover handlers that only work on desktop to prevent mobile ghost clicks
   onMenuMouseEnter() {
     if (window.innerWidth > 768) {
+      // Clear any pending close timeout
+      if (this.menuCloseTimeout) {
+        clearTimeout(this.menuCloseTimeout);
+        this.menuCloseTimeout = null;
+      }
       this.isCategoryMenuOpen = true;
     }
   }
 
   onMenuMouseLeave() {
     if (window.innerWidth > 768) {
-      this.isCategoryMenuOpen = false;
+      // Add delay before closing to allow mouse to move to dropdown
+      this.menuCloseTimeout = setTimeout(() => {
+        this.isCategoryMenuOpen = false;
+        this.menuCloseTimeout = null;
+      }, 200); // 200ms delay
     }
   }
 }

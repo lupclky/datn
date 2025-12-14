@@ -1,0 +1,90 @@
+@startuml LockerKorea_AI_Image_Analysis
+skinparam sequenceMessageAlign center
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+skinparam sequenceParticipant underline
+
+title Phân Tích Hình Ảnh Sản Phẩm Bằng AI
+
+actor "Người Dùng" as U
+participant "Giao Diện Chatbot\n(Frontend)" as UI
+participant "AIChatController\n(Backend)" as API
+participant "AIProductAssistantService" as AIService
+participant "Gemini AI\n(Google Vertex AI)" as Gemini
+participant "VectorSearchService" as VectorSearch
+database "ChromaDB\n(Cơ Sở Dữ Liệu Vector)" as ChromaDB
+
+
+U -> UI : Tải lên ảnh sản phẩm\n+ Nhập câu hỏi
+activate UI
+UI -> UI : Chuyển đổi ảnh sang Base64
+UI -> API : POST /api/v1/ai/chat/image\n(ảnh + câu hỏi)
+activate API
+
+API -> API : Trích xuất dữ liệu ảnh từ request
+API -> API : Mã hóa ảnh sang định dạng Base64
+API -> API : Xác định loại MIME của ảnh
+API -> AIService : Gọi phương thức xử lý câu hỏi\nkèm hình ảnh sản phẩm\n(answerProductQueryWithImage)
+activate AIService
+
+AIService -> Gemini : Gửi ảnh đến AI để phân tích\nvà tạo từ khóa tìm kiếm\n(chat với ImageContent)
+activate Gemini
+note right of Gemini
+  Câu lệnh: Mô tả chi tiết sản phẩm
+  trong ảnh này (màu sắc, loại,
+  thương hiệu, tính năng chính)
+  để dùng làm từ khóa tìm kiếm
+  trong cơ sở dữ liệu.
+  Chỉ trả về các từ khóa tìm kiếm.
+end note
+Gemini -> Gemini : Phân tích nội dung ảnh\nTrích xuất đặc điểm sản phẩm\nTạo từ khóa tìm kiếm
+Gemini --> AIService : Trả về từ khóa tìm kiếm\n(vd: khóa điện tử, màu đen, vân tay)
+deactivate Gemini
+
+AIService -> VectorSearch : Tìm kiếm 5 sản phẩm tương tự\ndựa trên từ khóa vừa tạo\n(searchProducts)
+activate VectorSearch
+VectorSearch -> ChromaDB : Thực hiện tìm kiếm tương tự vector\nsử dụng từ khóa đã phân tích
+activate ChromaDB
+ChromaDB -> ChromaDB : Tính toán độ tương đồng cosine\ngiữa vector từ khóa và vector sản phẩm
+ChromaDB -> ChromaDB : Sắp xếp và trả về 5 kết quả tốt nhất
+ChromaDB --> VectorSearch : Danh sách 5 sản phẩm hàng đầu\n(List<Document>)
+deactivate ChromaDB
+VectorSearch --> AIService : Trả về tài liệu sản phẩm liên quan\n(relevantDocuments)
+deactivate VectorSearch
+
+AIService -> AIService : Xây dựng ngữ cảnh sản phẩm\ntừ danh sách tài liệu tìm được\n(buildProductContext)
+note right of AIService
+  Trích xuất thông tin sản phẩm:
+  - Tên, giá, mô tả
+  - Tính năng, danh mục
+  - Định dạng thành chuỗi ngữ cảnh
+end note
+
+AIService -> AIService : Tạo câu lệnh cuối cùng\nkết hợp ảnh + ngữ cảnh sản phẩm\n+ câu hỏi của người dùng
+note right of AIService
+  Câu lệnh cuối:
+  Bạn là chuyên gia tư vấn...
+  Khách hàng hỏi: {câuHỏi}
+  Sản phẩm tìm thấy: {ngữCảnhSảnPhẩm}
+  Hãy trả lời dựa trên CẢ ảnh
+  VÀ danh sách sản phẩm...
+end note
+
+AIService -> Gemini : Gửi lại ảnh + câu lệnh cuối\nđể AI tạo câu trả lời cá nhân hóa\n(chat với ImageContent + finalPrompt)
+activate Gemini
+Gemini -> Gemini : So sánh chi tiết ảnh với\nmô tả sản phẩm đã tìm được
+Gemini -> Gemini : Tạo đề xuất sản phẩm\ncá nhân hóa cho người dùng
+Gemini --> AIService : Trả về câu trả lời cuối cùng\nbằng tiếng Việt (finalResponse)
+deactivate Gemini
+
+AIService --> API : Trả về văn bản câu trả lời\n(responseText)
+deactivate AIService
+API -> API : Xây dựng đối tượng phản hồi\nbao gồm response, success, timestamp
+API --> UI : Trả về phản hồi thành công\nvới nội dung câu trả lời AI
+
+deactivate API
+UI -> UI : Hiển thị câu trả lời AI\n+ Đề xuất sản phẩm
+UI --> U : Hiển thị câu trả lời\nvà gợi ý sản phẩm
+deactivate UI
+
+@enduml
