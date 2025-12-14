@@ -14,29 +14,29 @@
       </div>
       
       <!-- Product Category Menu Button -->
-      <div class="category-menu-container" (mouseleave)="onMenuMouseLeave()">
+      <div class="category-menu-container" (mouseleave)="onMenuMouseLeave()" *ngIf="roleId !== 2 && roleId !== 3">
         <button class="category-btn" (mouseenter)="onMenuMouseEnter()" (click)="toggleCategoryMenu()">
           <i class="pi pi-bars"></i>
-          <span>DANH MỤC</span>
+          <span>Danh mục sản phẩm</span>
         </button>
 
         <!-- Dropdown Menu -->
         <div class="category-dropdown" *ngIf="isCategoryMenuOpen">
-          <ul class="category-list">
+          <!-- Main List -->
+          <ul class="category-list" [class.hidden-on-mobile]="activeMobileSubmenu">
             <!-- Dynamic Categories -->
             <li *ngFor="let cat of categories" class="category-item" (click)="onCategorySelect(cat.id.toString())">
               <span>{{cat.name}}</span>
               <i class="pi pi-angle-right"></i>
             </li>
 
-            <!-- Brand Section -->
             <!-- Feature Section -->
-            <li class="category-item has-submenu">
+            <li class="category-item has-submenu" (click)="openMobileSubmenu('features', $event)">
               <span>Khóa thông minh theo tính năng</span>
               <i class="pi pi-angle-right"></i>
               
-               <!-- Submenu for Features -->
-               <div class="submenu">
+               <!-- Desktop Submenu -->
+               <div class="submenu desktop-submenu">
                 <ul>
                   <li *ngFor="let feat of features" (click)="onFeatureSelect(feat.id?.toString() || '')">
                     {{feat.name}}
@@ -44,9 +44,23 @@
                 </ul>
               </div>
             </li>
-            
-            <!-- Static/Other items from image -->
           </ul>
+
+          <!-- Mobile Submenu View (Drill-down) -->
+          <div class="mobile-submenu-container" *ngIf="activeMobileSubmenu === 'features'">
+            <div class="mobile-submenu-header" (click)="closeMobileSubmenu($event)">
+              <button class="back-btn">
+                <i class="pi pi-arrow-left"></i>
+              </button>
+              <span class="header-title">Khóa theo tính năng</span>
+            </div>
+            <ul class="mobile-submenu-list">
+              <li *ngFor="let feat of features" (click)="onFeatureSelect(feat.id?.toString() || '')">
+                <span>{{feat.name}}</span>
+                <i class="pi pi-angle-right"></i>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
       

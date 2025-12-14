@@ -77,6 +77,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
   
   // Category Menu Properties
   public isCategoryMenuOpen = false;
+  public activeMobileSubmenu: string | null = null; // 'features' or null
   public categories: CategoriesDto[] = [];
   public features: LockFeature[] = [];
   public brandOptions = [
@@ -420,8 +421,23 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
 
   toggleCategoryMenu() {
     this.isCategoryMenuOpen = !this.isCategoryMenuOpen;
+    if (!this.isCategoryMenuOpen) {
+      this.activeMobileSubmenu = null; // Reset submenu when closing
+    }
   }
-  
+
+  openMobileSubmenu(menuName: string, event: Event) {
+    if (window.innerWidth <= 768) {
+      event.stopPropagation(); // Prevent closing or other actions
+      this.activeMobileSubmenu = menuName;
+    }
+  }
+
+  closeMobileSubmenu(event: Event) {
+    event.stopPropagation();
+    this.activeMobileSubmenu = null;
+  }
+
   onCategorySelect(categoryId: string) {
     this.isCategoryMenuOpen = false;
     // Use setTimeout to ensure the menu closes visually before navigation or on mobile touch
