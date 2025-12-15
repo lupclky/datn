@@ -1,38 +1,303 @@
-<div class="profile-container">
+<div class="profile-page">
+  <p-toast></p-toast>
+  
   <div class="profile-header">
-    <div>
-      <h2>Hồ sơ của tôi</h2>
-      <p>Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
-    </div>
-    <div class="actions">
-      <button *ngIf="!isEditMode" (click)="enableEditMode()" class="btn btn-secondary">Sửa</button>
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="pi pi-user"></i>
+        Hồ sơ
+      </h1>
     </div>
   </div>
-  <hr>
-  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="fullName">Họ và tên</label>
-        <input type="text" id="fullName" class="form-control" formControlName="fullname">
+
+  <div class="profile-content">
+    <div class="tabs-wrapper">
+      <p-tabView class="profile-tabs" orientation="left" (onChange)="onTabChange($event)">
+      <!-- Tab 1: Thông tin cá nhân -->
+      <p-tabPanel header="Thông tin cá nhân" leftIcon="pi pi-user">
+        <div class="tab-content">
+          <div class="profile-info-card">
+            <div class="card-header">
+              <h2>Thông tin tài khoản</h2>
+              <div class="header-actions" style="display: flex; gap: 0.5rem;">
+                <p-button 
+                  label="Đổi mật khẩu" 
+                  icon="pi pi-key" 
+                  styleClass="p-button-text"
+                  (click)="navigateToChangePassword()">
+                </p-button>
+                <p-button 
+                  *ngIf="!isEditMode" 
+                  label="Chỉnh sửa" 
+                  icon="pi pi-pencil" 
+                  styleClass="p-button-text"
+                  (click)="enableEditMode()">
+                </p-button>
+              </div>
+            </div>
+
+            <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()" class="profile-form">
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="fullname">Họ và tên</label>
+                  <input 
+                    pInputText 
+                    id="fullname" 
+                    formControlName="fullname"
+                    placeholder="Nhập họ và tên"
+                    [class.error]="profileForm.get('fullname')?.invalid && profileForm.get('fullname')?.touched">
+                  <small *ngIf="profileForm.get('fullname')?.invalid && profileForm.get('fullname')?.touched" class="error-text">
+                    Họ và tên không được để trống
+                  </small>
       </div>
-      <div class="form-group col-md-6">
+
+                <div class="form-field">
         <label for="email">Email</label>
-        <input type="email" id="email" class="form-control" formControlName="email">
+                  <input 
+                    pInputText 
+                    type="email" 
+                    id="email" 
+                    formControlName="email"
+                    placeholder="Nhập email"
+                    [class.error]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+                  <small *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="error-text">
+                    Email không hợp lệ
+                  </small>
+                </div>
+
+                <div class="form-field">
+                  <label for="phone_number">Số điện thoại</label>
+                  <input 
+                    pInputText 
+                    id="phone_number" 
+                    formControlName="phone_number"
+                    placeholder="Nhập số điện thoại"
+                    [class.error]="profileForm.get('phone_number')?.invalid && profileForm.get('phone_number')?.touched">
+                  <small *ngIf="profileForm.get('phone_number')?.invalid && profileForm.get('phone_number')?.touched" class="error-text">
+                    Số điện thoại không được để trống
+                  </small>
+                </div>
+
+                <div class="form-field full-width">
+                  <label for="address">Địa chỉ</label>
+                  <input 
+                    pInputText 
+                    id="address" 
+                    formControlName="address"
+                    placeholder="Nhập địa chỉ"
+                    [class.error]="profileForm.get('address')?.invalid && profileForm.get('address')?.touched">
+                  <small *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched" class="error-text">
+                    Địa chỉ không được để trống
+                  </small>
+                </div>
+              </div>
+
+              <div class="form-actions" *ngIf="isEditMode">
+                <p-button 
+                  label="Hủy" 
+                  icon="pi pi-times" 
+                  styleClass="p-button-text"
+                  (click)="cancelEdit()">
+                </p-button>
+                <p-button 
+                  label="Lưu thay đổi" 
+                  icon="pi pi-check" 
+                  type="submit"
+                  [disabled]="profileForm.invalid">
+                </p-button>
+              </div>
+            </form>
+          </div>
+
+
+        </div>
+      </p-tabPanel>
+
+      <!-- Tab 3: Lịch sử mua hàng -->
+      <p-tabPanel header="Lịch sử mua hàng" leftIcon="pi pi-history">
+        <div class="tab-content">
+          <div class="order-history-section">
+            <!-- Filters -->
+            <div class="filters-container">
+              <div class="search-field">
+                <span class="p-input-icon-left">
+                  <i class="pi pi-search"></i>
+                  <input 
+                    pInputText 
+                    type="text" 
+                    [(ngModel)]="searchTerm" 
+                    (input)="onSearchChange()" 
+                    placeholder="Tìm theo mã ĐH, tên sản phẩm..." 
+                    class="search-input" />
+                </span>
+              </div>
+              <div class="status-filter">
+                <p-dropdown 
+                  [options]="statusOptions" 
+                  [(ngModel)]="selectedStatus" 
+                  (onChange)="onStatusChange()" 
+                  placeholder="Lọc trạng thái" 
+                  [showClear]="true" 
+                  styleClass="status-dropdown">
+                </p-dropdown>
+              </div>
+              <p-button 
+                icon="pi pi-filter-slash" 
+                styleClass="p-button-text" 
+                (click)="clearFilters()" 
+                pTooltip="Xóa bộ lọc">
+              </p-button>
+            </div>
+
+            <!-- Orders List -->
+            <div class="orders-list-container">
+              @if(orderLoading) {
+                <div class="loading-state">
+                  <p-progressSpinner strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
+                  <span>Đang tải đơn hàng...</span>
+                </div>
+              } @else if(filteredOrders.length === 0) {
+                <div class="empty-state">
+                  <i class="pi pi-inbox"></i>
+                  <h3>{{ historyOrder.length === 0 ? 'Bạn chưa có đơn hàng nào' : 'Không tìm thấy đơn hàng' }}</h3>
+                  <p>{{ historyOrder.length === 0 ? 'Hãy bắt đầu mua sắm để xem lịch sử đơn hàng của bạn tại đây.' : 'Vui lòng thử lại với bộ lọc khác.' }}</p>
+                </div>
+              } @else {
+                <div class="orders-list">
+                  @for (order of pagedOrders; track order.id) {
+                    <div class="order-card">
+                      <div class="order-header" [ngClass]="'status-' + order.status">
+                        <div class="order-id-section">
+                          <span class="order-id" (click)="viewOrderDetail(order.id)">Đơn hàng #{{order.id}}</span>
+                          <p-tag [value]="getStatusLabel(order.status)" [severity]="getStatusSeverity(order.status)" styleClass="status-tag"></p-tag>
+                        </div>
+                        <div class="order-date">{{ order.order_date | date: 'dd/MM/yyyy HH:mm' }}</div>
+                      </div>
+
+                      <div class="order-body" (click)="viewOrderDetail(order.id)">
+                        <div class="product-image-container">
+                          <img [src]="apiImage + order.thumbnail" [alt]="order.product_name" class="product-image" onerror="this.src='/assets/images/placeholder.jpg'" />
+                          @if (order.total_products > 1) {
+                            <span class="more-products-badge">+{{ order.total_products - 1 }}</span>
+                          }
+                        </div>
+                        <div class="product-info">
+                          <p class="product-name">{{ order.product_name }}</p>
+                          <p class="buyer-info">Người nhận: {{ order.fullname }}</p>
+                          <p class="payment-method">
+                            HT thanh toán: 
+                            <span [ngSwitch]="order.payment_method">
+                              <ng-container *ngSwitchCase="'cod'">Thanh toán khi nhận hàng</ng-container>
+                              <ng-container *ngSwitchCase="'Stripe'">Thẻ Visa/Mastercard</ng-container>
+                              <ng-container *ngSwitchDefault>{{ order.payment_method }}</ng-container>
+                            </span>
+                          </p>
+                        </div>
+                        <div class="order-total">
+                          <span class="total-label">Tổng cộng</span>
+                          <span class="total-amount">{{ order.total_money | currency: 'VND' : 'symbol' }}</span>
+                        </div>
+                      </div>
+
+                      <div class="order-footer">
+                        <div class="actions">
+                          <p-button label="Xem chi tiết" icon="pi pi-eye" styleClass="p-button-sm p-button-text" (click)="viewOrderDetail(order.id)"></p-button>
+                          
+                          @if (canReturnOrder(order)) {
+                            <p-button label="Trả hàng" icon="pi pi-replay" styleClass="p-button-sm p-button-text p-button-success" (click)="requestReturn(order.id)"></p-button>
+                          }
+                          
+                          @if(order.status === 'payment_failed'){
+                            @if(order.payment_method === 'Stripe'){
+                              <p-button label="Thanh toán lại" icon="pi pi-credit-card" styleClass="p-button-sm p-button-text p-button-danger" (click)="retryPayment(order)"></p-button>
+                            }
+                            @if(order.payment_method === 'VNPAY'){
+                              <p-button label="Thanh toán lại" icon="pi pi-credit-card" styleClass="p-button-sm p-button-text p-button-danger" (click)="retryVnpayPayment(order)"></p-button>
+                            }
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                
+                <p-paginator
+                  [rows]="rows"
+                  [totalRecords]="filteredOrders.length"
+                  (onPageChange)="paginate($event)"
+                  [rowsPerPageOptions]="[5, 10, 20]">
+                </p-paginator>
+              }
+            </div>
+          </div>
+        </div>
+      </p-tabPanel>
+
+      <!-- Tab 4: Trả hàng hoàn tiền -->
+      <p-tabPanel header="Trả hàng & Hoàn tiền" leftIcon="pi pi-replay">
+        <div class="tab-content">
+          <div class="returns-section">
+            @if(returnsLoading) {
+              <div class="loading-state">
+                <p-progressSpinner strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
+                <span>Đang tải danh sách...</span>
+              </div>
+            } @else if(myRequests.length === 0) {
+              <div class="empty-state">
+                <i class="pi pi-inbox"></i>
+                <h3>Chưa có yêu cầu trả hàng</h3>
+                <p>Bạn chưa có yêu cầu trả hàng nào. Nếu cần, bạn có thể tạo yêu cầu từ trang lịch sử mua hàng.</p>
+              </div>
+            } @else {
+              <div class="returns-list">
+                @for (request of myRequests; track request.id) {
+                  <div class="return-card">
+                    <div class="card-main-info">
+                      <div class="card-header">
+                        <span class="order-id" (click)="viewReturnOrderDetail(request.order_id)">Đơn hàng #{{ request.order_id }}</span>
+                        <p-tag [value]="getStatusText(request.status)" [severity]="getReturnStatusSeverity(request.status)" styleClass="status-tag"></p-tag>
+                      </div>
+                      <div class="card-body">
+                        <p><strong>Lý do:</strong> {{ request.reason }}</p>
+                        <p><strong>Số tiền hoàn:</strong> {{ request.refund_amount | currency:'VND':'symbol' }}</p>
+                        <p class="request-date">Yêu cầu lúc: {{ request.requested_at | date:'HH:mm dd/MM/yyyy' }}</p>
+                      </div>
+                    </div>
+                    <div class="card-footer" *ngIf="request.admin_notes">
+                      <p><strong>Phản hồi từ quản trị viên:</strong></p>
+                      <p class="admin-notes">{{ request.admin_notes }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="phoneNumber">Số điện thoại</label>
-        <input type="text" id="phoneNumber" class="form-control" formControlName="phone_number">
-      </div>
-      <div class="form-group col-md-6">
-        <label for="address">Địa chỉ</label>
-        <input type="text" id="address" class="form-control" formControlName="address">
-      </div>
+      </p-tabPanel>
+
+      <!-- Tab 5: Đăng xuất -->
+      <p-tabPanel header="Đăng xuất" leftIcon="pi pi-sign-out" headerStyleClass="logout-tab">
+      </p-tabPanel>
+      </p-tabView>
     </div>
-    <div class="form-actions" *ngIf="isEditMode">
-      <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid">Lưu</button>
-      <button type="button" (click)="cancelEdit()" class="btn btn-light">Hủy</button>
     </div>
-  </form>
 </div> 
+
+<!-- Stripe Payment Dialog -->
+<p-dialog 
+  header="Thanh toán an toàn bằng thẻ" 
+  [(visible)]="showStripeDialog" 
+  [modal]="true" 
+  [style]="{width: '50vw'}" 
+  [draggable]="false" 
+  [resizable]="false">
+  @if (selectedOrderForPayment) {
+    <app-stripe-payment
+      [orderId]="selectedOrderForPayment.id"
+      [paymentAmount]="getRoundedAmount(selectedOrderForPayment.total_money)"
+      (paymentSuccess)="onStripePaymentSuccess($event)"
+      (paymentError)="onStripePaymentError($event)"
+      (paymentCancel)="onStripePaymentCancel()">
+    </app-stripe-payment>
+  }
+</p-dialog>

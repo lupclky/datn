@@ -128,6 +128,15 @@
         <i class="pi pi-search"></i>
       </button>
 
+      <!-- Hotline -->
+      <div class="hotline" *ngIf="roleId !== 2 && roleId !== 3">
+        <i class="pi pi-phone"></i>
+        <div class="hotline-text">
+          <span class="hotline-label">Hotline</span>
+          <a href="tel:0912424173">0912424173</a>
+        </div>
+      </div>
+
       <!-- User Section -->
       @if(token == null) {
         <div class="auth-links">

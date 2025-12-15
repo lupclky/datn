@@ -167,28 +167,7 @@ export class AppHeaderComponent extends BaseComponent implements AfterViewInit,O
         }
       },
       {
-        label: 'Lịch sử mua',
-        icon: 'pi pi-history',
-        command: () => {
-          this.goToHistory();
-        }
-      },
-      {
-        label: 'Trả hàng & Hoàn tiền',
-        icon: 'pi pi-replay',
-        command: () => {
-          this.goToMyReturns();
-        }
-      },
-      {
-        label: 'Đổi mật khẩu',
-        icon: 'pi pi-key',
-        command: () => {
-          this.goToChangePassword();
-        }
-      },
-      {
-        label: 'Sign out',
+        label: 'Đăng xuất',
         icon: 'pi pi-power-off',
         command: () => {
           this.signOut();

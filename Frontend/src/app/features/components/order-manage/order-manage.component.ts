@@ -9,7 +9,7 @@ import { environment } from '../../../../environments/environment.development';
 import { MenuItem } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
 import { OrderService } from '../../../core/services/order.service';
-import { catchError, of, tap, debounceTime, distinctUntilChanged, switchMap, finalize } from 'rxjs';
+import { catchError, of, tap, debounceTime, distinctUntilChanged, switchMap, finalize, Observable } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { ToastService } from '../../../core/services/toast.service';
 import { ToastModule } from 'primeng/toast';
@@ -31,6 +31,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { ORDER_STATUS_OPTIONS, getOrderStatusLabel } from '../../../core/constants/order-status.constants';
+import { VietnamAddressService, AddressDropdownOption } from '../../../core/services/vietnam-address.service';
+import { forkJoin, map } from 'rxjs';
 
 @Component({
   selector: 'app-order-manage',
@@ -80,7 +82,7 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   public totalRecords: number = 0;
   public pageSize: number = 15;
   public page: number = 0;
-  public sortField: string = 'id';
+  public sortField: string = 'orderDate';
   public sortOrder: number = -1; // -1 for desc, 1 for asc
   public showSearchDialog: boolean = false;
   public isStaff: boolean = false; // Flag to check if user is STAFF
@@ -95,16 +97,24 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   public selectedProductForQuantity: ProductDto | null = null;
   public quantityToAdd: number = 1;
   public shippingMethods = [
-    { name: 'Tiêu chuẩn', price: 30000 },
-    { name: 'Nhanh', price: 40000 },
+    { name: 'Nhanh', price: 0 },
     { name: 'Hỏa tốc', price: 60000 }
   ];
+  
+  // Address properties
+  public provinces: AddressDropdownOption[] = [];
+  public districts: AddressDropdownOption[] = [];
+  public wards: AddressDropdownOption[] = [];
+  public selectedProvince: number | null = null;
+  public selectedDistrict: number | null = null;
+  public selectedWard: string | null = null;
+
   public paymentMethods = [
     { name: 'Thanh toán khi nhận hàng', key: 'Cash' },
-    { name: 'Chuyển khoản ngân hàng', key: 'Banking' },
     { name: 'Thanh toán bằng thẻ Visa/Mastercard', key: 'Stripe' },
     { name: 'Thanh toán qua VNPAY', key: 'VNPAY' }
   ];
+    
   public isCreatingOrder: boolean = false;
 
   constructor(
@@ -113,6 +123,7 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private productService: ProductService,
+    private vietnamAddressService: VietnamAddressService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     super();
@@ -124,11 +135,14 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     
     this.createOrderForm = this.fb.group({
       fullname: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phone_number: ['', [Validators.required, Validators.minLength(5)]],
+      ehone_number: ['', [Validators.required, Validators.minLength(5)]],
+      province: [null, [Validators.required]],
+      district: [{value: null, disabled: true}, [Validators.required]],
+      ward: [{value: null, disabled: true}, [Validators.required]],
+      streetmber: ['', [Validators.required, Validators.minLength(5)]],
       address: ['', [Validators.required]],
       note: [''],
-      shipping_method: ['Tiêu chuẩn', [Validators.required]],
+      shipping_method: ['Nhanh', [Validators.required]],
       payment_method: ['Cash', [Validators.required]],
       productSearch: ['']
     });
@@ -238,8 +252,13 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
           
           // Sort orders
           filteredOrders.sort((a, b) => {
-            const aValue = a[this.sortField as keyof HistoryOrderDto];
-            const bValue = b[this.sortField as keyof HistoryOrderDto];
+            let field = this.sortField;
+            if (field === 'orderDate') {
+              field = 'order_date';
+            }
+            
+            const aValue = a[field as keyof HistoryOrderDto];
+            const bValue = b[field as keyof HistoryOrderDto];
             
             // Handle undefined/null values
             if (aValue === undefined || aValue === null) {
@@ -361,19 +380,43 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
   }
 
   getPaymentMethodClass(paymentMethod: string): string {
-    if (paymentMethod === 'Stripe Card Payment' || paymentMethod === 'Stripe (visa/mastercard)' || paymentMethod === 'Thanh toán thẻ thành công') {
-      return 'payment-method-stripe-success';
+    if (paymentMethod === 'Stripe Card Payment' || paymentMethod === 'Stripe (visa/mastercard)' || paymentMethod === 'Thanh toán thẻ thành công' || paymentMethod === 'Stripe') {
+      return 'payment-stripe';
     }
     if (paymentMethod === 'Pending Stripe Payment') {
-      return 'payment-method-stripe-pending';
+      return 'payment-pending';
     }
     if (paymentMethod === 'VNPAY' || paymentMethod === 'VnPay' || paymentMethod?.toLowerCase() === 'vnpay') {
-      return 'payment-method-vnpay';
+      return 'payment-vnpay';
     }
-    if (paymentMethod === 'Thanh toán khi nhận hàng') {
-      return 'payment-method-cod';
+    if (paymentMethod === 'Thanh toán khi nhận hàng' || paymentMethod === 'Cash' || paymentMethod === 'Tiền mặt') {
+      return 'payment-cod';
     }
-    return 'payment-method-default';
+    return 'payment-default';
+  }
+
+  getPaymentMethodIcon(paymentMethod: string): string {
+    if (paymentMethod === 'Stripe Card Payment' || paymentMethod === 'Stripe (visa/mastercard)' || paymentMethod === 'Thanh toán thẻ thành công' || paymentMethod === 'Stripe') {
+      return 'pi-credit-card';
+    }
+    if (paymentMethod === 'VNPAY' || paymentMethod === 'VnPay' || paymentMethod?.toLowerCase() === 'vnpay') {
+      return 'pi-wallet';
+    }
+    if (paymentMethod === 'Thanh toán khi nhận hàng' || paymentMethod === 'Cash' || paymentMethod === 'Tiền mặt') {
+      return 'pi-money-bill';
+    }
+    return 'pi-info-circle';
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'pending': return 'pi-clock';
+      case 'processing': return 'pi-cog';
+      case 'shipped': return 'pi-truck';
+      case 'delivered': return 'pi-check-circle';
+      case 'cancelled': return 'pi-times-circle';
+      default: return 'pi-info-circle';
+    }
   }
 
   getPaymentMethodLabel(paymentMethod?: string): string {
@@ -437,7 +480,7 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     this.showCreateOrderDialog = true;
     this.selectedProducts = [];
     this.createOrderForm.reset({
-      shipping_method: 'Tiêu chuẩn',
+      shipping_method: 'Nhanh',
       payment_method: 'Cash',
       productSearch: ''
     });
@@ -445,6 +488,103 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     this.quantityToAdd = 1;
     this.showQuantityDialog = false;
     this.loadAllProducts();
+    this.loadProvinces();
+  }
+
+  // Address methods
+  loadProvinces() {
+    this.vietnamAddressService.getProvinces().subscribe({
+      next: (provinces) => {
+        this.provinces = provinces;
+      },
+      error: (err) => {
+        console.error('Error loading provinces:', err);
+        this.toastService.fail('Không thể tải danh sách tỉnh/thành phố');
+      }
+    });
+  }
+
+  onProvinceChange(event: any) {
+    const provinceId = event.value;
+    this.selectedProvince = provinceId;
+    this.selectedDistrict = null;
+    this.selectedWard = null;
+    this.districts = [];
+    this.wards = [];
+    
+    this.createOrderForm.patchValue({
+      district: null,
+      ward: null
+    });
+    this.createOrderForm.get('district')?.disable();
+    this.createOrderForm.get('ward')?.disable();
+
+    if (provinceId) {
+      this.createOrderForm.get('district')?.enable();
+      this.vietnamAddressService.getDistricts(provinceId).subscribe({
+        next: (districts) => {
+          this.districts = districts;
+        },
+        error: (err) => {
+          console.error('Error loading districts:', err);
+          this.toastService.fail('Không thể tải danh sách quận/huyện');
+        }
+      });
+    }
+  }
+
+  onDistrictChange(event: any) {
+    const districtId = event.value;
+    this.selectedDistrict = districtId;
+    this.selectedWard = null;
+    this.wards = [];
+    
+    this.createOrderForm.patchValue({
+      ward: null
+    });
+    this.createOrderForm.get('ward')?.disable();
+
+    if (districtId) {
+      this.createOrderForm.get('ward')?.enable();
+      this.vietnamAddressService.getWards(districtId).subscribe({
+        next: (wards) => {
+          this.wards = wards;
+        },
+        error: (err) => {
+          console.error('Error loading wards:', err);
+          this.toastService.fail('Không thể tải danh sách phường/xã');
+        }
+      });
+    }
+  }
+
+  onWardChange(event: any) {
+    this.selectedWard = event.value;
+  }
+
+  private buildCompleteAddress(): Observable<string> {
+    const street = this.createOrderForm.value.street || '';
+    const wardCode = this.createOrderForm.value.ward;
+    const districtId = this.createOrderForm.value.district;
+    const provinceId = this.createOrderForm.value.province;
+
+    if (!wardCode || !districtId || !provinceId) {
+      return of(street);
+    }
+
+    return forkJoin({
+      ward: this.vietnamAddressService.getWardName(wardCode),
+      district: this.vietnamAddressService.getDistrictName(districtId),
+      province: this.vietnamAddressService.getProvinceName(provinceId)
+    }).pipe(
+      map(({ ward, district, province }) => {
+        const parts = [street, ward, district, province].filter(part => part && part.trim());
+        return parts.join(', ');
+      }),
+      catchError(() => {
+        return of(street);
+      })
+    );
   }
 
   loadAllProducts() {
@@ -598,38 +738,42 @@ export class OrderManageComponent extends BaseComponent implements OnInit {
     this.isCreatingOrder = true;
     const formValue = this.createOrderForm.value;
     
-    const orderData = {
-      fullname: formValue.fullname,
-      email: formValue.email,
-      phone_number: formValue.phone_number,
-      address: formValue.address,
-      note: formValue.note || '',
-      shipping_method: formValue.shipping_method,
-      payment_method: formValue.payment_method,
-      cart_items: this.selectedProducts.map(item => ({
-        product_id: item.product.id,
-        quantity: item.quantity,
-        size: 0 // Khóa điện tử không có size
-      })),
-      sub_total: this.calculateSubTotal(),
-      total_money: this.calculateTotal()
-    };
+    this.buildCompleteAddress().subscribe(fullAddress => {
+        const orderData = {
+          fullname: formValue.fullname,
+          email: formValue.email,
+          phone_number: formValue.phone_number,
+          address: fullAddress,
+          district_id: formValue.district,
+          ward_code: formValue.ward,
+          note: formValue.note || '',
+          shipping_method: formValue.shipping_method,
+          payment_method: formValue.payment_method,
+          cart_items: this.selectedProducts.map(item => ({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            size: 0 // Khóa điện tử không có size
+          })),
+          sub_total: this.calculateSubTotal(),
+          total_money: this.calculateTotal()
+        };
 
-    this.orderService.postOrder(orderData).pipe(
-      tap(() => {
-        this.toastService.success('Tạo đơn hàng thành công!');
-        this.showCreateOrderDialog = false;
-        this.loadOrders(); // Reload orders list
-      }),
-      catchError((err) => {
-        const errorMessage = err?.error?.message || err?.error || 'Không thể tạo đơn hàng';
-        this.toastService.fail(errorMessage);
-        return of(err);
-      }),
-      finalize(() => {
-        this.isCreatingOrder = false;
-      })
-    ).subscribe();
+        this.orderService.postOrder(orderData).pipe(
+          tap(() => {
+            this.toastService.success('Tạo đơn hàng thành công!');
+            this.showCreateOrderDialog = false;
+            this.loadOrders(); // Reload orders list
+          }),
+          catchError((err) => {
+            const errorMessage = err?.error?.message || err?.error || 'Không thể tạo đơn hàng';
+            this.toastService.fail(errorMessage);
+            return of(err);
+          }),
+          finalize(() => {
+            this.isCreatingOrder = false;
+          })
+        ).subscribe();
+    });
   }
 
 }

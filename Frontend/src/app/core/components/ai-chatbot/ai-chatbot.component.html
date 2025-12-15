@@ -1,3 +1,14 @@
+<!-- Teaser Message -->
+<div class="chat-teaser" *ngIf="showTeaser() && !isOpen() && !showMenu()" (click)="toggleMenu()">
+  <div class="teaser-content">
+    {{ teaserMessage() }}
+    <button class="close-teaser" (click)="hideTeaser(); $event.stopPropagation()">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
+  <div class="teaser-arrow"></div>
+</div>
+
 <!-- Chat Button -->
 <div class="chat-button-wrapper">
   <button

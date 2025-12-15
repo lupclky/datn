@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, signal, computed } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService, ChatResponse } from '../../services/ai.service';
@@ -45,6 +45,20 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
   filePreview = signal<string | null>(null); // For staff chat file preview
   currentUserId: number = 0;
 
+  // Teaser properties
+  teaserMessage = signal<string>('');
+  showTeaser = signal<boolean>(false);
+  private teaserTimeout: any;
+  private teaserInterval: any;
+  private readonly TEASER_MESSAGES = [
+    'Bạn cần hỗ trợ? Chat ngay!',
+    'Chúng tôi có thể giúp gì cho bạn?',
+    'Đừng ngần ngại hỏi chúng tôi!',
+    'Tư vấn miễn phí tại đây!',
+    'Có thắc mắc về sản phẩm? Hỏi ngay!',
+    'Nhân viên đang sẵn sàng hỗ trợ bạn!'
+  ];
+
   // Computed properties
   hasMessages = computed(() => this.messages().length > 0 || this.staffMessages().length > 0);
   canSend = computed(() => {
@@ -59,7 +73,8 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
     private chatService: ChatService,
     private userService: UserService,
     private toastService: ToastService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private cdr: ChangeDetectorRef
   ) {
     super();
     if (isPlatformBrowser(this.platformId) && typeof localStorage !== 'undefined') {
@@ -93,6 +108,11 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     
     // Load staff messages if in staff mode
     this.loadStaffMessages();
+
+    // Start teaser loop
+    if (isPlatformBrowser(this.platformId)) {
+      this.startTeaserLoop();
+    }
     
     // Auto refresh staff messages every 5 seconds
     if (isPlatformBrowser(this.platformId)) {
@@ -132,10 +152,67 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
 
   toggleChat(): void {
     this.isOpen.update(v => !v);
+    if (this.isOpen()) {
+      this.hideTeaser();
+    }
   }
 
   toggleMenu(): void {
     this.showMenu.update(v => !v);
+    if (this.showMenu()) {
+      this.hideTeaser();
+    }
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.clearTeaserTimers();
+  }
+
+  private startTeaserLoop(): void {
+    // Show first teaser quickly (1s)
+    setTimeout(() => {
+      if (!this.isOpen() && !this.showMenu()) {
+        this.showRandomTeaser();
+      }
+      this.scheduleNextTeaser();
+    }, 1000);
+  }
+
+  private scheduleNextTeaser(): void {
+    // Random interval between 15s and 45s
+    const randomInterval = Math.floor(Math.random() * (45000 - 15000 + 1)) + 15000;
+    
+    this.teaserInterval = setTimeout(() => {
+      if (!this.isOpen() && !this.showMenu()) {
+        this.showRandomTeaser();
+      }
+      this.scheduleNextTeaser();
+    }, randomInterval);
+  }
+
+  private showRandomTeaser(): void {
+    const randomIndex = Math.floor(Math.random() * this.TEASER_MESSAGES.length);
+    this.teaserMessage.set(this.TEASER_MESSAGES[randomIndex]);
+    this.showTeaser.set(true);
+    this.cdr.detectChanges();
+
+    // Hide teaser after 10 seconds
+    if (this.teaserTimeout) clearTimeout(this.teaserTimeout);
+    this.teaserTimeout = setTimeout(() => {
+      this.hideTeaser();
+    }, 10000);
+  }
+
+  hideTeaser(): void {
+    this.showTeaser.set(false);
+    this.cdr.detectChanges();
+    if (this.teaserTimeout) clearTimeout(this.teaserTimeout);
+  }
+
+  private clearTeaserTimers(): void {
+    if (this.teaserInterval) clearTimeout(this.teaserInterval);
+    if (this.teaserTimeout) clearTimeout(this.teaserTimeout);
   }
 
   openAssistant(): void {

@@ -78,7 +78,7 @@
                     [scrollable]="true"
                     scrollHeight="flex"
                     responsiveLayout="scroll"
-                    [sortField]="'id'"
+                    [sortField]="'orderDate'"
                     [sortOrder]="-1">
                 <ng-template pTemplate="header">
                     <tr>
@@ -91,9 +91,9 @@
                         <th style="width:10%">Phương thức TT</th>
                         <th style="width:10%">Phương thức VC</th>
                         <th style="width:15%">Địa chỉ</th>
-                        <th pSortableColumn="order_date" style="width:10%">
+                        <th pSortableColumn="orderDate" style="width:10%">
                             Ngày đặt
-                            <p-sortIcon field="order_date"></p-sortIcon>
+                            <p-sortIcon field="orderDate"></p-sortIcon>
                         </th>
                         <th style="width:10%">Tổng tiền</th>
                         <th style="width:10%">Trạng thái ĐH</th>
@@ -111,12 +111,14 @@
                             </div>
                         </td>
                         <td data-label="Phương thức TT">
-                            <span [ngClass]="getPaymentMethodClass(order.payment_method)">
+                            <span class="payment-badge" [ngClass]="getPaymentMethodClass(order.payment_method)">
+                                <i class="pi" [ngClass]="getPaymentMethodIcon(order.payment_method)"></i>
                                 {{ getPaymentMethodLabel(order.payment_method) }}
                             </span>
                         </td>
                         <td data-label="Phương thức VC">
-                            <span class="shipping-method-badge">
+                            <span class="shipping-badge" [ngClass]="'shipping-' + (order.shipping_method === 'Hỏa tốc' ? 'express' : order.shipping_method === 'Nhanh' ? 'fast' : 'standard')">
+                                <i class="pi pi-truck"></i>
                                 {{ getShippingMethodLabel(order.shipping_method) }}
                             </span>
                         </td>
@@ -126,9 +128,10 @@
                             </div>
                         </td>
                         <td data-label="Ngày đặt">{{ order.order_date | date:'dd/MM/yyyy HH:mm' }}</td>
-                        <td data-label="Tổng tiền">{{ order.total_money | currency:'VND':'symbol':'1.0-0' }}</td>
+                        <td data-label="Tổng tiền" class="font-bold text-primary">{{ order.total_money | currency:'VND':'symbol':'1.0-0' }}</td>
                         <td data-label="Trạng thái ĐH">
-                            <span [ngClass]="'status-' + order.status">
+                            <span class="status-badge" [ngClass]="'status-' + order.status">
+                                <i class="pi" [ngClass]="getStatusIcon(order.status)"></i>
                                 {{ getPlaceholderByOrderStatus(order.status) }}
                             </span>
                         </td>
@@ -328,16 +331,75 @@
                         </small>
                     </div>
                     
-                    <div class="field col-12">
-                        <label for="address">Địa chỉ giao hàng <span class="required">*</span></label>
-                        <textarea pInputTextarea 
-                                  id="address" 
-                                  formControlName="address"
-                                  rows="3"
-                                  [class.ng-invalid]="createOrderForm.get('address')?.invalid && createOrderForm.get('address')?.touched">
-                        </textarea>
-                        <small class="p-error" *ngIf="createOrderForm.get('address')?.invalid && createOrderForm.get('address')?.touched">
-                            Địa chỉ là bắt buộc
+                    <div class="field col-12 md:col-6">
+                        <label for="province">Tỉnh/Thành phố <span class="required">*</span></label>
+                        <p-dropdown 
+                            id="province" 
+                            [options]="provinces" 
+                            formControlName="province" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            placeholder="Chọn Tỉnh/Thành phố" 
+                            [filter]="true" 
+                            filterBy="label"
+                            (onChange)="onProvinceChange($event)"
+                            [style]="{'width':'100%'}"
+                            [class.ng-invalid]="createOrderForm.get('province')?.invalid && createOrderForm.get('province')?.touched">
+                        </p-dropdown>
+                        <small class="p-error" *ngIf="createOrderForm.get('province')?.invalid && createOrderForm.get('province')?.touched">
+                            Vui lòng chọn Tỉnh/Thành phố
+                        </small>
+                    </div>
+
+                    <div class="field col-12 md:col-6">
+                        <label for="district">Quận/Huyện <span class="required">*</span></label>
+                        <p-dropdown 
+                            id="district" 
+                            [options]="districts" 
+                            formControlName="district" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            placeholder="Chọn Quận/Huyện" 
+                            [filter]="true" 
+                            filterBy="label"
+                            (onChange)="onDistrictChange($event)"
+                            [style]="{'width':'100%'}"
+                            [class.ng-invalid]="createOrderForm.get('district')?.invalid && createOrderForm.get('district')?.touched">
+                        </p-dropdown>
+                        <small class="p-error" *ngIf="createOrderForm.get('district')?.invalid && createOrderForm.get('district')?.touched">
+                            Vui lòng chọn Quận/Huyện
+                        </small>
+                    </div>
+
+                    <div class="field col-12 md:col-6">
+                        <label for="ward">Phường/Xã <span class="required">*</span></label>
+                        <p-dropdown 
+                            id="ward" 
+                            [options]="wards" 
+                            formControlName="ward" 
+                            optionLabel="label" 
+                            optionValue="value" 
+                            placeholder="Chọn Phường/Xã" 
+                            [filter]="true" 
+                            filterBy="label"
+                            (onChange)="onWardChange($event)"
+                            [style]="{'width':'100%'}"
+                            [class.ng-invalid]="createOrderForm.get('ward')?.invalid && createOrderForm.get('ward')?.touched">
+                        </p-dropdown>
+                        <small class="p-error" *ngIf="createOrderForm.get('ward')?.invalid && createOrderForm.get('ward')?.touched">
+                            Vui lòng chọn Phường/Xã
+                        </small>
+                    </div>
+
+                    <div class="field col-12 md:col-6">
+                        <label for="street">Số nhà, tên đường <span class="required">*</span></label>
+                        <input type="text" 
+                               pInputText 
+                               id="street" 
+                               formControlName="street"
+                               [class.ng-invalid]="createOrderForm.get('street')?.invalid && createOrderForm.get('street')?.touched">
+                        <small class="p-error" *ngIf="createOrderForm.get('street')?.invalid && createOrderForm.get('street')?.touched">
+                            Địa chỉ cụ thể là bắt buộc
                         </small>
                     </div>
                     

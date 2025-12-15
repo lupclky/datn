@@ -8,11 +8,12 @@ import { RouterModule } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-voucher-display',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastModule, CurrencyPipe],
+  imports: [CommonModule, RouterModule, ToastModule, CurrencyPipe, TooltipModule],
   templateUrl: './voucher-display.component.html',
   styleUrls: ['./voucher-display.component.scss'],
   providers: [ToastService, MessageService]

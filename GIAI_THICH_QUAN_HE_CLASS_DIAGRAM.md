@@ -264,3 +264,4 @@ ProductFeature "*" o-- "1" LockFeature
 3. **Thêm relationships cho Banner và News:** Nếu cần, có thể thêm quan hệ với User (người tạo)
 
 
+

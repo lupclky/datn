@@ -68,6 +68,10 @@ export class CustomerChatComponent extends BaseComponent implements OnInit, OnDe
     this.loadMessages();
   }
 
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+  }
+
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {
       this.scrollToBottom();
