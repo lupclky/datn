@@ -9,8 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,29 +46,20 @@ public class AIProductAssistantService {
     public String answerProductQueryWithImage(String base64Image, String mimeType, String userPrompt) {
         log.info("Processing product query with image: {}", userPrompt);
 
-        // Step 1: Analyze image to get a search query
-        // We ask Gemini to describe the product in the image specifically for search purposes
-        String imageAnalysisPrompt = "Describe the product in this image in detail (color, type, brand, key features) to use as a search query for a database. Return ONLY the search keywords.";
-        
-        var analysisResponse = geminiChatModel.chat(UserMessage.from(
-                dev.langchain4j.data.message.ImageContent.from(base64Image, mimeType),
-                dev.langchain4j.data.message.TextContent.from(imageAnalysisPrompt)
-        ));
-        
-        String searchQuery = analysisResponse.aiMessage().text();
-        log.info("Generated search query from image: {}", searchQuery);
+        // Step 1: Image -> embedding (Python CLIP) -> cosine search in Chroma
+        byte[] imageBytes = decodeBase64Image(base64Image);
+        List<Document> relevantDocuments = vectorSearchService.searchByImage(imageBytes, 5);
 
-        // Step 2: Search for relevant products using the generated description
-        List<Document> relevantDocuments = vectorSearchService.searchProducts(searchQuery, 5);
-        String productContext = buildProductContext(relevantDocuments);
+        // Build high-quality context from matched product ids (works for both product and product_image segments)
+        String productContext = buildProductContextFromMatches(relevantDocuments);
 
-        // Step 3: Answer the user's original prompt using the image AND the found products
+        // Step 2: Answer the user's original prompt using the image AND the found products
         String finalPrompt = String.format("""
                 Bạn là chuyên gia tư vấn khóa điện tử của Locker Korea.
                 
                 Khách hàng đã gửi một hình ảnh sản phẩm và hỏi: "%s"
                 
-                Hệ thống đã tìm thấy các sản phẩm tương tự trong cửa hàng dựa trên hình ảnh:
+            Hệ thống đã tìm thấy các sản phẩm tương tự trong cửa hàng dựa trên độ tương đồng hình ảnh (cosine similarity):
                 %s
                 
                 Hãy trả lời khách hàng dựa trên CẢ hình ảnh họ gửi VÀ danh sách sản phẩm tìm thấy ở trên.
@@ -84,6 +78,74 @@ public class AIProductAssistantService {
         ));
 
         return finalResponse.aiMessage().text();
+    }
+
+    private byte[] decodeBase64Image(String base64Image) {
+        if (base64Image == null || base64Image.trim().isEmpty()) {
+            throw new IllegalArgumentException("base64Image is empty");
+        }
+
+        String normalized = base64Image.trim();
+        // Handle data URL format: data:image/png;base64,....
+        int commaIndex = normalized.indexOf(',');
+        if (normalized.startsWith("data:") && commaIndex > 0) {
+            normalized = normalized.substring(commaIndex + 1);
+        }
+        return Base64.getDecoder().decode(normalized);
+    }
+
+    private String buildProductContextFromMatches(List<Document> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return "No similar products found in the database.";
+        }
+
+        List<Long> productIdsInOrder = new ArrayList<>();
+        for (Document doc : documents) {
+            Map<String, Object> md = doc.metadata().toMap();
+            Object productIdObj = md.get("product_id");
+            Optional<Long> parsed = parseLongSafe(productIdObj);
+            parsed.ifPresent(id -> {
+                if (!productIdsInOrder.contains(id)) {
+                    productIdsInOrder.add(id);
+                }
+            });
+        }
+
+        if (productIdsInOrder.isEmpty()) {
+            // Fallback: at least return whatever is in documents
+            return buildProductContext(documents);
+        }
+
+        List<Product> products = productRepository.findAllById(productIdsInOrder);
+        Map<Long, Product> byId = products.stream()
+                .filter(p -> p.getId() != null)
+                .collect(Collectors.toMap(Product::getId, p -> p, (a, b) -> a));
+
+        StringBuilder context = new StringBuilder("Here are the most similar products from our database (image search):\n\n");
+        int rank = 1;
+        for (Long id : productIdsInOrder) {
+            Product p = byId.get(id);
+            if (p == null) continue;
+
+            context.append(String.format("%d. Product: %s\n", rank++, p.getName()));
+            context.append(String.format("   Price: %d VND\n", p.getPrice()));
+            context.append(String.format("   Category: %s\n", p.getCategory() != null ? p.getCategory().getName() : "Unknown"));
+            context.append(String.format("   Discount: %d%%\n", p.getDiscount() != null ? p.getDiscount() : 0));
+            context.append(String.format("   Description: %s\n\n", p.getDescription()));
+        }
+
+        return context.toString();
+    }
+
+    private Optional<Long> parseLongSafe(Object value) {
+        if (value == null) return Optional.empty();
+        try {
+            String s = value.toString().trim();
+            if (s.isEmpty()) return Optional.empty();
+            return Optional.of(Long.parseLong(s));
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
     }
 
     public String answerProductQueryByCategory(String userQuery, String category) {

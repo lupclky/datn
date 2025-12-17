@@ -41,6 +41,8 @@ public interface VectorSearchService {
 
     List<Document> searchProductsByPriceRange(String query, Long minPrice, Long maxPrice, int topK);
 
+    List<Document> searchByImage(byte[] imageBytes, int topK);
+
     // Advanced search with scores
     List<DocumentWithScore> searchProductsWithScores(String query, int topK, double minScore);
 

@@ -71,6 +71,8 @@ chroma:
 # AI Features Configuration
 ai:
   enabled: true # Set to true when Google Cloud is configured
+  embedding:
+    base-url: http://localhost:9001
 # Stripe Configuration (Test Mode)
 stripe:
   api:

@@ -129,13 +129,13 @@
       </button>
 
       <!-- Hotline -->
-      <div class="hotline" *ngIf="roleId !== 2 && roleId !== 3">
+      <a class="hotline" *ngIf="roleId !== 2 && roleId !== 3" href="tel:0912424173">
         <i class="pi pi-phone"></i>
         <div class="hotline-text">
           <span class="hotline-label">Hotline</span>
-          <a href="tel:0912424173">0912424173</a>
+          <span class="hotline-number">0912424173</span>
         </div>
-      </div>
+      </a>
 
       <!-- User Section -->
       @if(token == null) {

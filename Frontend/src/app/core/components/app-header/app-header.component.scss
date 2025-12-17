@@ -450,7 +450,7 @@ $m3-sys-dark-outline-variant: #49454F;
       font-size: 0.85rem;
     }
 
-    a {
+    .hotline-number {
       color: inherit;
       text-decoration: none;
       font-size: 0.95rem;
@@ -1008,16 +1008,19 @@ $m3-sys-dark-outline-variant: #49454F;
     }
 
     .hotline {
-      padding: 6px 10px;
-      gap: 8px;
+      padding: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      justify-content: center;
+      gap: 0;
+
+      i {
+        font-size: 1.1rem;
+      }
 
       .hotline-text {
-        .hotline-label {
-          font-size: 0.8rem;
-        }
-        a {
-          font-size: 0.9rem;
-        }
+        display: none;
       }
     }
 
