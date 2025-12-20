@@ -12,7 +12,6 @@ import { LoadingService } from '../../services/loading.service';
 import { takeUntil, tap, filter } from 'rxjs';
 import { AiChatbotComponent } from '../ai-chatbot/ai-chatbot.component';
 import { ScrollToTopComponent } from '../../../shared/components/scroll-to-top/scroll-to-top.component';
-import { CustomerChatComponent } from '../../../features/components/customer-chat/customer-chat.component';
 import { AppBottomNavComponent } from '../app-bottom-nav/app-bottom-nav.component';
 import { CommonModule } from '@angular/common';
 
@@ -30,7 +29,6 @@ import { CommonModule } from '@angular/common';
     BlockUIModule,
     AiChatbotComponent,
     ScrollToTopComponent,
-    CustomerChatComponent,
     AppBottomNavComponent
   ],
   templateUrl: './app-layout.component.html',
@@ -63,18 +61,42 @@ export class AppLayoutComponent extends BaseComponent implements AfterViewInit, 
   }
 
   ngOnInit(): void {
+    // Update roleId first
+    this.updateRoleId();
+    
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      tap(() => {
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      tap((event: NavigationEnd) => {
         window.scrollTo(0, 0);
         // Update roleId on navigation
         this.updateRoleId();
+        
+        // Small delay to ensure roleId is updated
+        setTimeout(() => {
+          this.handleRoleBasedRedirect(event.url);
+        }, 0);
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
     
-    // Also update on init
-    this.updateRoleId();
+    // Check initial route and redirect if needed after a small delay
+    setTimeout(() => {
+      const currentUrl = this.router.url;
+      this.handleRoleBasedRedirect(currentUrl);
+    }, 100);
+  }
+
+  private handleRoleBasedRedirect(url: string): void {
+    // Only redirect if user is on Home page or root
+    if (url === '/Home' || url === '/' || url === '') {
+      if (this.roleId === 2) {
+        // Admin -> Dashboard
+        this.router.navigate(['/admin/dashboard'], { replaceUrl: true });
+      } else if (this.roleId === 3) {
+        // Staff -> Order Management
+        this.router.navigate(['/orderManage'], { replaceUrl: true });
+      }
+    }
   }
 
   private updateRoleId(): void {

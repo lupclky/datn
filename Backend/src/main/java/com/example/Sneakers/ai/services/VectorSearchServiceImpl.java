@@ -3,6 +3,7 @@ package com.example.Sneakers.ai.services;
 import com.example.Sneakers.models.Product;
 import com.example.Sneakers.models.Category;
 import com.example.Sneakers.models.ProductFeature;
+import com.example.Sneakers.models.ProductImage;
 import com.example.Sneakers.repositories.ProductRepository;
 import com.example.Sneakers.repositories.CategoryRepository;
 import dev.langchain4j.data.document.Document;
@@ -77,7 +78,8 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             indexingStatus.set("Starting initialization...");
             log.info("Starting async indexing of all data");
 
-            List<Product> products = productRepository.findAllWithFeatures();
+            // Load products with both features and images for better indexing
+            List<Product> products = productRepository.findAllWithFeaturesAndImages();
             List<Category> categories = categoryRepository.findAll();
             
             int totalItems = products.size() + categories.size();
@@ -91,9 +93,32 @@ public class VectorSearchServiceImpl implements VectorSearchService {
 
             // Index Products
             log.info("Indexing {} products...", products.size());
+            
+            // Load all product IDs first
+            List<Long> productIds = products.stream()
+                    .map(Product::getId)
+                    .collect(Collectors.toList());
+            
+            // Batch load all images for all products to avoid N+1 queries
+            Map<Long, List<ProductImage>> imagesMap = new HashMap<>();
+            if (!productIds.isEmpty()) {
+                List<Product> productsWithImages = productRepository.findProductsByIds(productIds);
+                for (Product p : productsWithImages) {
+                    if (p.getProductImages() != null) {
+                        imagesMap.put(p.getId(), p.getProductImages());
+                    }
+                }
+            }
+            
+            // Index each product with its images
             for (Product product : products) {
                 try {
                     indexingStatus.set("Indexing product: " + product.getName());
+                    // Set images from the map
+                    List<ProductImage> images = imagesMap.get(product.getId());
+                    if (images != null) {
+                        product.setProductImages(images);
+                    }
                     indexProduct(product);
                 } catch (Exception e) {
                     log.error("Failed to index product: {}", product.getName(), e);
@@ -150,26 +175,65 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             log.error("Failed to embed product text: {}", product.getName(), e);
         }
 
-        // Index Image if available
+        // Index all product images for better search accuracy
+        // Index thumbnail first (if available)
         String thumbnail = metadata.get("thumbnail");
         if (thumbnail != null && !thumbnail.isEmpty()) {
-            try {
-                log.debug("Indexing thumbnail for product {}: {}", product.getId(), thumbnail);
-                byte[] imageBytes = readImage(thumbnail);
-                if (imageBytes != null) {
-                    log.debug("Read image bytes for product {} ({} bytes)", product.getId(), imageBytes.length);
-                    Embedding imageEmbedding = pythonEmbeddingService.embedImage(imageBytes).content();
-                    Map<String, String> imageMetadata = new HashMap<>(metadata);
-                    imageMetadata.put("type", "product_image");
-                    
-                    // We store a dummy text segment for the image because Chroma/LangChain4j expects one
-                    TextSegment imageSegment = TextSegment.from("Image of " + product.getName(), Metadata.from(imageMetadata));
-                    chromaStoreProvider.add(imageEmbedding, imageSegment);
-                    log.debug("Indexed image for product: {}", product.getName());
+            indexSingleImage(product, thumbnail, metadata, 0, true);
+        }
+        
+        // Index all product images from productImages list
+        if (product.getProductImages() != null && !product.getProductImages().isEmpty()) {
+            log.debug("Indexing {} images for product {}: {}", product.getProductImages().size(), product.getId(), product.getName());
+            int imageIndex = 1; // Start from 1, 0 is for thumbnail
+            
+            for (var productImage : product.getProductImages()) {
+                if (productImage.getImageUrl() != null && !productImage.getImageUrl().isEmpty()) {
+                    // Skip if this is the same as thumbnail to avoid duplicate
+                    if (!productImage.getImageUrl().equals(thumbnail)) {
+                        indexSingleImage(product, productImage.getImageUrl(), metadata, imageIndex, false);
+                        imageIndex++;
+                    }
                 }
-            } catch (Exception e) {
-                log.error("Failed to index image for product {}", product.getName(), e);
             }
+            
+            log.debug("Indexed {} images for product: {}", imageIndex, product.getName());
+        }
+    }
+    
+    /**
+     * Index a single image for a product
+     * @param product The product
+     * @param imageUrl The image URL/path
+     * @param baseMetadata Base metadata from product
+     * @param imageIndex Index of the image (0 for thumbnail, 1+ for productImages)
+     * @param isThumbnail Whether this is the thumbnail image
+     */
+    private void indexSingleImage(Product product, String imageUrl, Map<String, String> baseMetadata, int imageIndex, boolean isThumbnail) {
+        try {
+            log.debug("Indexing image {} for product {}: {}", isThumbnail ? "thumbnail" : "#" + imageIndex, product.getId(), imageUrl);
+            byte[] imageBytes = readImage(imageUrl);
+            if (imageBytes != null) {
+                log.debug("Read image bytes for product {} ({} bytes)", product.getId(), imageBytes.length);
+                Embedding imageEmbedding = pythonEmbeddingService.embedImage(imageBytes).content();
+                Map<String, String> imageMetadata = new HashMap<>(baseMetadata);
+                imageMetadata.put("type", "product_image");
+                imageMetadata.put("image_index", String.valueOf(imageIndex));
+                imageMetadata.put("image_url", imageUrl);
+                imageMetadata.put("is_thumbnail", String.valueOf(isThumbnail));
+                
+                // We store a descriptive text segment for the image
+                String imageDescription = isThumbnail 
+                    ? "Thumbnail image of " + product.getName()
+                    : "Product image #" + imageIndex + " of " + product.getName();
+                TextSegment imageSegment = TextSegment.from(imageDescription, Metadata.from(imageMetadata));
+                chromaStoreProvider.add(imageEmbedding, imageSegment);
+                log.debug("Indexed {} for product: {}", isThumbnail ? "thumbnail" : "image #" + imageIndex, product.getName());
+            } else {
+                log.warn("Could not read image bytes for product {}: {}", product.getId(), imageUrl);
+            }
+        } catch (Exception e) {
+            log.error("Failed to index image {} for product {}: {}", imageUrl, product.getName(), e.getMessage());
         }
     }
 
@@ -271,7 +335,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     @Async
     public void updateProductIndexAsync(Long productId) {
         try {
-            // Reload product from database with all relationships to avoid detached entity issues
+            // Reload product from database with features to avoid detached entity issues
             Optional<Product> productOpt = productRepository.findByIdWithFeatures(productId);
             if (productOpt.isEmpty()) {
                 log.warn("Product not found for indexing: {}", productId);
@@ -279,6 +343,13 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             }
             
             Product product = productOpt.get();
+            
+            // Load images separately to avoid MultipleBagFetchException
+            Optional<Product> productWithImages = productRepository.findByIdWithImages(productId);
+            if (productWithImages.isPresent()) {
+                product.setProductImages(productWithImages.get().getProductImages());
+            }
+            
             log.info("Async indexing product: {} (ID: {})", product.getName(), productId);
             updateProductIndex(product);
             log.info("Successfully indexed product: {} (ID: {})", product.getName(), productId);
@@ -322,18 +393,103 @@ public class VectorSearchServiceImpl implements VectorSearchService {
 
         Embedding queryEmbedding = embeddingModel.embed(query).content();
 
+        // Giảm minimum score từ 0.6 xuống 0.4 để tìm được nhiều sản phẩm hơn
+        // Đặc biệt với tên model ngắn như "F300-FH"
         EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                 queryEmbedding,
                 topK,
-                0.6, // minimum score
+                0.4, // minimum score - giảm từ 0.6 để tìm được sản phẩm có tên model ngắn
                 null // no filter
         );
 
         EmbeddingSearchResult<TextSegment> searchResult = chromaStoreProvider.search(searchRequest);
-
-        return searchResult.matches().stream()
-                .map(match -> Document.from(match.embedded().text(), match.embedded().metadata()))
+        
+        // Filter để loại bỏ duplicates theo product_id
+        Map<Long, Document> uniqueProducts = new HashMap<>();
+        Map<Long, Double> productScores = new HashMap<>();
+        
+        for (var match : searchResult.matches()) {
+            Map<String, Object> metadata = match.embedded().metadata().toMap();
+            Object productIdObj = metadata.get("product_id");
+            
+            if (productIdObj != null) {
+                try {
+                    Long productId = Long.parseLong(productIdObj.toString());
+                    double score = match.score();
+                    
+                    // Chỉ giữ document có score cao nhất cho mỗi product
+                    if (!productScores.containsKey(productId) || score > productScores.get(productId)) {
+                        productScores.put(productId, score);
+                        uniqueProducts.put(productId, Document.from(
+                            match.embedded().text(), 
+                            match.embedded().metadata()
+                        ));
+                    }
+                } catch (NumberFormatException e) {
+                    log.warn("Invalid product_id in metadata: {}", productIdObj);
+                }
+            }
+        }
+        
+        // Sắp xếp theo score và lấy topK
+        List<Document> results = uniqueProducts.entrySet().stream()
+                .sorted((e1, e2) -> Double.compare(
+                    productScores.get(e2.getKey()), 
+                    productScores.get(e1.getKey())
+                ))
+                .limit(topK)
+                .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
+        
+        // Nếu không tìm thấy kết quả, thử tìm với minimum score thấp hơn nữa
+        if (results.isEmpty()) {
+            log.debug("No results with minScore 0.4, trying with minScore 0.3");
+            EmbeddingSearchRequest fallbackRequest = new EmbeddingSearchRequest(
+                    queryEmbedding,
+                    topK * 3, // Lấy nhiều hơn để có đủ sau khi filter
+                    0.3, // minimum score thấp hơn nữa
+                    null
+            );
+            EmbeddingSearchResult<TextSegment> fallbackResult = chromaStoreProvider.search(fallbackRequest);
+            
+            // Filter duplicates cho fallback results
+            uniqueProducts.clear();
+            productScores.clear();
+            
+            for (var match : fallbackResult.matches()) {
+                Map<String, Object> metadata = match.embedded().metadata().toMap();
+                Object productIdObj = metadata.get("product_id");
+                
+                if (productIdObj != null) {
+                    try {
+                        Long productId = Long.parseLong(productIdObj.toString());
+                        double score = match.score();
+                        
+                        if (!productScores.containsKey(productId) || score > productScores.get(productId)) {
+                            productScores.put(productId, score);
+                            uniqueProducts.put(productId, Document.from(
+                                match.embedded().text(), 
+                                match.embedded().metadata()
+                            ));
+                        }
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid product_id in metadata: {}", productIdObj);
+                    }
+                }
+            }
+            
+            results = uniqueProducts.entrySet().stream()
+                    .sorted((e1, e2) -> Double.compare(
+                        productScores.get(e2.getKey()), 
+                        productScores.get(e1.getKey())
+                    ))
+                    .limit(topK)
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toList());
+        }
+        
+        log.debug("Found {} unique products from {} matches", results.size(), searchResult.matches().size());
+        return results;
     }
 
     @Override
@@ -349,18 +505,56 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         try {
             Embedding imageEmbedding = pythonEmbeddingService.embedImage(imageBytes).content();
             
+            // Tăng topK lên để có đủ kết quả sau khi filter duplicates
             EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                     imageEmbedding,
-                    topK,
-                    0.6,
+                    topK * 3, // Lấy nhiều hơn để có đủ sau khi filter
+                    0.52, // Minimum score 0.52 (48% similarity) để bao gồm F300-FH và các sản phẩm tương tự
                     null
             );
             
             EmbeddingSearchResult<TextSegment> searchResult = chromaStoreProvider.search(searchRequest);
             
-            return searchResult.matches().stream()
-                    .map(match -> Document.from(match.embedded().text(), match.embedded().metadata()))
+            // Filter để loại bỏ duplicates theo product_id
+            // Chỉ giữ document có score cao nhất cho mỗi product_id
+            Map<Long, Document> uniqueProducts = new HashMap<>();
+            Map<Long, Double> productScores = new HashMap<>();
+            
+            for (var match : searchResult.matches()) {
+                Map<String, Object> metadata = match.embedded().metadata().toMap();
+                Object productIdObj = metadata.get("product_id");
+                
+                if (productIdObj != null) {
+                    try {
+                        Long productId = Long.parseLong(productIdObj.toString());
+                        double score = match.score();
+                        
+                        // Chỉ giữ document có score cao nhất cho mỗi product
+                        if (!productScores.containsKey(productId) || score > productScores.get(productId)) {
+                            productScores.put(productId, score);
+                            uniqueProducts.put(productId, Document.from(
+                                match.embedded().text(), 
+                                match.embedded().metadata()
+                            ));
+                        }
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid product_id in metadata: {}", productIdObj);
+                    }
+                }
+            }
+            
+            // Sắp xếp theo score và lấy topK
+            List<Document> results = uniqueProducts.entrySet().stream()
+                    .sorted((e1, e2) -> Double.compare(
+                        productScores.get(e2.getKey()), 
+                        productScores.get(e1.getKey())
+                    ))
+                    .limit(topK)
+                    .map(Map.Entry::getValue)
                     .collect(Collectors.toList());
+            
+            log.debug("Found {} unique products from {} matches", results.size(), searchResult.matches().size());
+            return results;
         } catch (Exception e) {
             log.error("Failed to search by image", e);
             return List.of();

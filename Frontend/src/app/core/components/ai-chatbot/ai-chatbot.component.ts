@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ElementRef, signal, computed, ChangeDetec
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService, ChatResponse } from '../../services/ai.service';
-import { ChatService, ChatMessage as StaffChatMessage } from '../../services/chat.service';
 import { UserService } from '../../services/user.service';
 import { finalize, catchError, tap, takeUntil } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -34,15 +33,11 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
 
   isOpen = signal(false);
   showMenu = signal(false);
-  chatMode = signal<'ai' | 'staff'>('ai'); // 'ai' or 'staff'
   messages = signal<ChatMessage[]>([]);
-  staffMessages = signal<StaffChatMessage[]>([]);
   userInput = signal('');
   isLoading = signal(false);
   selectedImage = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
-  selectedFile = signal<File | null>(null); // For staff chat file attachments
-  filePreview = signal<string | null>(null); // For staff chat file preview
   currentUserId: number = 0;
 
   // Teaser properties
@@ -60,17 +55,15 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
   ];
 
   // Computed properties
-  hasMessages = computed(() => this.messages().length > 0 || this.staffMessages().length > 0);
+  hasMessages = computed(() => this.messages().length > 0);
   canSend = computed(() => {
     const hasText = this.userInput().trim().length > 0;
     const hasImage = this.selectedImage() !== null;
-    const hasFile = this.selectedFile() !== null;
-    return hasText || hasImage || hasFile;
+    return hasText || hasImage;
   });
 
   constructor(
     private aiService: AiService,
-    private chatService: ChatService,
     private userService: UserService,
     private toastService: ToastService,
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -106,48 +99,10 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     
     this.addMessage(welcomeMessage, 'bot');
     
-    // Load staff messages if in staff mode
-    this.loadStaffMessages();
-
     // Start teaser loop
     if (isPlatformBrowser(this.platformId)) {
       this.startTeaserLoop();
     }
-    
-    // Auto refresh staff messages every 5 seconds
-    if (isPlatformBrowser(this.platformId)) {
-      setInterval(() => {
-        if (this.chatMode() === 'staff') {
-          this.loadStaffMessages();
-        }
-      }, 5000);
-    }
-  }
-  
-  switchMode(mode: 'ai' | 'staff'): void {
-    this.chatMode.set(mode);
-    if (mode === 'staff') {
-      this.loadStaffMessages();
-    }
-  }
-  
-  loadStaffMessages(): void {
-    // Load messages even if user is not logged in (guest user)
-    const hasToken = typeof localStorage !== 'undefined' && localStorage.getItem('token') !== null;
-    
-    // Load messages (will return public messages for guest users)
-    this.chatService.getMessages().pipe(
-      catchError(err => {
-        console.error('Failed to load staff messages:', err);
-        return of([]);
-      }),
-      takeUntil(this.destroyed$)
-    ).subscribe(messages => {
-      // Messages from backend are sorted by createdAt ASC (oldest first)
-      // Keep this order for display (oldest at top, newest at bottom)
-      this.staffMessages.set(messages);
-      this.scrollToBottom();
-    });
   }
 
   toggleChat(): void {
@@ -218,7 +173,6 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   openAssistant(): void {
     this.showMenu.set(false);
     this.isOpen.set(true);
-    this.chatMode.set('ai');
   }
 
   openMessenger(): void {
@@ -238,178 +192,57 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
 
     const message = this.userInput().trim();
     const image = this.selectedImage();
-    const mode = this.chatMode();
 
-    if (mode === 'staff') {
-      // Send staff chat message
-      if (!message.trim() && !this.selectedImage() && !this.selectedFile()) return;
-      
-      const hasToken = typeof localStorage !== 'undefined' && localStorage.getItem('token') !== null;
-      
-      // If file is selected, send as file
-      if (this.selectedFile()) {
-        const file = this.selectedFile();
-        if (file) {
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('receiverId', '');
-          formData.append('message', message.trim() || '');
-          
-          // Determine message type based on file type
-          const messageType = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
-          formData.append('messageType', messageType);
-          formData.append('isStaffMessage', 'false');
+    if (!message.trim() && !image) return;
 
-          const headers: any = {};
-          if (hasToken) {
-            headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
-          } else {
-            // Add guest session ID for guest users
-            let guestSessionId = localStorage.getItem('guestSessionId');
-            if (!guestSessionId) {
-              guestSessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
-              localStorage.setItem('guestSessionId', guestSessionId);
-            }
-            headers['X-Guest-Session-Id'] = guestSessionId;
-          }
-
-          this.chatService.sendFileMessage(formData, headers).pipe(
-            tap(() => {
-              this.userInput.set('');
-              this.clearImage();
-              this.clearFile();
-              this.loadStaffMessages();
-            }),
-            catchError(err => {
-              this.toastService.fail('Không thể gửi file');
-              return of(null);
-            }),
-            takeUntil(this.destroyed$)
-          ).subscribe();
-          return;
-        }
-      }
-      
-      // If image is selected (legacy support), send as image
-      if (this.selectedImage()) {
-        const imageFile = this.selectedImage();
-        if (imageFile) {
-          const formData = new FormData();
-          formData.append('file', imageFile);
-          formData.append('receiverId', '');
-          formData.append('message', message.trim() || '');
-          formData.append('messageType', 'IMAGE');
-          formData.append('isStaffMessage', 'false');
-
-          const headers: any = {};
-          if (hasToken) {
-            headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
-          } else {
-            // Add guest session ID for guest users
-            let guestSessionId = localStorage.getItem('guestSessionId');
-            if (!guestSessionId) {
-              guestSessionId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
-              localStorage.setItem('guestSessionId', guestSessionId);
-            }
-            headers['X-Guest-Session-Id'] = guestSessionId;
-          }
-
-          this.chatService.sendFileMessage(formData, headers).pipe(
-            tap(() => {
-              this.userInput.set('');
-              this.clearImage();
-              this.clearFile();
-              this.loadStaffMessages();
-            }),
-            catchError(err => {
-              this.toastService.fail('Không thể gửi hình ảnh');
-              return of(null);
-            }),
-            takeUntil(this.destroyed$)
-          ).subscribe();
-          return;
-        }
-      }
-      
-      // Send text message only
-      this.chatService.sendMessage({
-        receiverId: null,
-        message: message.trim(),
-        messageType: 'TEXT',
-        isStaffMessage: false
-      }, hasToken).pipe(
-        tap(() => {
-          this.userInput.set('');
-          this.loadStaffMessages();
-        }),
-        catchError(err => {
-          this.toastService.fail('Không thể gửi tin nhắn');
-          return of(null);
-        }),
-        takeUntil(this.destroyed$)
-      ).subscribe();
-      return;
-    }
-
-    // AI mode
-    if (message && !image) {
+    // Add user message
+    if (image) {
+      this.addMessageWithImage(message || '[Hình ảnh]', 'user', this.imagePreview() || '');
+    } else {
       this.addMessage(message, 'user');
-    }
-
-    if (image && message) {
-      // Send image with prompt
-      const preview = this.imagePreview();
-      if (preview) {
-        this.addMessageWithImage(message, 'user', preview);
-      }
-      this.sendImageMessage(image, message);
-    } else if (image) {
-      // Send image with default prompt
-      const preview = this.imagePreview();
-      if (preview) {
-        this.addMessageWithImage('What can you tell me about this sneaker?', 'user', preview);
-      }
-      this.sendImageMessage(image, 'What can you tell me about this sneaker?');
-    } else if (message) {
-      // Send text message
-      this.sendTextMessage(message);
     }
 
     // Clear input
     this.userInput.set('');
-    this.clearImage();
-  }
 
-  private sendTextMessage(message: string): void {
-    this.isLoading.set(true);
-
-    this.aiService.productAssistant(message)
-      .pipe(finalize(() => this.isLoading.set(false)))
-      .subscribe({
-        next: (response: ChatResponse) => {
-          if (response.success) {
-            this.addMessage(response.response, 'bot');
-          } else {
-            this.addMessage('Xin lỗi, tôi không thể xử lý yêu cầu của bạn. Vui lòng thử lại hoặc đặt câu hỏi khác.', 'bot', true);
+    if (image) {
+      // Send image with optional prompt
+      const imageToSend = image;
+      this.clearImage(); // Clear image preview after adding to message
+      this.sendImageMessage(imageToSend, message);
+    } else {
+      // Send text message
+      this.isLoading.set(true);
+      
+      this.aiService.productAssistant(message)
+        .pipe(
+          finalize(() => this.isLoading.set(false)),
+          catchError(error => {
+            console.error('Chat error:', error);
+            let errorMessage = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
+            
+            if (error.status === 0) {
+              errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+            } else if (error.status === 500) {
+              errorMessage = 'Lỗi máy chủ. AI service có thể chưa được khởi tạo. Vui lòng liên hệ admin.';
+            } else if (error.status === 503) {
+              errorMessage = 'Dịch vụ AI tạm thời không khả dụng. Vui lòng thử lại sau.';
+            } else if (error.error?.error) {
+              errorMessage = error.error.error;
+            }
+            
+            this.addMessage(errorMessage, 'bot', true);
+            return of(null);
+          })
+        )
+        .subscribe({
+          next: (response: ChatResponse | null) => {
+            if (response?.success) {
+              this.addMessage(response.response, 'bot');
+            }
           }
-        },
-        error: (error) => {
-          console.error('Chat error:', error);
-          let errorMessage = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
-          
-          if (error.status === 0) {
-            errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
-          } else if (error.status === 500) {
-            errorMessage = 'Lỗi máy chủ. AI service có thể chưa được khởi tạo. Vui lòng liên hệ admin.';
-          } else if (error.status === 503) {
-            errorMessage = 'Dịch vụ AI tạm thời không khả dụng. Vui lòng thử lại sau.';
-          } else if (error.error?.error) {
-            errorMessage = error.error.error;
-          }
-          
-          this.addMessage(errorMessage, 'bot', true);
-        }
-      });
+        });
+    }
   }
 
   private sendImageMessage(image: File, prompt: string): void {
@@ -488,7 +321,7 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   onImageSelected(event: Event): void {
     if (isPlatformBrowser(this.platformId)) {
       const input = event.target as HTMLInputElement;
-      if (input.files && input.files[0]) {
+      if (input?.files && input.files[0]) {
         const file = input.files[0];
         this.selectedImage.set(file);
 
@@ -510,62 +343,18 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     }
   }
 
-  clearFile(): void {
-    this.selectedFile.set(null);
-    this.filePreview.set(null);
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = '';
-    }
-  }
-
   triggerFileInput(): void {
-    this.fileInput.nativeElement.click();
-  }
-
-  onFileSelected(event: Event): void {
-    if (isPlatformBrowser(this.platformId)) {
-      const input = event.target as HTMLInputElement;
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        
-        // Validate file size (max 10MB)
-        const maxSize = 10 * 1024 * 1024; // 10MB
-        if (file.size > maxSize) {
-          this.toastService.fail('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 10MB.');
-          return;
-        }
-
-        this.selectedFile.set(file);
-
-        // Create preview for images
-        if (file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.filePreview.set(e.target?.result as string);
-          };
-          reader.readAsDataURL(file);
-        } else {
-          // For non-image files, just set the file name as preview
-          this.filePreview.set(file.name);
-        }
-      }
+    if (this.fileInput) {
+      this.fileInput.nativeElement.click();
     }
   }
 
   onFileInputChange(event: Event): void {
-    if (this.chatMode() === 'staff') {
-      this.onFileSelected(event);
-    } else {
-      this.onImageSelected(event);
-    }
-  }
-
-  removeFile(): void {
-    this.clearFile();
+    this.onImageSelected(event);
   }
 
   onKeyPress(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event?.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendMessage();
     }
@@ -574,7 +363,7 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   private scrollToBottom(): void {
     if (isPlatformBrowser(this.platformId)) {
       setTimeout(() => {
-        if (this.scrollContainer) {
+        if (this.scrollContainer?.nativeElement) {
           const element = this.scrollContainer.nativeElement;
           element.scrollTop = element.scrollHeight;
         }
@@ -583,12 +372,8 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   clearChat(): void {
-    if (this.chatMode() === 'staff') {
-      this.staffMessages.set([]);
-      this.loadStaffMessages();
-    } else {
-      this.messages.set([]);
-      const welcomeMessage = `Xin chào! 👋 Tôi là trợ lý AI tư vấn khóa điện tử của Locker Korea. Tôi có quyền truy cập vào toàn bộ database sản phẩm khóa vân tay, khóa điện tử của cửa hàng.
+    this.messages.set([]);
+    const welcomeMessage = `Xin chào! 👋 Tôi là trợ lý AI tư vấn khóa điện tử của Locker Korea. Tôi có quyền truy cập vào toàn bộ database sản phẩm khóa vân tay, khóa điện tử của cửa hàng.
 
 Bạn có thể hỏi tôi những câu như:
 • "Cho tôi xem khóa vân tay cho cửa nhà dưới 5 triệu VND"
@@ -599,13 +384,14 @@ Bạn có thể hỏi tôi những câu như:
 • "Gợi ý khóa điện tử cho cửa kính"
 
 Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
-      
-      this.addMessage(welcomeMessage, 'bot');
-    }
+    
+    this.addMessage(welcomeMessage, 'bot');
   }
 
   openImagePreview(imageUrl: string): void {
-    window.open(imageUrl, '_blank');
+    if (imageUrl) {
+      window.open(imageUrl, '_blank');
+    }
   }
 
   getFileUrl(fileUrl: string): string {
@@ -637,8 +423,10 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
 
   handleImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    console.error('Failed to load image:', img.src);
-    // Optionally show a placeholder or error message
-    img.style.display = 'none';
+    if (img) {
+      console.error('Failed to load image:', img.src);
+      // Optionally show a placeholder or error message
+      img.style.display = 'none';
+    }
   }
 }

@@ -29,7 +29,13 @@ public class AIProductAssistantService {
         log.info("Processing product query: {}", userQuery);
 
         // Search for relevant products using vector search
-        List<Document> relevantDocuments = vectorSearchService.searchProducts(userQuery, 5);
+        List<Document> relevantDocuments = vectorSearchService.searchProducts(userQuery, 10);
+
+        // Fallback: Nếu vector search không tìm thấy, thử tìm kiếm exact/partial match trong database
+        if (relevantDocuments.isEmpty()) {
+            log.info("Vector search returned no results, trying exact/partial match fallback");
+            relevantDocuments = searchProductsByExactMatch(userQuery);
+        }
 
         // Extract product information from documents
         String productContext = buildProductContext(relevantDocuments);
@@ -42,13 +48,63 @@ public class AIProductAssistantService {
 
         return response.aiMessage().text();
     }
+    
+    /**
+     * Fallback search: Tìm kiếm sản phẩm bằng exact/partial match trong database
+     * Đặc biệt hữu ích cho tên model ngắn như "F300-FH"
+     */
+    private List<Document> searchProductsByExactMatch(String query) {
+        try {
+            // Tìm kiếm sản phẩm có tên chứa query (case-insensitive)
+            List<Product> products = productRepository.getProductsByKeyword(query);
+            
+            if (products.isEmpty()) {
+                log.debug("No products found with keyword: {}", query);
+                return List.of();
+            }
+            
+            // Chuyển đổi Product thành Document để tương thích với logic hiện tại
+            List<Document> documents = new ArrayList<>();
+            for (Product product : products) {
+                // Tạo metadata tương tự như khi index
+                Map<String, Object> metadata = new java.util.HashMap<>();
+                metadata.put("product_id", product.getId());
+                metadata.put("product_name", product.getName());
+                metadata.put("category_name", product.getCategory() != null ? product.getCategory().getName() : "");
+                metadata.put("category_id", product.getCategory() != null ? product.getCategory().getId() : null);
+                metadata.put("price", product.getPrice());
+                metadata.put("discount", product.getDiscount() != null ? product.getDiscount() : 0);
+                metadata.put("thumbnail", product.getThumbnail());
+                metadata.put("type", "product");
+                
+                // Tạo description text tương tự như khi index
+                String description = String.format(
+                    "Product: %s\nDescription: %s\nCategory: %s\nPrice: %d VND\nDiscount: %d%%",
+                    product.getName(),
+                    product.getDescription() != null ? product.getDescription() : "",
+                    product.getCategory() != null ? product.getCategory().getName() : "",
+                    product.getPrice(),
+                    product.getDiscount() != null ? product.getDiscount() : 0
+                );
+                
+                Document doc = Document.from(description, dev.langchain4j.data.document.Metadata.from(metadata));
+                documents.add(doc);
+            }
+            
+            log.info("Found {} products using exact/partial match for query: {}", documents.size(), query);
+            return documents;
+        } catch (Exception e) {
+            log.error("Error in fallback exact match search", e);
+            return List.of();
+        }
+    }
 
     public String answerProductQueryWithImage(String base64Image, String mimeType, String userPrompt) {
         log.info("Processing product query with image: {}", userPrompt);
 
         // Step 1: Image -> embedding (Python CLIP) -> cosine search in Chroma
         byte[] imageBytes = decodeBase64Image(base64Image);
-        List<Document> relevantDocuments = vectorSearchService.searchByImage(imageBytes, 5);
+        List<Document> relevantDocuments = vectorSearchService.searchByImage(imageBytes, 10);
 
         // Build high-quality context from matched product ids (works for both product and product_image segments)
         String productContext = buildProductContextFromMatches(relevantDocuments);
@@ -152,7 +208,7 @@ public class AIProductAssistantService {
         log.info("Processing product query in category {}: {}", category, userQuery);
 
         // Search for relevant products in specific category
-        List<Document> relevantDocuments = vectorSearchService.searchProductsByCategory(userQuery, category, 5);
+        List<Document> relevantDocuments = vectorSearchService.searchProductsByCategory(userQuery, category, 10);
 
         String productContext = buildProductContext(relevantDocuments);
         String enhancedPrompt = createCategoryPrompt(userQuery, category, productContext);
@@ -167,7 +223,7 @@ public class AIProductAssistantService {
 
         // Search for relevant products in price range
         List<Document> relevantDocuments = vectorSearchService.searchProductsByPriceRange(userQuery, minPrice, maxPrice,
-                5);
+                10);
 
         String productContext = buildProductContext(relevantDocuments);
         String enhancedPrompt = createPriceRangePrompt(userQuery, minPrice, maxPrice, productContext);

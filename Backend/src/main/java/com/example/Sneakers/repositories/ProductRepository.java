@@ -22,7 +22,19 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productFeatures pf LEFT JOIN FETCH pf.feature LEFT JOIN FETCH p.category")
     List<Product> findAllWithFeatures();
 
+    // Used for AI indexing with all images to improve search accuracy
+    // Note: Cannot fetch both productFeatures and productImages in same query (MultipleBagFetchException)
+    // So we fetch features first, then load images separately when needed
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productFeatures pf LEFT JOIN FETCH pf.feature LEFT JOIN FETCH p.category")
+    List<Product> findAllWithFeaturesAndImages();
+    
+    // Load product with images only (for loading images separately)
+    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
+    Optional<Product> findByIdWithImages(@Param("productId") Long productId);
+
     // Load single product with all relationships for async indexing
+    // Note: Cannot fetch both productFeatures and productImages in same query
+    // So we fetch features first, then load images separately
     @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.productFeatures pf LEFT JOIN FETCH pf.feature LEFT JOIN FETCH p.category WHERE p.id = :productId")
     Optional<Product> findByIdWithFeatures(@Param("productId") Long productId);
 

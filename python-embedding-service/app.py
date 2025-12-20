@@ -10,10 +10,11 @@ from PIL import Image
 from transformers import CLIPModel, CLIPProcessor
 
 MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "openai/clip-vit-base-patch32")
+# Tên model embedding
 DEVICE = os.getenv("EMBEDDING_DEVICE", "cpu")
-
+# Thiết bị embedding
 app = FastAPI(title="LockerKorea Embedding Service", version="1.0")
-
+# Khởi động FastAPI app
 
 class TextRequest(BaseModel):
     text: str
@@ -38,16 +39,17 @@ def _startup() -> None:
     _model = CLIPModel.from_pretrained(MODEL_NAME)
     _model.eval()
     _model.to(DEVICE)
-
+# Khởi động model embedding
 
 def _normalize(vec: torch.Tensor) -> torch.Tensor:
     vec = vec / (vec.norm(dim=-1, keepdim=True) + 1e-12)
     return vec
-
+# Normalize vector
 
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "model": MODEL_NAME, "device": DEVICE}
+# Health check
 
 
 @app.post("/embed/text", response_model=EmbeddingResponse)
@@ -68,6 +70,7 @@ def embed_text(req: TextRequest) -> EmbeddingResponse:
 
     emb = feats[0].detach().cpu().numpy().astype(np.float32).tolist()
     return EmbeddingResponse(embedding=emb)
+# Embed text
 
 
 @app.post("/embed/image", response_model=EmbeddingResponse)
@@ -90,3 +93,4 @@ def embed_image(req: ImageRequest) -> EmbeddingResponse:
 
     emb = feats[0].detach().cpu().numpy().astype(np.float32).tolist()
     return EmbeddingResponse(embedding=emb)
+# Embed image

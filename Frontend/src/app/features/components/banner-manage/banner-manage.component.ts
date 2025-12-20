@@ -429,5 +429,9 @@ export class BannerManageComponent implements OnInit {
   onImageError(event: any): void {
     event.target.src = 'assets/images/no-image.png'; // Fallback on error
   }
+
+  previewHomePage(): void {
+    window.open('/Home', '_blank');
+  }
 }
 

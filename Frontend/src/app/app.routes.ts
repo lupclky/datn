@@ -34,7 +34,6 @@ import { BannerManageComponent } from './features/components/banner-manage/banne
 import { NewsManageComponent } from './features/components/news-manage/news-manage.component';
 import { NewsDetailComponent } from './features/components/news-detail/news-detail.component';
 import { ProductManageComponent } from './features/components/product-manage/product-manage.component';
-import { StaffChatComponent } from './features/components/staff-chat/staff-chat.component';
 import { AiManagementComponent } from './features/components/ai-management/ai-management.component';
 import { StaffGuard } from './features/auth/authInterceptor/staff.guard';
 
@@ -198,11 +197,6 @@ export const routes: Routes = [
         path: 'user-profile',
         component: UserProfileComponent,
         canActivate: [AuthGuard]
-      },
-      {
-        path: 'staff/chat',
-        component: StaffChatComponent,
-        canActivate: [StaffGuard]
       }
     ]
   },
