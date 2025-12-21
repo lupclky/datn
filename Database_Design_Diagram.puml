@@ -1,0 +1,304 @@
+@startuml LockerKorea_Database_Design
+!define TABLE(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define PRIMARY_KEY(x) <b>x</b>
+!define FOREIGN_KEY(x) <color:blue>x</color>
+
+title LockerKorea - Thiết kế Cơ sở Dữ liệu
+
+' ============================================
+' BẢNG QUẢN LÝ NGƯỜI DÙNG
+' ============================================
+
+TABLE(roles, "Bảng Vai trò") {
+  PRIMARY_KEY(id) : INT
+  name : VARCHAR(20)
+}
+
+TABLE(users, "Bảng Người dùng") {
+  PRIMARY_KEY(id) : INT
+  fullname : VARCHAR(100)
+  phone_number : VARCHAR(10)
+  email : VARCHAR(100) <<unique>>
+  address : VARCHAR(200)
+  password : VARCHAR(100)
+  created_at : DATETIME
+  updated_at : DATETIME
+  is_active : TINYINT(1)
+  date_of_birth : DATETIME(6)
+  facebook_account_id : INT
+  google_account_id : INT
+  FOREIGN_KEY(role_id) : INT
+  reset_password_token : VARCHAR(255)
+  reset_password_token_expiry : DATETIME
+}
+
+' ============================================
+' BẢNG QUẢN LÝ SẢN PHẨM
+' ============================================
+
+TABLE(categories, "Bảng Danh mục") {
+  PRIMARY_KEY(id) : INT
+  name : VARCHAR(100)
+}
+
+TABLE(products, "Bảng Sản phẩm") {
+  PRIMARY_KEY(id) : INT
+  name : VARCHAR(350)
+  price : BIGINT
+  thumbnail : VARCHAR(300)
+  description : LONGTEXT
+  created_at : DATETIME
+  updated_at : DATETIME
+  FOREIGN_KEY(category_id) : INT
+  discount : BIGINT
+  quantity : BIGINT
+}
+
+TABLE(lock_features, "Bảng Tính năng khóa") {
+  PRIMARY_KEY(id) : BIGINT
+  name : VARCHAR(100)
+  description : TEXT
+  is_active : TINYINT(1)
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+TABLE(product_features, "Bảng Tính năng sản phẩm") {
+  PRIMARY_KEY(id) : BIGINT
+  FOREIGN_KEY(product_id) : INT
+  FOREIGN_KEY(feature_id) : BIGINT
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+TABLE(product_images, "Bảng Hình ảnh sản phẩm") {
+  PRIMARY_KEY(id) : BIGINT
+  FOREIGN_KEY(product_id) : INT
+  image_url : VARCHAR(300)
+}
+
+' ============================================
+' BẢNG QUẢN LÝ ĐƠN HÀNG
+' ============================================
+
+TABLE(orders, "Bảng Đơn hàng") {
+  PRIMARY_KEY(id) : INT
+  FOREIGN_KEY(user_id) : INT
+  fullname : VARCHAR(100)
+  email : VARCHAR(100)
+  phone_number : VARCHAR(20)
+  address : VARCHAR(200)
+  note : VARCHAR(100)
+  order_date : DATETIME
+  status : VARCHAR(255)
+  total_money : BIGINT
+  shipping_method : VARCHAR(100)
+  shipping_date : DATE
+  payment_method : VARCHAR(100)
+  active : TINYINT(1)
+  FOREIGN_KEY(voucher_id) : INT
+  discount_amount : BIGINT
+  payment_intent_id : VARCHAR(255)
+  vnp_txn_ref : VARCHAR(255)
+  vnp_transaction_no : VARCHAR(255)
+  tracking_number : VARCHAR(255)
+  carrier : VARCHAR(255)
+  district_id : INT
+  ward_code : VARCHAR(50)
+  FOREIGN_KEY(assigned_staff_id) : INT
+}
+
+TABLE(order_details, "Bảng Chi tiết đơn hàng") {
+  PRIMARY_KEY(id) : BIGINT
+  FOREIGN_KEY(order_id) : INT
+  FOREIGN_KEY(product_id) : INT
+  price : BIGINT
+  number_of_products : BIGINT
+  total_money : BIGINT
+  size : BIGINT
+}
+
+TABLE(return_requests, "Bảng Yêu cầu trả hàng") {
+  PRIMARY_KEY(id) : BIGINT
+  FOREIGN_KEY(order_id) : INT
+  reason : TEXT
+  status : VARCHAR(50)
+  refund_amount : DECIMAL(10,2)
+  admin_notes : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' ============================================
+' BẢNG QUẢN LÝ GIỎ HÀNG
+' ============================================
+
+TABLE(carts, "Bảng Giỏ hàng") {
+  PRIMARY_KEY(id) : BIGINT
+  FOREIGN_KEY(user_id) : INT
+  FOREIGN_KEY(product_id) : INT
+  quantity : BIGINT
+  size : BIGINT
+  session_id : VARCHAR(255)
+}
+
+' ============================================
+' BẢNG QUẢN LÝ VOUCHER
+' ============================================
+
+TABLE(vouchers, "Bảng Mã giảm giá") {
+  PRIMARY_KEY(id) : INT
+  code : VARCHAR(50) <<unique>>
+  name : VARCHAR(100)
+  description : TEXT
+  discount_percentage : INT
+  min_order_value : BIGINT
+  max_discount_amount : BIGINT
+  quantity : INT
+  remaining_quantity : INT
+  valid_from : DATETIME
+  valid_to : DATETIME
+  is_active : TINYINT(1)
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+TABLE(voucher_usage, "Bảng Sử dụng voucher") {
+  PRIMARY_KEY(id) : BIGINT
+  FOREIGN_KEY(voucher_id) : INT
+  FOREIGN_KEY(order_id) : INT
+  FOREIGN_KEY(user_id) : INT
+  discount_amount : BIGINT
+  used_at : DATETIME
+}
+
+' ============================================
+' BẢNG QUẢN LÝ ĐÁNH GIÁ
+' ============================================
+
+TABLE(reviews, "Bảng Đánh giá") {
+  PRIMARY_KEY(id) : BIGINT
+  FOREIGN_KEY(product_id) : INT
+  FOREIGN_KEY(user_id) : INT
+  rating : INT
+  comment : TEXT
+  staff_reply : TEXT
+  FOREIGN_KEY(staff_reply_by) : INT
+  staff_reply_at : DATETIME
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+' ============================================
+' BẢNG QUẢN LÝ NỘI DUNG
+' ============================================
+
+TABLE(banners, "Bảng Banner") {
+  PRIMARY_KEY(id) : BIGINT
+  title : VARCHAR(500)
+  description : VARCHAR(1000)
+  image_url : VARCHAR(500)
+  button_text : VARCHAR(100)
+  button_link : VARCHAR(500)
+  button_style : VARCHAR(50)
+  display_order : INT
+  is_active : TINYINT(1)
+  start_date : DATETIME
+  end_date : DATETIME
+  created_at : DATETIME
+  updated_at : DATETIME
+}
+
+TABLE(news, "Bảng Tin tức") {
+  PRIMARY_KEY(id) : BIGINT
+  title : VARCHAR(500)
+  content : TEXT
+  summary : VARCHAR(1000)
+  author : VARCHAR(100)
+  category : VARCHAR(50)
+  status : ENUM
+  featured_image : VARCHAR(500)
+  views : BIGINT
+  published_at : DATETIME
+  created_at : DATETIME
+  updated_at : DATETIME
+  thumbnail : VARCHAR(255)
+  facebook_post_id : VARCHAR(255)
+  facebook_scheduled_at : DATETIME(6)
+}
+
+' ============================================
+' QUAN HỆ GIỮA CÁC BẢNG
+' ============================================
+
+' Quan hệ Users - Roles
+users }o--|| roles : "role_id"
+
+' Quan hệ Products - Categories
+products }o--|| categories : "category_id"
+
+' Quan hệ Products - Features (Many-to-Many)
+products ||--o{ product_features : "product_id"
+lock_features ||--o{ product_features : "feature_id"
+
+' Quan hệ Products - Images
+products ||--o{ product_images : "product_id"
+
+' Quan hệ Orders - Users
+users ||--o{ orders : "user_id"
+users ||--o{ orders : "assigned_staff_id"
+
+' Quan hệ Orders - Order Details
+orders ||--o{ order_details : "order_id"
+products ||--o{ order_details : "product_id"
+
+' Quan hệ Orders - Vouchers
+vouchers ||--o{ orders : "voucher_id"
+
+' Quan hệ Orders - Return Requests
+orders ||--o{ return_requests : "order_id"
+
+' Quan hệ Carts - Users & Products
+users ||--o{ carts : "user_id"
+products ||--o{ carts : "product_id"
+
+' Quan hệ Voucher Usage
+vouchers ||--o{ voucher_usage : "voucher_id"
+orders ||--o{ voucher_usage : "order_id"
+users ||--o{ voucher_usage : "user_id"
+
+' Quan hệ Reviews
+products ||--o{ reviews : "product_id"
+users ||--o{ reviews : "user_id"
+users ||--o{ reviews : "staff_reply_by"
+
+note right of users
+  **Quản lý người dùng:**
+  - USER: Khách hàng
+  - ADMIN: Quản trị viên
+  - STAFF: Nhân viên
+end note
+
+note right of products
+  **Quản lý sản phẩm:**
+  - Thông tin sản phẩm khóa điện tử
+  - Giá, mô tả, số lượng
+  - Thuộc danh mục cụ thể
+end note
+
+note right of orders
+  **Quản lý đơn hàng:**
+  - Trạng thái: processing, shipped, 
+    delivered, cancelled, payment_failed
+  - Hỗ trợ thanh toán VNPAY, Stripe
+  - Gán nhân viên xử lý đơn
+end note
+
+note right of vouchers
+  **Quản lý mã giảm giá:**
+  - Giảm theo phần trăm
+  - Có giới hạn số lượng
+  - Có thời hạn sử dụng
+end note
+
+@enduml
