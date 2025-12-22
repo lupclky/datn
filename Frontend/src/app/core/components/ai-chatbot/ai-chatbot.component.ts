@@ -1,13 +1,11 @@
-'import { Component, OnInit, ViewChild, ElementRef, signal, computed, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, ElementRef, signal, computed, ChangeDetectorRef, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService, ChatResponse } from '../../services/ai.service';
 import { UserService } from '../../services/user.service';
 import { finalize, catchError, tap, takeUntil } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
-import { PLATFORM_ID, Inject } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { BaseComponent } from '../../commonComponent/base.component';
 import { ToastService } from '../../services/toast.service';
 
