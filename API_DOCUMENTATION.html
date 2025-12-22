@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LockerKorea API Documentation</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --method-get: #61affe;
+            --method-post: #49cc90;
+            --method-put: #fca130;
+            --method-delete: #f93e3e;
+            --method-patch: #50e3c2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; }
+        
+        .base-url {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            padding: 20px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .endpoint {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #fcfcfc;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .endpoint-header:hover {
+            background-color: #f0f0f0;
+        }
+
+        .method {
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: white;
+            min-width: 60px;
+            text-align: center;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .method.GET { background-color: var(--method-get); }
+        .method.POST { background-color: var(--method-post); }
+        .method.PUT { background-color: var(--method-put); }
+        .method.DELETE { background-color: var(--method-delete); }
+        .method.PATCH { background-color: var(--method-patch); }
+
+        .url {
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--primary-color);
+            flex-grow: 1;
+        }
+
+        .desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .endpoint-details {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: #fff;
+            display: none; /* Hidden by default */
+        }
+
+        .endpoint.active .endpoint-details {
+            display: block;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #c7254e;
+        }
+
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .param-table th, .param-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .param-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 7px;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 10px;
+        }
+        .badge-admin { background-color: #e74c3c; }
+        .badge-staff { background-color: #f39c12; }
+        .badge-user { background-color: #2ecc71; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div>
+            <h1>LockerKorea API Documentation</h1>
+            <p>Developer Guide for Backend Services</p>
+        </div>
+        <div class="base-url">
+            Base URL: http://localhost:8089/api/v1
+        </div>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="section">
+        <h2>Authentication</h2>
+        <p>Most endpoints require a Bearer Token. Include it in the header:</p>
+        <pre>Authorization: Bearer &lt;your_jwt_token&gt;</pre>
+    </div>
+
+    <!-- Auth & Users -->
+    <div class="section">
+        <h2>1. Authentication & Users</h2>
+        
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/users/register</span><span class="desc">Register new user</span></div>
+            <div class="endpoint-details"><p>Create a new user account.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/users/login</span><span class="desc">Login</span></div>
+            <div class="endpoint-details"><p>Authenticate user and return JWT token.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/users/details</span><span class="desc">Get User Details</span></div>
+            <div class="endpoint-details"><p>Get information of the currently logged-in user.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/users/details/{userId}</span><span class="desc">Update User Details</span></div>
+            <div class="endpoint-details"><p>Update user information.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/users/change-active/{userId}</span><span class="desc">Block/Unblock User <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Change user active status.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/users/forgot-password</span><span class="desc">Forgot Password</span></div>
+            <div class="endpoint-details"><p>Initiate password reset process.</p></div>
+        </div>
+    </div>
+
+    <!-- Products -->
+    <div class="section">
+        <h2>2. Products</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/products</span><span class="desc">Get Product List</span></div>
+            <div class="endpoint-details"><p>Get a paginated list of products.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/products/{id}</span><span class="desc">Get Product Detail</span></div>
+            <div class="endpoint-details"><p>Get detailed information of a specific product.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/products/search</span><span class="desc">Search Products</span></div>
+            <div class="endpoint-details"><p>Search products by keyword.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/products</span><span class="desc">Create Product <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Create a new product.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/products/{id}</span><span class="desc">Update Product <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Update an existing product.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method DELETE">DELETE</span><span class="url">/products/{id}</span><span class="desc">Delete Product <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Delete a product.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/products/uploads/{id}</span><span class="desc">Upload Images <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Upload images for a product.</p></div>
+        </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="section">
+        <h2>3. Orders</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/orders</span><span class="desc">Create Order</span></div>
+            <div class="endpoint-details"><p>Place a new order.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/orders/user</span><span class="desc">Get My Orders</span></div>
+            <div class="endpoint-details"><p>Get order history of the current user.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/orders/{id}</span><span class="desc">Get Order Detail</span></div>
+            <div class="endpoint-details"><p>Get details of a specific order.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/orders/status/{id}</span><span class="desc">Update Order Status <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Update the status of an order.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/orders/revenue</span><span class="desc">Get Revenue <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Get revenue statistics.</p></div>
+        </div>
+    </div>
+
+    <!-- Order Details -->
+    <div class="section">
+        <h2>4. Order Details</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/order_details/order/{orderId}</span><span class="desc">Get Order Details</span></div>
+            <div class="endpoint-details"><p>Get all details (items) for a specific order.</p></div>
+        </div>
+    </div>
+
+    <!-- Cart -->
+    <div class="section">
+        <h2>5. Cart</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/carts</span><span class="desc">Get Cart</span></div>
+            <div class="endpoint-details"><p>Get current user's cart.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/carts</span><span class="desc">Add to Cart</span></div>
+            <div class="endpoint-details"><p>Add an item to the cart.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/carts/{id}</span><span class="desc">Update Cart Item</span></div>
+            <div class="endpoint-details"><p>Update quantity of a cart item.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method DELETE">DELETE</span><span class="url">/carts/{id}</span><span class="desc">Remove Cart Item</span></div>
+            <div class="endpoint-details"><p>Remove an item from the cart.</p></div>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="section">
+        <h2>6. Categories</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/categories</span><span class="desc">Get Categories</span></div>
+            <div class="endpoint-details"><p>Get all product categories.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/categories</span><span class="desc">Create Category <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Create a new category.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/categories/{id}</span><span class="desc">Update Category <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Update a category.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method DELETE">DELETE</span><span class="url">/categories/{id}</span><span class="desc">Delete Category <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Delete a category.</p></div>
+        </div>
+    </div>
+
+    <!-- News -->
+    <div class="section">
+        <h2>7. News</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/news/published</span><span class="desc">Get Published News</span></div>
+            <div class="endpoint-details"><p>Get list of published news articles.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/news/published/{id}</span><span class="desc">Get News Detail</span></div>
+            <div class="endpoint-details"><p>Get detail of a news article.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/news/admin</span><span class="desc">Create News <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Create a new news article.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/news/admin/{id}/publish</span><span class="desc">Publish News <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Publish a news article.</p></div>
+        </div>
+    </div>
+
+    <!-- Banners -->
+    <div class="section">
+        <h2>8. Banners</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/banners</span><span class="desc">Get All Banners</span></div>
+            <div class="endpoint-details"><p>Get all banners.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/banners/active</span><span class="desc">Get Active Banners</span></div>
+            <div class="endpoint-details"><p>Get currently active banners.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/banners</span><span class="desc">Create Banner <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Create a new banner.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PATCH">PATCH</span><span class="url">/banners/{id}/toggle</span><span class="desc">Toggle Banner Status <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Enable or disable a banner.</p></div>
+        </div>
+    </div>
+
+    <!-- Vouchers -->
+    <div class="section">
+        <h2>9. Vouchers</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/vouchers/homepage</span><span class="desc">Get Homepage Vouchers</span></div>
+            <div class="endpoint-details"><p>Get vouchers to display on homepage.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/vouchers/apply</span><span class="desc">Apply Voucher</span></div>
+            <div class="endpoint-details"><p>Apply a voucher to an order.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/vouchers</span><span class="desc">Create Voucher <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Create a new voucher.</p></div>
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="section">
+        <h2>10. Reviews</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/reviews/product/{productId}</span><span class="desc">Get Product Reviews</span></div>
+            <div class="endpoint-details"><p>Get reviews for a product.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/reviews</span><span class="desc">Create Review</span></div>
+            <div class="endpoint-details"><p>Submit a review for a product.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/reviews/reply</span><span class="desc">Reply Review <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Reply to a user review.</p></div>
+        </div>
+    </div>
+
+    <!-- Returns -->
+    <div class="section">
+        <h2>11. Returns</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/returns</span><span class="desc">Create Return Request</span></div>
+            <div class="endpoint-details"><p>Request a return for an order.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/returns/my-requests</span><span class="desc">My Return Requests</span></div>
+            <div class="endpoint-details"><p>Get list of my return requests.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method PUT">PUT</span><span class="url">/returns/admin/{id}/approve</span><span class="desc">Approve Return <span class="badge badge-staff">Staff</span></span></div>
+            <div class="endpoint-details"><p>Approve a return request.</p></div>
+        </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="section">
+        <h2>12. Payment</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/vnpay/create-payment</span><span class="desc">VNPay Payment URL</span></div>
+            <div class="endpoint-details"><p>Create VNPay payment URL.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/stripe/create-payment-intent</span><span class="desc">Stripe Payment Intent</span></div>
+            <div class="endpoint-details"><p>Create Stripe payment intent.</p></div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="section">
+        <h2>13. Statistics</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/statistics/daily-revenue/{date}</span><span class="desc">Daily Revenue <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Get revenue for a specific date.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/statistics/top-product-sold</span><span class="desc">Top Products <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Get top selling products.</p></div>
+        </div>
+    </div>
+
+    <!-- AI Features -->
+    <div class="section">
+        <h2>14. AI Features</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/ai/chat/text</span><span class="desc">Chat Text</span></div>
+            <div class="endpoint-details"><p>Chat with AI using text.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/ai/chat/image</span><span class="desc">Chat Image</span></div>
+            <div class="endpoint-details"><p>Chat with AI using image.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/ai/chat/product-assistant</span><span class="desc">Product Assistant</span></div>
+            <div class="endpoint-details"><p>AI Product Assistant.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/ai/search/products</span><span class="desc">Vector Search</span></div>
+            <div class="endpoint-details"><p>Semantic search for products.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method POST">POST</span><span class="url">/ai/initialize/index-all</span><span class="desc">Index Data <span class="badge badge-admin">Admin</span></span></div>
+            <div class="endpoint-details"><p>Index all data for AI search.</p></div>
+        </div>
+    </div>
+
+    <!-- Other -->
+    <div class="section">
+        <h2>15. Other Services</h2>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/ghn/provinces</span><span class="desc">GHN Provinces</span></div>
+            <div class="endpoint-details"><p>Get provinces from GHN.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/roles</span><span class="desc">Get Roles</span></div>
+            <div class="endpoint-details"><p>Get all user roles.</p></div>
+        </div>
+        <div class="endpoint" onclick="this.classList.toggle('active')">
+            <div class="endpoint-header"><span class="method GET">GET</span><span class="url">/lock-features</span><span class="desc">Lock Features</span></div>
+            <div class="endpoint-details"><p>Get lock features.</p></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    console.log("API Documentation Loaded");
+</script>
+
+</body>
+</html>
