@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, signal, computed, ChangeDetectorRef } from '@angular/core';
+'import { Component, OnInit, ViewChild, ElementRef, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService, ChatResponse } from '../../services/ai.service';
@@ -13,7 +13,7 @@ import { ToastService } from '../../services/toast.service';
 
 interface ChatMessage {
   content: string;
-  sender: 'user' | 'bot' | 'staff';
+  sender: 'user' | 'bot';
   timestamp: Date;
   isError?: boolean;
   image?: string; // Base64 image data
@@ -50,8 +50,7 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
     'Chúng tôi có thể giúp gì cho bạn?',
     'Đừng ngần ngại hỏi chúng tôi!',
     'Tư vấn miễn phí tại đây!',
-    'Có thắc mắc về sản phẩm? Hỏi ngay!',
-    'Nhân viên đang sẵn sàng hỗ trợ bạn!'
+    'Có thắc mắc về sản phẩm? Hỏi ngay!'
   ];
 
   // Computed properties
@@ -104,6 +103,8 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
       this.startTeaserLoop();
     }
   }
+  
+
 
   toggleChat(): void {
     this.isOpen.update(v => !v);
@@ -193,56 +194,65 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     const message = this.userInput().trim();
     const image = this.selectedImage();
 
-    if (!message.trim() && !image) return;
-
-    // Add user message
-    if (image) {
-      this.addMessageWithImage(message || '[Hình ảnh]', 'user', this.imagePreview() || '');
-    } else {
+    // AI mode
+    if (message && !image) {
       this.addMessage(message, 'user');
+    }
+
+    if (image && message) {
+      // Send image with prompt
+      const preview = this.imagePreview();
+      if (preview) {
+        this.addMessageWithImage(message, 'user', preview);
+      }
+      this.sendImageMessage(image, message);
+    } else if (image) {
+      // Send image with default prompt
+      const preview = this.imagePreview();
+      if (preview) {
+        this.addMessageWithImage('What can you tell me about this sneaker?', 'user', preview);
+      }
+      this.sendImageMessage(image, 'What can you tell me about this sneaker?');
+    } else if (message) {
+      // Send text message
+      this.sendTextMessage(message);
     }
 
     // Clear input
     this.userInput.set('');
+    this.clearImage();
+  }
 
-    if (image) {
-      // Send image with optional prompt
-      const imageToSend = image;
-      this.clearImage(); // Clear image preview after adding to message
-      this.sendImageMessage(imageToSend, message);
-    } else {
-      // Send text message
-      this.isLoading.set(true);
-      
-      this.aiService.productAssistant(message)
-        .pipe(
-          finalize(() => this.isLoading.set(false)),
-          catchError(error => {
-            console.error('Chat error:', error);
-            let errorMessage = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
-            
-            if (error.status === 0) {
-              errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
-            } else if (error.status === 500) {
-              errorMessage = 'Lỗi máy chủ. AI service có thể chưa được khởi tạo. Vui lòng liên hệ admin.';
-            } else if (error.status === 503) {
-              errorMessage = 'Dịch vụ AI tạm thời không khả dụng. Vui lòng thử lại sau.';
-            } else if (error.error?.error) {
-              errorMessage = error.error.error;
-            }
-            
-            this.addMessage(errorMessage, 'bot', true);
-            return of(null);
-          })
-        )
-        .subscribe({
-          next: (response: ChatResponse | null) => {
-            if (response?.success) {
-              this.addMessage(response.response, 'bot');
-            }
+  private sendTextMessage(message: string): void {
+    this.isLoading.set(true);
+
+    this.aiService.productAssistant(message)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: (response: ChatResponse) => {
+          if (response.success) {
+            this.addMessage(response.response, 'bot');
+          } else {
+            this.addMessage('Xin lỗi, tôi không thể xử lý yêu cầu của bạn. Vui lòng thử lại hoặc đặt câu hỏi khác.', 'bot', true);
           }
-        });
-    }
+        },
+        error: (error) => {
+          console.error('Chat error:', error);
+          let errorMessage = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
+          
+          if (error.status === 0) {
+            errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+          } else if (error.status === 500) {
+            errorMessage = 'Lỗi máy chủ. AI service có thể chưa được khởi tạo. Vui lòng liên hệ admin.';
+          } else if (error.status === 503) {
+            errorMessage = 'Dịch vụ AI tạm thời không khả dụng. Vui lòng thử lại sau.';
+          } else if (error.error?.error) {
+            errorMessage = error.error.error;
+          }
+          
+          this.addMessage(errorMessage, 'bot', true);
+        }
+      });
   }
 
   private sendImageMessage(image: File, prompt: string): void {
@@ -321,7 +331,7 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   onImageSelected(event: Event): void {
     if (isPlatformBrowser(this.platformId)) {
       const input = event.target as HTMLInputElement;
-      if (input?.files && input.files[0]) {
+      if (input.files && input.files[0]) {
         const file = input.files[0];
         this.selectedImage.set(file);
 
@@ -344,9 +354,7 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   triggerFileInput(): void {
-    if (this.fileInput) {
-      this.fileInput.nativeElement.click();
-    }
+    this.fileInput.nativeElement.click();
   }
 
   onFileInputChange(event: Event): void {
@@ -354,7 +362,7 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   onKeyPress(event: KeyboardEvent): void {
-    if (event?.key === 'Enter' && !event.shiftKey) {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendMessage();
     }
@@ -363,7 +371,7 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   private scrollToBottom(): void {
     if (isPlatformBrowser(this.platformId)) {
       setTimeout(() => {
-        if (this.scrollContainer?.nativeElement) {
+        if (this.scrollContainer) {
           const element = this.scrollContainer.nativeElement;
           element.scrollTop = element.scrollHeight;
         }
@@ -384,49 +392,18 @@ Bạn có thể hỏi tôi những câu như:
 • "Gợi ý khóa điện tử cho cửa kính"
 
 Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
-    
+      
     this.addMessage(welcomeMessage, 'bot');
   }
 
   openImagePreview(imageUrl: string): void {
-    if (imageUrl) {
-      window.open(imageUrl, '_blank');
-    }
-  }
-
-  getFileUrl(fileUrl: string): string {
-    if (!fileUrl) {
-      return '';
-    }
-    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
-      return fileUrl;
-    }
-    
-    // Remove duplicate /api/v1 if fileUrl already contains it
-    // Backend returns: /api/v1/chat/files/...
-    // environment.apiUrl: http://localhost:8089/api/v1
-    // We need to avoid duplication
-    let normalizedUrl = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
-    
-    // If fileUrl already starts with /api/v1, remove it since apiUrl already contains it
-    if (normalizedUrl.startsWith('/api/v1/')) {
-      normalizedUrl = normalizedUrl.substring('/api/v1'.length);
-    }
-    
-    // Ensure apiUrl doesn't have trailing slash and normalizedUrl starts with /
-    const baseUrl = environment.apiUrl.endsWith('/') 
-      ? environment.apiUrl.slice(0, -1) 
-      : environment.apiUrl;
-    
-    return `${baseUrl}${normalizedUrl}`;
+    window.open(imageUrl, '_blank');
   }
 
   handleImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    if (img) {
-      console.error('Failed to load image:', img.src);
-      // Optionally show a placeholder or error message
-      img.style.display = 'none';
-    }
+    console.error('Failed to load image:', img.src);
+    // Optionally show a placeholder or error message
+    img.style.display = 'none';
   }
 }
