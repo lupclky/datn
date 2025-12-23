@@ -6,22 +6,42 @@
 
   <!-- Stats Cards -->
   <div class="stats-cards">
-    <p-card header="Tổng số yêu cầu" styleClass="stat-card">
-      <div class="stat-value">{{ totalRequests }}</div>
-    </p-card>
-    <p-card header="Đang chờ xử lý" styleClass="stat-card pending">
-      <div class="stat-value">{{ pendingRequests }}</div>
-    </p-card>
-    <p-card header="Đã chấp thuận" styleClass="stat-card approved">
-      <div class="stat-value">{{ approvedRequests }}</div>
-    </p-card>
-    <p-card header="Đã từ chối" styleClass="stat-card rejected">
-      <div class="stat-value">{{ rejectedRequests }}</div>
-    </p-card>
+    <div class="stat-card-wrapper">
+      <p-card styleClass="stat-card">
+        <div class="stat-content">
+          <div class="stat-title">Tổng số yêu cầu</div>
+          <div class="stat-value">{{ totalRequests }}</div>
+        </div>
+      </p-card>
+    </div>
+    <div class="stat-card-wrapper">
+      <p-card styleClass="stat-card pending">
+        <div class="stat-content">
+          <div class="stat-title">Đang chờ xử lý</div>
+          <div class="stat-value">{{ pendingRequests }}</div>
+        </div>
+      </p-card>
+    </div>
+    <div class="stat-card-wrapper">
+      <p-card styleClass="stat-card approved">
+        <div class="stat-content">
+          <div class="stat-title">Đã chấp thuận</div>
+          <div class="stat-value">{{ approvedRequests }}</div>
+        </div>
+      </p-card>
+    </div>
+    <div class="stat-card-wrapper">
+      <p-card styleClass="stat-card rejected">
+        <div class="stat-content">
+          <div class="stat-title">Đã từ chối</div>
+          <div class="stat-value">{{ rejectedRequests }}</div>
+        </div>
+      </p-card>
+    </div>
   </div>
 
   <!-- Data Table -->
-  <p-card>
+  <p-card styleClass="return-table-card">
     <p-table #dt 
              [value]="allRequests" 
              [loading]="isLoading"
@@ -29,7 +49,7 @@
              [rows]="10" 
              [rowsPerPageOptions]="[10, 25, 50]"
              [globalFilterFields]="['id', 'order_id', 'customer_name', 'reason', 'status']"
-             styleClass="p-datatable-customers"
+             styleClass="p-datatable-striped"
              responsiveLayout="scroll">
       
       <ng-template pTemplate="caption">
@@ -58,44 +78,48 @@
 
       <ng-template pTemplate="body" let-request>
         <tr>
-          <td>{{ request.id }}</td>
-          <td>#{{ request.order_id || 'N/A' }}</td>
-          <td>{{ request.customer_name || 'N/A' }}</td>
-          <td pTooltip="{{request.reason}}" tooltipPosition="top">{{ request.reason | slice:0:50 }}{{ request.reason && request.reason.length > 50 ? '...' : '' }}</td>
-          <td>{{ request.refund_amount | currency:'VND' }}</td>
-          <td>{{ formatDate(request.requested_at) }}</td>
-          <td>
-            <p-tag [value]="request.status" [severity]="getStatusSeverity(request.status)"></p-tag>
+          <td data-label="ID">{{ request.id }}</td>
+          <td data-label="Đơn hàng">#{{ request.order_id || 'N/A' }}</td>
+          <td data-label="Khách hàng">{{ request.customer_name || 'N/A' }}</td>
+          <td data-label="Lý do" pTooltip="{{request.reason}}" tooltipPosition="top">{{ request.reason | slice:0:50 }}{{ request.reason && request.reason.length > 50 ? '...' : '' }}</td>
+          <td data-label="Hoàn tiền" class="font-bold text-primary">{{ request.refund_amount | currency:'VND' }}</td>
+          <td data-label="Ngày Y/C">{{ formatDate(request.requested_at) }}</td>
+          <td data-label="T.T Trả hàng">
+            <span class="status-badge" [ngClass]="'status-' + request.status.toLowerCase()">
+              {{ request.status }}
+            </span>
           </td>
-          <td>
-            <p-tag [value]="getOrderStatusDisplay(request.order_status)" [severity]="getOrderStatusSeverity(request.order_status)"></p-tag>
+          <td data-label="T.T Đơn hàng">
+            <span class="status-badge" [ngClass]="'status-' + request.order_status.toLowerCase()">
+              {{ getOrderStatusDisplay(request.order_status) }}
+            </span>
           </td>
-          <td>
-            <div *ngIf="request.status === 'PENDING'">
-              <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-success p-mr-2" (click)="showActionDialog(request, 'approve')" pTooltip="Approve"></button>
-              <button *ngIf="request.status === 'PENDING'" pButton pRipple icon="pi pi-times" class="p-button-sm p-button-danger"
-                (click)="showActionDialog(request, 'reject')" pTooltip="Reject request"></button>
+          <td data-label="Hành động">
+            <div *ngIf="request.status === 'PENDING'" class="flex gap-2">
+              <button pButton pRipple icon="pi pi-check" class="action-btn p-button-success" (click)="showActionDialog(request, 'approve')" pTooltip="Approve"></button>
+              <button pButton pRipple icon="pi pi-times" class="action-btn p-button-danger" (click)="showActionDialog(request, 'reject')" pTooltip="Reject request"></button>
             </div>
 
             <!-- Conditional Refund/Action Buttons -->
             <ng-container *ngIf="request.status === 'AWAITING_REFUND'">
               <!-- Manual/COD refund completion -->
               <button *ngIf="request.payment_method === 'COD'" pButton pRipple icon="pi pi-check-circle"
-                label="Đánh dấu hoàn tất" class="p-button-success" (click)="showCompleteRefundDialog(request)"
+                label="Đánh dấu hoàn tất" class="p-button-success p-button-rounded" (click)="showCompleteRefundDialog(request)"
                 pTooltip="Mark manual refund as completed"></button>
 
               <!-- VNPAY Refund Button -->
               <button *ngIf="request.payment_method === 'VNPAY'" pButton pRipple icon="pi pi-undo"
-                label="Hoàn tiền VNPAY" class="p-button-warning" (click)="showVnpayRefundDialog(request)"></button>
+                label="Hoàn tiền VNPAY" class="p-button-warning p-button-rounded" (click)="showVnpayRefundDialog(request)"></button>
 
               <!-- Stripe Refund Button -->
               <button *ngIf="request.payment_method === 'STRIPE'" pButton pRipple icon="pi pi-undo"
-                label="Hoàn tiền Stripe" class="p-button-info"
+                label="Hoàn tiền Stripe" class="p-button-info p-button-rounded"
                 (click)="approveReturnRequestAndRefund(request)"></button>
             </ng-container>
 
-            <p-tag *ngIf="!['PENDING', 'AWAITING_REFUND'].includes(request.status)" value="Đã xử lý"
-              severity="info"></p-tag>
+            <span *ngIf="!['PENDING', 'AWAITING_REFUND'].includes(request.status)" class="status-badge status-completed">
+              <i class="pi pi-check-circle"></i> Đã xử lý
+            </span>
           </td>
         </tr>
       </ng-template>

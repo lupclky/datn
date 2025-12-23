@@ -1,7 +1,17 @@
+// Material 3 Expressive Design Tokens
+$m3-sys-color-surface: #FFFFFF; // Pure White
+$m3-sys-color-surface-container: #F3F4F6;
+$m3-sys-color-surface-container-high: #ECE6F0;
+$m3-sys-color-primary-container: #EADDFF;
+$m3-sys-color-on-surface: #1C1B1F;
+$m3-sys-shape-corner-extra-large: 28px;
+$m3-sys-shape-corner-large: 16px;
+
 .admin-order-detail-container {
-  padding: 1.5rem;
-  background-color: var(--surface-ground);
-  min-height: calc(100vh - 64px);
+  padding: 2rem; // More breathing room
+  background-color: $m3-sys-color-surface-container;
+  min-height: 100vh;
+  font-family: 'Roboto', sans-serif;
 }
 
 /* Page Header */
@@ -9,34 +19,41 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--surface-border);
+  margin-bottom: 2rem;
+  padding-bottom: 0;
+  border-bottom: none;
 
   .header-left {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
 
     .page-title {
       margin: 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text-color);
+      font-size: 2.25rem; // Display Small/Medium
+      font-weight: 400;
+      color: $m3-sys-color-on-surface;
+      letter-spacing: -0.5px;
     }
   }
 
   .header-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 }
 
 /* Content Grid */
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1fr; // Balanced 50/50 split for Expressive
   gap: 1.5rem;
+  align-items: start;
+
+  @media (min-width: 1600px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
@@ -57,99 +74,151 @@
   gap: 1.5rem;
 }
 
-/* Info Cards */
-::ng-deep .info-card {
+/* Material 3 Card Styles */
+::ng-deep .m3-card, 
+::ng-deep .p-card {
+  border-radius: $m3-sys-shape-corner-extra-large !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border: none !important;
+  background: $m3-sys-color-surface;
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+  }
+
   .p-card-body {
-    padding: 1.5rem;
+    padding: 1.25rem; // Reduced padding
   }
 
   .p-card-header {
-    font-weight: 600;
-    font-size: 1.1rem;
-    border-bottom: 1px solid var(--surface-border);
-    padding-bottom: 0.75rem;
-    margin-bottom: 1rem;
+    padding: 1.25rem 1.25rem 0 1.25rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500; // Medium
+    font-size: 1.25rem; // Reduced font size
+    color: $m3-sys-color-on-surface;
+    border: none; // Remove separator
+    background: transparent;
+  }
+  
+  .p-card-content {
+    padding: 1rem 0 0 0;
   }
 }
 
+// Highlighted Status Card (Expressive)
+::ng-deep .highlight-card {
+  background: #ffffff !important; // Pure white background
+  border: 1px solid #E0E0E0 !important; // Subtle border
+  
+  &.status-card {
+    .p-card-body {
+      padding: 0.75rem 1.25rem; // Very compact padding
+    }
+    
+    .p-card-content {
+      padding: 0; // Remove content padding
+    }
+  }
+}
+
+.update-btn-compact {
+  border-radius: 100px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  background-color: #6750A4;
+  border: none;
+  white-space: nowrap;
+  
+  &:hover {
+    background-color: #6750A4 !important;
+    filter: brightness(1.1);
+  }
+}
+
+/* Info Grid */
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 1.5rem;
 
   .info-item {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
 
     &.full-width {
       grid-column: 1 / -1;
     }
 
     label {
-      font-size: 0.875rem;
-      color: var(--text-color-secondary);
+      font-size: 0.875rem; // Label Large
+      color: #49454F; // On Surface Variant
       font-weight: 500;
+      letter-spacing: 0.1px;
     }
 
     .value {
-      font-size: 0.95rem;
-      color: var(--text-color);
-      font-weight: 500;
+      font-size: 1rem; // Body Large
+      color: $m3-sys-color-on-surface;
+      font-weight: 400;
+      line-height: 1.5;
 
       &.tracking-code {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        letter-spacing: 1px;
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: #6750A4; // Primary
+        letter-spacing: 0.5px;
       }
 
       &.payment-code {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        font-family: 'Courier New', monospace;
-        background-color: var(--surface-100);
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        display: inline-block;
-        word-break: break-all;
+        font-family: 'Roboto Mono', monospace;
+        background-color: #F3F4F6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
       }
-    }
-
-    .status-control {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
     }
   }
 }
 
-/* Products Card */
+/* Products Table Override */
 ::ng-deep .products-card {
-  .p-card-body {
-    padding: 0;
-  }
+  .p-datatable {
+    .p-datatable-header {
+      background: transparent;
+      border: none;
+    }
+    
+    .p-datatable-thead > tr > th {
+      background: transparent;
+      color: #49454F;
+      font-weight: 500;
+      border-bottom: 1px solid #E0E0E0;
+      padding: 1rem;
+    }
 
-  .p-card-header {
-    padding: 1.5rem 1.5rem 0.75rem 1.5rem;
-    font-weight: 600;
-    font-size: 1.1rem;
-    border-bottom: 1px solid var(--surface-border);
+    .p-datatable-tbody > tr > td {
+      padding: 1.25rem 1rem;
+      border-bottom: 1px solid #F3F4F6;
+      color: $m3-sys-color-on-surface;
+    }
   }
 }
 
 .product-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 
   .product-thumbnail {
-    width: 50px;
-    height: 50px;
+    width: 64px; // Larger thumbnail
+    height: 64px;
     object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid var(--surface-border);
+    border-radius: 12px; // M3 Medium shape
+    background-color: #F3F4F6;
   }
 
   .product-details {
@@ -159,79 +228,70 @@
 
     .product-name {
       font-weight: 500;
-      color: var(--text-color);
-      font-size: 0.95rem;
+      font-size: 1rem;
+      color: $m3-sys-color-on-surface;
     }
 
     .product-brand {
-      font-size: 0.8rem;
-      color: var(--text-color-secondary);
+      font-size: 0.875rem;
+      color: #49454F;
     }
   }
 }
 
-/* Summary Card */
-::ng-deep .summary-card {
-  .p-card-body {
-    padding: 1.5rem;
-  }
-
-  .p-card-header {
-    font-weight: 600;
-    font-size: 1.1rem;
-    border-bottom: 1px solid var(--surface-border);
-    padding-bottom: 0.75rem;
-    margin-bottom: 1rem;
-  }
-}
-
+/* Summary Section */
 .summary-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  background-color: #F9FAFB;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--surface-border);
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &.discount {
-    .amount {
-      color: var(--red-500);
-    }
-  }
-
+  padding: 0.75rem 0;
+  
   &.total {
+    margin-top: 1rem;
     padding-top: 1rem;
-    margin-top: 0.5rem;
-    border-top: 2px solid var(--primary-color);
-    font-size: 1.1rem;
-    font-weight: 600;
-
-    .total-amount {
-      font-size: 1.25rem;
-      color: var(--primary-color);
+    border-top: 1px dashed #CAC4D0;
+    
+    .label {
+      font-size: 1.125rem;
+      font-weight: 500;
     }
-  }
-
-  .amount {
-    font-weight: 600;
-    color: var(--text-color);
+    
+    .total-amount {
+      font-size: 1.5rem; // Headline Small
+      color: #6750A4; // Primary
+      font-weight: 600;
+    }
   }
 }
 
-/* Timeline Section */
+/* Update Button */
+.update-btn {
+  border-radius: 100px;
+  height: 2.75rem; // Reduced height
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  background-color: #6750A4; // M3 Primary
+  border: none;
+  
+  &:hover {
+    background-color: #6750A4 !important;
+    filter: brightness(1.1);
+  }
+}
+
+/* Timeline */
 .timeline-section {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--surface-border);
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #E0E0E0;
 }
 
 .custom-marker {
@@ -292,6 +352,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+
 
 
 

@@ -20,6 +20,8 @@ import { finalize } from 'rxjs/operators';
 
 import { CalendarModule } from 'primeng/calendar';
 import { CheckboxModule } from 'primeng/checkbox';
+import { CardModule } from 'primeng/card';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-news-manage',
@@ -38,7 +40,9 @@ import { CheckboxModule } from 'primeng/checkbox';
     ConfirmDialogModule,
     CKEditorModule,
     CalendarModule,
-    CheckboxModule
+    CheckboxModule,
+    CardModule,
+    TooltipModule
   ],
   providers: [MessageService, ToastService, ConfirmationService],
   templateUrl: './news-manage.component.html',

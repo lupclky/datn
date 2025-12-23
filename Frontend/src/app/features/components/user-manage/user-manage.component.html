@@ -15,7 +15,7 @@
                     type="button" 
                     label="Thêm người dùng" 
                     icon="pi pi-plus"
-                    class="p-button-success"
+                    class="p-button-success p-button-rounded"
                     (click)="openAddUserDialog()">
             </button>
         </div>
@@ -90,7 +90,7 @@
                 <ng-template pTemplate="body" let-user>
                     <tr>
                         <td data-label="ID">#{{ user.id }}</td>
-                        <td data-label="Họ và tên">{{ user.fullname }}</td>
+                        <td data-label="Họ và tên" class="font-bold">{{ user.fullname }}</td>
                         <td data-label="Số điện thoại">{{ user.phone_number }}</td>
                         <td data-label="Email">{{ user.email }}</td>
                         <td data-label="Địa chỉ">{{ user.address }}</td>
@@ -102,16 +102,17 @@
                                         optionValue="value"
                                         (onChange)="onRoleChange($event, user.id)"
                                         appendTo="body"
-                                        [style]="{'min-width': '120px'}">
+                                        [style]="{'min-width': '120px'}"
+                                        styleClass="role-dropdown">
                             </p-dropdown>
                         </td>
                         <td data-label="Trạng thái">
-                            <p-tag [value]="user.is_active ? 'Hoạt động' : 'Vô hiệu'" 
-                                   [severity]="user.is_active ? 'success' : 'danger'"
-                                   (click)="changeActiveStatus(user)"
-                                   [style]="{'cursor': 'pointer'}"
-                                   [pTooltip]="user.is_active ? 'Click để vô hiệu hóa' : 'Click để kích hoạt'">
-                            </p-tag>
+                            <div class="status-badge" 
+                                 [ngClass]="{'status-active': user.is_active, 'status-inactive': !user.is_active}"
+                                 (click)="changeActiveStatus(user)"
+                                 [pTooltip]="user.is_active ? 'Click để vô hiệu hóa' : 'Click để kích hoạt'">
+                                {{ user.is_active ? 'Hoạt động' : 'Vô hiệu' }}
+                            </div>
                         </td>
                         <td>
                             <div class="action-buttons">
@@ -119,7 +120,7 @@
                                         pRipple 
                                         type="button" 
                                         icon="pi pi-shopping-cart"
-                                        class="p-button-rounded p-button-text p-button-secondary"
+                                        class="p-button-rounded p-button-text p-button-secondary action-btn"
                                         pTooltip="Lịch sử đơn hàng" 
                                         (click)="viewOrderHistory(user)">
                                 </button>
@@ -127,7 +128,7 @@
                                         pRipple 
                                         type="button" 
                                         icon="pi pi-comment"
-                                        class="p-button-rounded p-button-text p-button-warning"
+                                        class="p-button-rounded p-button-text p-button-warning action-btn"
                                         pTooltip="Lịch sử bình luận" 
                                         (click)="viewCommentHistory(user)">
                                 </button>
@@ -135,7 +136,7 @@
                                         pRipple 
                                         type="button" 
                                         icon="pi pi-pencil"
-                                        class="p-button-rounded p-button-text p-button-info"
+                                        class="p-button-rounded p-button-text p-button-info action-btn"
                                         pTooltip="Chỉnh sửa" 
                                         (click)="editUser(user)">
                                 </button>
@@ -143,7 +144,7 @@
                                         pRipple 
                                         type="button" 
                                         icon="pi pi-trash"
-                                        class="p-button-rounded p-button-text p-button-danger"
+                                        class="p-button-rounded p-button-text p-button-danger action-btn"
                                         pTooltip="Xóa" 
                                         (click)="confirmDelete(user.id)">
                                 </button>

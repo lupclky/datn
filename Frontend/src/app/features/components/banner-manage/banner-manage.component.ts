@@ -18,6 +18,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { TooltipModule } from 'primeng/tooltip';
 import { environment } from '../../../../environments/environment.development';
 import { CheckboxModule } from 'primeng/checkbox';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-banner-manage',
@@ -37,7 +38,8 @@ import { CheckboxModule } from 'primeng/checkbox';
     InputNumberModule,
     CalendarModule,
     TooltipModule,
-    CheckboxModule
+    CheckboxModule,
+    CardModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './banner-manage.component.html',
@@ -52,7 +54,7 @@ export class BannerManageComponent implements OnInit {
   isEditMode: boolean = false;
   selectedBannerId: number | null = null;
   selectedFile: File | null = null;
-  imagePreview: string | null = null;
+  previewImage: string | null = null;
   isUploading: boolean = false;
 
   buttonStyleOptions = [
@@ -141,7 +143,7 @@ export class BannerManageComponent implements OnInit {
     this.isEditMode = false;
     this.selectedBannerId = null;
     this.selectedFile = null;
-    this.imagePreview = null;
+    this.previewImage = null;
     this.bannerForm.reset({
       title: '',
       description: '',
@@ -165,7 +167,7 @@ export class BannerManageComponent implements OnInit {
     this.selectedFile = null;
     const cleanApiImage = environment.apiUrl.replace(/\/$/, '') + '/banners/images';
     const cleanImageUrl = banner.image_url ? banner.image_url.replace(/^\//, '') : '';
-    this.imagePreview = banner.image_url ? `${cleanApiImage}/${cleanImageUrl}` : null;
+    this.previewImage = banner.image_url ? `${cleanApiImage}/${cleanImageUrl}` : null;
     
     // Helper function to safely parse date
     const parseDateSafely = (dateString: string | null | undefined): Date | null => {
@@ -191,7 +193,7 @@ export class BannerManageComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  onFileSelect(event: any): void {
+  onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
       this.selectedFile = file;
@@ -201,7 +203,7 @@ export class BannerManageComponent implements OnInit {
       this.updateImageUrlValidator();
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.imagePreview = e.target.result;
+        this.previewImage = e.target.result;
         this.cdr.markForCheck();
       };
       reader.readAsDataURL(file);
@@ -212,7 +214,7 @@ export class BannerManageComponent implements OnInit {
         this.updateImageUrlValidator();
       }
       this.selectedFile = null;
-      this.imagePreview = null;
+      this.previewImage = null;
     }
     this.cdr.markForCheck();
   }
@@ -431,7 +433,7 @@ export class BannerManageComponent implements OnInit {
   }
 
   previewHomePage(): void {
-    window.open('/Home', '_blank');
+    window.open('/Home?preview=true', '_blank');
   }
 }
 

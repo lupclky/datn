@@ -403,6 +403,22 @@ export class AdminOrderDetailComponent extends BaseComponent implements OnInit {
     }
   }
 
+  getPlaceholderByOrderStatus(status: string): string {
+    return getOrderStatusLabel(status);
+  }
+
+  getSeverity(status: string): string {
+    switch (status) {
+      case 'pending': return 'warning';
+      case 'confirmed': return 'info';
+      case 'shipping': return 'primary';
+      case 'delivered': return 'success';
+      case 'cancelled': return 'danger';
+      case 'payment_failed': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
   getStatusLabel(status: string): string {
     const option = this.orderStatusOptions.find(opt => opt.value === status);
     return option ? option.label : status;

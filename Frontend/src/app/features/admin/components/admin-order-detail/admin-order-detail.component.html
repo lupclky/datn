@@ -55,6 +55,36 @@
     <div class="content-grid">
       <!-- Left Column: Order Info & Customer -->
       <div class="left-column">
+        <!-- Status Management Card (Compact) -->
+        <p-card styleClass="status-card m3-card highlight-card mb-3">
+            <div class="flex align-items-center gap-3 p-2">
+                <div class="flex align-items-center gap-2 flex-shrink-0">
+                    <i class="pi pi-sync text-primary text-lg"></i>
+                    <span class="font-medium text-900">Trạng thái:</span>
+                    <p-tag [value]="getPlaceholderByOrderStatus(orderInfor.status)" 
+                           [severity]="getSeverity(orderInfor.status)"></p-tag>
+                </div>
+                
+                <div class="flex-grow-1 flex gap-2 align-items-center justify-content-end">
+                    <p-dropdown [options]="orderStatusOptions" 
+                                [(ngModel)]="selectedStatus" 
+                                optionLabel="label" 
+                                optionValue="value"
+                                appendTo="body"
+                                placeholder="Chọn trạng thái mới"
+                                styleClass="w-15rem p-inputtext-sm">
+                    </p-dropdown>
+                    <button pButton 
+                            pRipple
+                            label="Cập nhật"
+                            icon="pi pi-check" 
+                            (click)="updateOrderStatus()" 
+                            class="p-button-primary p-button-sm update-btn-compact">
+                    </button>
+                </div>
+            </div>
+        </p-card>
+
         <!-- Order Overview Card -->
         <p-card header="Thông tin đơn hàng" styleClass="info-card">
           <div class="info-grid">
@@ -98,24 +128,6 @@
             <div class="info-item" *ngIf="orderInfor.assigned_staff">
               <label>Nhân viên lắp đặt:</label>
               <span class="value">{{ orderInfor.assigned_staff.fullname }} ({{ orderInfor.assigned_staff.phone_number }})</span>
-            </div>
-            <div class="info-item full-width">
-              <label>Trạng thái đơn hàng:</label>
-              <div class="status-control">
-                <p-dropdown [options]="orderStatusOptions" 
-                            [(ngModel)]="selectedStatus" 
-                            optionLabel="label" 
-                            optionValue="value"
-                            appendTo="body"
-                            [style]="{'width':'200px'}">
-                </p-dropdown>
-                <button pButton 
-                        icon="pi pi-check" 
-                        (click)="updateOrderStatus()" 
-                        class="p-button-success p-button-sm" 
-                        pTooltip="Cập nhật trạng thái">
-                </button>
-              </div>
             </div>
           </div>
         </p-card>

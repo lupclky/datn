@@ -1,44 +1,122 @@
+// Material 3 Expressive Design Tokens
+$md-sys-color-surface: #FEFBFF;
+$md-sys-color-surface-container: #F3F4F6;
+$md-sys-color-surface-container-high: #E5E7EB;
+$md-sys-color-primary: #1976D2;
+$md-sys-color-on-primary: #FFFFFF;
+$md-sys-color-primary-container: #BBDEFB;
+$md-sys-color-on-primary-container: #0D47A1;
+$md-sys-color-secondary: #03DAC6;
+$md-sys-color-on-secondary: #000000;
+$md-sys-color-error: #BA1A1A;
+$md-sys-color-on-error: #FFFFFF;
+$md-sys-color-on-surface: #1C1B1F;
+$md-sys-color-on-surface-variant: #49454F;
+$md-sys-color-outline: #79747E;
+$md-sys-color-outline-variant: #CAC4D0;
+
+:host {
+  display: block;
+  background-color: $md-sys-color-surface-container;
+  height: 100%;
+  font-family: 'Roboto', sans-serif;
+}
+
 .admin-return-manage-container {
-  padding: 2rem;
-  background-color: #f4f7f9;
+  padding: 1.5rem 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 
   .header {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     h1 {
       font-size: 2rem;
-      font-weight: 700;
-      color: #2c3e50;
+      font-weight: 500;
+      color: $md-sys-color-on-surface;
+      margin: 0;
+      letter-spacing: -0.5px;
     }
     p {
-      color: #7f8c8d;
+      color: $md-sys-color-on-surface-variant;
       font-size: 1rem;
+      margin-top: 0.5rem;
     }
   }
 
   .stats-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 
-    .stat-card {
+    .stat-card-wrapper {
+      height: 100%;
+    }
+
+    ::ng-deep .stat-card {
+      height: 100%;
+      border-radius: 16px;
+      background: $md-sys-color-surface;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); // Elevation 1
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      border: 1px solid $md-sys-color-surface-container-high;
+
+      &:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); // Elevation 2
+        transform: translateY(-2px);
+      }
+      
       .p-card-body {
         padding: 1.5rem;
-        text-align: center;
-        .p-card-title {
-          font-size: 1rem;
-          font-weight: 600;
-          color: #7f8c8d;
-        }
-        .stat-value {
-          font-size: 2.5rem;
-          font-weight: 700;
-          margin-top: 0.5rem;
-        }
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
-      &.pending .stat-value { color: #f39c12; }
-      &.approved .stat-value { color: #3498db; }
-      &.rejected .stat-value { color: #e74c3c; }
+
+      .stat-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+        
+      .stat-title {
+        font-size: 1rem;
+        font-weight: 500;
+        color: $md-sys-color-on-surface-variant;
+        letter-spacing: 0.1px;
+      }
+      
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: $md-sys-color-on-surface;
+        line-height: 1.2;
+      }
+
+      &.pending {
+        .stat-value { color: #F57C00; }
+        border-left: 4px solid #F57C00;
+      }
+      
+      &.approved {
+        .stat-value { color: #1976D2; }
+        border-left: 4px solid #1976D2;
+      }
+      
+      &.rejected {
+        .stat-value { color: #D32F2F; }
+        border-left: 4px solid #D32F2F;
+      }
     }
   }
 
@@ -46,38 +124,207 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: $md-sys-color-on-surface;
+    padding: 1rem 1.5rem;
+    
+    .p-input-icon-left {
+      i { z-index: 1; color: $md-sys-color-on-surface-variant; }
+      input {
+        border-radius: 100px;
+        padding-left: 2.5rem;
+        border: 1px solid $md-sys-color-outline-variant;
+        &:focus {
+          border-color: $md-sys-color-primary;
+          box-shadow: 0 0 0 2px $md-sys-color-primary-container;
+        }
+      }
+    }
   }
 
-  .p-datatable-customers {
-    .p-datatable-thead > tr > th {
-      background-color: #e9ecef;
-      color: #495057;
-      font-weight: 600;
-    }
-    .p-button {
-      margin-right: 0.5rem;
-    }
+  ::ng-deep .p-card {
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: none;
+    overflow: hidden;
+    
+    .p-card-body { padding: 0; }
+    .p-card-content { padding: 0; }
   }
-  
-  .form-group {
-    margin-top: 1.5rem;
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
+
+  ::ng-deep .p-datatable {
+    .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding: 0;
     }
-    textarea {
-      width: 100%;
+
+    .p-datatable-thead > tr > th {
+      background-color: $md-sys-color-surface;
+      font-weight: 600;
+      color: $md-sys-color-on-surface-variant;
+      padding: 1.25rem 1rem;
+      border-bottom: 1px solid $md-sys-color-surface-container-high;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &.p-highlight {
+        color: $md-sys-color-primary;
+        .p-sortable-column-icon { color: $md-sys-color-primary; }
+      }
+    }
+
+    .p-datatable-tbody > tr {
+      > td {
+        padding: 1rem;
+        border-bottom: 1px solid $md-sys-color-surface-container-high;
+        color: $md-sys-color-on-surface;
+        vertical-align: middle;
+      }
+      
+      &:hover {
+        background-color: $md-sys-color-surface-container !important;
+      }
+    }
+    
+    .p-paginator {
+      border: none;
+      border-top: 1px solid $md-sys-color-surface-container-high;
+      background: transparent;
+      
+      .p-paginator-element {
+        border-radius: 50%;
+        min-width: 2.5rem;
+        height: 2.5rem;
+        &.p-highlight {
+          background-color: $md-sys-color-primary-container;
+          color: $md-sys-color-on-primary-container;
+        }
+      }
     }
   }
 }
 
-// Custom severity for PrimeNG tags
-:host ::ng-deep {
-  .p-tag-info {
-    background-color: #3498db;
-    color: #ffffff;
+// Badges
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &.status-pending {
+    background-color: #FFF8E1;
+    color: #F57C00;
+    border: 1px solid #FFE0B2;
   }
-} 
+  
+  &.status-approved, &.status-completed {
+    background-color: #E3F2FD;
+    color: #1976D2;
+    border: 1px solid #BBDEFB;
+  }
+  
+  &.status-rejected, &.status-cancelled {
+    background-color: #FFEBEE;
+    color: #D32F2F;
+    border: 1px solid #FFCDD2;
+  }
+  
+  &.status-awaiting_refund {
+    background-color: #E0F7FA;
+    color: #006064;
+    border: 1px solid #B2EBF2;
+  }
+}
+
+// Action Buttons
+.action-btn {
+  border-radius: 100px !important;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 !important;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  
+  &.p-button-success {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #C8E6C9;
+    &:hover { background-color: #C8E6C9; }
+  }
+  
+  &.p-button-danger {
+    background-color: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #FFCDD2;
+    &:hover { background-color: #FFCDD2; }
+  }
+  
+  &.p-button-warning {
+    background-color: #FFF8E1;
+    color: #F57C00;
+    border: 1px solid #FFE0B2;
+    &:hover { background-color: #FFE0B2; }
+  }
+  
+  &.p-button-info {
+    background-color: #E3F2FD;
+    color: #1565C0;
+    border: 1px solid #BBDEFB;
+    &:hover { background-color: #BBDEFB; }
+  }
+}
+
+// Mobile Optimization
+@media screen and (max-width: 960px) {
+  .admin-return-manage-container {
+    padding: 1rem;
+  }
+
+  ::ng-deep .p-datatable {
+    .p-datatable-thead { display: none !important; }
+
+    .p-datatable-tbody > tr {
+      display: flex;
+      flex-direction: column;
+      background: $md-sys-color-surface;
+      margin-bottom: 1rem;
+      border-radius: 16px;
+      border: 1px solid $md-sys-color-surface-container-high;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+
+      > td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border: none;
+        border-bottom: 1px solid $md-sys-color-surface-container;
+        text-align: right;
+        width: 100%;
+
+        &:last-child {
+          border-bottom: none;
+          justify-content: flex-end;
+          gap: 0.5rem;
+          padding-top: 1rem;
+        }
+
+        &:before {
+          content: attr(data-label);
+          font-weight: 600;
+          color: $md-sys-color-on-surface-variant;
+          text-align: left;
+          margin-right: 1rem;
+        }
+      }
+    }
+  }
+}

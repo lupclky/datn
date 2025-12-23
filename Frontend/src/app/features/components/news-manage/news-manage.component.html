@@ -1,103 +1,102 @@
-<div class="container-fluid py-4">
+<div class="news-manage-container">
   <p-toast></p-toast>
   <p-confirmDialog></p-confirmDialog>
 
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h3 class="mb-0">Quản lý Tin tức</h3>
-      <div class="d-flex gap-2">
-        <button pButton type="button" label="Cập nhật Facebook" icon="pi pi-refresh" 
-                class="p-button-outlined p-button-secondary" (click)="manualSyncFacebook()"></button>
-        <button pButton type="button" label="Thêm tin tức" icon="pi pi-plus" 
-                class="p-button-success" (click)="openNewDialog()"></button>
+  <div class="news-header">
+    <h2>Quản lý Tin tức</h2>
+    <div class="header-actions">
+      <button pButton type="button" label="Cập nhật Facebook" icon="pi pi-refresh" 
+              class="p-button-outlined p-button-secondary" (click)="manualSyncFacebook()"></button>
+      <button pButton type="button" label="Thêm tin tức" icon="pi pi-plus" 
+              class="p-button-success" (click)="openNewDialog()"></button>
+    </div>
+  </div>
+
+  <p-card styleClass="news-table-card">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Đang tải...</span>
       </div>
     </div>
 
-    <div class="card-body">
-      <!-- Loading State -->
-      <div *ngIf="isLoading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Đang tải...</span>
-        </div>
-      </div>
+    <!-- Data Table -->
+    <p-table *ngIf="!isLoading" 
+             [value]="newsList" 
+             [paginator]="true" 
+             [rows]="pageSize"
+             [totalRecords]="totalPages * pageSize"
+             [lazy]="true"
+             (onLazyLoad)="onPageChange($event)"
+             [showCurrentPageReport]="true"
+             currentPageReportTemplate="Hiển thị {first} đến {last} trong tổng số {totalRecords} tin tức"
+             styleClass="p-datatable-striped">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 5%">ID</th>
+          <th style="width: 25%">Tiêu đề</th>
+          <th style="width: 10%">Tác giả</th>
+          <th style="width: 10%">Danh mục</th>
+          <th style="width: 10%">Trạng thái</th>
+          <th style="width: 10%">Facebook</th>
+          <th style="width: 8%">Lượt xem</th>
+          <th style="width: 12%">Ngày tạo</th>
+          <th style="width: 20%">Thao tác</th>
+        </tr>
+      </ng-template>
 
-      <!-- Data Table -->
-      <p-table *ngIf="!isLoading" 
-               [value]="newsList" 
-               [paginator]="true" 
-               [rows]="pageSize"
-               [totalRecords]="totalPages * pageSize"
-               [lazy]="true"
-               (onLazyLoad)="onPageChange($event)"
-               [showCurrentPageReport]="true"
-               currentPageReportTemplate="Hiển thị {first} đến {last} trong tổng số {totalRecords} tin tức"
-               styleClass="p-datatable-gridlines">
-        
-        <ng-template pTemplate="header">
-          <tr>
-            <th style="width: 5%">ID</th>
-            <th style="width: 25%">Tiêu đề</th>
-            <th style="width: 10%">Tác giả</th>
-            <th style="width: 10%">Danh mục</th>
-            <th style="width: 10%">Trạng thái</th>
-            <th style="width: 10%">Facebook</th>
-            <th style="width: 8%">Lượt xem</th>
-            <th style="width: 12%">Ngày tạo</th>
-            <th style="width: 20%">Thao tác</th>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="body" let-news>
-          <tr>
-            <td>{{ news.id }}</td>
-            <td>
-              <div class="text-truncate" style="max-width: 300px;" [title]="news.title">
-                {{ news.title }}
-              </div>
-            </td>
-            <td>{{ news.author || 'N/A' }}</td>
-            <td>{{ news.category || 'N/A' }}</td>
-            <td>
-              <span [ngClass]="getStatusClass(news.status)">
-                {{ getStatusLabel(news.status) }}
-              </span>
-            </td>
-            <td>
-              <div *ngIf="news.facebook_post_id; else noFb">
-                <a [href]="'https://facebook.com/' + news.facebook_post_id" target="_blank" class="text-decoration-none">
-                  <span *ngIf="news.facebook_scheduled_at; else sharedFb" class="badge bg-warning text-dark" 
-                        [pTooltip]="'Lên lịch: ' + formatDate(news.facebook_scheduled_at)" tooltipPosition="top">
-                    <i class="pi pi-clock me-1"></i>Đã lên lịch
+      <ng-template pTemplate="body" let-news>
+        <tr>
+          <td>{{ news.id }}</td>
+          <td>
+            <div class="text-truncate" style="max-width: 300px;" [title]="news.title">
+              {{ news.title }}
+            </div>
+          </td>
+          <td>{{ news.author || 'N/A' }}</td>
+          <td>{{ news.category || 'N/A' }}</td>
+          <td>
+            <span [ngClass]="getStatusClass(news.status)">
+              {{ getStatusLabel(news.status) }}
+            </span>
+          </td>
+          <td>
+            <div *ngIf="news.facebook_post_id; else noFb">
+              <a [href]="'https://facebook.com/' + news.facebook_post_id" target="_blank" class="text-decoration-none">
+                <span *ngIf="news.facebook_scheduled_at; else sharedFb" class="badge bg-warning text-dark" 
+                      [pTooltip]="'Lên lịch: ' + formatDate(news.facebook_scheduled_at)" tooltipPosition="top">
+                  <i class="pi pi-clock me-1"></i>Đã lên lịch
+                </span>
+                <ng-template #sharedFb>
+                  <span class="badge bg-primary" pTooltip="Xem bài viết" tooltipPosition="top">
+                    <i class="pi pi-facebook me-1"></i>Đã đăng
                   </span>
-                  <ng-template #sharedFb>
-                    <span class="badge bg-primary" pTooltip="Xem bài viết" tooltipPosition="top">
-                      <i class="pi pi-facebook me-1"></i>Đã đăng
-                    </span>
-                  </ng-template>
-                </a>
-              </div>
-              <ng-template #noFb>
-                <span class="text-muted"><small>Chưa đăng</small></span>
-              </ng-template>
-            </td>
-            <td>{{ news.views }}</td>
-            <td>{{ formatDate(news.created_at) }}</td>
-            <td>
-              <div class="d-flex gap-1">
-                <button pButton type="button" icon="pi pi-pencil" 
-                        class="p-button-rounded p-button-warning p-button-sm"
-                        (click)="openEditDialog(news)"
-                        pTooltip="Chỉnh sửa" tooltipPosition="top"></button>
-                
-                <button *ngIf="news.status === 'DRAFT'" 
-                        pButton type="button" icon="pi pi-check" 
-                        class="p-button-rounded p-button-success p-button-sm"
-                        (click)="publishNews(news.id)"
-                        pTooltip="Xuất bản" tooltipPosition="top"></button>
-                
-                <button *ngIf="news.status === 'PUBLISHED'" 
-                        pButton type="button" icon="pi pi-inbox" 
-                        class="p-button-rounded p-button-secondary p-button-sm"
+                </ng-template>
+              </a>
+            </div>
+            <ng-template #noFb>
+              <span class="text-muted"><small>Chưa đăng</small></span>
+            </ng-template>
+          </td>
+          <td>{{ news.views }}</td>
+          <td>{{ formatDate(news.created_at) }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <button pButton type="button" icon="pi pi-pencil" 
+                      class="p-button-rounded p-button-warning p-button-sm"
+                      (click)="openEditDialog(news)"
+                      pTooltip="Chỉnh sửa" tooltipPosition="top"></button>
+              
+              <button *ngIf="news.status === 'DRAFT'" 
+                      pButton type="button" icon="pi pi-check" 
+                      class="p-button-rounded p-button-success p-button-sm"
+                      (click)="publishNews(news.id)"
+                      pTooltip="Xuất bản" tooltipPosition="top"></button>
+              
+              <button *ngIf="news.status === 'PUBLISHED'" 
+                      pButton type="button" icon="pi pi-inbox" 
+                      class="p-button-rounded p-button-secondary p-button-sm"
                         (click)="archiveNews(news.id)"
                         pTooltip="Lưu trữ" tooltipPosition="top"></button>
                 
@@ -123,8 +122,7 @@
           </tr>
         </ng-template>
       </p-table>
-    </div>
-  </div>
+  </p-card>
 
   <!-- Create/Edit Dialog -->
   <p-dialog [(visible)]="displayDialog" 

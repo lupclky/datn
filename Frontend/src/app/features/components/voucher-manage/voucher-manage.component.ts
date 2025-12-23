@@ -22,6 +22,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-voucher-manage',
@@ -44,7 +45,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
     TooltipModule,
     DropdownModule,
     InputGroupModule,
-    InputGroupAddonModule
+    InputGroupAddonModule,
+    CardModule
   ],
   providers: [
     MessageService,
