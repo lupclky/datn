@@ -37,9 +37,28 @@
     margin: 0;
   }
 
+  .sidebar-group {
+    details {
+      summary {
+        list-style: none;
+        cursor: pointer;
+        &::-webkit-details-marker {
+          display: none;
+        }
+      }
+
+      &[open] .toggle-icon {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
   .menu-section-header {
     padding: 16px 24px 8px;
     margin: 8px 0 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     
     .section-title {
       display: block;
@@ -50,6 +69,19 @@
       letter-spacing: 0.5px;
       opacity: 0.6;
     }
+
+    .toggle-icon {
+      font-size: 0.75rem;
+      color: $m3-sys-dark-on-surface-variant;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  .submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-left: 12px; // Indentation
   }
   
   .sidebar-link {

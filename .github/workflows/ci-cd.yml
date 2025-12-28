@@ -92,22 +92,33 @@ jobs:
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
       
     - name: Build Backend Docker Image
       uses: docker/build-push-action@v5
       with:
         context: .
         file: DockerfileJavaSpring
-        push: false
-        tags: lockerkorea-backend:latest
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/lockerkorea-backend:latest
         
     - name: Build Frontend Docker Image
       uses: docker/build-push-action@v5
       with:
         context: .
         file: DockerfileAngular
-        push: false
-        tags: lockerkorea-frontend:latest
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/lockerkorea-frontend:latest
 
-    # Add Python service docker build if there is a Dockerfile for it
-    # Currently no Dockerfile for python service in root, checking python-embedding-service folder
+    - name: Build Python Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: DockerfilePython
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/lockerkorea-python:latest

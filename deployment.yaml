@@ -92,6 +92,16 @@ services:
     networks:
       - lockerkorea-network
 
+  lockerkorea-python-container:
+    container_name: lockerkorea-python-container
+    build:
+      context: .
+      dockerfile: DockerfilePython
+    ports:
+      - "8001:8000"
+    networks:
+      - lockerkorea-network
+
   chroma-container:
     container_name: chroma-container
     image: ghcr.io/chroma-core/chroma:0.4.15

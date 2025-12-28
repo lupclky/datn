@@ -128,15 +128,6 @@
         <i class="pi pi-search"></i>
       </button>
 
-      <!-- Hotline -->
-      <a class="hotline" *ngIf="roleId !== 2 && roleId !== 3" href="tel:0912424173">
-        <i class="pi pi-phone"></i>
-        <div class="hotline-text">
-          <span class="hotline-label">Hotline</span>
-          <span class="hotline-number">0912424173</span>
-        </div>
-      </a>
-
       <!-- User Section -->
       @if(token == null) {
         <div class="auth-links">
@@ -216,101 +207,127 @@
     </div>
     <nav class="sidebar-nav">
       <ul class="sidebar-menu">
+        <!-- Chat với khách hàng -->
+
+
         <!-- Tổng quan -->
-        <li class="menu-section-header">
-          <span class="section-title">Tổng quan</span>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/admin/dashboard']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-chart-bar"></i>
-            <span>Dashboard</span>
-          </a>
+        <li class="sidebar-group">
+          <details open>
+            <summary class="menu-section-header">
+              <span class="section-title">Tổng quan</span>
+              <i class="pi pi-chevron-down toggle-icon"></i>
+            </summary>
+            <ul class="submenu">
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/admin/dashboard']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Dashboard</span>
+                </a>
+              </li>
+            </ul>
+          </details>
         </li>
 
         <!-- Quản lý Người dùng & Đơn hàng -->
-        <li class="menu-section-header">
-          <span class="section-title">Người dùng & Đơn hàng</span>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/userManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-users"></i>
-            <span>Người dùng</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/orderManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-shopping-cart"></i>
-            <span>Đơn hàng</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/admin/returns']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-replay"></i>
-            <span>Trả hàng</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/reviewManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-star"></i>
-            <span>Quản lý đánh giá</span>
-          </a>
+        <li class="sidebar-group">
+          <details open>
+            <summary class="menu-section-header">
+              <span class="section-title">Người dùng & Đơn hàng</span>
+              <i class="pi pi-chevron-down toggle-icon"></i>
+            </summary>
+            <ul class="submenu">
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/userManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Người dùng</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/orderManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Đơn hàng</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/admin/returns']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Trả hàng</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/reviewManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Quản lý đánh giá</span>
+                </a>
+              </li>
+            </ul>
+          </details>
         </li>
 
         <!-- Quản lý Sản phẩm -->
-        <li class="menu-section-header">
-          <span class="section-title">Sản phẩm</span>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/productManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-list"></i>
-            <span>Quản lý SP</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/categoryManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-tags"></i>
-            <span>Quản lý thương hiệu</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/admin/features']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-cog"></i>
-            <span>Chức năng</span>
-          </a>
+        <li class="sidebar-group">
+          <details open>
+            <summary class="menu-section-header">
+              <span class="section-title">Sản phẩm</span>
+              <i class="pi pi-chevron-down toggle-icon"></i>
+            </summary>
+            <ul class="submenu">
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/productManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Quản lý SP</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/categoryManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Quản lý thương hiệu</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/admin/features']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Chức năng</span>
+                </a>
+              </li>
+            </ul>
+          </details>
         </li>
 
         <!-- Marketing & Nội dung -->
-        <li class="menu-section-header">
-          <span class="section-title">Marketing & Nội dung</span>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/voucherManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-ticket"></i>
-            <span>Voucher</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/newsManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-book"></i>
-            <span>Tin tức</span>
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/bannerManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-images"></i>
-            <span>Banner</span>
-          </a>
+        <li class="sidebar-group">
+          <details open>
+            <summary class="menu-section-header">
+              <span class="section-title">Marketing & Nội dung</span>
+              <i class="pi pi-chevron-down toggle-icon"></i>
+            </summary>
+            <ul class="submenu">
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/voucherManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Voucher</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/newsManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Tin tức</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/bannerManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Banner</span>
+                </a>
+              </li>
+            </ul>
+          </details>
         </li>
 
         <!-- Hệ thống & Công cụ -->
-        <li class="menu-section-header">
-          <span class="section-title">Hệ thống & Công cụ</span>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" [routerLink]="['/admin/ai-management']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-database"></i>
-            <span>Quản lý AI</span>
-          </a>
+        <li class="sidebar-group">
+          <details open>
+            <summary class="menu-section-header">
+              <span class="section-title">Hệ thống & Công cụ</span>
+              <i class="pi pi-chevron-down toggle-icon"></i>
+            </summary>
+            <ul class="submenu">
+              <li class="sidebar-item">
+                <a class="sidebar-link" [routerLink]="['/admin/ai-management']" routerLinkActive="active" (click)="closeSidebarMobile()">
+                  <span>Quản lý AI</span>
+                </a>
+              </li>
+            </ul>
+          </details>
         </li>
       </ul>
     </nav>
@@ -326,8 +343,12 @@
     <nav class="sidebar-nav">
       <ul class="sidebar-menu">
         <li class="sidebar-item">
+          <a class="sidebar-link" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeSidebarMobile()">
+            <span>Trang chủ</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
           <a class="sidebar-link" [routerLink]="['/orderManage']" routerLinkActive="active" (click)="closeSidebarMobile()">
-            <i class="pi pi-shopping-cart"></i>
             <span>Đơn hàng lắp đặt hỏa tốc</span>
           </a>
         </li>
@@ -342,22 +363,19 @@
       @if(roleId == 1 || !roleId){
         <li class="nav-item">
           <a class="nav-link" aria-current="true" [routerLink]="['/Home']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-            <i class="pi pi-home"></i>
-            <span class="nav-text">Trang chủ</span>
+            <span class="nav-text">TRANG CHỦ</span>
           </a>
         </li>
     
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/news']" routerLinkActive="active">
-            <i class="pi pi-book"></i>
-            <span class="nav-text">Tin tức</span>
+            <span class="nav-text">TIN TỨC</span>
           </a>
         </li>
     
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/allProduct']" routerLinkActive="active">
-            <i class="pi pi-th-large"></i>
-            <span class="nav-text">Tất cả sản phẩm</span>
+            <span class="nav-text">TẤT CẢ SẢN PHẨM</span>
           </a>
         </li>
       }
