@@ -95,6 +95,7 @@ public class WebSecurityConfig {
                                         "http://localhost:80",
                                         "http://localhost",
                                         "https://locker.lap123.click",
+                                        "https://lap123.click",
                                         "https://www.lap123.click",
                                         "https://api.lap123.click"
                                 ));
