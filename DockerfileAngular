@@ -14,10 +14,13 @@ RUN yarn install --frozen-lockfile
 COPY ./Frontend/ .
 
 # Build the Angular app in production mode
-RUN yarn build
+RUN npm run build -- --configuration=production
 
 # Production-ready image
 FROM nginx:1.25-alpine
+
+# Copy custom nginx config
+COPY ./Frontend/nginx-custom.conf /etc/nginx/conf.d/default.conf
 
 # Copy the built app from the builder stage
 COPY --from=builder /app/dist/sneakers-ui/browser /usr/share/nginx/html
