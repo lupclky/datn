@@ -26,6 +26,7 @@ services:
     container_name: lockerkorea-mysql
     image: mysql:8.0
     restart: always
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin123}
       MYSQL_DATABASE: ${DB_NAME:-lockerkorea}
@@ -46,11 +47,11 @@ services:
     container_name: lockerkorea-phpmyadmin
     restart: always
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: lockerkorea-mysql
       PMA_PORT: 3306
       PMA_ARBITRARY: 1
     ports:
-      - 8081:80
+      - 8100:80
     networks:
       - lockerkorea-network
     depends_on:
@@ -67,9 +68,9 @@ services:
       - VIRTUAL_HOST=${DOMAIN_NAME:-localhost}
       - VIRTUAL_PORT=8089
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME:-lockerkorea}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=${DB_USER:-user}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://lockerkorea-mysql:3306/${DB_NAME:-lockerkorea}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:root}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:admin}
       - CHROMA_BASE_URL=http://chromadb:8000
       - AI_EMBEDDING_BASE_URL=http://python-service:9000
       - GCP_STORAGE_BUCKET_NAME=${GCP_STORAGE_BUCKET_NAME}
