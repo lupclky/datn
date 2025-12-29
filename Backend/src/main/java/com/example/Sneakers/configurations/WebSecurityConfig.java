@@ -38,72 +38,74 @@ public class WebSecurityConfig {
         // Pair.of(String.format("%s/products", apiPrefix), "GET"),
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
-                                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                                .authorizeHttpRequests(requests -> {
-                                        requests
-                                                        .requestMatchers(
-                                                                String.format("%s/users/register", apiPrefix),
-                                                                String.format("%s/users/login", apiPrefix),
-                                                                String.format("%s/users/login/google", apiPrefix),
-                                                                String.format("%s/users/forgot-password", apiPrefix),
-                                                                String.format("%s/users/reset-password", apiPrefix),
-                                                                "/error"
-                                                        ).permitAll()
-                                                        
-                                                        .requestMatchers(GET,
-                                                                String.format("%s/categories/**", apiPrefix),
-                                                                String.format("%s/products/**", apiPrefix),
-                                                                String.format("%s/products/images/**", apiPrefix),
-                                                                String.format("%s/reviews/**", apiPrefix),
-                                                                String.format("%s/vouchers/**", apiPrefix),
-                                                                String.format("%s/news/**", apiPrefix),
-                                                                String.format("%s/banners/**", apiPrefix),
-                                                                String.format("%s/vnpay/payment-callback", apiPrefix),
-                                                                String.format("%s/lock-features/**", apiPrefix)
-                                                        ).permitAll()
-                                                        
-                                                        // AI Chat endpoints - Public
-                                                        .requestMatchers(
-                                                                String.format("%s/ai/chat/**", apiPrefix)
-                                                        ).permitAll()
-                                                        
-                                                        // GHN Location endpoints - Public for testing/integration
-                                                        .requestMatchers(
-                                                                String.format("%s/ghn/**", apiPrefix),
-                                                                String.format("%s/carts/**", apiPrefix)
-                                                        ).permitAll()
+                        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                        .authorizeHttpRequests(requests -> {
+                                requests
+                                                .requestMatchers(
+                                                        String.format("%s/users/register", apiPrefix),
+                                                        String.format("%s/users/login", apiPrefix),
+                                                        String.format("%s/users/login/google", apiPrefix),
+                                                        String.format("%s/users/forgot-password", apiPrefix),
+                                                        String.format("%s/users/reset-password", apiPrefix),
+                                                        "/error"
+                                                ).permitAll()
+                                                
+                                                .requestMatchers(GET,
+                                                        String.format("%s/categories/**", apiPrefix),
+                                                        String.format("%s/products/**", apiPrefix),
+                                                        String.format("%s/products/images/**", apiPrefix),
+                                                        String.format("%s/reviews/**", apiPrefix),
+                                                        String.format("%s/vouchers/**", apiPrefix),
+                                                        String.format("%s/news/**", apiPrefix),
+                                                        String.format("%s/banners/**", apiPrefix),
+                                                        String.format("%s/vnpay/payment-callback", apiPrefix),
+                                                        String.format("%s/lock-features/**", apiPrefix)
+                                                ).permitAll()
+                                                
+                                                // AI Chat endpoints - Public
+                                                .requestMatchers(
+                                                        String.format("%s/ai/chat/**", apiPrefix)
+                                                ).permitAll()
+                                                
+                                                // GHN Location endpoints - Public for testing/integration
+                                                .requestMatchers(
+                                                        String.format("%s/ghn/**", apiPrefix),
+                                                        String.format("%s/carts/**", apiPrefix)
+                                                ).permitAll()
 
-                                                        // AI Admin endpoints
-                                                        .requestMatchers(
-                                                                String.format("%s/ai/initialize/**", apiPrefix)
-                                                        ).hasAnyRole("ADMIN")
+                                                // AI Admin endpoints
+                                                .requestMatchers(
+                                                        String.format("%s/ai/initialize/**", apiPrefix)
+                                                ).hasAnyRole("ADMIN")
 
-                                                        .requestMatchers(POST,
-                                                                String.format("%s/orders/**", apiPrefix)
-                                                        ).hasAnyRole("USER", "ADMIN", "STAFF")
+                                                .requestMatchers(POST,
+                                                        String.format("%s/orders/**", apiPrefix)
+                                                ).hasAnyRole("USER", "ADMIN", "STAFF")
 
-                                                        .anyRequest().authenticated();
+                                                .anyRequest().authenticated();
 
-                                })
-                                .csrf(AbstractHttpConfigurer::disable);
-                http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
-                        @Override
-                        public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {
-                                CorsConfiguration configuration = new CorsConfiguration();
-                                configuration.setAllowedOrigins(List.of("http://localhost:4200",
-                                        "https://locker.lap123.click")); // Angular dev server
-                                configuration.setAllowedMethods(
-                                                Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-                                configuration.setAllowedHeaders(
-                                                Arrays.asList("authorization", "content-type", "x-auth-token", "x-guest-session-id"));
-                                configuration.setExposedHeaders(List.of("x-auth-token"));
-                                configuration.setAllowCredentials(true); // Allow credentials
-                                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                                source.registerCorsConfiguration("/**", configuration);
-                                httpSecurityCorsConfigurer.configurationSource(source);
-                        }
-                });
+                        })
+                        .csrf(AbstractHttpConfigurer::disable);
 
-                return http.build();
+        http.cors(cors -> {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of(
+                        "http://localhost:4200",
+                        "https://locker.lap123.click"
+                ));
+                configuration.setAllowedMethods(Arrays.asList(
+                        "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+                ));
+                configuration.setAllowedHeaders(Arrays.asList(
+                        "authorization", "content-type", "x-auth-token", "x-guest-session-id"
+                ));
+                configuration.setExposedHeaders(List.of("x-auth-token"));
+                configuration.setAllowCredentials(true);
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                cors.configurationSource(source);
+        });
+
+        return http.build();
         }
 }
