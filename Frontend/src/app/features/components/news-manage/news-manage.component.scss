@@ -262,7 +262,6 @@ $md-sys-color-on-surface-variant: #49454F;
   }
 
   &:not(:disabled):hover {
-    transform: translateY(-3px) scale(1.03);
     box-shadow: 0 12px 28px rgba(255, 107, 157, 0.4), 
                 0 8px 16px rgba(109, 213, 250, 0.3),
                 0 0 30px rgba(255, 154, 86, 0.2) !important;
@@ -273,7 +272,6 @@ $md-sys-color-on-surface-variant: #49454F;
   }
 
   &:not(:disabled):active {
-    transform: translateY(-1px) scale(0.99);
     transition: all 0.1s ease;
   }
 

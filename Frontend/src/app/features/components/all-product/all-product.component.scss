@@ -99,7 +99,7 @@
         &:hover {
           background-color: #e7f1ff;
           color: #007bff;
-          padding-left: 20px;
+          // padding-left: 20px;
 
           i {
             color: #007bff;
@@ -141,7 +141,7 @@
 
       &:hover {
         background: #0056b3;
-        transform: translateY(-1px);
+        // transform: translateY(-1px);
         box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
       }
     }
@@ -203,10 +203,12 @@
 
         &:hover {
           background-color: #e7f1ff;
-          transform: translateX(5px);
+          // transform: translateX(5px);
           
           .product-name { color: #007bff; }
-          img { transform: scale(1.05); }
+          img { 
+            // transform: scale(1.05); 
+          }
         }
 
         img {
@@ -244,12 +246,12 @@
       border: 1px solid #f0f0f0;
       display: flex;
       flex-direction: column;
-
-      &:hover {
-        transform: translateY(-10px);
+// transform: translateY(-10px);
         box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         border-color: rgba(0, 123, 255, 0.2);
 
+        .product-image img {
+          //
         .product-image img {
           transform: scale(1.08);
         }

@@ -110,7 +110,6 @@ $md-sys-color-inverse-primary: #BDBDBD;
 
           &:hover:not(:disabled) {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            transform: translateY(-1px);
           }
         }
 
@@ -214,7 +213,6 @@ $md-sys-color-inverse-primary: #BDBDBD;
     border-radius: 12px;
 
     &:hover {
-      transform: scale(1.05);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     }
   }
@@ -275,7 +273,6 @@ $md-sys-color-inverse-primary: #BDBDBD;
           &:hover:not(:disabled) {
             background: darken(#FF9800, 5%);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            transform: translateY(-1px);
           }
         }
 
@@ -288,8 +285,7 @@ $md-sys-color-inverse-primary: #BDBDBD;
             background: darken($md-sys-color-error, 5%);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             transform: translateY(-1px);
-          }
-        }
+          
       }
     }
   }
@@ -618,8 +614,7 @@ $md-sys-color-inverse-primary: #BDBDBD;
             &:hover:not(:disabled) {
               box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
               transform: translateY(-1px);
-            }
-          }
+            
         }
       }
     }
@@ -712,7 +707,6 @@ $md-sys-color-inverse-primary: #BDBDBD;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(255, 107, 157, 0.4) !important;
   }
-
   &:not(:disabled):active {
     transform: translateY(0);
   }
