@@ -22,34 +22,28 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  mysql:
-    container_name: lockerkorea-mysql
-    image: mysql:8.0
+  mysql8-container:
+    container_name: mysql8-container
+    image: mysql:8.2.0
     restart: always
-    command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin123}
-      MYSQL_DATABASE: ${DB_NAME:-lockerkorea}
-      MYSQL_USER: ${DB_USER:-user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
-    volumes:
-      - mysql_data:/var/lib/mysql
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: lockerkorea
+      TZ: Asia/Ho_Chi_Minh
     ports:
       - 3306:3306
+    volumes:
+      - ./Backend/lockerkorea.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - lockerkorea-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    command: --default-time-zone='+07:00'
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: lockerkorea-phpmyadmin
+    container_name: phpmyadmin-container
     restart: always
     environment:
-      PMA_HOST: lockerkorea-mysql
+      PMA_HOST: mysql8-container
       PMA_PORT: 3306
       PMA_ARBITRARY: 1
     ports:
@@ -70,9 +64,9 @@ services:
       - VIRTUAL_HOST=${DOMAIN_NAME:-localhost}
       - VIRTUAL_PORT=8089
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:mysql://lockerkorea-mysql:3306/${DB_NAME:-lockerkorea}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=${DB_USER:-root}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-admin}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql8-container:3306/${DB_NAME:-lockerkorea}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=admin
       - CHROMA_BASE_URL=http://chromadb:8000
       - AI_EMBEDDING_BASE_URL=http://python-service:9000
       - GCP_STORAGE_BUCKET_NAME=${GCP_STORAGE_BUCKET_NAME}
