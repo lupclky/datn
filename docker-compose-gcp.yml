@@ -51,7 +51,7 @@ services:
     networks:
       - lockerkorea-network
     depends_on:
-      - mysql
+      - mysql8-container
 
   backend:
     container_name: lockerkorea-backend
@@ -71,7 +71,7 @@ services:
       - AI_EMBEDDING_BASE_URL=http://python-service:9000
       - GCP_STORAGE_BUCKET_NAME=${GCP_STORAGE_BUCKET_NAME}
     depends_on:
-      - mysql
+      - mysql8-container
       - chromadb
       - python-service
     networks:
