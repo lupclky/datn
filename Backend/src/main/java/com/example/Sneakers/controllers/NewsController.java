@@ -8,6 +8,7 @@ import com.example.Sneakers.responses.NewsListResponse;
 import com.example.Sneakers.responses.NewsResponse;
 import com.example.Sneakers.responses.MessageResponse;
 import com.example.Sneakers.services.INewsService;
+import com.example.Sneakers.services.storage.IStorageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -29,7 +30,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 public class NewsController {
     private static final Logger logger = LoggerFactory.getLogger(NewsController.class);
     private final INewsService newsService;
+    private final IStorageService storageService;
     private final LocalizationUtils localizationUtils;
 
     /**
@@ -362,9 +363,9 @@ public class NewsController {
             }
 
             // Store file
-            String fileName = storeFile(file);
+            String fileUrl = storageService.storeFile(file);
 
-            return ResponseEntity.ok(new ImageUploadResponse(fileName, "/api/v1/news/images/" + fileName));
+            return ResponseEntity.ok(new ImageUploadResponse(fileUrl, fileUrl));
         } catch (IOException e) {
             logger.error("Error uploading image: ", e);
             return ResponseEntity.badRequest().body("Failed to upload image: " + e.getMessage());
@@ -439,25 +440,6 @@ public class NewsController {
     private boolean isImageFile(MultipartFile file) {
         String contentType = file.getContentType();
         return contentType != null && contentType.startsWith("image/");
-    }
-
-    private String storeFile(MultipartFile file) throws IOException {
-        if (!isImageFile(file) || file.getOriginalFilename() == null) {
-            throw new IOException("Invalid image format");
-        }
-        
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
-        Path uploadDir = Paths.get("uploads");
-        
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        
-        Path destination = Paths.get(uploadDir.toString(), uniqueFileName);
-        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-        
-        return uniqueFileName;
     }
 
     private NewsResponse convertToNewsResponse(News news) {

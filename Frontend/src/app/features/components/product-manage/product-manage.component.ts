@@ -490,12 +490,19 @@ export class ProductManageComponent implements OnInit {
   getProductImage(product: ProductDto): string {
     // If product has a thumbnail, use it
     if (product.thumbnail && product.thumbnail.trim() !== '') {
+      if (product.thumbnail.startsWith('http')) {
+        return product.thumbnail;
+      }
       return `${this.apiImage}${product.thumbnail}`;
     }
     
     // If no thumbnail but has product_images, use the first one
     if (product.product_images && product.product_images.length > 0) {
-      return `${this.apiImage}${product.product_images[0].image_url}`;
+      const imageUrl = product.product_images[0].image_url;
+      if (imageUrl.startsWith('http')) {
+        return imageUrl;
+      }
+      return `${this.apiImage}${imageUrl}`;
     }
     
     // Default image if no images available

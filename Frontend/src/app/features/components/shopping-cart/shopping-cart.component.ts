@@ -360,12 +360,19 @@ constructor(
     const productDto = product.products;
     // If product has a thumbnail, use it
     if (productDto.thumbnail && productDto.thumbnail.trim() !== '') {
+      if (productDto.thumbnail.startsWith('http')) {
+        return productDto.thumbnail;
+      }
       return `${this.apiImage}${productDto.thumbnail}`;
     }
     
     // If no thumbnail but has product_images, use the first one
     if (productDto.product_images && productDto.product_images.length > 0) {
-      return `${this.apiImage}${productDto.product_images[0].image_url}`;
+      const imageUrl = productDto.product_images[0].image_url;
+      if (imageUrl.startsWith('http')) {
+        return imageUrl;
+      }
+      return `${this.apiImage}${imageUrl}`;
     }
     
     // Default image if no images available

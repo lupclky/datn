@@ -191,7 +191,9 @@ export class NewsManageComponent implements OnInit {
     this.isEditMode = true;
     this.selectedNewsId = news.id;
     this.selectedFile = null;
-    this.imagePreview = news.featured_image ? `${environment.apiUrl}/news/images/${news.featured_image}` : null;
+    this.imagePreview = news.featured_image ? 
+        (news.featured_image.startsWith('http') ? news.featured_image : `${environment.apiUrl}/news/images/${news.featured_image}`) 
+        : null;
     this.scheduledDate = null;
     
     // Store content to set later after editor is ready

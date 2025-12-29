@@ -41,6 +41,10 @@ services:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: lockerkorea
       CHROMA_BASE_URL: http://chroma-container:8000
+      AZURE_STORAGE_ACCOUNT_NAME: ${AZURE_STORAGE_ACCOUNT_NAME}
+      AZURE_STORAGE_ACCOUNT_KEY: ${AZURE_STORAGE_ACCOUNT_KEY}
+      AZURE_STORAGE_ENDPOINT: ${AZURE_STORAGE_ENDPOINT}
+      AZURE_STORAGE_CONTAINER_NAME: ${AZURE_STORAGE_CONTAINER_NAME}
     #depends_on only waits for the container to start, not for the service inside the container to be fully operational
     depends_on:
       - mysql8-container

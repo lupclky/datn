@@ -169,6 +169,9 @@ export class HomeComponent extends BaseComponent implements OnInit {
 
   getBannerImageUrl(banner: BannerDto): string {
     if (!banner.image_url) return '';
+    if (banner.image_url.startsWith('http')) {
+      return banner.image_url;
+    }
     const cleanApiUrl = environment.apiUrl.replace(/\/$/, '');
     const cleanImageUrl = banner.image_url.replace(/^\//, '');
     return `${cleanApiUrl}/banners/images/${cleanImageUrl}`;

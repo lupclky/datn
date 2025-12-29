@@ -423,6 +423,9 @@ export class BannerManageComponent implements OnInit {
     if (!imageUrl) {
       return 'assets/images/no-image.png'; // Fallback image
     }
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
     const cleanApiUrl = environment.apiUrl.replace(/\/$/, '');
     const cleanImageUrl = imageUrl.replace(/^\//, '');
     return `${cleanApiUrl}/banners/images/${cleanImageUrl}`;

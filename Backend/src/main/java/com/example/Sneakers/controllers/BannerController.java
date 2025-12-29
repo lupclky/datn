@@ -4,6 +4,7 @@ import com.example.Sneakers.dtos.BannerDTO;
 import com.example.Sneakers.responses.BannerListResponse;
 import com.example.Sneakers.responses.BannerResponse;
 import com.example.Sneakers.services.IBannerService;
+import com.example.Sneakers.services.storage.IStorageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -20,11 +21,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("${api.prefix}/banners")
@@ -32,6 +31,7 @@ import java.util.UUID;
 public class BannerController {
     private static final Logger logger = LoggerFactory.getLogger(BannerController.class);
     private final IBannerService bannerService;
+    private final IStorageService storageService;
 
     /**
      * Get all banners (public endpoint)
@@ -144,11 +144,11 @@ public class BannerController {
                         .body(createErrorResponse("File must be an image"));
             }
 
-            String fileName = storeFile(file);
+            String fileUrl = storageService.storeFile(file);
             Map<String, String> response = new HashMap<>();
-            response.put("fileName", fileName);
+            response.put("fileName", fileUrl);
             response.put("message", "Upload successful");
-            response.put("url", "/api/v1/banners/images/" + fileName);
+            response.put("url", fileUrl);
             return ResponseEntity.ok(response);
         } catch (IOException e) {
             logger.error("Error uploading banner image: ", e);
@@ -161,30 +161,8 @@ public class BannerController {
      */
     @GetMapping("/images/{imageName}")
     public ResponseEntity<?> viewBannerImage(@PathVariable String imageName) {
-        try {
-            Path imagePath = Paths.get("uploads").resolve(imageName);
-            if (!Files.exists(imagePath)) {
-                return ResponseEntity.notFound().build();
-            }
-            UrlResource resource = new UrlResource(imagePath.toUri());
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(resource);
-        } catch (Exception e) {
-            logger.error("Error loading banner image: ", e);
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    private String storeFile(MultipartFile file) throws IOException {
-        String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path uploadDir = Paths.get("uploads");
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-        Path destination = uploadDir.resolve(filename);
-        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-        return filename;
+        // This endpoint might be deprecated if using Azure Storage directly
+        return ResponseEntity.notFound().build();
     }
 
     private Map<String, String> createErrorResponse(String message) {

@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  nginx-proxy:
+    container_name: nginx-proxy
+    image: nginxproxy/nginx-proxy:alpine
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/vhost:/etc/nginx/vhost.d
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - lockerkorea-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  mysql:
+    container_name: lockerkorea-mysql
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-admin123}
+      MYSQL_DATABASE: ${DB_NAME:-lockerkorea}
+      MYSQL_USER: ${DB_USER:-user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - lockerkorea-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    container_name: lockerkorea-backend
+    image: ${DOCKERHUB_USERNAME}/lockerkorea-backend:latest
+    build:
+      context: .
+      dockerfile: DockerfileJavaSpring
+    restart: always
+    environment:
+      - VIRTUAL_HOST=${DOMAIN_NAME:-localhost}
+      - VIRTUAL_PORT=8089
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${DB_NAME:-lockerkorea}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-user}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
+      - CHROMA_BASE_URL=http://chromadb:8000
+      - AI_EMBEDDING_BASE_URL=http://python-service:8000
+      # Azure Storage Config (If you still use it, otherwise code change needed for local/GCS)
+      - AZURE_STORAGE_ACCOUNT_NAME=${AZURE_STORAGE_ACCOUNT_NAME}
+      - AZURE_STORAGE_ACCOUNT_KEY=${AZURE_STORAGE_ACCOUNT_KEY}
+      - AZURE_STORAGE_ENDPOINT=${AZURE_STORAGE_ENDPOINT}
+      - AZURE_STORAGE_CONTAINER_NAME=${AZURE_STORAGE_CONTAINER_NAME}
+    depends_on:
+      - mysql
+      - chromadb
+      - python-service
+    networks:
+      - lockerkorea-network
+
+  frontend:
+    container_name: lockerkorea-frontend
+    image: ${DOCKERHUB_USERNAME}/lockerkorea-frontend:latest
+    build:
+      context: .
+      dockerfile: DockerfileAngular
+    restart: always
+    environment:
+      - VIRTUAL_HOST=${DOMAIN_NAME:-localhost}
+      - LETSENCRYPT_HOST=${DOMAIN_NAME:-localhost}
+    networks:
+      - lockerkorea-network
+    depends_on:
+      - backend
+
+  python-service:
+    container_name: lockerkorea-python
+    image: ${DOCKERHUB_USERNAME}/lockerkorea-python:latest
+    build:
+      context: .
+      dockerfile: DockerfilePython
+    restart: always
+    expose:
+      - 8000
+    networks:
+      - lockerkorea-network
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: lockerkorea-chromadb
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+    expose:
+      - 8000
+    networks:
+      - lockerkorea-network
+
+volumes:
+  mysql_data:
+  chroma-data:
+
+networks:
+  lockerkorea-network:
+    driver: bridge
