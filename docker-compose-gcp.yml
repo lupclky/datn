@@ -70,10 +70,9 @@ services:
       - CHROMA_BASE_URL=http://chromadb:8000
       - AI_EMBEDDING_BASE_URL=http://python-service:9000
       - GCP_STORAGE_BUCKET_NAME=${GCP_STORAGE_BUCKET_NAME}
-      # Uncomment below if using a JSON key file instead of VM Service Account
-      # - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
-    # volumes:
-      # - ./credentials.json:/app/credentials.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+    volumes:
+      - ../first-strength-460610-i4-4a6026a8564c.json:/app/credentials.json
     depends_on:
       - mysql8-container
       - chromadb
