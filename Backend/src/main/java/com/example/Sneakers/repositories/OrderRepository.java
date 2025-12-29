@@ -51,7 +51,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     
     @Query(value = "SELECT COALESCE(SUM(o.total_money), 0) " +
            "FROM orders o " +
-           "WHERE DATE(o.order_date) = :date " +
+           "WHERE DATE(CONVERT_TZ(o.order_date, '+00:00', '+07:00')) = :date " +
            "AND o.status IN ('pending', 'processing', 'delivered', 'paid') AND o.active = true",
             nativeQuery = true)
     Double getDailyRevenue(@Param("date") LocalDate date);
@@ -92,7 +92,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("endYear") int endYear);
 
     // Đếm số đơn hàng trong ngày (tính cả đơn đang xử lý, đang giao, và thanh toán thành công)
-    @Query(value = "SELECT COUNT(*) FROM orders o WHERE DATE(o.order_date) = :date " +
+    @Query(value = "SELECT COUNT(*) FROM orders o WHERE DATE(CONVERT_TZ(o.order_date, '+00:00', '+07:00')) = :date " +
            "AND o.status IN ('pending', 'processing', 'delivered', 'paid') AND o.active = true",
            nativeQuery = true)
     Long countOrdersByDate(@Param("date") LocalDate date);

@@ -113,7 +113,7 @@ public class VnpayController {
 
             if (orderOptional.isPresent()) {
                 Order order = orderOptional.get();
-                redirectUrl = "http://localhost:4200/order-detail/" + order.getId();
+                redirectUrl = "https://locker.lap123.click/order-detail/" + order.getId();
 
                 if ("00".equals(status)) {
                     order.setStatus(OrderStatus.PAID);
@@ -127,12 +127,12 @@ public class VnpayController {
             } else {
                 log.error("Order not found for VNPAY TxnRef: {}", txnRef);
                 String errorMessage = URLEncoder.encode("Không tìm thấy đơn hàng với mã giao dịch: " + txnRef, StandardCharsets.UTF_8);
-                redirectUrl = "http://localhost:4200/history?payment_status=not_found&error=" + errorMessage;
+                redirectUrl = "https://locker.lap123.click/history?payment_status=not_found&error=" + errorMessage;
             }
         } catch (Exception e) {
             log.error("Critical error in VNPAY payment callback for TxnRef: {}. Error: {}", txnRef, e.getMessage(), e);
             String errorMessage = URLEncoder.encode("Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng thử lại.", StandardCharsets.UTF_8);
-            redirectUrl = "http://localhost:4200/history?payment_status=error&error=" + errorMessage;
+            redirectUrl = "https://locker.lap123.click/history?payment_status=error&error=" + errorMessage;
         }
 
         response.sendRedirect(redirectUrl);

@@ -85,7 +85,7 @@ payment:
     tmnCode: "JHQEESRJ" # Replace with your TmnCode
     hashSecret: "075M0OLSGSFKL8BEIT81CFM9WGATXYCA" # Replace with your HashSecret
     url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
-    returnUrl: "http://localhost:8089/api/v1/vnpay/payment-callback"
+    returnUrl: "https://api.lap123.click/api/v1/vnpay/payment-callback"
 
 ghn:
   api:
