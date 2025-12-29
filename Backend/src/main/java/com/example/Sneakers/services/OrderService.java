@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,7 +78,7 @@ public class OrderService implements IOrderService {
             }
 
             // Check validity period
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
             if (now.isBefore(voucher.getValidFrom()) || now.isAfter(voucher.getValidTo())) {
                 throw new Exception("Voucher không trong thời gian hiệu lực");
             }
@@ -113,7 +114,7 @@ public class OrderService implements IOrderService {
 
         Order order = Order.builder()
                 .user(user)
-                .orderDate(LocalDateTime.now())
+                .orderDate(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
                 .status(initialStatus) // Sử dụng trạng thái đã xác định
                 .fullName(orderDTO.getFullName())
                 .email(orderDTO.getEmail())
@@ -126,7 +127,7 @@ public class OrderService implements IOrderService {
                 .voucher(appliedVoucher)
                 .discountAmount(discountAmount)
                 .active(true)
-                .shippingDate(LocalDate.now().plusDays(3))
+                .shippingDate(LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")).plusDays(3))
                 .districtId(orderDTO.getDistrictId())
                 .wardCode(orderDTO.getWardCode())
                 .build();
@@ -141,7 +142,7 @@ public class OrderService implements IOrderService {
                     .order(order)
                     .user(user)
                     .discountAmount(discountAmount)
-                    .usedAt(LocalDateTime.now())
+                    .usedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
                     .build();
             voucherUsageRepository.save(voucherUsage);
 
@@ -375,7 +376,7 @@ public class OrderService implements IOrderService {
 
     public DashboardStatsDTO getDashboardStats() {
         Long totalRevenue = orderRepository.calculateTotalRevenue();
-        Long todayOrders = orderRepository.countOrdersByDate(LocalDate.now());
+        Long todayOrders = orderRepository.countOrdersByDate(LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         Long totalProductsSold = orderRepository.countTotalProductsSold();
 
         return new DashboardStatsDTO(totalRevenue, todayOrders, totalProductsSold);
