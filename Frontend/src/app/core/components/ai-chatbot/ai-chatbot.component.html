@@ -23,6 +23,10 @@
 
   <!-- Menu Options -->
   <div class="chat-menu" [class.open]="showMenu()">
+    <button class="menu-item" (click)="toggleChat()">
+      <i class="pi pi-sparkles"></i>
+      <span>Trợ lý AI</span>
+    </button>
     <button class="menu-item" (click)="openMessenger()">
       <i class="pi pi-facebook"></i>
       <span>Messenger</span>

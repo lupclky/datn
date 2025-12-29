@@ -24,6 +24,18 @@ Tài liệu này hướng dẫn bạn triển khai toàn bộ dự án (Frontend
     *   Access scopes: Chọn **Allow full access to all Cloud APIs** (Để VM có quyền truy cập Storage).
 10. Nhấn **Create**.
 
+## 1.1. Mở Port cho phpMyAdmin (Quan trọng)
+Để truy cập phpMyAdmin, bạn cần mở port 8081 trên Firewall của GCP:
+1.  Vào menu **VPC network** -> **Firewall**.
+2.  Nhấn **Create Firewall Rule**.
+3.  **Name**: `allow-phpmyadmin`.
+4.  **Targets**: `All instances in the network`.
+5.  **Source IPv4 ranges**: `0.0.0.0/0`.
+6.  **Protocols and ports**:
+    *   Chọn **Specified protocols and ports**.
+    *   Tích chọn **TCP** và điền: `8081`.
+7.  Nhấn **Create**.
+
 ## 2. Tạo Google Cloud Storage Bucket (Lưu ảnh)
 
 1.  Vào menu **Cloud Storage** -> **Buckets**.
@@ -66,9 +78,9 @@ newgrp docker
 
 ## 4. Triển khai Code
 
-1.  **Clone code**:
+1.  **Clone code** (Nhánh `gcp`):
     ```bash
-    git clone https://github.com/YOUR_USERNAME/locker_korea.git
+    git clone -b gcp https://github.com/YOUR_USERNAME/locker_korea.git
     cd locker_korea
     ```
 
@@ -131,7 +143,40 @@ Vào Repo Settings -> Secrets -> Actions -> New repository secret:
     *   `DOCKERHUB_USERNAME`: Username Docker Hub.
     *   `DOCKERHUB_TOKEN`: Token Docker Hub.
 
-## 6. Truy cập Website
+## 6. Truy cập Website (Qua Cloudflare Tunnel - Khuyên dùng)
+
+Sử dụng Cloudflare Tunnel giúp bạn không cần mở port trên Firewall (trừ port SSH), bảo mật hơn và có HTTPS miễn phí ngay lập tức.
+
+### Bước 1: Lấy Token
+1.  Truy cập [Cloudflare Zero Trust Dashboard](https://one.dash.cloudflare.com/).
+2.  Vào **Networks** -> **Tunnels** -> **Create a tunnel**.
+3.  Chọn **Cloudflared** -> Next.
+4.  Đặt tên Tunnel (ví dụ: `lockerkorea-gcp`) -> Save.
+5.  Tại màn hình "Install and run a connector", tìm đoạn code cài đặt.
+6.  Copy chuỗi token dài nằm sau đoạn `tunnel run --token`. Ví dụ: `eyJhIjoi...`
+
+### Bước 2: Cấu hình Public Hostname (Trên Cloudflare Dashboard)
+Chuyển sang tab **Public Hostname** và thêm các domain trỏ về service trong Docker:
+
+1.  **Frontend** (Web chính):
+    *   Subdomain: `www` (hoặc để trống nếu dùng root domain)
+    *   Service: `http://frontend:80`
+2.  **Backend API**:
+    *   Subdomain: `api`
+    *   Service: `http://backend:8089`
+3.  **phpMyAdmin**:
+    *   Subdomain: `db`
+    *   Service: `http://phpmyadmin:80`
+
+### Bước 3: Cập nhật .env trên VM
+Thêm dòng này vào file `.env` trên VM:
+```env
+CLOUDFLARE_TUNNEL_TOKEN=eyJhIjoi... (Token bạn vừa copy)
+```
+
+## 7. Truy cập Website (Qua IP - Cách cũ)
+
+Sau khi triển khai thành công, bạn có thể truy cập website thông qua địa chỉ IP Public của máy ảo (VM).
 
 Sau khi triển khai thành công, bạn có thể truy cập website thông qua địa chỉ IP Public của máy ảo (VM).
 

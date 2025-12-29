@@ -41,6 +41,21 @@ services:
       timeout: 10s
       retries: 5
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: lockerkorea-phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - 8081:80
+    networks:
+      - lockerkorea-network
+    depends_on:
+      - mysql
+
   backend:
     container_name: lockerkorea-backend
     image: ${DOCKERHUB_USERNAME}/lockerkorea-backend:latest
@@ -56,7 +71,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USER:-user}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
       - CHROMA_BASE_URL=http://chromadb:8000
-      - AI_EMBEDDING_BASE_URL=http://python-service:8000
+      - AI_EMBEDDING_BASE_URL=http://python-service:9000
       - GCP_STORAGE_BUCKET_NAME=${GCP_STORAGE_BUCKET_NAME}
     depends_on:
       - mysql
@@ -87,8 +102,19 @@ services:
       context: .
       dockerfile: DockerfilePython
     restart: always
+    command: uvicorn app:app --host 0.0.0.0 --port 9000
     expose:
-      - 8000
+      - 9000
+    networks:
+      - lockerkorea-network
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: lockerkorea-cloudflared
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
       - lockerkorea-network
 
