@@ -162,7 +162,7 @@
         transition: all 0.3s ease;
 
         &:hover {
-          transform: translateY(-2px);
+          // transform: translateY(-2px);
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
       }
@@ -267,7 +267,7 @@
         }
 
         &:hover {
-          transform: translateY(-3px) scale(1.05);
+          // transform: translateY(-3px) scale(1.05);
           box-shadow: 0 8px 25px rgba(220, 53, 69, 0.5);
 
           &::before {
@@ -276,7 +276,7 @@
         }
 
         &:active {
-          transform: translateY(-1px) scale(1.02);
+          // transform: translateY(-1px) scale(1.02);
         }
 
         i {
@@ -293,10 +293,10 @@
 
     @keyframes tagPulse {
       0%, 100% {
-        transform: scale(1);
+        // transform: scale(1);
       }
       50% {
-        transform: scale(1.1);
+        // transform: scale(1.1);
       }
     }
 
@@ -354,7 +354,7 @@
         }
 
         &:active {
-          transform: translateY(0) scale(1);
+          // transform: translateY(0) scale(1);
         }
 
         i {
@@ -642,7 +642,7 @@
         transition: transform 0.3s ease;
 
         &:hover {
-          transform: scale(1.05);
+          // transform: scale(1.05);
         }
 
         img {
@@ -681,7 +681,7 @@
 
       &:hover {
         background: #ffb400;
-        transform: translateY(-2px);
+        // transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
       }
     }
@@ -715,7 +715,7 @@
 
         &:hover {
           background: #ffb400;
-          transform: translateY(-1px);
+          // transform: translateY(-1px);
         }
       }
     }
@@ -761,11 +761,11 @@
       cursor: pointer;
 
       &:hover {
-        transform: translateY(-8px);
+        // transform: translateY(-8px);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 
         .product-image img {
-          transform: scale(1.05);
+          // transform: scale(1.05);
         }
 
         .btn {
@@ -803,11 +803,11 @@
           font-size: 0.9rem;
           font-weight: 600;
           box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-          transform: scale(1);
-          transition: transform 0.3s ease;
+          // transform: scale(1);
+          // transition: transform 0.3s ease;
 
           &:hover {
-            transform: scale(1.1);
+            // transform: scale(1.1);
           }
         }
       }
@@ -890,7 +890,7 @@
           color: #dc3545;
 
           &:hover {
-            transform: translateY(-2px);
+            // transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
           }
         }
@@ -1091,17 +1091,17 @@
       flex-direction: column;
 
       &:hover {
-        transform: translateY(-10px);
+        // transform: translateY(-10px);
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 
         .news-card-image img {
-          transform: scale(1.1);
+          // transform: scale(1.1);
         }
 
         .btn-read-more {
           background: #dc3545;
           color: white;
-          transform: translateX(5px);
+          // transform: translateX(5px);
         }
       }
 
@@ -1220,7 +1220,7 @@
             }
 
             &:hover i {
-              transform: translateX(3px);
+              // transform: translateX(3px);
             }
           }
         }
@@ -1240,7 +1240,7 @@
       &:hover {
         background: #dc3545;
         color: white;
-        transform: translateY(-2px);
+        // transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
       }
     }
@@ -1278,7 +1278,7 @@
 
         &:hover {
           background: transparent;
-          padding-left: 0.25rem;
+          // padding-left: 0.25rem;
           
           .fw-semibold {
             color: #dc3545;
@@ -1339,7 +1339,7 @@
         &:hover {
           background: #dc3545;
           color: #fff;
-          transform: translateY(-1px);
+          // transform: translateY(-1px);
           box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
         }
       }
@@ -1379,7 +1379,7 @@
         &:hover {
           background: #f8f9fa;
           border-color: #dc3545;
-          transform: translateX(5px);
+          // transform: translateX(5px);
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 

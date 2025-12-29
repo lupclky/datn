@@ -94,7 +94,7 @@
                         transition: transform 0.3s ease;
   
                         &:hover {
-                          transform: scale(1.05);
+                          // transform: scale(1.05);
                         }
   
                         .gallery-thumbnail {
@@ -211,7 +211,7 @@
       border-color: #dfe3e6;
       color: #111827;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      transform: translateY(-1px);
+      // transform: translateY(-1px);
     }
   }
 }
@@ -334,7 +334,7 @@
               background-color: #007bff;
               color: white;
               border-color: #007bff;
-              transform: scale(1.05);
+              // transform: scale(1.05);
               box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
             }
           }
@@ -380,7 +380,7 @@
             transition: all 0.3s ease;
   
             &:hover {
-              transform: translateY(-2px);
+              // transform: translateY(-2px);
               box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
             }
           }
@@ -453,7 +453,7 @@
         border: 1px solid #e9ecef;
 
         &:hover {
-          transform: translateY(-4px);
+          // transform: translateY(-4px);
           box-shadow: 0 8px 20px rgba(0, 123, 255, 0.1);
           border-color: #007bff;
         }
@@ -937,7 +937,7 @@
     }
 
     &:hover {
-      transform: translateY(-12px);
+      // transform: translateY(-12px);
       box-shadow: 0 20px 40px rgba(0, 123, 255, 0.25);
       border-color: #007bff;
 
@@ -947,7 +947,7 @@
 
       .product-image-container {
         .image-wrapper img {
-          transform: scale(1.15);
+          // transform: scale(1.15);
         }
 
         .image-overlay {
@@ -961,7 +961,7 @@
       }
 
       .discount-badge {
-        transform: scale(1.1);
+        // transform: scale(1.1);
         box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
       }
     }
@@ -1340,7 +1340,7 @@
 
         &:hover {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-          transform: translateY(-2px);
+          // transform: translateY(-2px);
         }
 
         &.selected-thumbnail {
@@ -2364,7 +2364,7 @@
   }
 
   &:not(:disabled):hover {
-    transform: translateY(-3px) scale(1.03);
+    // transform: translateY(-3px) scale(1.03);
     box-shadow: 0 12px 28px rgba(255, 107, 157, 0.4), 
                 0 8px 16px rgba(109, 213, 250, 0.3),
                 0 0 30px rgba(255, 154, 86, 0.2) !important;
@@ -2375,7 +2375,7 @@
   }
 
   &:not(:disabled):active {
-    transform: translateY(-1px) scale(0.99);
+    // transform: translateY(-1px) scale(0.99);
     transition: all 0.1s ease;
   }
 
@@ -2594,7 +2594,7 @@
         border-radius: 12px;
 
         &:hover {
-          transform: translateY(-8px);
+          // transform: translateY(-8px);
         }
 
         .product-image-container {
@@ -2674,7 +2674,7 @@
         border-radius: 10px;
 
         &:hover {
-          transform: translateY(-6px);
+          // transform: translateY(-6px);
         }
 
         .product-image-container {
