@@ -119,7 +119,7 @@ services:
       - lockerkorea-network
 
   chromadb:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:0.4.24
     container_name: lockerkorea-chromadb
     volumes:
       - chroma-data:/chroma/chroma

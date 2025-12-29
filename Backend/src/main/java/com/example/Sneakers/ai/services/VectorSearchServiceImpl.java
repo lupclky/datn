@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.io.InputStream;
 import java.net.URL;
 import java.io.ByteArrayOutputStream;
+import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
 
 @Service
 @RequiredArgsConstructor
@@ -170,7 +171,22 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         try {
             Embedding embedding = embeddingModel.embed(content).content();
             TextSegment segment = TextSegment.from(content, Metadata.from(metadata));
-            chromaStoreProvider.add(embedding, segment);
+            
+            // Use synchronized block to ensure collection exists
+            synchronized(this) {
+                try {
+                    chromaStoreProvider.add(embedding, segment);
+                } catch (Exception e) {
+                    // If collection not found, try to reset and retry once
+                    if (e.getMessage() != null && (e.getMessage().contains("404") || e.getMessage().contains("not found"))) {
+                        log.warn("Collection not found, attempting to recreate...");
+                        chromaStoreProvider.reset();
+                        chromaStoreProvider.add(embedding, segment);
+                    } else {
+                        throw e;
+                    }
+                }
+            }
         } catch (Exception e) {
             log.error("Failed to embed product text: {}", product.getName(), e);
         }
@@ -227,7 +243,22 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                     ? "Thumbnail image of " + product.getName()
                     : "Product image #" + imageIndex + " of " + product.getName();
                 TextSegment imageSegment = TextSegment.from(imageDescription, Metadata.from(imageMetadata));
-                chromaStoreProvider.add(imageEmbedding, imageSegment);
+                
+                // Use synchronized block to ensure collection exists
+                synchronized(this) {
+                    try {
+                        chromaStoreProvider.add(imageEmbedding, imageSegment);
+                    } catch (Exception e) {
+                        // If collection not found, try to reset and retry once
+                        if (e.getMessage() != null && (e.getMessage().contains("404") || e.getMessage().contains("not found"))) {
+                            log.warn("Collection not found during image indexing, attempting to recreate...");
+                            chromaStoreProvider.reset();
+                            chromaStoreProvider.add(imageEmbedding, imageSegment);
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
                 log.debug("Indexed {} for product: {}", isThumbnail ? "thumbnail" : "image #" + imageIndex, product.getName());
             } else {
                 log.warn("Could not read image bytes for product {}: {}", product.getId(), imageUrl);
@@ -402,7 +433,19 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                 null // no filter
         );
 
-        EmbeddingSearchResult<TextSegment> searchResult = chromaStoreProvider.search(searchRequest);
+        EmbeddingSearchResult<TextSegment> searchResult;
+        try {
+            searchResult = chromaStoreProvider.search(searchRequest);
+        } catch (Exception e) {
+            // If collection not found, try to reset and retry once
+            if (e.getMessage() != null && (e.getMessage().contains("404") || e.getMessage().contains("not found"))) {
+                log.warn("Collection not found during search, attempting to recreate...");
+                chromaStoreProvider.reset();
+                searchResult = chromaStoreProvider.search(searchRequest);
+            } else {
+                throw e;
+            }
+        }
         
         // Filter để loại bỏ duplicates theo product_id
         Map<Long, Document> uniqueProducts = new HashMap<>();
