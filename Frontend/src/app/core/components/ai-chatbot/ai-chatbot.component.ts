@@ -32,10 +32,16 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
   isOpen = signal(false);
   showMenu = signal(false);
   messages = signal<ChatMessage[]>([]);
-  userInput = signal('');
+  userInput: string = ''; // Changed to string for ngModel
   isLoading = signal(false);
   selectedImage = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
+  
+  // Added missing signals
+  chatMode = signal<'ai' | 'staff'>('ai');
+  selectedFile = signal<File | null>(null);
+  filePreview = signal<string | null>(null);
+
   currentUserId: number = 0;
 
   // Teaser properties
@@ -53,11 +59,13 @@ export class AiChatbotComponent extends BaseComponent implements OnInit {
 
   // Computed properties
   hasMessages = computed(() => this.messages().length > 0);
-  canSend = computed(() => {
-    const hasText = this.userInput().trim().length > 0;
+  
+  get canSend(): boolean {
+    const hasText = this.userInput.trim().length > 0;
     const hasImage = this.selectedImage() !== null;
-    return hasText || hasImage;
-  });
+    const hasFile = this.selectedFile() !== null;
+    return hasText || hasImage || hasFile;
+  }
 
   constructor(
     private aiService: AiService,
@@ -187,38 +195,48 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   sendMessage(): void {
-    if (!this.canSend() || this.isLoading()) return;
+    if (!this.canSend || this.isLoading()) return;
 
-    const message = this.userInput().trim();
+    const message = this.userInput.trim();
     const image = this.selectedImage();
+    const file = this.selectedFile();
 
     // AI mode
-    if (message && !image) {
-      this.addMessage(message, 'user');
-    }
+    if (this.chatMode() === 'ai') {
+        if (message && !image) {
+          this.addMessage(message, 'user');
+        }
 
-    if (image && message) {
-      // Send image with prompt
-      const preview = this.imagePreview();
-      if (preview) {
-        this.addMessageWithImage(message, 'user', preview);
-      }
-      this.sendImageMessage(image, message);
-    } else if (image) {
-      // Send image with default prompt
-      const preview = this.imagePreview();
-      if (preview) {
-        this.addMessageWithImage('What can you tell me about this sneaker?', 'user', preview);
-      }
-      this.sendImageMessage(image, 'What can you tell me about this sneaker?');
-    } else if (message) {
-      // Send text message
-      this.sendTextMessage(message);
+        if (image && message) {
+          // Send image with prompt
+          const preview = this.imagePreview();
+          if (preview) {
+            this.addMessageWithImage(message, 'user', preview);
+          }
+          this.sendImageMessage(image, message);
+        } else if (image) {
+          // Send image with default prompt
+          const preview = this.imagePreview();
+          if (preview) {
+            this.addMessageWithImage('What can you tell me about this sneaker?', 'user', preview);
+          }
+          this.sendImageMessage(image, 'What can you tell me about this sneaker?');
+        } else if (message) {
+          // Send text message
+          this.sendTextMessage(message);
+        }
+    } else {
+        // Staff mode (placeholder)
+         if (message) {
+            this.addMessage(message, 'user');
+            this.addMessage('Tính năng chat với nhân viên đang được phát triển.', 'bot');
+         }
     }
 
     // Clear input
-    this.userInput.set('');
+    this.userInput = '';
     this.clearImage();
+    this.removeFile();
   }
 
   private sendTextMessage(message: string): void {
@@ -343,9 +361,38 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
     }
   }
 
+  onFileSelected(event: Event): void {
+     if (isPlatformBrowser(this.platformId)) {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        this.selectedFile.set(file);
+
+        // Create preview if it's an image
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              this.filePreview.set(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            this.filePreview.set(file.name);
+        }
+      }
+    }
+  }
+
   clearImage(): void {
     this.selectedImage.set(null);
     this.imagePreview.set(null);
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  removeFile(): void {
+    this.selectedFile.set(null);
+    this.filePreview.set(null);
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';
     }
@@ -356,7 +403,11 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   onFileInputChange(event: Event): void {
-    this.onImageSelected(event);
+    if (this.chatMode() === 'ai') {
+        this.onImageSelected(event);
+    } else {
+        this.onFileSelected(event);
+    }
   }
 
   onKeyPress(event: KeyboardEvent): void {
