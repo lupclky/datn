@@ -23,10 +23,6 @@
 
   <!-- Menu Options -->
   <div class="chat-menu" [class.open]="showMenu()">
-    <button class="menu-item" (click)="openAssistant()">
-      <i class="pi pi-sparkles"></i>
-      <span>Trợ lý AI</span>
-    </button>
     <button class="menu-item" (click)="openMessenger()">
       <i class="pi pi-facebook"></i>
       <span>Messenger</span>
@@ -46,15 +42,7 @@
 <div class="chat-container" [class.open]="isOpen()">
   <div class="chat-header">
     <div class="header-content">
-      <div class="header-title">
-        <div class="ai-icon-wrapper">
-          <i class="pi pi-sparkles"></i>
-        </div>
-        <div>
-          <h3>Trợ lý KVK Intelligence</h3>
-          <span class="status-text">Đang hoạt động</span>
-        </div>
-      </div>
+      <h3>Trợ lý KVK Intelligence</h3>
       <span class="status-indicator"></span>
     </div>
     <div class="header-actions">
@@ -77,49 +65,75 @@
       <!-- AI Chat Messages -->
       @if (!hasMessages()) {
         <div class="empty-state">
-          <div class="empty-state-icon">
-            <i class="pi pi-sparkles"></i>
-          </div>
-          <p>Bắt đầu trò chuyện với trợ lý AI!</p>
-          <span class="empty-state-hint">Hỏi về sản phẩm, giá cả, hoặc bất kỳ thắc mắc nào</span>
+          <p>Start a conversation!</p>
         </div>
       }
 
       @for (message of messages(); track message.timestamp) {
         <div class="message" [class.user]="message.sender === 'user'" [class.bot]="message.sender === 'bot'" [class.error]="message.isError">
           @if(message.sender === 'bot') {
-            <div class="avatar ai-avatar">
+            <div class="avatar">
               <i class="pi pi-sparkles"></i>
             </div>
           }
-          <div class="message-content-wrapper">
-            <div class="message-bubble">
-              @if (message.image) {
-                <img [src]="message.image" alt="Uploaded image" class="message-image">
-              }
-              <p [innerHTML]="message.content"></p>
-            </div>
-            <span class="timestamp">{{ message.timestamp | date:'short' }}</span>
+          <div class="message-bubble">
+            @if (message.image) {
+              <img [src]="message.image" alt="Uploaded image" class="message-image" style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 8px;">
+            }
+            <p [innerHTML]="message.content"></p>
           </div>
+          <span class="timestamp">{{ message.timestamp | date:'short' }}</span>
         </div>
       }
 
       @if (isLoading()) {
         <div class="message bot loading">
-          <div class="avatar ai-avatar">
-            <i class="pi pi-sparkles"></i>
+          <div class="avatar">
+            <i class="pi pi-spin pi-spinner"></i>
           </div>
-          <div class="message-content-wrapper">
-            <div class="message-bubble">
-              <div class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
+          <div class="message-bubble">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
           </div>
         </div>
       }
+    }
+  </div>
+
+  <div class="chat-input-container">
+    @if (chatMode() === 'ai' && imagePreview()) {
+      <div class="image-preview">
+        <img [src]="imagePreview()" alt="Selected image">
+        <button class="remove-image" (click)="clearImage()">×</button>
+      </div>
+    }
+    
+    @if (chatMode() === 'staff' && filePreview()) {
+      <div class="file-preview">
+        @if (selectedFile() && selectedFile()!.type.startsWith('image/')) {
+          <img [src]="filePreview()" alt="Preview">
+        } @else {
+          <div class="file-info">
+            <i class="pi pi-file"></i>
+            <span>{{ selectedFile()?.name || filePreview() }}</span>
+          </div>
+        }
+        <button type="button" class="remove-file-btn" (click)="removeFile()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    }
+
+    <div class="chat-input">
+      <input
+        type="file"
+        #fileInput
+        [accept]="chatMode() === 'staff' ? 'image/*,.pdf,.doc,.docx,.txt,.zip,.rar' : 'image/*'"
+        (change)="onFileInputChange($event)"
+        style="display: none;">
   </div>
 
   <div class="chat-input-container">
@@ -151,18 +165,4 @@
         type="text"
         [(ngModel)]="userInput"
         (keypress)="onKeyPress($event)"
-        placeholder="Hỏi về mọi thứ về khoá...">
-
-      <button 
-        class="send-button"
-        (click)="sendMessage()"
-        [disabled]="!canSend() || isLoading()"
-        title="Send message">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-        </svg>
-      </button>
-    </div>
-  </div>
-</div>
+        placeholder="Hỏi về mọi thứ về khoá...

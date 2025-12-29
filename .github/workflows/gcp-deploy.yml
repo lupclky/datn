@@ -1,0 +1,69 @@
+name: Deploy to Google Cloud Platform
+
+on:
+  push:
+    branches: [ "master", "main", "gcp" ]
+  workflow_dispatch:
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+    - name: Build and Push Frontend
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: DockerfileAngular
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/lockerkorea-frontend:latest
+
+    - name: Build and Push Backend
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: DockerfileJavaSpring
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/lockerkorea-backend:latest
+
+    - name: Build and Push Python Service
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: DockerfilePython
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/lockerkorea-python:latest
+
+  deploy-to-vm:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.GCP_VM_HOST }}
+        username: ${{ secrets.GCP_VM_USERNAME }}
+        key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+        script: |
+          cd locker_korea
+          # Pull latest code (optional)
+          # git pull origin gcp
+          
+          # Pull latest images
+          docker compose -f docker-compose-gcp.yml pull
+          
+          # Restart containers
+          docker compose -f docker-compose-gcp.yml up -d
+          
+          # Prune unused images
+          docker image prune -f
