@@ -69,8 +69,8 @@ services:
       - VIRTUAL_PORT=8089
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:mysql://lockerkorea-mysql:3306/${DB_NAME:-lockerkorea}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=${DB_USER:root}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:admin}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-root}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-admin}
       - CHROMA_BASE_URL=http://chromadb:8000
       - AI_EMBEDDING_BASE_URL=http://python-service:9000
       - GCP_STORAGE_BUCKET_NAME=${GCP_STORAGE_BUCKET_NAME}
