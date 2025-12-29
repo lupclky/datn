@@ -26,7 +26,7 @@ import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { VnpayService } from '../../../core/services/vnpay.service';
 import { VnpayPaymentResponse } from '../../../core/responses/vnpay-payment.response';
 import { CreateVnpayPaymentDto } from '../../../core/dtos/create-vnpay-payment.dto';

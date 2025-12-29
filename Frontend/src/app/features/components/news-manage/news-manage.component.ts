@@ -14,7 +14,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastService } from '../../../core/services/toast.service';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { AiService } from '../../../core/services/ai.service';
 import { finalize } from 'rxjs/operators';
 

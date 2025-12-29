@@ -27,7 +27,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { AiService } from '../../../core/services/ai.service';
 import { ProductDto } from '../../../core/dtos/product.dto';
 import { AllProductDto } from '../../../core/dtos/AllProduct.dto';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { finalize } from 'rxjs';
 
 interface ProductUploadReq {

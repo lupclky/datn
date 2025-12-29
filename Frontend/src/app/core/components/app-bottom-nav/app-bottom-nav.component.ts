@@ -8,7 +8,7 @@ import { ProductFromCartDto } from '../../dtos/ProductFromCart.dto';
 import { ProductDto } from '../../dtos/product.dto';
 import { filter, tap, debounceTime, distinctUntilChanged, switchMap, catchError, takeUntil } from 'rxjs/operators';
 import { Subject, of } from 'rxjs';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-bottom-nav',

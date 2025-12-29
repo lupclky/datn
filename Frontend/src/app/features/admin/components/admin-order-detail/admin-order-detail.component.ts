@@ -7,7 +7,7 @@ import { InfoOrderDto } from '../../../../core/dtos/InfoOrder.dto';
 import { OrderDetailDto } from '../../../../core/dtos/OrderDetail.dto';
 import { CurrencyPipe, DatePipe, NgClass, NgIf } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { environment } from '../../../../../environments/environment.development';
+import { environment } from '../../../../../environments/environment';
 import { ToastService } from '../../../../core/services/toast.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';

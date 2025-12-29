@@ -5,7 +5,7 @@ import { CurrencyPipe, DatePipe, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BaseComponent } from '../../../core/commonComponent/base.component';
 import { HistoryOrderDto } from '../../../core/dtos/HistoryOrder.dto';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { MenuItem } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
 import { OrderService } from '../../../core/services/order.service';

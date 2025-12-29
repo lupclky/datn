@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NewsService } from '../../../core/services/news.service';
 import { NewsDto } from '../../../core/dtos/news.dto';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { LinkPreviewCardComponent, LinkPreview } from '../../../shared/components/link-preview-card/link-preview-card.component';
 
 @Component({

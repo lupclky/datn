@@ -18,7 +18,7 @@ Chart.register(...registerables);
 
 import { AiService } from '../../../core/services/ai.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admin-dashboard',
