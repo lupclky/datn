@@ -55,7 +55,7 @@ jobs:
         username: ${{ secrets.GCP_VM_USERNAME }}
         key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
         script: |
-          cd locker_korea
+          cd datn
           # Pull latest code (optional)
           # git pull origin gcp
           

@@ -90,7 +90,14 @@ public class WebSecurityConfig {
                         @Override
                         public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {
                                 CorsConfiguration configuration = new CorsConfiguration();
-                                configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Angular dev server
+                                configuration.setAllowedOrigins(List.of(
+                                        "http://localhost:4200",
+                                        "http://localhost:80",
+                                        "http://localhost",
+                                        "https://locker.lap123.click",
+                                        "https://www.lap123.click",
+                                        "https://api.lap123.click"
+                                ));
                                 configuration.setAllowedMethods(
                                                 Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                                 configuration.setAllowedHeaders(

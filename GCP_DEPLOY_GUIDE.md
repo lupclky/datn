@@ -158,15 +158,20 @@ Sử dụng Cloudflare Tunnel giúp bạn không cần mở port trên Firewall 
 ### Bước 2: Cấu hình Public Hostname (Trên Cloudflare Dashboard)
 Chuyển sang tab **Public Hostname** và thêm các domain trỏ về service trong Docker:
 
-1.  **Frontend** (Web chính):
-    *   Subdomain: `www` (hoặc để trống nếu dùng root domain)
-    *   Service: `http://frontend:80`
-2.  **Backend API**:
+1.  **Frontend** (Web chính - `lap123.click`):
+    *   Subdomain: `@` (Root domain) hoặc `www`
+    *   Domain: `lap123.click`
+    *   Service: `http://lockerkorea-frontend:80` (Lưu ý: Tên container là `lockerkorea-frontend`)
+
+2.  **Backend API** (`api.lap123.click`):
     *   Subdomain: `api`
-    *   Service: `http://backend:8089`
-3.  **phpMyAdmin**:
+    *   Domain: `lap123.click`
+    *   Service: `http://lockerkorea-backend:8089`
+
+3.  **phpMyAdmin** (`db.lap123.click`):
     *   Subdomain: `db`
-    *   Service: `http://phpmyadmin:80`
+    *   Domain: `lap123.click`
+    *   Service: `http://lockerkorea-phpmyadmin:80`
 
 ### Bước 3: Cập nhật .env trên VM
 Thêm dòng này vào file `.env` trên VM:
