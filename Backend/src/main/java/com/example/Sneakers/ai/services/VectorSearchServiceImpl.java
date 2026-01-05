@@ -557,12 +557,14 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                     imageEmbedding,
                     topK * 5, // Lấy nhiều hơn để có đủ sau khi filter
-                    0.60, // Tăng minimum score lên 0.60 để đảm bảo độ chính xác cao hơn
+                    0.55, // Giảm nhẹ xuống 0.55 để bắt được ảnh chụp thực tế (khác với ảnh studio)
                     filter
             );
             
             EmbeddingSearchResult<TextSegment> searchResult = chromaStoreProvider.search(searchRequest);
             
+            log.info("Found {} raw matches from ChromaDB", searchResult.matches().size());
+
             // Filter để loại bỏ duplicates theo product_id
             // Chỉ giữ document có score cao nhất cho mỗi product_id
             Map<Long, Document> uniqueProducts = new HashMap<>();
@@ -571,11 +573,14 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             for (var match : searchResult.matches()) {
                 Map<String, Object> metadata = match.embedded().metadata().toMap();
                 Object productIdObj = metadata.get("product_id");
+                Object productName = metadata.get("product_name");
+                double score = match.score();
                 
+                log.info("Match found: Product ID={}, Name={}, Score={}", productIdObj, productName, score);
+
                 if (productIdObj != null) {
                     try {
                         Long productId = Long.parseLong(productIdObj.toString());
-                        double score = match.score();
                         
                         // Chỉ giữ document có score cao nhất cho mỗi product
                         if (!productScores.containsKey(productId) || score > productScores.get(productId)) {

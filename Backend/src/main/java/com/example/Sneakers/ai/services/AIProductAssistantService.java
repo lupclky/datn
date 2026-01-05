@@ -120,11 +120,12 @@ public class AIProductAssistantService {
                 
                 Hãy trả lời khách hàng dựa trên CẢ hình ảnh họ gửi VÀ danh sách sản phẩm tìm thấy ở trên.
                 
-                Quy tắc:
-                1. Nếu hình ảnh giống với một trong các sản phẩm tìm thấy, hãy xác nhận và giới thiệu chi tiết sản phẩm đó.
-                2. Nếu không giống hoàn toàn, hãy giới thiệu các sản phẩm tương tự nhất từ danh sách.
-                3. Trả lời chuyên nghiệp, thân thiện bằng tiếng Việt.
-                4. Cung cấp tên, giá và link (nếu có trong context) của sản phẩm được đề xuất.
+                Quy tắc QUAN TRỌNG:
+                1. SO SÁNH KỸ hình ảnh khách gửi với mô tả và tên của các sản phẩm trong danh sách.
+                2. Nếu hình ảnh khách gửi KHÔNG GIỐNG với sản phẩm nào trong danh sách (ví dụ: khác kiểu dáng, khác màu sắc, khác loại khóa), hãy nói rõ là "Không tìm thấy sản phẩm chính xác trong cửa hàng" và chỉ đề xuất các sản phẩm có tính năng tương tự.
+                3. TUYỆT ĐỐI KHÔNG nhận vơ sản phẩm nếu không chắc chắn. Ví dụ: Nếu khách gửi ảnh khóa tay gạt mà danh sách chỉ có khóa không tay cầm, phải chỉ ra sự khác biệt.
+                4. Nếu tìm thấy sản phẩm giống hệt (hoặc rất giống), hãy xác nhận và giới thiệu chi tiết.
+                5. Trả lời chuyên nghiệp, thân thiện bằng tiếng Việt.
                 """, userPrompt, productContext);
 
         // We send the image again so Gemini can compare specific visual details with the text descriptions
