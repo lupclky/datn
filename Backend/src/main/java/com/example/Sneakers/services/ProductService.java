@@ -249,7 +249,12 @@ public class ProductService implements IProductService {
             throw new InvalidParamException("Number of images must be <= "
                     + ProductImage.MAXIMUM_IMAGES_PER_PRODUCT);
         }
-        return productImageRepository.save(newProductImage);
+        ProductImage savedImage = productImageRepository.save(newProductImage);
+        
+        // Publish event for re-indexing to include new image
+        eventPublisher.publishEvent(new ProductSaveEvent(existingProduct));
+        
+        return savedImage;
     }
 
     @Override
@@ -395,6 +400,9 @@ public class ProductService implements IProductService {
         Product existingProduct = getProductById(productId);
         existingProduct.setThumbnail(thumbnailUrl);
         productRepository.save(existingProduct);
+        
+        // Publish event for re-indexing
+        eventPublisher.publishEvent(new ProductSaveEvent(existingProduct));
     }
 
     @Override
@@ -405,8 +413,12 @@ public class ProductService implements IProductService {
             ProductImage productImage = productImageOptional.get();
             // Ensure the image belongs to a product to avoid unintended deletions
             if (productImage.getProduct() != null) {
+                Product product = productImage.getProduct();
                 productImageRepository.deleteById(id);
                 // Future enhancement: Add logic here to delete the actual file from storage
+                
+                // Publish event for re-indexing
+                eventPublisher.publishEvent(new ProductSaveEvent(product));
             } else {
                 throw new DataNotFoundException("Image with id " + id + " is not associated with any product.");
             }

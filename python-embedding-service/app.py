@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from PIL import Image
 from transformers import CLIPModel, CLIPProcessor
+from rembg import remove
 
 MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", "openai/clip-vit-base-patch32")
 # Tên model embedding
@@ -80,7 +81,21 @@ def embed_image(req: ImageRequest) -> EmbeddingResponse:
 
     try:
         raw = base64.b64decode(req.image_base64)
-        img = Image.open(io.BytesIO(raw)).convert("RGB")
+        img = Image.open(io.BytesIO(raw))
+        
+        # Remove background
+        img_no_bg = remove(img)
+        
+        # Create white background
+        new_img = Image.new("RGB", img_no_bg.size, (255, 255, 255))
+        
+        # Composite image over white background if it has alpha channel
+        if img_no_bg.mode == 'RGBA':
+            new_img.paste(img_no_bg, mask=img_no_bg.split()[3])
+        else:
+            new_img = img_no_bg.convert("RGB")
+            
+        img = new_img
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image_base64: {e}")
 

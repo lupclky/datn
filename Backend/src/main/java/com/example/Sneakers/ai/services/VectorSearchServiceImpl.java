@@ -34,6 +34,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.io.ByteArrayOutputStream;
 import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore;
+import dev.langchain4j.store.embedding.filter.Filter;
+import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
 
 @Service
 @RequiredArgsConstructor
@@ -548,12 +550,15 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         try {
             Embedding imageEmbedding = pythonEmbeddingService.embedImage(imageBytes).content();
             
+            // Filter chỉ tìm kiếm trong các vector hình ảnh (type = product_image)
+            Filter filter = metadataKey("type").isEqualTo("product_image");
+
             // Tăng topK lên để có đủ kết quả sau khi filter duplicates
             EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                     imageEmbedding,
-                    topK * 3, // Lấy nhiều hơn để có đủ sau khi filter
-                    0.52, // Minimum score 0.52 (48% similarity) để bao gồm F300-FH và các sản phẩm tương tự
-                    null
+                    topK * 5, // Lấy nhiều hơn để có đủ sau khi filter
+                    0.60, // Tăng minimum score lên 0.60 để đảm bảo độ chính xác cao hơn
+                    filter
             );
             
             EmbeddingSearchResult<TextSegment> searchResult = chromaStoreProvider.search(searchRequest);
