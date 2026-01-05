@@ -122,10 +122,11 @@ public class AIProductAssistantService {
                 
                 Quy tắc QUAN TRỌNG:
                 1. SO SÁNH KỸ hình ảnh khách gửi với mô tả và tên của các sản phẩm trong danh sách.
-                2. Nếu hình ảnh khách gửi KHÔNG GIỐNG với sản phẩm nào trong danh sách (ví dụ: khác kiểu dáng, khác màu sắc, khác loại khóa), hãy nói rõ là "Không tìm thấy sản phẩm chính xác trong cửa hàng" và chỉ đề xuất các sản phẩm có tính năng tương tự.
-                3. TUYỆT ĐỐI KHÔNG nhận vơ sản phẩm nếu không chắc chắn. Ví dụ: Nếu khách gửi ảnh khóa tay gạt mà danh sách chỉ có khóa không tay cầm, phải chỉ ra sự khác biệt.
-                4. Nếu tìm thấy sản phẩm giống hệt (hoặc rất giống), hãy xác nhận và giới thiệu chi tiết.
-                5. Trả lời chuyên nghiệp, thân thiện bằng tiếng Việt.
+                2. ƯU TIÊN TUYỆT ĐỐI sản phẩm có ghi chú "[EXACT MATCH]" hoặc "[VERY HIGH MATCH]" hoặc có độ tương đồng (Similarity) cao nhất. Đây là kết quả phân tích hình ảnh chính xác từ hệ thống.
+                3. Nếu hình ảnh khách gửi KHÔNG GIỐNG với sản phẩm nào trong danh sách (ví dụ: khác kiểu dáng, khác màu sắc, khác loại khóa), hãy nói rõ là "Không tìm thấy sản phẩm chính xác trong cửa hàng" và chỉ đề xuất các sản phẩm có tính năng tương tự.
+                4. TUYỆT ĐỐI KHÔNG nhận vơ sản phẩm nếu không chắc chắn. Ví dụ: Nếu khách gửi ảnh khóa tay gạt mà danh sách chỉ có khóa không tay cầm, phải chỉ ra sự khác biệt.
+                5. Nếu tìm thấy sản phẩm giống hệt (hoặc rất giống), hãy xác nhận và giới thiệu chi tiết.
+                6. Trả lời chuyên nghiệp, thân thiện bằng tiếng Việt.
                 """, userPrompt, productContext);
 
         // We send the image again so Gemini can compare specific visual details with the text descriptions
@@ -157,13 +158,25 @@ public class AIProductAssistantService {
         }
 
         List<Long> productIdsInOrder = new ArrayList<>();
+        Map<Long, Double> scoreMap = new HashMap<>();
+
         for (Document doc : documents) {
             Map<String, Object> md = doc.metadata().toMap();
             Object productIdObj = md.get("product_id");
-            Optional<Long> parsed = parseLongSafe(productIdObj);
-            parsed.ifPresent(id -> {
+            Object scoreObj = md.get("similarity_score");
+            
+            Optional<Long> parsedId = parseLongSafe(productIdObj);
+            parsedId.ifPresent(id -> {
                 if (!productIdsInOrder.contains(id)) {
                     productIdsInOrder.add(id);
+                }
+                
+                if (scoreObj != null) {
+                    try {
+                        scoreMap.put(id, Double.parseDouble(scoreObj.toString()));
+                    } catch (NumberFormatException e) {
+                        scoreMap.put(id, 0.0);
+                    }
                 }
             });
         }
@@ -184,7 +197,13 @@ public class AIProductAssistantService {
             Product p = byId.get(id);
             if (p == null) continue;
 
-            context.append(String.format("%d. Product: %s\n", rank++, p.getName()));
+            Double score = scoreMap.getOrDefault(id, 0.0);
+            String matchConfidence = "";
+            if (score > 0.9) matchConfidence = " [EXACT MATCH - HIGH CONFIDENCE]";
+            else if (score > 0.8) matchConfidence = " [VERY HIGH MATCH]";
+            else if (score > 0.7) matchConfidence = " [HIGH MATCH]";
+
+            context.append(String.format("%d. Product: %s (Similarity: %.1f%%%s)\n", rank++, p.getName(), score * 100, matchConfidence));
             context.append(String.format("   Price: %d VND\n", p.getPrice()));
             context.append(String.format("   Category: %s\n", p.getCategory() != null ? p.getCategory().getName() : "Unknown"));
             context.append(String.format("   Discount: %d%%\n", p.getDiscount() != null ? p.getDiscount() : 0));

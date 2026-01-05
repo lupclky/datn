@@ -585,9 +585,14 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                         // Chỉ giữ document có score cao nhất cho mỗi product
                         if (!productScores.containsKey(productId) || score > productScores.get(productId)) {
                             productScores.put(productId, score);
+                            
+                            // Add score to metadata for AI context
+                            Map<String, Object> newMetadata = new HashMap<>(match.embedded().metadata().toMap());
+                            newMetadata.put("similarity_score", score);
+                            
                             uniqueProducts.put(productId, Document.from(
                                 match.embedded().text(), 
-                                match.embedded().metadata()
+                                Metadata.from(newMetadata)
                             ));
                         }
                     } catch (NumberFormatException e) {

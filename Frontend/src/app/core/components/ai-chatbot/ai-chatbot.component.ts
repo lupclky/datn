@@ -208,9 +208,9 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
       // Send image with default prompt
       const preview = this.imagePreview();
       if (preview) {
-        this.addMessageWithImage('What can you tell me about this sneaker?', 'user', preview);
+        this.addMessageWithImage('Bạn có thể cho tôi biết về sản phẩm Locker Korea này không?', 'user', preview);
       }
-      this.sendImageMessage(image, 'What can you tell me about this sneaker?');
+      this.sendImageMessage(image, 'Bạn có thể cho tôi biết về sản phẩm Locker Korea này không?');
     } else if (message) {
       // Send text message
       this.sendTextMessage(message);
