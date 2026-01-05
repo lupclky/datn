@@ -306,8 +306,11 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   private addMessage(content: string, sender: 'user' | 'bot', isError: boolean = false): void {
+    // Process content to handle markdown bold syntax (**text**)
+    const processedContent = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    
     this.messages.update(msgs => [...msgs, {
-      content,
+      content: processedContent,
       sender,
       timestamp: new Date(),
       isError
@@ -316,8 +319,11 @@ Tôi có thể giúp gì cho bạn hôm nay? 🔐😊`;
   }
 
   private addMessageWithImage(content: string, sender: 'user' | 'bot', image: string, isError: boolean = false): void {
+    // Process content to handle markdown bold syntax (**text**)
+    const processedContent = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
     this.messages.update(msgs => [...msgs, {
-      content,
+      content: processedContent,
       sender,
       timestamp: new Date(),
       isError,
