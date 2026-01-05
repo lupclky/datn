@@ -54,9 +54,9 @@
         <div class="action-item">
           <button class="btn-primary" (click)="initializeAI()" [disabled]="isLoading() || isIndexing()">
             <i class="pi pi-database"></i>
-            {{ isIndexing() ? 'Đang chạy nền...' : 'Khởi tạo lại toàn bộ Database' }}
+            {{ isIndexing() ? 'Đang chạy nền...' : 'Cập nhật dữ liệu AI' }}
           </button>
-          <p class="description">Xóa toàn bộ index cũ và tạo lại index mới cho tất cả sản phẩm và danh mục. Dùng khi có thay đổi lớn về dữ liệu.</p>
+          <p class="description">Cập nhật lại toàn bộ dữ liệu tìm kiếm (sản phẩm, hình ảnh, danh mục) cho AI. Sử dụng khi có dữ liệu mới hoặc thay đổi thuật toán.</p>
         </div>
 
         <div class="action-item">

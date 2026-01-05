@@ -48,6 +48,12 @@ export class AiService {
     return this.httpClient.post<ChatResponse>(`${this.apiUrl}/ai/chat/product-assistant`, { query });
   }
 
+  // Index all products
+  indexAllProducts(): Observable<any> {
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.token}`);
+    return this.httpClient.post<any>(`${this.apiUrl}/ai/search/index/all-products`, {}, { headers });
+  }
+
   // Chat with image
   chatWithImage(image: File, prompt: string): Observable<ChatResponse> {
     const formData = new FormData();

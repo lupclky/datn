@@ -129,12 +129,12 @@ export class AiManagementComponent implements OnInit, OnDestroy {
   }
 
   initializeAI() {
-    if (!confirm('Bạn có chắc chắn muốn khởi tạo lại database AI? Dữ liệu cũ sẽ bị xóa và quá trình này có thể mất vài phút.')) {
+    if (!confirm('Bạn có chắc chắn muốn cập nhật lại dữ liệu AI? Quá trình này có thể mất vài phút.')) {
       return;
     }
 
     this.isLoading.set(true);
-    this.addLog('Đang gửi yêu cầu khởi tạo...', 'info');
+    this.addLog('Đang gửi yêu cầu cập nhật...', 'info');
 
     this.http.post<{success: boolean; message: string}>(`${this.apiUrl}/ai/initialize/index-all`, {})
       .pipe(finalize(() => this.isLoading.set(false)))
