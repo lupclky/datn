@@ -708,7 +708,15 @@
                     <span>KVK Intelligence đang tạo mô tả chuyên nghiệp cho sản phẩm...</span>
                   </div>
 
-                  <ckeditor [editor]="Editor" formControlName="description"></ckeditor>
+                  <ng-container *ngIf="Editor; else editorLoading">
+                    <ckeditor [editor]="Editor" formControlName="description"></ckeditor>
+                  </ng-container>
+                  <ng-template #editorLoading>
+                    <div class="editor-loading">
+                      <i class="pi pi-spin pi-spinner"></i>
+                      <span>Đang tải trình chỉnh sửa văn bản...</span>
+                    </div>
+                  </ng-template>
                 </div>
               </form>
             </div>

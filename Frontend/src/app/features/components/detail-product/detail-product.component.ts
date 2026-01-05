@@ -208,6 +208,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
         this.cdr.markForCheck();
       }).catch(error => {
         console.error('Error loading CKEditor:', error);
+        this.toastService.fail('Không thể tải trình chỉnh sửa văn bản');
       });
     }
     if (this.token != null){

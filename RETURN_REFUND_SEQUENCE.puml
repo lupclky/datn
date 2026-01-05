@@ -1,0 +1,250 @@
+@startuml
+actor User
+actor Admin
+
+box "Frontend" #Lavender
+    participant "UI" as UI
+end box
+
+box "Backend Controllers" #LightBlue
+    participant ReturnController
+    participant VnpayController
+end box
+
+box "Backend Services" #LightGreen
+    participant "ReturnService (BE)" as ReturnServiceBE
+    participant StripeService
+    participant VnPayService
+end box
+
+box "Repositories" #LightYellow
+    participant ReturnRequestRepository
+    participant OrderRepository
+end box
+
+box "External Gateways" #LightGray
+    participant "Stripe API" as StripeAPI
+    participant "VNPAY API" as VnpayAPI
+end box
+
+== 1. User Creates Return Request ==
+User -> UI: Fill Return Form (Reason)
+activate UI
+UI -> ReturnController: POST /returns
+activate ReturnController
+ReturnController -> ReturnServiceBE: createReturnRequest(dto, token)
+activate ReturnServiceBE
+ReturnServiceBE -> OrderRepository: findById(orderId)
+activate OrderRepository
+OrderRepository --> ReturnServiceBE: Order Entity
+deactivate OrderRepository
+ReturnServiceBE -> ReturnServiceBE: validateReturnEligibility(order)
+ReturnServiceBE -> ReturnRequestRepository: save(returnRequest)
+activate ReturnRequestRepository
+ReturnRequestRepository --> ReturnServiceBE: Saved Entity
+deactivate ReturnRequestRepository
+ReturnServiceBE --> ReturnController: ReturnRequest
+deactivate ReturnServiceBE
+ReturnController --> UI: 201 Created
+deactivate ReturnController
+UI --> User: Show Success Message
+deactivate UI
+
+== 2. Admin Reviews Request ==
+Admin -> UI: View Return Requests
+activate UI
+UI -> ReturnController: GET /returns/admin/all
+activate ReturnController
+ReturnController -> ReturnServiceBE: getAllReturnRequestsForAdmin()
+activate ReturnServiceBE
+ReturnServiceBE -> ReturnRequestRepository: findAllAdmin()
+activate ReturnRequestRepository
+ReturnRequestRepository --> ReturnServiceBE: List<ReturnRequest>
+deactivate ReturnRequestRepository
+ReturnServiceBE --> ReturnController: List<ReturnRequest>
+deactivate ReturnServiceBE
+ReturnController --> UI: List<ReturnRequest>
+deactivate ReturnController
+UI --> Admin: Display Requests Table
+deactivate UI
+
+== 3. Admin Processes Request ==
+
+alt Action == Approve
+    alt Payment Method == Stripe
+        Admin -> UI: Click "Approve"
+        activate UI
+        UI -> ReturnController: PUT /returns/admin/{id}/approve
+        activate ReturnController
+        ReturnController -> ReturnServiceBE: approveReturnRequest(id, actionDTO)
+        activate ReturnServiceBE
+        ReturnServiceBE -> ReturnRequestRepository: findById(id)
+        activate ReturnRequestRepository
+        ReturnRequestRepository --> ReturnServiceBE: ReturnRequest
+        deactivate ReturnRequestRepository
+        
+        ReturnServiceBE -> StripeService: refund(paymentIntentId)
+        activate StripeService
+        StripeService -> StripeAPI: Create Refund
+        activate StripeAPI
+        StripeAPI --> StripeService: Refund Success
+        deactivate StripeAPI
+        StripeService --> ReturnServiceBE: Success
+        deactivate StripeService
+        
+        ReturnServiceBE -> ReturnRequestRepository: save(status=REFUNDED)
+        activate ReturnRequestRepository
+        ReturnRequestRepository --> ReturnServiceBE: Updated Entity
+        deactivate ReturnRequestRepository
+        
+        ReturnServiceBE -> OrderRepository: save(status=canceled)
+        activate OrderRepository
+        OrderRepository --> ReturnServiceBE: Updated Order
+        deactivate OrderRepository
+        
+        ReturnServiceBE --> ReturnController: ReturnRequest
+        deactivate ReturnServiceBE
+        ReturnController --> UI: 200 OK (Refunded)
+        deactivate ReturnController
+        UI --> Admin: Update UI (Refunded)
+        deactivate UI
+
+    else Payment Method == VNPay
+        Admin -> UI: Click "Approve"
+        activate UI
+        UI -> ReturnController: PUT /returns/admin/{id}/approve
+        activate ReturnController
+        ReturnController -> ReturnServiceBE: approveReturnRequest(id, actionDTO)
+        activate ReturnServiceBE
+        
+        ReturnServiceBE -> ReturnRequestRepository: save(status=AWAITING_REFUND)
+        activate ReturnRequestRepository
+        ReturnRequestRepository --> ReturnServiceBE: Updated Entity
+        deactivate ReturnRequestRepository
+        
+        ReturnServiceBE -> OrderRepository: save(status=awaiting_refund)
+        activate OrderRepository
+        OrderRepository --> ReturnServiceBE: Updated Order
+        deactivate OrderRepository
+        
+        ReturnServiceBE --> ReturnController: ReturnRequest
+        deactivate ReturnServiceBE
+        ReturnController --> UI: 200 OK (Awaiting Refund)
+        deactivate ReturnController
+        UI --> Admin: Update UI (Awaiting Refund)
+        deactivate UI
+        
+        note right of Admin: Admin triggers refund later
+        Admin -> UI: Click "Refund VNPAY"
+        activate UI
+        UI -> VnpayController: POST /vnpay/refund
+        activate VnpayController
+        VnpayController -> VnPayService: refund(requestDTO)
+        activate VnPayService
+        VnPayService -> VnpayAPI: Refund Request
+        activate VnpayAPI
+        VnpayAPI --> VnPayService: Refund Response (00)
+        deactivate VnpayAPI
+        VnPayService --> VnpayController: Response Map
+        deactivate VnPayService
+        
+        VnpayController -> ReturnServiceBE: processVnpayRefund(returnRequestId)
+        activate ReturnServiceBE
+        ReturnServiceBE -> ReturnRequestRepository: save(status=REFUNDED)
+        activate ReturnRequestRepository
+        ReturnRequestRepository --> ReturnServiceBE: Updated Entity
+        deactivate ReturnRequestRepository
+        ReturnServiceBE -> OrderRepository: save(status=canceled)
+        activate OrderRepository
+        OrderRepository --> ReturnServiceBE: Updated Order
+        deactivate OrderRepository
+        ReturnServiceBE --> VnpayController: ReturnRequest
+        deactivate ReturnServiceBE
+        
+        VnpayController --> UI: 200 OK (Refund Success)
+        deactivate VnpayController
+        UI --> Admin: Update UI (Refunded)
+        deactivate UI
+
+    else Payment Method == COD (or others)
+        Admin -> UI: Click "Approve"
+        activate UI
+        UI -> ReturnController: PUT /returns/admin/{id}/approve
+        activate ReturnController
+        ReturnController -> ReturnServiceBE: approveReturnRequest(id, actionDTO)
+        activate ReturnServiceBE
+        
+        ReturnServiceBE -> ReturnRequestRepository: save(status=AWAITING_REFUND)
+        activate ReturnRequestRepository
+        ReturnRequestRepository --> ReturnServiceBE: Updated Entity
+        deactivate ReturnRequestRepository
+        
+        ReturnServiceBE -> OrderRepository: save(status=awaiting_refund)
+        activate OrderRepository
+        OrderRepository --> ReturnServiceBE: Updated Order
+        deactivate OrderRepository
+        
+        ReturnServiceBE --> ReturnController: ReturnRequest
+        deactivate ReturnServiceBE
+        ReturnController --> UI: 200 OK (Awaiting Manual Refund)
+        deactivate ReturnController
+        UI --> Admin: Update UI (Awaiting Refund)
+        deactivate UI
+        
+        note right of Admin: Admin performs manual bank transfer
+        Admin -> UI: Click "Complete Refund"
+        activate UI
+        UI -> ReturnController: PUT /returns/admin/{id}/complete-refund
+        activate ReturnController
+        ReturnController -> ReturnServiceBE: completeRefund(id, actionDTO)
+        activate ReturnServiceBE
+        
+        ReturnServiceBE -> ReturnRequestRepository: save(status=REFUNDED)
+        activate ReturnRequestRepository
+        ReturnRequestRepository --> ReturnServiceBE: Updated Entity
+        deactivate ReturnRequestRepository
+        
+        ReturnServiceBE -> OrderRepository: save(status=canceled)
+        activate OrderRepository
+        OrderRepository --> ReturnServiceBE: Updated Order
+        deactivate OrderRepository
+        
+        ReturnServiceBE --> ReturnController: ReturnRequest
+        deactivate ReturnServiceBE
+        ReturnController --> UI: 200 OK (Refund Completed)
+        deactivate ReturnController
+        UI --> Admin: Update UI (Refunded)
+        deactivate UI
+    end
+
+else Action == Reject
+    Admin -> UI: Click "Reject"
+    activate UI
+    UI -> ReturnController: PUT /returns/admin/{id}/reject
+    activate ReturnController
+    ReturnController -> ReturnServiceBE: rejectReturnRequest(id, actionDTO)
+    activate ReturnServiceBE
+    ReturnServiceBE -> ReturnRequestRepository: findById(id)
+    activate ReturnRequestRepository
+    ReturnRequestRepository --> ReturnServiceBE: ReturnRequest
+    deactivate ReturnRequestRepository
+    
+    ReturnServiceBE -> ReturnRequestRepository: save(status=REJECTED)
+    activate ReturnRequestRepository
+    ReturnRequestRepository --> ReturnServiceBE: Updated Entity
+    deactivate ReturnRequestRepository
+    
+    ReturnServiceBE -> OrderRepository: save(status=delivered)
+    activate OrderRepository
+    OrderRepository --> ReturnServiceBE: Updated Order
+    deactivate OrderRepository
+    
+    ReturnServiceBE --> ReturnController: ReturnRequest
+    deactivate ReturnServiceBE
+    ReturnController --> UI: 200 OK (Rejected)
+    deactivate ReturnController
+    UI --> Admin: Update UI (Rejected)
+    deactivate UI
+end
+
+@enduml

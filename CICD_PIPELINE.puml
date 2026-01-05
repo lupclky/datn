@@ -1,0 +1,33 @@
+@startuml
+title Quy trình CI/CD (GitHub Actions -> GCP)
+
+start
+
+:Push to branches\n(master, develop, gcp);
+
+partition "Build & Push Stage (GitHub Runner)" {
+    :Checkout Code;
+    :Login to Docker Hub;
+    
+    fork
+        :Build Frontend Image\n(DockerfileAngular);
+        :Push to Docker Hub\n(lockerkorea-frontend:latest);
+    fork again
+        :Build Backend Image\n(DockerfileJavaSpring);
+        :Push to Docker Hub\n(lockerkorea-backend:latest);
+    fork again
+        :Build Python Service Image\n(DockerfilePython);
+        :Push to Docker Hub\n(lockerkorea-python:latest);
+    end fork
+}
+
+partition "Deploy Stage (GCP VM)" {
+    :SSH Connect to VM;
+    :cd datn;
+    :docker compose pull\n(Tải image mới nhất);
+    :docker compose up -d\n(Khởi động lại containers);
+    :docker image prune -f\n(Dọn dẹp image cũ);
+}
+
+stop
+@enduml

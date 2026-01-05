@@ -1,0 +1,68 @@
+@startuml
+title Phân công lắp đặt hỏa tốc (Express Installation Assignment)
+actor Admin
+participant "Frontend\n(AdminOrderDetail)" as FE
+participant "OrderController" as Controller
+participant "OrderService" as Service
+database "Database" as DB
+participant "EmailService" as Email
+
+== Khởi tạo ==
+Admin -> FE: Mở chi tiết đơn hàng
+FE -> Controller: GET /api/v1/orders/{id}
+Controller -> Service: getOrder(id)
+Service -> DB: Find Order by ID
+DB --> Service: Order Data
+Service --> Controller: OrderResponse
+Controller --> FE: Order Details
+FE -> FE: Kiểm tra quyền Admin
+FE -> Controller: GET /api/v1/users (Filter Role=STAFF)
+Controller --> FE: List<User> (Staff)
+
+== Quy trình Phân công ==
+Admin -> FE: Chọn Nhân viên (Staff)
+Admin -> FE: Click "Phân công" (Assign)
+FE -> Controller: PUT /api/v1/orders/{id}/assign-staff?staffId={staffId}
+activate Controller
+
+Controller -> Service: assignStaff(orderId, staffId)
+activate Service
+
+Service -> DB: Find Order by ID
+DB --> Service: Order
+Service -> DB: Find User (Staff) by ID
+DB --> Service: User (Staff)
+
+alt Staff Valid & Role == STAFF
+    Service -> Service: order.setAssignedStaff(staff)
+    Service -> DB: save(order)
+    activate DB
+    DB --> Service: Saved Order
+    deactivate DB
+
+    par Gửi Email thông báo (Async/Sync)
+        Service -> Service: buildStaffAssignmentEmailContent(order)
+        Service -> Email: sendEmail(customerEmail, subject, content)
+        activate Email
+        Email --> Service: Success/Fail
+        deactivate Email
+    end
+
+    Service --> Controller: void (Success)
+else Staff Invalid or Not Found
+    Service --> Controller: Exception("Staff not found" / "Not a staff member")
+end
+
+deactivate Service
+
+alt Success
+    Controller --> FE: 200 OK ("Staff assigned successfully")
+    FE -> Admin: Hiển thị thông báo thành công
+    FE -> FE: Reload Order Details
+else Error
+    Controller --> FE: 400 Bad Request (Error Message)
+    FE -> Admin: Hiển thị lỗi
+end
+
+deactivate Controller
+@enduml
