@@ -42,6 +42,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AiService } from '../../../core/services/ai.service';
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { registerCkeditorUploadAdapter } from '../../../shared/ckeditor-upload-adapter';
 
 
 @Component({
@@ -178,6 +180,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     private sanitizer: DomSanitizer,
     private aiService: AiService,
     private cdr: ChangeDetectorRef,
+    private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     super();
@@ -316,6 +319,10 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
         })
       })
     ).subscribe();
+  }
+
+  onEditorReady(editor: any): void {
+    registerCkeditorUploadAdapter(editor, this.http);
   }
 
   addToCart(){

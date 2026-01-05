@@ -17,11 +17,13 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { environment } from '../../../../environments/environment';
 import { AiService } from '../../../core/services/ai.service';
 import { finalize } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
 import { CalendarModule } from 'primeng/calendar';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
+import { registerCkeditorUploadAdapter } from '../../../shared/ckeditor-upload-adapter';
 
 @Component({
   selector: 'app-news-manage',
@@ -89,6 +91,7 @@ export class NewsManageComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
     private aiService: AiService,
+    private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -220,6 +223,7 @@ export class NewsManageComponent implements OnInit {
 
   onEditorReady(editor: any) {
     console.log('CKEditor is ready.');
+    registerCkeditorUploadAdapter(editor, this.http);
     this.editorInstance = editor;
     // If there is pending content, set it now that the editor is ready.
     if (this.pendingContent) {

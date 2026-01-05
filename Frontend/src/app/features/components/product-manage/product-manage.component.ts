@@ -29,6 +29,8 @@ import { ProductDto } from '../../../core/dtos/product.dto';
 import { AllProductDto } from '../../../core/dtos/AllProduct.dto';
 import { environment } from '../../../../environments/environment';
 import { finalize } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { registerCkeditorUploadAdapter } from '../../../shared/ckeditor-upload-adapter';
 
 interface ProductUploadReq {
   name: string;
@@ -125,6 +127,7 @@ export class ProductManageComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private router: Router,
     private aiService: AiService,
+    private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.initForm();
@@ -306,6 +309,10 @@ export class ProductManageComponent implements OnInit {
 
   openEditDialog(product: ProductDto): void {
     this.router.navigate(['/detailProduct', product.id]);
+  }
+
+  onEditorReady(editor: any): void {
+    registerCkeditorUploadAdapter(editor, this.http);
   }
 
   onFilesSelected(event: any): void {

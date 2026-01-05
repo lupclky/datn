@@ -709,7 +709,9 @@
                   </div>
 
                   <ng-container *ngIf="Editor; else editorLoading">
-                    <ckeditor [editor]="Editor" formControlName="description"></ckeditor>
+                    <ckeditor [editor]="Editor" 
+                              formControlName="description"
+                              (ready)="onEditorReady($event)"></ckeditor>
                   </ng-container>
                   <ng-template #editorLoading>
                     <div class="editor-loading">
