@@ -112,6 +112,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
   public showExpandToggle: boolean = false;
   public addQuantityMode: boolean = false; // If true, add quantity; if false, replace quantity
   public selectedThumbnail: string | null = null; // Selected thumbnail image URL
+  public descriptionSafeHtml: SafeHtml | null = null;
 
   public Editor: any = null;
 
@@ -130,6 +131,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
       filter((product: ProductDto) => !!product),
       tap((product: ProductDto) => {
         this.mainProduct = product;
+        this.updateDescriptionSafeHtml(product.description);
         this.productForm.patchValue({
           productName: product.name,
           description: product.description,
@@ -247,6 +249,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
         tap((product : ProductDto) => {
           this.loadingService.loading = true;
           this.mainProduct = product;
+            this.updateDescriptionSafeHtml(product.description);
           this.productForm.setValue({
             productName: product.name,
             description: product.description,
@@ -697,8 +700,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit,Afte
     return Array(5).fill(0).map((_, i) => i < rating ? 1 : 0);
   }
 
-  getSafeHtml(content: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(content);
+  private updateDescriptionSafeHtml(content?: string | null): void {
+    this.descriptionSafeHtml = this.sanitizer.bypassSecurityTrustHtml(content || '');
   }
 
   private stripHtml(html: string): string {

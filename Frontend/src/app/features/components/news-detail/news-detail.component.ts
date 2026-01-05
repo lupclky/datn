@@ -20,6 +20,7 @@ export class NewsDetailComponent implements OnInit {
   news: NewsDto | null = null;
   isLoading: boolean = false;
   relatedNews: NewsDto[] = [];
+  contentSafeHtml: SafeHtml | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -44,6 +45,7 @@ export class NewsDetailComponent implements OnInit {
     this.newsService.getPublishedNewsById(id).subscribe({
       next: (news) => {
         this.news = news;
+        this.contentSafeHtml = this.getSafeHtml(news.content || '');
         this.isLoading = false;
         this.cdr.markForCheck();
         // Load related news

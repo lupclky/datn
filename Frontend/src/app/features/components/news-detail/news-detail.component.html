@@ -28,7 +28,7 @@
             <p *ngIf="news.summary" class="news-lead">{{ news.summary }}</p>
           </header>
           
-          <div class="news-content" [innerHTML]="getSafeHtml(news.content)"></div>
+          <div class="news-content" [innerHTML]="contentSafeHtml"></div>
         </article>
       </div>
 

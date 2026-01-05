@@ -178,7 +178,7 @@
                 
                 <div class="article-content" 
                      [class.collapsed]="!isDescriptionExpanded && showExpandToggle"
-                     [innerHTML]="getSafeHtml(mainProduct.description || '')"></div>
+                   [innerHTML]="descriptionSafeHtml"></div>
 
                 @if (showExpandToggle) {
                   <div class="article-expand-toggle">
