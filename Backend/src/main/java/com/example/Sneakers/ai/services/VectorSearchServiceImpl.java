@@ -422,7 +422,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
 
     @Override
     public List<Document> searchProducts(String query, int topK) {
-        log.debug("Searching products with query: {}", query);
+        log.info("Searching products with query: {}", query);
 
         Embedding queryEmbedding = embeddingModel.embed(query).content();
 
@@ -438,6 +438,10 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         EmbeddingSearchResult<TextSegment> searchResult;
         try {
             searchResult = chromaStoreProvider.search(searchRequest);
+            log.info("ChromaDB Step 1 (Score >= 0.6) found {} raw matches", searchResult.matches().size());
+            searchResult.matches().forEach(match -> 
+                log.info("Match: score={}, product_id={}", match.score(), match.embedded().metadata().get("product_id"))
+            );
         } catch (Exception e) {
             // If collection not found, try to reset and retry once
             if (e.getMessage() != null && (e.getMessage().contains("404") || e.getMessage().contains("not found"))) {
@@ -488,7 +492,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         
         // Nếu không tìm thấy kết quả, thử tìm với minimum score thấp hơn nữa
         if (results.isEmpty()) {
-            log.debug("No results with minScore 0.6, trying with minScore 0.45");
+            log.info("No results with minScore 0.6, trying with minScore 0.45");
             EmbeddingSearchRequest fallbackRequest = new EmbeddingSearchRequest(
                     queryEmbedding,
                     topK * 3, // Lấy nhiều hơn để có đủ sau khi filter
@@ -496,6 +500,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                     null
             );
             EmbeddingSearchResult<TextSegment> fallbackResult = chromaStoreProvider.search(fallbackRequest);
+            log.info("ChromaDB Step 2 (Score >= 0.45) found {} raw matches", fallbackResult.matches().size());
             
             // Filter duplicates cho fallback results
             uniqueProducts.clear();
@@ -512,9 +517,14 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                         
                         if (!productScores.containsKey(productId) || score > productScores.get(productId)) {
                             productScores.put(productId, score);
+                            
+                            // Thêm score vào metadata để log
+                            Map<String, Object> newMeta = new HashMap<>(match.embedded().metadata().toMap());
+                            newMeta.put("similarity_score", score);
+                            
                             uniqueProducts.put(productId, Document.from(
                                 match.embedded().text(), 
-                                match.embedded().metadata()
+                                Metadata.from(newMeta)
                             ));
                         }
                     } catch (NumberFormatException e) {
@@ -533,7 +543,18 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                     .collect(Collectors.toList());
         }
         
-        log.debug("Found {} unique products from {} matches", results.size(), searchResult.matches().size());
+        log.info("Found {} unique products from {} matches (Step 1)", results.size(), searchResult.matches().size());
+        
+        // Log chi tiết từng sản phẩm tìm thấy để debug
+        if (!results.isEmpty()) {
+             for (Document doc : results) {
+                 log.info(" > Found Product: ID={} | Name={} | Score={}", 
+                     doc.metadata().get("product_id"), 
+                     doc.metadata().get("product_name"),
+                     doc.metadata().get("similarity_score") != null ? doc.metadata().get("similarity_score") : "N/A");
+             }
+        }
+        
         return results;
     }
 
