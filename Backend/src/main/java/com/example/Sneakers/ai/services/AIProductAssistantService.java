@@ -111,31 +111,28 @@ public class AIProductAssistantService {
         // Keep only top 1 result for image search as requested
         String productContext = buildProductContextFromMatches(relevantDocuments);
 
-        // Step 2: Answer the user's original prompt using the image AND the found products
+        // Step 2: Answer the user's original prompt using the found products
+        // We do NOT send the image to Gemini to avoid hallucinations about visual differences (e.g. "handles") that don't exist.
+        // We trust the Vector Search result as the ground truth.
         String finalPrompt = String.format("""
                 Bạn là chuyên gia tư vấn khóa điện tử của Locker Korea.
                 
-                Khách hàng đã gửi một hình ảnh sản phẩm và hỏi: "%s"
-                
-            Hệ thống đã tìm thấy sản phẩm phù hợp nhất trong cửa hàng:
+                Khách hàng đã gửi hình ảnh sản phẩm để tìm kiếm.
+                Hệ thống nhận diện đã xác định sản phẩm phù hợp nhất trong kho là:
                 %s
                 
-                Hãy tư vấn cho khách hàng về sản phẩm này.
+                Câu hỏi của khách hàng: "%s"
+                
+                Nhiệm vụ: Tư vấn cho khách hàng về sản phẩm ĐÃ ĐƯỢC HỆ THỐNG TÌM THẤY ở trên.
                 
                 Quy tắc QUAN TRỌNG:
-                1. Giới thiệu sản phẩm được tìm thấy như là kết quả nhận diện từ hình ảnh.
-                2. Quan sát hình ảnh khách gửi và sản phẩm tìm thấy. Nếu thấy tương đồng về kiểu dáng, thương hiệu và thiết kế tổng thể, hãy xác nhận đây là sản phẩm đang có tại cửa hàng.
-                3. Tránh suy diễn sai về các chi tiết không rõ ràng hoặc cố tìm điểm khác biệt nhỏ nhặt. Đừng tự ý cho rằng sản phẩm trong ảnh có "tay nắm" hay không nếu không nhìn rõ.
-                4. Chỉ nêu ra sự khác biệt nếu nó RẤT RÕ RÀNG và thay đổi bản chất loại khóa (ví dụ: ảnh là khóa vân tay nhưng sản phẩm tìm thấy chỉ là khóa cơ, hoặc sai lệch hoàn toàn về màu sắc).
-                5. Tập trung vào việc tư vấn tính năng và giá trị của sản phẩm tìm được.
-                6. Trả lời chuyên nghiệp, thân thiện bằng tiếng Việt.
-                """, userPrompt, productContext);
+                1. Mặc định sản phẩm tìm thấy là chính xác. KHÔNG cố gắng so sánh lại với hình ảnh gốc hay tìm điểm khác biệt.
+                2. Tập trung hoàn toàn vào việc giới thiệu tính năng, lợi ích, và giá của sản phẩm tìm được.
+                3. Trả lời trực tiếp câu hỏi của khách hàng.
+                4. Giọng điệu chuyên nghiệp, thân thiện, ngắn gọn.
+                """, productContext, userPrompt);
 
-        // We send the image again so Gemini can compare specific visual details with the text descriptions
-        var finalResponse = geminiChatModel.chat(UserMessage.from(
-                dev.langchain4j.data.message.ImageContent.from(base64Image, mimeType),
-                dev.langchain4j.data.message.TextContent.from(finalPrompt)
-        ));
+        var finalResponse = geminiChatModel.chat(UserMessage.from(finalPrompt));
 
         return finalResponse.aiMessage().text();
     }
