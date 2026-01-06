@@ -440,7 +440,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             searchResult = chromaStoreProvider.search(searchRequest);
             log.info("ChromaDB Step 1 (Score >= 0.6) found {} raw matches", searchResult.matches().size());
             searchResult.matches().forEach(match -> 
-                log.info("Match: score={}, product_id={}", match.score(), match.embedded().metadata().getString("product_id"))
+                log.info("Match: score={}, product_id={}", match.score(), match.embedded().metadata().toMap().get("product_id"))
             );
         } catch (Exception e) {
             // If collection not found, try to reset and retry once
@@ -549,9 +549,9 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         if (!results.isEmpty()) {
              for (Document doc : results) {
                  log.info(" > Found Product: ID={} | Name={} | Score={}", 
-                     doc.metadata().getString("product_id"), 
-                     doc.metadata().getString("product_name"),
-                     doc.metadata().getString("similarity_score") != null ? doc.metadata().getString("similarity_score") : "N/A");
+                     doc.metadata().toMap().get("product_id"), 
+                     doc.metadata().toMap().get("product_name"),
+                     doc.metadata().toMap().get("similarity_score") != null ? doc.metadata().toMap().get("similarity_score") : "N/A");
              }
         }
         
