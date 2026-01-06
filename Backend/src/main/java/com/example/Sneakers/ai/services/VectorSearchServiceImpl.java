@@ -169,6 +169,9 @@ public class VectorSearchServiceImpl implements VectorSearchService {
 
         String content = formatProductContent(product);
         Map<String, String> metadata = createProductMetadata(product);
+        
+        // Log metadata to verify product_id before indexing
+        log.info("Preparing to index product ID: {} | Metadata: {}", product.getId(), metadata);
 
         try {
             Embedding embedding = embeddingModel.embed(content).content();
@@ -239,6 +242,14 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                 imageMetadata.put("image_index", String.valueOf(imageIndex));
                 imageMetadata.put("image_url", imageUrl);
                 imageMetadata.put("is_thumbnail", String.valueOf(isThumbnail));
+                
+                // Confirm product_id is in image metadata
+                if (!imageMetadata.containsKey("product_id")) {
+                    log.warn("CRITICAL: product_id missing in image metadata for product {}", product.getId());
+                    imageMetadata.put("product_id", String.valueOf(product.getId()));
+                } else {
+                     log.debug("Image Metadata contains product_id: {}", imageMetadata.get("product_id"));
+                }
                 
                 // We store a descriptive text segment for the image
                 String imageDescription = isThumbnail 
