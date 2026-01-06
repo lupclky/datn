@@ -367,12 +367,7 @@ public class AIProductAssistantService {
                 Hãy trả lời ngắn gọn, chuyên nghiệp, và giúp khách hàng chọn được sản phẩm thay thế tốt nhất nếu cửa hàng không có đúng món họ cần.
                 """, productContext, userQuery);
     }
-                8. TRÁNH list dài các yếu tố. Chỉ đề cập 2-3 điểm quan trọng nhất liên quan trực tiếp đến câu hỏi
-                9. Độ dài trả lời: 150-300 từ, tập trung vào thông tin cần thiết
-                
-                Hãy trả lời ngắn gọn, súc tích, tập trung vào thông tin khách hàng cần. Không cần liệt kê tất cả tính năng nếu không liên quan.
-                """, userQuery, productContext);
-    }
+
 
     private String createCategoryPrompt(String userQuery, String category, String productContext) {
         return String.format("""
