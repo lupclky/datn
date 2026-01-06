@@ -437,13 +437,16 @@ public class VectorSearchServiceImpl implements VectorSearchService {
 
         Embedding queryEmbedding = embeddingModel.embed(query).content();
 
+        // Filter to ensure we only get products, not categories or images
+        Filter productFilter = metadataKey("type").isEqualTo("product");
+
         // Giảm minimum score từ 0.6 xuống 0.4 để tìm được nhiều sản phẩm hơn
         // Đặc biệt với tên model ngắn như "F300-FH"
         EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                 queryEmbedding,
                 topK,
                 0.6, // minimum score - Tăng lên 0.6 để lọc bớt kết quả không liên quan
-                null // no filter
+                productFilter
         );
 
         EmbeddingSearchResult<TextSegment> searchResult;
@@ -451,7 +454,10 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             searchResult = chromaStoreProvider.search(searchRequest);
             log.info("ChromaDB Step 1 (Score >= 0.6) found {} raw matches", searchResult.matches().size());
             searchResult.matches().forEach(match -> 
-                log.info("Match: score={}, product_id={}", match.score(), match.embedded().metadata().toMap().get("product_id"))
+                log.info("Match: score={}, product_id={}, name={}", 
+                    match.score(), 
+                    match.embedded().metadata().toMap().get("product_id"),
+                    match.embedded().metadata().toMap().get("product_name"))
             );
         } catch (Exception e) {
             // If collection not found, try to reset and retry once
@@ -508,7 +514,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                     queryEmbedding,
                     topK * 3, // Lấy nhiều hơn để có đủ sau khi filter
                     0.45, // minimum score thấp hơn
-                    null
+                    productFilter
             );
             EmbeddingSearchResult<TextSegment> fallbackResult = chromaStoreProvider.search(fallbackRequest);
             log.info("ChromaDB Step 2 (Score >= 0.45) found {} raw matches", fallbackResult.matches().size());
@@ -683,7 +689,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                 queryEmbedding,
                 topK,
                 minScore,
-                null);
+                metadataKey("type").isEqualTo("product"));
 
         EmbeddingSearchResult<TextSegment> searchResult = chromaStoreProvider.search(searchRequest);
 
