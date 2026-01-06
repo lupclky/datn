@@ -551,7 +551,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                  log.info(" > Found Product: ID={} | Name={} | Score={}", 
                      doc.metadata().getString("product_id"), 
                      doc.metadata().getString("product_name"),
-                     doc.metadata().get("similarity_score") != null ? doc.metadata().get("similarity_score") : "N/A");
+                     doc.metadata().getString("similarity_score") != null ? doc.metadata().getString("similarity_score") : "N/A");
              }
         }
         
