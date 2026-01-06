@@ -29,8 +29,28 @@ public class AIProductAssistantService {
     public String answerProductQuery(String userQuery) {
         log.info("Processing product query: {}", userQuery);
 
+        // Basic Intent Classification
+        String lowerQuery = userQuery.toLowerCase();
+        
+        // 1. Warranty Check
+        // Keywords: bao hanh, chinh sach (policy)
+        if (lowerQuery.contains("bảo hành") || lowerQuery.contains("bao hanh") || 
+            (lowerQuery.contains("chính sách") && (lowerQuery.contains("đổi trả") || lowerQuery.contains("hoàn tiền")))) {
+             log.info("Detected WARRANTY intent");
+             return provideWarrantyAdvice(userQuery);
+        }
+        
+        // 2. Diagnostic/Support Check
+        // Keywords: lỗi, hư, không mở, kẹt, sửa, help
+        if (lowerQuery.contains("lỗi") || lowerQuery.contains("hỏng") || lowerQuery.contains("không mở") || 
+            lowerQuery.contains("kẹt") || lowerQuery.contains("sửa khóa") || lowerQuery.contains("hết pin")) {
+            log.info("Detected DIAGNOSTIC intent");
+            return diagnoseLockIssue(userQuery);
+        }
+
         // Search for relevant products using vector search
-        List<Document> relevantDocuments = vectorSearchService.searchProducts(userQuery, 10);
+        // Tăng số lượng sản phẩm tìm kiếm lên 20 để hỗ trợ tốt hơn cho các câu hỏi so sánh/lọc (như rẻ nhất, đắt nhất)
+        List<Document> relevantDocuments = vectorSearchService.searchProducts(userQuery, 20);
 
         // Fallback: Nếu vector search không tìm thấy, thử tìm kiếm exact/partial match trong database
         if (relevantDocuments.isEmpty()) {
@@ -105,7 +125,8 @@ public class AIProductAssistantService {
 
         // Step 1: Image -> embedding (Python CLIP) -> cosine search in Chroma
         byte[] imageBytes = decodeBase64Image(base64Image);
-        List<Document> relevantDocuments = vectorSearchService.searchByImage(imageBytes, 10);
+        // Tìm 20 sản phẩm tương đồng, nhưng sẽ chỉ lấy 1 sản phẩm tốt nhất để context
+        List<Document> relevantDocuments = vectorSearchService.searchByImage(imageBytes, 20);
 
         // Build high-quality context from matched product ids (works for both product and product_image segments)
         // Keep only top 1 result for image search as requested

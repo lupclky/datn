@@ -286,8 +286,8 @@
   position: fixed;
   bottom: 100px;
   right: 24px;
-  width: 360px;
-  height: 550px;
+  width: 330px;
+  height: 480px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -300,6 +300,9 @@
   pointer-events: none;
   overflow: hidden;
 
+  // Add max-width to prevent overflow on small desktop screens
+  max-width: calc(100vw - 32px);
+
   &.open {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -311,10 +314,17 @@
     bottom: 100px;
     right: 20px;
   }
+  
+  // Custom breakpoint for small laptop screens
+  @media (max-width: 768px) {
+    width: 310px;
+    right: 16px;
+  }
 
   // Responsive for Mobile
   @media (max-width: 480px) {
     width: 100%;
+    max-width: 100%; // Override the calc limit
     height: 100%;
     bottom: 0;
     right: 0;

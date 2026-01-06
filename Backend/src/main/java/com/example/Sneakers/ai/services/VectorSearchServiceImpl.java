@@ -431,7 +431,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                 queryEmbedding,
                 topK,
-                0.4, // minimum score - giảm từ 0.6 để tìm được sản phẩm có tên model ngắn
+                0.6, // minimum score - Tăng lên 0.6 để lọc bớt kết quả không liên quan
                 null // no filter
         );
 
@@ -488,11 +488,11 @@ public class VectorSearchServiceImpl implements VectorSearchService {
         
         // Nếu không tìm thấy kết quả, thử tìm với minimum score thấp hơn nữa
         if (results.isEmpty()) {
-            log.debug("No results with minScore 0.4, trying with minScore 0.3");
+            log.debug("No results with minScore 0.6, trying with minScore 0.45");
             EmbeddingSearchRequest fallbackRequest = new EmbeddingSearchRequest(
                     queryEmbedding,
                     topK * 3, // Lấy nhiều hơn để có đủ sau khi filter
-                    0.3, // minimum score thấp hơn nữa
+                    0.45, // minimum score thấp hơn
                     null
             );
             EmbeddingSearchResult<TextSegment> fallbackResult = chromaStoreProvider.search(fallbackRequest);
