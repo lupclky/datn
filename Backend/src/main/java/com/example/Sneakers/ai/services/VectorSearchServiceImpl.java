@@ -442,9 +442,13 @@ public class VectorSearchServiceImpl implements VectorSearchService {
 
         // Giảm minimum score từ 0.6 xuống 0.4 để tìm được nhiều sản phẩm hơn
         // Đặc biệt với tên model ngắn như "F300-FH"
+        // Request more raw results (topK * 5) to handle multiple segments per product (images, text, etc.)
+        // This ensures we have enough unique products after deduplication
+        int rawLimit = topK * 5; 
+        
         EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                 queryEmbedding,
-                topK,
+                rawLimit,
                 0.6, // minimum score - Tăng lên 0.6 để lọc bớt kết quả không liên quan
                 productFilter
         );
@@ -486,9 +490,14 @@ public class VectorSearchServiceImpl implements VectorSearchService {
                     // Chỉ giữ document có score cao nhất cho mỗi product
                     if (!productScores.containsKey(productId) || score > productScores.get(productId)) {
                         productScores.put(productId, score);
+                        
+                        // Add score to metadata for consistent logging and usage
+                        Map<String, Object> newMeta = new HashMap<>(match.embedded().metadata().toMap());
+                        newMeta.put("similarity_score", score);
+                        
                         uniqueProducts.put(productId, Document.from(
                             match.embedded().text(), 
-                            match.embedded().metadata()
+                            Metadata.from(newMeta)
                         ));
                     }
                 } catch (NumberFormatException e) {
@@ -512,7 +521,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             log.info("No results with minScore 0.6, trying with minScore 0.45");
             EmbeddingSearchRequest fallbackRequest = new EmbeddingSearchRequest(
                     queryEmbedding,
-                    topK * 3, // Lấy nhiều hơn để có đủ sau khi filter
+                    topK * 5, // Lấy nhiều hơn để có đủ sau khi filter
                     0.45, // minimum score thấp hơn
                     productFilter
             );

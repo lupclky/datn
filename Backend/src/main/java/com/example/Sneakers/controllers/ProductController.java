@@ -337,11 +337,15 @@ public class ProductController {
             PageRequest pageRequest = PageRequest.of(page, limit, sortBy);
             Page<ProductResponse> productPage = productService.getAllProducts(keyword, categoryId, minPrice, maxPrice, pageRequest);
 
-            return ResponseEntity.ok(ProductListResponse.builder()
-                    .products(productPage.getContent())
-                    .totalProducts(productPage.getTotalElements()) // Use totalElements from page for filtered results
-                    .totalPages(productPage.getTotalPages())
-                    .build());
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
+                    .header(org.springframework.http.HttpHeaders.PRAGMA, "no-cache")
+                    .header(org.springframework.http.HttpHeaders.EXPIRES, "0")
+                    .body(ProductListResponse.builder()
+                            .products(productPage.getContent())
+                            .totalProducts(productPage.getTotalElements()) // Use totalElements from page for filtered results
+                            .totalPages(productPage.getTotalPages())
+                            .build());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

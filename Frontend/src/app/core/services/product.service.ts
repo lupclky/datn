@@ -53,7 +53,7 @@ export class ProductService {
   }
 
   getAllProduct(page: number = 0, limit: number = 12, sort: string = 'id,desc', keyword: string = '', categoryId: number = 0, minPrice: number = 0, maxPrice: number = 50000000) {
-    let url = `${this.apiUrl}/products/all?page=${page}&limit=${limit}&sort=${sort}`;
+    let url = `${this.apiUrl}/products/all?page=${page}&limit=${limit}&sort=${sort}&t=${new Date().getTime()}`;
     if (keyword) url += `&keyword=${keyword}`;
     if (categoryId > 0) url += `&category_id=${categoryId}`;
     if (minPrice > 0 || maxPrice < 50000000) url += `&min_price=${minPrice}&max_price=${maxPrice}`;

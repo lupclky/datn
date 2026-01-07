@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  mysql8-container:
+    container_name: mysql8-container
+    image: mysql:8.2.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: lockerkorea
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./Backend/lockerkorea.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - lockerkorea-network
+    command: --default-time-zone='+07:00'
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-container
+    restart: always
+    environment:
+      PMA_HOST: mysql8-container
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - "8100:80"
+    networks:
+      - lockerkorea-network
+    depends_on:
+      - mysql8-container
+
+  chromadb:
+    image: chromadb/chroma:0.4.24
+    container_name: lockerkorea-chromadb
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+    ports:
+      - "8000:8000"
+    networks:
+      - lockerkorea-network
+
+  python-service:
+    container_name: lockerkorea-python
+    image: lockerkorea-python:latest
+    build:
+      context: .
+      dockerfile: DockerfilePython
+    restart: always
+    command: uvicorn app:app --host 0.0.0.0 --port 9000
+    ports:
+      - "9000:9000"
+    networks:
+      - lockerkorea-network
+
+  backend:
+    container_name: lockerkorea-backend
+    image: lockerkorea-backend:latest
+    build:
+      context: .
+      dockerfile: DockerfileJavaSpring
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql8-container:3306/${DB_NAME:-lockerkorea}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - CHROMA_BASE_URL=http://chromadb:8000
+      - AI_EMBEDDING_BASE_URL=http://python-service:9000
+      - GCP_STORAGE_BUCKET_NAME=${GCP_STORAGE_BUCKET_NAME}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+    volumes:
+      - ../first-strength-460610-i4-4a6026a8564c.json:/app/credentials.json
+    depends_on:
+      - mysql8-container
+      - chromadb
+      - python-service
+    ports:
+      - "8089:8089"
+    networks:
+      - lockerkorea-network
+
+  frontend:
+    container_name: lockerkorea-frontend
+    image: lockerkorea-frontend:latest
+    build:
+      context: .
+      dockerfile: DockerfileAngular
+    restart: always
+    ports:
+      - "4200:80"
+    networks:
+      - lockerkorea-network
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  chroma-data:
+
+networks:
+  lockerkorea-network:
+    driver: bridge
