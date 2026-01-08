@@ -128,6 +128,11 @@ public class AIProductAssistantService {
         // Tìm 20 sản phẩm tương đồng, nhưng sẽ chỉ lấy 1 sản phẩm tốt nhất để context
         List<Document> relevantDocuments = vectorSearchService.searchByImage(imageBytes, 20);
 
+        // Nếu không có sản phẩm nào phù hợp (do score thấp bị lọc)
+        if (relevantDocuments.isEmpty()) {
+            return "Xin lỗi, tôi không tìm thấy sản phẩm nào trong cửa hàng giống với hình ảnh bạn cung cấp. Bạn có thể thử hình ảnh khác rõ nét hơn hoặc mô tả sản phẩm cho tôi nhé!";
+        }
+
         // Build high-quality context from matched product ids (works for both product and product_image segments)
         // Keep only top 1 result for image search as requested
         String productContext = buildProductContextFromMatches(relevantDocuments);
