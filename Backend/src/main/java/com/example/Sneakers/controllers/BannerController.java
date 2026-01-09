@@ -159,19 +159,73 @@ public class BannerController {
     /**
      * Serve banner image
      */
-    @GetMapping("/images/{imageName}")
+    @GetMapping("/images/{imageName:.+}")
     public ResponseEntity<?> viewBannerImage(@PathVariable String imageName) {
         try {
-            Path imagePath = Paths.get("uploads").resolve(imageName);
-            if (!Files.exists(imagePath)) {
-                return ResponseEntity.notFound().build();
+            // Remove any path prefixes if present
+            String cleanImageName = imageName;
+            if (imageName.contains("/")) {
+                cleanImageName = imageName.substring(imageName.lastIndexOf("/") + 1);
             }
-            UrlResource resource = new UrlResource(imagePath.toUri());
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(resource);
+            
+            // Get current working directory
+            String userDir = System.getProperty("user.dir");
+            Path currentDir = Paths.get(userDir).toAbsolutePath();
+            Path backendRoot = currentDir;
+            
+            // Auto-detect Backend folder
+            Path uploadsInCurrent = currentDir.resolve("uploads");
+            if (!Files.exists(uploadsInCurrent)) {
+                // Try going to Backend folder
+                Path backendDir = currentDir.resolve("Backend");
+                if (Files.exists(backendDir.resolve("uploads"))) {
+                    backendRoot = backendDir;
+                } else if (currentDir.getParent() != null) {
+                    Path parentBackend = currentDir.getParent().resolve("Backend");
+                    if (Files.exists(parentBackend.resolve("uploads"))) {
+                        backendRoot = parentBackend;
+                    }
+                }
+            }
+            
+            logger.info("Loading banner image: clean={}, backendRoot={}", cleanImageName, backendRoot.toAbsolutePath());
+            
+            // Try multiple possible locations
+            Path[] possiblePaths = {
+                backendRoot.resolve("uploads").resolve(cleanImageName),
+                currentDir.resolve("uploads").resolve(cleanImageName),
+                Paths.get("uploads").resolve(cleanImageName).toAbsolutePath()
+            };
+            
+            for (Path imagePath : possiblePaths) {
+                try {
+                    Path absolutePath = imagePath.toAbsolutePath();
+                    logger.debug("Trying banner path: {}", absolutePath);
+                    
+                    if (Files.exists(absolutePath) && Files.isReadable(absolutePath)) {
+                        UrlResource resource = new UrlResource(absolutePath.toUri());
+                        logger.info("Found banner image at: {}", absolutePath);
+                        
+                        // Determine content type based on file extension
+                        String contentType = Files.probeContentType(absolutePath);
+                        if (contentType == null) {
+                            contentType = "image/jpeg"; // default
+                        }
+                        
+                        return ResponseEntity.ok()
+                                .contentType(MediaType.parseMediaType(contentType))
+                                .body(resource);
+                    }
+                } catch (Exception e) {
+                    logger.debug("Banner path not accessible: {} - {}", imagePath, e.getMessage());
+                    continue;
+                }
+            }
+            
+            logger.error("Banner image not found: {}", imageName);
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            logger.error("Error loading banner image: ", e);
+            logger.error("Error loading banner image: {}", imageName, e);
             return ResponseEntity.notFound().build();
         }
     }
