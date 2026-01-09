@@ -604,7 +604,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                     imageEmbedding,
                     topK * 5, // 
-                    0.977,// 
+                    0.9,// 
                     filter
             );
             
