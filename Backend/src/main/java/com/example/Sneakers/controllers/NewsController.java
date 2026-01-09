@@ -66,7 +66,11 @@ public class NewsController {
                     .totalPages(newsPage.getTotalPages())
                     .build();
             
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
+                    .header("Expires", "0")
+                    .body(response);
         } catch (Exception e) {
             logger.error("Error getting published news: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -125,7 +129,11 @@ public class NewsController {
                     .totalPages(newsPage.getTotalPages())
                     .build();
             
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
+                    .header("Expires", "0")
+                    .body(response);
         } catch (Exception e) {
             logger.error("Error searching news: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -156,7 +164,11 @@ public class NewsController {
                     .totalPages(newsPage.getTotalPages())
                     .build();
             
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
+                    .header("Expires", "0")
+                    .body(response);
         } catch (Exception e) {
             logger.error("Error getting news by category: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -203,7 +215,11 @@ public class NewsController {
                     .totalPages(newsPage.getTotalPages())
                     .build();
             
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                    .header("Pragma", "no-cache")
+                    .header("Expires", "0")
+                    .body(response);
         } catch (Exception e) {
             logger.error("Error getting all news: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

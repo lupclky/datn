@@ -67,11 +67,15 @@ public class BannerController {
     @GetMapping("")
     public ResponseEntity<BannerListResponse> getAllBanners() {
         List<BannerDTO> banners = bannerService.getAllBanners();
-        return ResponseEntity.ok(BannerListResponse.builder()
-                .message("Banners retrieved successfully")
-                .banners(banners)
-                .total(banners.size())
-                .build());
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(BannerListResponse.builder()
+                        .message("Banners retrieved successfully")
+                        .banners(banners)
+                        .total(banners.size())
+                        .build());
     }
 
     /**
@@ -80,11 +84,15 @@ public class BannerController {
     @GetMapping("/active")
     public ResponseEntity<BannerListResponse> getActiveBanners() {
         List<BannerDTO> banners = bannerService.getActiveBannersInDateRange();
-        return ResponseEntity.ok(BannerListResponse.builder()
-                .message("Active banners retrieved successfully")
-                .banners(banners)
-                .total(banners.size())
-                .build());
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .body(BannerListResponse.builder()
+                        .message("Active banners retrieved successfully")
+                        .banners(banners)
+                        .total(banners.size())
+                        .build());
     }
 
     /**
