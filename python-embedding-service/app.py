@@ -2,6 +2,7 @@ import base64
 import io
 import os
 
+import cv2
 import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException
@@ -47,6 +48,47 @@ def _normalize(vec: torch.Tensor) -> torch.Tensor:
     return vec
 # Normalize vector
 
+
+def _preprocess_image(img: Image.Image) -> Image.Image:
+    """
+    Tiền xử lý ảnh trước khi embedding:
+    1. Khử nhiễu bằng Bilateral Filter (giữ nguyên cạnh, làm mịn vùng phẳng)
+    2. Cân bằng tương phản bằng CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    """
+    # Chuyển PIL Image sang numpy array (BGR cho OpenCV)
+    img_array = np.array(img)
+    
+    # Nếu ảnh là grayscale, chuyển sang RGB
+    if len(img_array.shape) == 2:
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_GRAY2RGB)
+    
+    # Chuyển RGB sang BGR cho OpenCV
+    img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+    
+    # Bước 1: Khử nhiễu bằng Bilateral Filter
+    # d=9: đường kính vùng lọc
+    # sigmaColor=75: lọc màu
+    # sigmaSpace=75: lọc không gian
+    img_denoised = cv2.bilateralFilter(img_bgr, d=9, sigmaColor=75, sigmaSpace=75)
+    
+    # Bước 2: Cân bằng tương phản bằng CLAHE
+    # Chuyển sang LAB color space để xử lý kênh L (độ sáng)
+    img_lab = cv2.cvtColor(img_denoised, cv2.COLOR_BGR2LAB)
+    l_channel, a_channel, b_channel = cv2.split(img_lab)
+    
+    # Áp dụng CLAHE lên kênh L
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    l_enhanced = clahe.apply(l_channel)
+    
+    # Gộp lại các kênh
+    img_lab_enhanced = cv2.merge([l_enhanced, a_channel, b_channel])
+    img_enhanced = cv2.cvtColor(img_lab_enhanced, cv2.COLOR_LAB2BGR)
+    
+    # Chuyển BGR về RGB và trả về PIL Image
+    img_rgb = cv2.cvtColor(img_enhanced, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(img_rgb)
+# Tiền xử lý ảnh (khử nhiễu + cân bằng tương phản)
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok", "model": MODEL_NAME, "device": DEVICE}
@@ -83,13 +125,20 @@ def embed_image(req: ImageRequest) -> EmbeddingResponse:
         raw = base64.b64decode(req.image_base64)
         img = Image.open(io.BytesIO(raw))
         
-        # Remove background
+        # Bước 1: Chuyển sang RGB nếu cần
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # Bước 2: Tiền xử lý ảnh (khử nhiễu + cân bằng tương phản)
+        img = _preprocess_image(img)
+        
+        # Bước 3: Xóa nền ảnh
         img_no_bg = remove(img)
         
-        # Create white background
+        # Bước 4: Tạo nền trắng
         new_img = Image.new("RGB", img_no_bg.size, (255, 255, 255))
         
-        # Composite image over white background if it has alpha channel
+        # Ghép ảnh sản phẩm lên nền trắng
         if img_no_bg.mode == 'RGBA':
             new_img.paste(img_no_bg, mask=img_no_bg.split()[3])
         else:

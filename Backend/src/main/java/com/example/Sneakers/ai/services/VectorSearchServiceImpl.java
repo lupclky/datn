@@ -603,8 +603,8 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             // Tăng topK lên để có đủ kết quả sau khi filter duplicates
             EmbeddingSearchRequest searchRequest = new EmbeddingSearchRequest(
                     imageEmbedding,
-                    topK * 5, // Lấy nhiều hơn để có đủ sau khi filter
-                    0.98,// Tăng lên 0.6 để lọc bớt kết quả không liên quan (chỉ lấy ảnh tương đối giống)
+                    topK * 5, // 
+                    0.977,// 
                     filter
             );
             
