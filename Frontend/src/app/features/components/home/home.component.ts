@@ -76,6 +76,16 @@ export class HomeComponent extends BaseComponent implements OnInit {
     this.loadBanners();
     this.loadLatestNews();
     this.loadFeatures();
+    
+    // Lắng nghe sự thay đổi banner và tự động reload
+    this.bannerService.bannerChanged$.pipe(
+      filter((changed) => changed === true),
+      tap(() => {
+        console.log('Banner changed, reloading...');
+        this.loadBanners();
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
   }
 
   loadProducts(): void {

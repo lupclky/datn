@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment.development';
 import { BannerDto, BannerResponse, BannerListResponse } from '../dtos/banner.dto';
 
@@ -9,8 +10,19 @@ import { BannerDto, BannerResponse, BannerListResponse } from '../dtos/banner.dt
 })
 export class BannerService {
   private readonly apiUrl = `${environment.apiUrl}/banners`;
+  
+  // BehaviorSubject để thông báo khi banner thay đổi
+  private bannerChangedSubject = new BehaviorSubject<boolean>(false);
+  public bannerChanged$ = this.bannerChangedSubject.asObservable();
 
   constructor(private http: HttpClient) { }
+  
+  /**
+   * Trigger event khi banner thay đổi
+   */
+  private notifyBannerChanged(): void {
+    this.bannerChangedSubject.next(true);
+  }
 
   /**
    * Get all banners
@@ -43,7 +55,9 @@ export class BannerService {
       'Authorization': `Bearer ${token}`
     });
     
-    return this.http.post<BannerResponse>(this.apiUrl, banner, { headers });
+    return this.http.post<BannerResponse>(this.apiUrl, banner, { headers }).pipe(
+      tap(() => this.notifyBannerChanged())
+    );
   }
 
   /**
@@ -56,7 +70,9 @@ export class BannerService {
       'Authorization': `Bearer ${token}`
     });
     
-    return this.http.put<BannerResponse>(`${this.apiUrl}/${id}`, banner, { headers });
+    return this.http.put<BannerResponse>(`${this.apiUrl}/${id}`, banner, { headers }).pipe(
+      tap(() => this.notifyBannerChanged())
+    );
   }
 
   /**
@@ -68,7 +84,9 @@ export class BannerService {
       'Authorization': `Bearer ${token}`
     });
     
-    return this.http.delete<BannerResponse>(`${this.apiUrl}/${id}`, { headers });
+    return this.http.delete<BannerResponse>(`${this.apiUrl}/${id}`, { headers }).pipe(
+      tap(() => this.notifyBannerChanged())
+    );
   }
 
   /**
@@ -80,7 +98,9 @@ export class BannerService {
       'Authorization': `Bearer ${token}`
     });
     
-    return this.http.patch<BannerResponse>(`${this.apiUrl}/${id}/toggle`, {}, { headers });
+    return this.http.patch<BannerResponse>(`${this.apiUrl}/${id}/toggle`, {}, { headers }).pipe(
+      tap(() => this.notifyBannerChanged())
+    );
   }
 
   /**

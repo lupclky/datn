@@ -61,11 +61,7 @@ public class UserService implements IUserService{
             throw new PermissionDenyException("You cannot register an admin account");
         }
 
-        // Check if email already exists - if registering from Google, email will match
-        // Backend will handle linking by email in loginWithGoogleResponse
-        // Here we just create the user normally
-
-        //convert from userDTO => user
+    
         User newUser = User.builder()
                 .fullName(userDTO.getFullName())
                 .phoneNumber(userDTO.getPhoneNumber())

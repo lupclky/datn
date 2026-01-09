@@ -522,7 +522,7 @@ public class VectorSearchServiceImpl implements VectorSearchService {
             EmbeddingSearchRequest fallbackRequest = new EmbeddingSearchRequest(
                     queryEmbedding,
                     topK * 5, // Lấy nhiều hơn để có đủ sau khi filter
-                    0.45, // minimum score thấp hơn
+                    0.85, // minimum score thấp hơn
                     productFilter
             );
             EmbeddingSearchResult<TextSegment> fallbackResult = chromaStoreProvider.search(fallbackRequest);
