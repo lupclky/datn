@@ -284,6 +284,22 @@
           </p-inputNumber>
         </div>
 
+        <!-- Created At & Updated At (Read-only) -->
+        <div class="col-12 grid" *ngIf="isEditMode">
+          <div class="col-12 md:col-6">
+            <label class="form-label text-500">Ngày tạo</label>
+            <div class="font-medium p-2 surface-100 border-round">
+              {{ currentProduct?.created_at | date:'dd/MM/yyyy HH:mm:ss' }}
+            </div>
+          </div>
+          <div class="col-12 md:col-6">
+            <label class="form-label text-500">Cập nhật lần cuối</label>
+            <div class="font-medium p-2 surface-100 border-round">
+              {{ currentProduct?.updated_at | date:'dd/MM/yyyy HH:mm:ss' }}
+            </div>
+          </div>
+        </div>
+
         <!-- Features -->
         <div class="col-12">
           <label for="features" class="form-label">Tính năng</label>

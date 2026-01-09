@@ -189,9 +189,7 @@ export class HomeComponent extends BaseComponent implements OnInit {
 
   getBannerImageUrl(banner: BannerDto): string {
     if (!banner.image_url) return '';
-    const cleanApiUrl = environment.apiUrl.replace(/\/$/, '');
-    const cleanImageUrl = banner.image_url.replace(/^\//, '');
-    return `${cleanApiUrl}/banners/images/${cleanImageUrl}`;
+    return this.bannerService.getBannerImageUrl(banner.image_url);
   }
 
   loadLatestNews(): void {
@@ -211,12 +209,9 @@ export class HomeComponent extends BaseComponent implements OnInit {
 
   getNewsImageUrl(news: NewsDto): string {
     if (!news.featured_image) {
-      return '../../../../assets/images/post1.jpg';
+      return 'assets/images/post1.jpg'; // Path should be relative to assets folder if possible or absolute
     }
-    if (news.featured_image.startsWith('http')) {
-      return news.featured_image;
-    }
-    return `${environment.apiUrl}/news/images/${news.featured_image}`;
+    return this.newsService.getNewsImageUrl(news.featured_image);
   }
 
   formatDate(dateString: string): { day: string, month: string } {

@@ -116,6 +116,8 @@ export class ProductManageComponent implements OnInit {
     { label: 'Hết hàng', value: 'out' }
   ];
 
+  currentProduct: ProductDto | null = null; // To store current editing product for timestamps
+
   constructor(
     private productService: ProductService,
     private categoriesService: CategoriesService,

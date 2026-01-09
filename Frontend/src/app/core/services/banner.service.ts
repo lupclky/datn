@@ -106,6 +106,9 @@ export class BannerService {
   /**
    * Upload banner image (admin only)
    */
+  /**
+   * Upload banner image (admin only)
+   */
   uploadBannerImage(formData: FormData): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
@@ -113,6 +116,18 @@ export class BannerService {
     });
     
     return this.http.post(`${this.apiUrl}/upload`, formData, { headers });
+  }
+
+  /**
+   * Get banner image URL with timestamp to prevent caching
+   */
+  getBannerImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    
+    // Add timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    return `${environment.apiUrl}/banners/images/${imageUrl}?v=${timestamp}`;
   }
 }
 

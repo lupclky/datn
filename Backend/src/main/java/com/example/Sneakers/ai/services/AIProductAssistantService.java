@@ -133,30 +133,62 @@ public class AIProductAssistantService {
             return "Xin lỗi, tôi không tìm thấy sản phẩm nào trong cửa hàng giống với hình ảnh bạn cung cấp. Bạn có thể thử hình ảnh khác rõ nét hơn hoặc mô tả sản phẩm cho tôi nhé!";
         }
 
-        // Build high-quality context from matched product ids (works for both product and product_image segments)
-        // Keep only top 1 result for image search as requested
+        // Lấy score cao nhất từ kết quả
+        double maxScore = 0.0;
+        try {
+            Object scoreObj = relevantDocuments.get(0).metadata().toMap().get("similarity_score");
+            if (scoreObj != null) {
+                maxScore = Double.parseDouble(scoreObj.toString());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse similarity score", e);
+        }
+
+        log.info("Max similarity score: {}", maxScore);
+
+        // Build high-quality context from matched product ids
         String productContext = buildProductContextFromMatches(relevantDocuments);
 
-        // Step 2: Answer the user's original prompt using the found products
-        // We do NOT send the image to Gemini to avoid hallucinations about visual differences (e.g. "handles") that don't exist.
-        // We trust the Vector Search result as the ground truth.
-        String finalPrompt = String.format("""
+        // Nếu độ tương đồng rất cao (> 0.96), trả lời khẳng định luôn
+        if (maxScore > 0.96) {
+            String finalPrompt = String.format("""
                 Bạn là chuyên gia tư vấn khóa điện tử của Locker Korea.
                 
-                Khách hàng đã gửi hình ảnh sản phẩm để tìm kiếm.
-                Hệ thống nhận diện đã xác định sản phẩm phù hợp nhất trong kho là:
+                Khách hàng đã gửi hình ảnh sản phẩm. Hệ thống nhận diện CHÍNH XÁC (Độ tin cậy cao) sản phẩm là:
                 %s
                 
                 Câu hỏi của khách hàng: "%s"
                 
-                Nhiệm vụ: Tư vấn cho khách hàng về sản phẩm ĐÃ ĐƯỢC HỆ THỐNG TÌM THẤY ở trên.
-                
-                Quy tắc QUAN TRỌNG:
-                1. Mặc định sản phẩm tìm thấy là chính xác. KHÔNG cố gắng so sánh lại với hình ảnh gốc hay tìm điểm khác biệt.
-                2. Tập trung hoàn toàn vào việc giới thiệu tính năng, lợi ích, và giá của sản phẩm tìm được.
-                3. Trả lời trực tiếp câu hỏi của khách hàng.
-                4. Giọng điệu chuyên nghiệp, thân thiện, ngắn gọn.
+                Nhiệm vụ:
+                1. Xác nhận ngay với khách hàng đây chính là sản phẩm trong ảnh.
+                2. Tư vấn chi tiết tính năng, lợi ích dựa trên thông tin đã cung cấp.
+                3. Giọng điệu chắc chắn, chuyên nghiệp.
                 """, productContext, userPrompt);
+            var finalResponse = geminiChatModel.chat(UserMessage.from(finalPrompt));
+            return finalResponse.aiMessage().text();
+        }
+
+        // Nếu độ tương đồng khá (0.90 - 0.96), trả lời dè dặt hơn
+        String confidenceNote = (maxScore >= 0.90) 
+            ? "Tôi thấy sản phẩm này rất giống với hình ảnh bạn gửi, nhưng để chắc chắn, bạn hãy kiểm tra kỹ các chi tiết nhé."
+            : "Dựa trên hình ảnh, đây là sản phẩm có kiểu dáng tương đồng nhất mà tôi tìm thấy.";
+
+        String finalPrompt = String.format("""
+                Bạn là chuyên gia tư vấn khóa điện tử của Locker Korea.
+                
+                Khách hàng gửi ảnh tìm sản phẩm. Hệ thống tìm thấy sản phẩm tương đồng:
+                %s
+                
+                Câu hỏi của khách hàng: "%s"
+                
+                Lưu ý quan trọng về giá: Giá trong dữ liệu LÀ GIÁ ĐÃ GIẢM (nếu có), không cần tự tính toán lại.
+                
+                Nhiệm vụ:
+                1. Bắt đầu bằng câu: "%s"
+                2. Giới thiệu sản phẩm tìm được (Tên, Giá, Tính năng).
+                3. Trả lời câu hỏi của khách hàng.
+                4. Nếu khách hỏi giá, hãy dùng giá trong context.
+                """, productContext, userPrompt, confidenceNote);
 
         var finalResponse = geminiChatModel.chat(UserMessage.from(finalPrompt));
 
@@ -366,7 +398,7 @@ public class AIProductAssistantService {
                    - Bước 2: Dựa vào CONTEXT, gợi ý các sản phẩm THAY THẾ tương đương (cùng tầm giá, cùng tính năng) đang có sẵn.
                 4. ĐỊNH DẠNG CÂU TRẢ LỜI:
                    - Tên sản phẩm chính xác như trong CONTEXT.
-                   - Giá: Format dạng X.XXX.XXX VND.
+                   - Giá: Dùng trực tiếp giá trong CONTEXT (đây là giá đã giảm nếu có), KHÔNG tự tính toán lại. Format dạng X.XXX.XXX VND.
                    - Nêu bật 2-3 tính năng chính.
                 
                 Hãy trả lời ngắn gọn, chuyên nghiệp, và giúp khách hàng chọn được sản phẩm thay thế tốt nhất nếu cửa hàng không có đúng món họ cần.

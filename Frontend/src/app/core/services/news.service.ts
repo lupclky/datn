@@ -202,5 +202,17 @@ export class NewsService {
       headers: this.getAuthHeaders()
     });
   }
+
+  /**
+   * Get news image URL with timestamp to prevent caching
+   */
+  getNewsImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    
+    // Add timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    return `${environment.apiUrl}/news/images/${imageUrl}?v=${timestamp}`;
+  }
 }
 

@@ -144,8 +144,13 @@
 
                 <!-- Display Order -->
                 <div class="field col-12 md:col-6">
-                    <label for="display_order">Thứ tự hiển thị</label>
-                    <p-inputNumber id="display_order" formControlName="display_order" [showButtons]="true" [min]="0"></p-inputNumber>
+                    <label for="display_order">Thứ tự hiển thị <i class="pi pi-info-circle ml-1" pTooltip="Thứ tự 1-10: Banner Chính (Slide lớn ở trang chủ). Thứ tự > 10: Banner Phụ (Ảnh nhỏ bên dưới slide)" tooltipPosition="top"></i></label>
+                    <p-inputNumber id="display_order" formControlName="display_order" [showButtons]="true" [min]="1" placeholder="Nhập thứ tự"></p-inputNumber>
+                    <small class="text-gray-500 block mt-1">
+                        <i class="pi pi-star-fill text-yellow-500 text-xs mr-1"></i><strong>1-10:</strong> Banner Chính (Slide lớn trang chủ)
+                        <br>
+                        <i class="pi pi-th-large text-blue-500 text-xs mr-1"></i><strong>> 10:</strong> Banner Phụ (Ảnh nhỏ bên dưới)
+                    </small>
                 </div>
 
                 <!-- Status -->
