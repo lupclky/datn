@@ -36,11 +36,14 @@ export class NewsService {
 
   /**
    * Get all published news (for users)
+   * Add timestamp to prevent API response caching
    */
   getPublishedNews(page: number = 0, limit: number = 10): Observable<NewsListResponse> {
+    const timestamp = new Date().getTime();
     const params = new HttpParams()
       .set('page', page.toString())
-      .set('limit', limit.toString());
+      .set('limit', limit.toString())
+      .set('t', timestamp.toString()); // Prevent caching
     
     return this.httpClient.get<NewsListResponse>(`${this.apiUrl}/news/published`, { params });
   }

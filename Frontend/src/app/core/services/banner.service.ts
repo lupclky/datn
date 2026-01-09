@@ -33,9 +33,11 @@ export class BannerService {
 
   /**
    * Get active banners
+   * Add timestamp to prevent API response caching
    */
   getActiveBanners(): Observable<BannerListResponse> {
-    return this.http.get<BannerListResponse>(`${this.apiUrl}/active`);
+    const timestamp = new Date().getTime();
+    return this.http.get<BannerListResponse>(`${this.apiUrl}/active?t=${timestamp}`);
   }
 
   /**
