@@ -119,15 +119,14 @@ export class BannerService {
   }
 
   /**
-   * Get banner image URL with timestamp to prevent caching
+   * Get banner image URL (simple approach like product images)
    */
   getBannerImageUrl(imageUrl: string): string {
     if (!imageUrl) return '';
     if (imageUrl.startsWith('http')) return imageUrl;
     
-    // Add timestamp to prevent caching
-    const timestamp = new Date().getTime();
-    return `${environment.apiUrl}/banners/images/${imageUrl}?v=${timestamp}`;
+    // Direct API path without cache-busting (browser handles caching naturally)
+    return `${environment.apiUrl}/banners/images/${imageUrl}`;
   }
 }
 

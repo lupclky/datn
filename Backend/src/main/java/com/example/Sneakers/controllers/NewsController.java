@@ -426,6 +426,8 @@ public class NewsController {
             }
             
             org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(imagePath.toUri());
+            
+            // Simple response like ProductController (let browser handle caching naturally)
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_JPEG)
                     .body(resource);

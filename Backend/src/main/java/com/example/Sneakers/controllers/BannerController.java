@@ -215,6 +215,7 @@ public class BannerController {
                     contentType = "image/jpeg"; // default
                 }
                 
+                // Simple response like ProductController (let browser handle caching naturally)
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .body(resource);
