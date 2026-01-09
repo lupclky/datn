@@ -21,6 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,40 +35,30 @@ public class BannerController {
     private static final Logger logger = LoggerFactory.getLogger(BannerController.class);
     private final IBannerService bannerService;
     
-    // Centralized upload directory path
+    // Centralized upload directory path - Match ProductController logic
     private Path getUploadDirectory() {
         String userDir = System.getProperty("user.dir");
         Path currentDir = Paths.get(userDir).toAbsolutePath();
+        Path backendRoot = currentDir;
         
-        // Check if we're in Backend directory or root
+        // Auto-detect Backend folder
         Path uploadsInCurrent = currentDir.resolve("uploads");
-        if (Files.exists(uploadsInCurrent)) {
-            return uploadsInCurrent;
-        }
-        
-        // Try Backend subdirectory
-        Path backendDir = currentDir.resolve("Backend");
-        if (Files.exists(backendDir)) {
-            Path uploadsInBackend = backendDir.resolve("uploads");
-            if (!Files.exists(uploadsInBackend)) {
-                try {
-                    Files.createDirectories(uploadsInBackend);
-                } catch (IOException e) {
-                    logger.warn("Could not create uploads in Backend directory", e);
+        if (!Files.exists(uploadsInCurrent)) {
+            // Try going to Backend folder
+            Path backendDir = currentDir.resolve("Backend");
+            if (Files.exists(backendDir.resolve("uploads"))) {
+                backendRoot = backendDir;
+            } else if (currentDir.getParent() != null) {
+                Path parentBackend = currentDir.getParent().resolve("Backend");
+                if (Files.exists(parentBackend.resolve("uploads"))) {
+                    backendRoot = parentBackend;
                 }
             }
-            return uploadsInBackend;
         }
         
-        // Fallback: create in current directory
-        if (!Files.exists(uploadsInCurrent)) {
-            try {
-                Files.createDirectories(uploadsInCurrent);
-            } catch (IOException e) {
-                logger.error("Could not create uploads directory", e);
-            }
-        }
-        return uploadsInCurrent;
+        Path uploadDir = backendRoot.resolve("uploads");
+        logger.debug("Upload directory resolved to: {}", uploadDir.toAbsolutePath());
+        return uploadDir;
     }
 
     /**
@@ -198,17 +190,21 @@ public class BannerController {
     @GetMapping("/images/{imageName:.+}")
     public ResponseEntity<?> viewBannerImage(@PathVariable String imageName) {
         try {
+            // URL decode the image name (important for special characters)
+            String decodedImageName = URLDecoder.decode(imageName, StandardCharsets.UTF_8);
+            
             // Remove any path prefixes if present
-            String cleanImageName = imageName;
-            if (imageName.contains("/")) {
-                cleanImageName = imageName.substring(imageName.lastIndexOf("/") + 1);
+            String cleanImageName = decodedImageName;
+            if (decodedImageName.contains("/")) {
+                cleanImageName = decodedImageName.substring(decodedImageName.lastIndexOf("/") + 1);
             }
             
             // Use centralized upload directory
             Path uploadDir = getUploadDirectory();
             Path imagePath = uploadDir.resolve(cleanImageName);
             
-            logger.info("Loading banner image: {} from {}", cleanImageName, imagePath.toAbsolutePath());
+            logger.info("Loading banner image: original={}, decoded={}, clean={}, path={}", 
+                imageName, decodedImageName, cleanImageName, imagePath.toAbsolutePath());
             
             if (Files.exists(imagePath) && Files.isReadable(imagePath)) {
                 UrlResource resource = new UrlResource(imagePath.toUri());
