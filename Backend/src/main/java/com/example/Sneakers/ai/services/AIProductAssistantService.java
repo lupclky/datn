@@ -154,15 +154,21 @@ public class AIProductAssistantService {
             String finalPrompt = String.format("""
                 Bạn là chuyên gia tư vấn khóa điện tử của Locker Korea.
                 
-                Khách hàng đã gửi hình ảnh sản phẩm. Hệ thống nhận diện CHÍNH XÁC (Độ tin cậy cao) sản phẩm là:
+                Hệ thống đã tìm thấy sản phẩm khớp với hình ảnh khách hàng gửi.
+                THÔNG TIN SẢN PHẨM TỪ CƠ SỞ DỮ LIỆU (CONTEXT):
                 %s
                 
                 Câu hỏi của khách hàng: "%s"
                 
+                QUY TẮC TUYỆT ĐỐI:
+                1. Sản phẩm trong CONTEXT chính là sản phẩm khách hàng đang hỏi. KHÔNG được nghi ngờ hay so sánh với sản phẩm khác.
+                2. Nếu tên sản phẩm trong CONTEXT khác với suy đoán của bạn, hãy LUÔN LẤY TÊN VÀ THÔNG TIN TRONG CONTEXT làm chuẩn.
+                3. KHÔNG được nói câu kiểu như "hệ thống nhận diện là A nhưng mô tả là B". Hãy coi thông tin trong CONTEXT là chân lý duy nhất.
+                4. Trả lời trực tiếp, chuyên nghiệp, đi thẳng vào tính năng và lợi ích của sản phẩm trong CONTEXT.
+                
                 Nhiệm vụ:
-                1. Xác nhận ngay với khách hàng đây chính là sản phẩm trong ảnh.
-                2. Tư vấn chi tiết tính năng, lợi ích dựa trên thông tin đã cung cấp.
-                3. Giọng điệu chắc chắn, chuyên nghiệp.
+                1. Xác nhận đây là sản phẩm [Tên sản phẩm trong Context].
+                2. Tư vấn chi tiết dựa trên thông tin đã cung cấp.
                 """, productContext, userPrompt);
             var finalResponse = geminiChatModel.chat(UserMessage.from(finalPrompt));
             return finalResponse.aiMessage().text();
@@ -170,24 +176,26 @@ public class AIProductAssistantService {
 
         // Nếu độ tương đồng khá (0.90 - 0.96), trả lời dè dặt hơn
         String confidenceNote = (maxScore >= 0.90) 
-            ? "Tôi thấy sản phẩm này rất giống với hình ảnh bạn gửi, nhưng để chắc chắn, bạn hãy kiểm tra kỹ các chi tiết nhé."
-            : "Dựa trên hình ảnh, đây là sản phẩm có kiểu dáng tương đồng nhất mà tôi tìm thấy.";
+            ? "Dựa trên hình ảnh bạn gửi, đây là sản phẩm phù hợp nhất mà tôi tìm thấy trong hệ thống."
+            : "Dựa trên hình ảnh, đây là sản phẩm có kiểu dáng tương đồng nhất.";
 
         String finalPrompt = String.format("""
                 Bạn là chuyên gia tư vấn khóa điện tử của Locker Korea.
                 
-                Khách hàng gửi ảnh tìm sản phẩm. Hệ thống tìm thấy sản phẩm tương đồng:
+                Khách hàng gửi ảnh tìm sản phẩm. Hệ thống tìm thấy sản phẩm tương đồng trong CSDL:
                 %s
                 
                 Câu hỏi của khách hàng: "%s"
                 
-                Lưu ý quan trọng về giá: Giá trong dữ liệu LÀ GIÁ ĐÃ GIẢM (nếu có), không cần tự tính toán lại.
+                QUY TẮC TUYỆT ĐỐI:
+                1. CHỈ sử dụng thông tin trong CONTEXT để trả lời. KHÔNG tự bịa ra sản phẩm khác.
+                2. Nếu tên sản phẩm trong CONTEXT là A, thì hãy tư vấn về sản phẩm A.
+                3. Giá trong dữ liệu LÀ GIÁ ĐÃ GIẢM (nếu có), không cần tự tính toán lại.
                 
                 Nhiệm vụ:
                 1. Bắt đầu bằng câu: "%s"
-                2. Giới thiệu sản phẩm tìm được (Tên, Giá, Tính năng).
+                2. Giới thiệu sản phẩm tìm được trong CONTEXT (Tên, Giá, Tính năng).
                 3. Trả lời câu hỏi của khách hàng.
-                4. Nếu khách hỏi giá, hãy dùng giá trong context.
                 """, productContext, userPrompt, confidenceNote);
 
         var finalResponse = geminiChatModel.chat(UserMessage.from(finalPrompt));
