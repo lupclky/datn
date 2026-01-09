@@ -54,8 +54,7 @@ public class OrderService implements IOrderService {
             throw new Exception("Cart items are null or empty");
         }
         Long shippingCost = switch (orderDTO.getShippingMethod()) {
-            case "Tiêu chuẩn" -> 30000L;
-            case "Nhanh" -> 40000L;
+            case "Nhanh" -> 0L;
             case "Hỏa tốc" -> 60000L;
             default -> throw new Exception("Shipping method is unavailable");
         };
