@@ -44,9 +44,11 @@ export class VoucherService {
   }
 
   // Get all vouchers with pagination
+  // Add timestamp to prevent API response caching
   getAllVouchers(page: number = 0, limit: number = 10, filter: string = 'active'): Observable<VoucherListDto | any> {
+    const timestamp = new Date().getTime();
     return this.httpClient.get<VoucherListDto | any>(
-      `${this.apiUrl}/vouchers?page=${page}&limit=${limit}&filter=${filter}`,
+      `${this.apiUrl}/vouchers?page=${page}&limit=${limit}&filter=${filter}&t=${timestamp}`,
       { headers: this.getHeaders() }
     );
   }
@@ -117,9 +119,11 @@ export class VoucherService {
   }
 
   // Get vouchers for homepage with expiration date information
+  // Add timestamp to prevent API response caching
   getHomepageVouchers(page: number = 0, limit: number = 5): Observable<HomepageVoucherListDto> {
+    const timestamp = new Date().getTime();
     return this.httpClient.get<HomepageVoucherListDto>(
-      `${this.apiUrl}/vouchers/homepage?page=${page}&limit=${limit}`
+      `${this.apiUrl}/vouchers/homepage?page=${page}&limit=${limit}&t=${timestamp}`
     );
   }
 } 
