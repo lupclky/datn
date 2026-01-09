@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment.development';
 import { NewsDto, NewsListResponse, NewsCreateRequest } from '../dtos/news.dto';
 
@@ -9,8 +10,19 @@ import { NewsDto, NewsListResponse, NewsCreateRequest } from '../dtos/news.dto';
 })
 export class NewsService {
   private apiUrl: string = environment.apiUrl;
+  
+  // BehaviorSubject để thông báo khi news thay đổi
+  private newsChangedSubject = new BehaviorSubject<boolean>(false);
+  public newsChanged$ = this.newsChangedSubject.asObservable();
 
   constructor(private httpClient: HttpClient) {}
+  
+  /**
+   * Trigger event khi news thay đổi
+   */
+  private notifyNewsChanged(): void {
+    this.newsChangedSubject.next(true);
+  }
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
@@ -101,7 +113,9 @@ export class NewsService {
   createNews(news: NewsCreateRequest): Observable<any> {
     return this.httpClient.post(`${this.apiUrl}/news/admin`, news, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap(() => this.notifyNewsChanged())
+    );
   }
 
   /**
@@ -110,7 +124,9 @@ export class NewsService {
   updateNews(id: number, news: NewsCreateRequest): Observable<any> {
     return this.httpClient.put(`${this.apiUrl}/news/admin/${id}`, news, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap(() => this.notifyNewsChanged())
+    );
   }
 
   /**
@@ -119,7 +135,9 @@ export class NewsService {
   deleteNews(id: number): Observable<any> {
     return this.httpClient.delete(`${this.apiUrl}/news/admin/${id}`, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap(() => this.notifyNewsChanged())
+    );
   }
 
   /**
@@ -128,7 +146,9 @@ export class NewsService {
   publishNews(id: number): Observable<any> {
     return this.httpClient.put(`${this.apiUrl}/news/admin/${id}/publish`, {}, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap(() => this.notifyNewsChanged())
+    );
   }
 
   /**
@@ -137,7 +157,9 @@ export class NewsService {
   archiveNews(id: number): Observable<any> {
     return this.httpClient.put(`${this.apiUrl}/news/admin/${id}/archive`, {}, {
       headers: this.getAuthHeaders()
-    });
+    }).pipe(
+      tap(() => this.notifyNewsChanged())
+    );
   }
 
   /**

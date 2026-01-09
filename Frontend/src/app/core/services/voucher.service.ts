@@ -5,7 +5,8 @@ import { VoucherDto } from '../dtos/voucher.dto';
 import { VoucherListDto } from '../dtos/voucherList.dto';
 import { ApplyVoucherDto, VoucherApplicationResponseDto } from '../dtos/voucherApplication.dto';
 import { HomepageVoucherListDto } from '../dtos/homepageVoucher.dto';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -13,11 +14,22 @@ import { Observable } from 'rxjs';
 export class VoucherService {
   private apiUrl: string = environment.apiUrl;
   private token!: string | null;
+  
+  // BehaviorSubject để thông báo khi voucher thay đổi
+  private voucherChangedSubject = new BehaviorSubject<boolean>(false);
+  public voucherChanged$ = this.voucherChangedSubject.asObservable();
 
   constructor(private httpClient: HttpClient) {
     if (typeof localStorage !== 'undefined') {
       this.token = localStorage.getItem('token');
     }
+  }
+  
+  /**
+   * Trigger event khi voucher thay đổi
+   */
+  private notifyVoucherChanged(): void {
+    this.voucherChangedSubject.next(true);
   }
 
   private getHeaders(): HttpHeaders {
@@ -69,6 +81,8 @@ export class VoucherService {
       `${this.apiUrl}/vouchers`,
       voucher,
       { headers: this.getHeaders() }
+    ).pipe(
+      tap(() => this.notifyVoucherChanged())
     );
   }
 
@@ -78,6 +92,8 @@ export class VoucherService {
       `${this.apiUrl}/vouchers/${id}`,
       voucher,
       { headers: this.getHeaders() }
+    ).pipe(
+      tap(() => this.notifyVoucherChanged())
     );
   }
 
@@ -86,6 +102,8 @@ export class VoucherService {
     return this.httpClient.delete(
       `${this.apiUrl}/vouchers/${id}`,
       { headers: this.getHeaders() }
+    ).pipe(
+      tap(() => this.notifyVoucherChanged())
     );
   }
 

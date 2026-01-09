@@ -86,6 +86,16 @@ export class HomeComponent extends BaseComponent implements OnInit {
       }),
       takeUntil(this.destroyed$)
     ).subscribe();
+    
+    // Lắng nghe sự thay đổi news và tự động reload
+    this.newsService.newsChanged$.pipe(
+      filter((changed) => changed === true),
+      tap(() => {
+        console.log('News changed, reloading...');
+        this.loadLatestNews();
+      }),
+      takeUntil(this.destroyed$)
+    ).subscribe();
   }
 
   loadProducts(): void {
