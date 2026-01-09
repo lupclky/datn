@@ -530,6 +530,26 @@
   
             <div class="edit-form">
               <form class="p-fluid" [formGroup]="productForm">
+                <!-- Created At & Updated At (Read-only) -->
+                <div class="grid" *ngIf="mainProduct?.created_at || mainProduct?.updated_at">
+                  <div class="col-12 md:col-6" *ngIf="mainProduct?.created_at">
+                    <div class="field">
+                      <label class="text-500">Ngày tạo</label>
+                      <div class="font-medium p-2 surface-100 border-round">
+                        {{ mainProduct.created_at | date:'dd/MM/yyyy HH:mm:ss' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 md:col-6" *ngIf="mainProduct?.updated_at">
+                    <div class="field">
+                      <label class="text-500">Cập nhật lần cuối</label>
+                      <div class="font-medium p-2 surface-100 border-round">
+                        {{ mainProduct.updated_at | date:'dd/MM/yyyy HH:mm:ss' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="grid">
                   <div class="col-12 md:col-6">
                     <div class="field">
@@ -551,30 +571,6 @@
                                   optionValue="value"
                                   (onChange)="onCategoryChange($event)">
                       </p-dropdown>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Created At & Updated At (Read-only) -->
-                <div class="grid">
-                  <div class="col-12 md:col-6">
-                    <div class="field">
-                      <label class="text-500">
-                        <i class="pi pi-calendar-plus mr-1"></i>Ngày tạo
-                      </label>
-                      <div class="font-medium p-2 surface-100 border-round">
-                        {{ mainProduct?.created_at | date:'dd/MM/yyyy HH:mm:ss' }}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 md:col-6">
-                    <div class="field">
-                      <label class="text-500">
-                        <i class="pi pi-calendar-times mr-1"></i>Cập nhật lần cuối
-                      </label>
-                      <div class="font-medium p-2 surface-100 border-round">
-                        {{ mainProduct?.updated_at | date:'dd/MM/yyyy HH:mm:ss' }}
-                      </div>
                     </div>
                   </div>
                 </div>

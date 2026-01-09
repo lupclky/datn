@@ -7,7 +7,7 @@ import { ProductDto } from '../../../core/dtos/product.dto';
 import { GalleriaModule } from 'primeng/galleria';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormBuilder, FormGroup, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ToastService } from '../../../core/services/toast.service';
@@ -50,6 +50,7 @@ import { registerCkeditorUploadAdapter } from '../../../shared/ckeditor-upload-a
   selector: 'app-detail-product',
   standalone: true,
   imports: [
+    CommonModule,
     GalleriaModule,
     InputNumberModule,
     FormsModule,
