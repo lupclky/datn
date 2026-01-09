@@ -16,7 +16,6 @@ import { ToastService } from '../../../core/services/toast.service';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
 import { TooltipModule } from 'primeng/tooltip';
-import { environment } from '../../../../environments/environment';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
 
@@ -165,9 +164,7 @@ export class BannerManageComponent implements OnInit {
     this.isEditMode = true;
     this.selectedBannerId = banner.id!;
     this.selectedFile = null;
-    const cleanApiImage = environment.apiUrl.replace(/\/$/, '') + '/banners/images';
-    const cleanImageUrl = banner.image_url ? banner.image_url.replace(/^\//, '') : '';
-    this.previewImage = banner.image_url ? `${cleanApiImage}/${cleanImageUrl}` : null;
+    this.previewImage = banner.image_url ? this.bannerService.getBannerImageUrl(banner.image_url) : null;
     
     // Helper function to safely parse date
     const parseDateSafely = (dateString: string | null | undefined): Date | null => {
@@ -423,9 +420,7 @@ export class BannerManageComponent implements OnInit {
     if (!imageUrl) {
       return 'assets/images/no-image.png'; // Fallback image
     }
-    const cleanApiUrl = environment.apiUrl.replace(/\/$/, '');
-    const cleanImageUrl = imageUrl.replace(/^\//, '');
-    return `${cleanApiUrl}/banners/images/${cleanImageUrl}`;
+    return this.bannerService.getBannerImageUrl(imageUrl);
   }
 
   onImageError(event: any): void {

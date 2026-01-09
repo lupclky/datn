@@ -32,6 +32,42 @@ import java.util.UUID;
 public class BannerController {
     private static final Logger logger = LoggerFactory.getLogger(BannerController.class);
     private final IBannerService bannerService;
+    
+    // Centralized upload directory path
+    private Path getUploadDirectory() {
+        String userDir = System.getProperty("user.dir");
+        Path currentDir = Paths.get(userDir).toAbsolutePath();
+        
+        // Check if we're in Backend directory or root
+        Path uploadsInCurrent = currentDir.resolve("uploads");
+        if (Files.exists(uploadsInCurrent)) {
+            return uploadsInCurrent;
+        }
+        
+        // Try Backend subdirectory
+        Path backendDir = currentDir.resolve("Backend");
+        if (Files.exists(backendDir)) {
+            Path uploadsInBackend = backendDir.resolve("uploads");
+            if (!Files.exists(uploadsInBackend)) {
+                try {
+                    Files.createDirectories(uploadsInBackend);
+                } catch (IOException e) {
+                    logger.warn("Could not create uploads in Backend directory", e);
+                }
+            }
+            return uploadsInBackend;
+        }
+        
+        // Fallback: create in current directory
+        if (!Files.exists(uploadsInCurrent)) {
+            try {
+                Files.createDirectories(uploadsInCurrent);
+            } catch (IOException e) {
+                logger.error("Could not create uploads directory", e);
+            }
+        }
+        return uploadsInCurrent;
+    }
 
     /**
      * Get all banners (public endpoint)
@@ -168,61 +204,27 @@ public class BannerController {
                 cleanImageName = imageName.substring(imageName.lastIndexOf("/") + 1);
             }
             
-            // Get current working directory
-            String userDir = System.getProperty("user.dir");
-            Path currentDir = Paths.get(userDir).toAbsolutePath();
-            Path backendRoot = currentDir;
+            // Use centralized upload directory
+            Path uploadDir = getUploadDirectory();
+            Path imagePath = uploadDir.resolve(cleanImageName);
             
-            // Auto-detect Backend folder
-            Path uploadsInCurrent = currentDir.resolve("uploads");
-            if (!Files.exists(uploadsInCurrent)) {
-                // Try going to Backend folder
-                Path backendDir = currentDir.resolve("Backend");
-                if (Files.exists(backendDir.resolve("uploads"))) {
-                    backendRoot = backendDir;
-                } else if (currentDir.getParent() != null) {
-                    Path parentBackend = currentDir.getParent().resolve("Backend");
-                    if (Files.exists(parentBackend.resolve("uploads"))) {
-                        backendRoot = parentBackend;
-                    }
+            logger.info("Loading banner image: {} from {}", cleanImageName, imagePath.toAbsolutePath());
+            
+            if (Files.exists(imagePath) && Files.isReadable(imagePath)) {
+                UrlResource resource = new UrlResource(imagePath.toUri());
+                
+                // Determine content type based on file extension
+                String contentType = Files.probeContentType(imagePath);
+                if (contentType == null) {
+                    contentType = "image/jpeg"; // default
                 }
+                
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
             }
             
-            logger.info("Loading banner image: clean={}, backendRoot={}", cleanImageName, backendRoot.toAbsolutePath());
-            
-            // Try multiple possible locations
-            Path[] possiblePaths = {
-                backendRoot.resolve("uploads").resolve(cleanImageName),
-                currentDir.resolve("uploads").resolve(cleanImageName),
-                Paths.get("uploads").resolve(cleanImageName).toAbsolutePath()
-            };
-            
-            for (Path imagePath : possiblePaths) {
-                try {
-                    Path absolutePath = imagePath.toAbsolutePath();
-                    logger.debug("Trying banner path: {}", absolutePath);
-                    
-                    if (Files.exists(absolutePath) && Files.isReadable(absolutePath)) {
-                        UrlResource resource = new UrlResource(absolutePath.toUri());
-                        logger.info("Found banner image at: {}", absolutePath);
-                        
-                        // Determine content type based on file extension
-                        String contentType = Files.probeContentType(absolutePath);
-                        if (contentType == null) {
-                            contentType = "image/jpeg"; // default
-                        }
-                        
-                        return ResponseEntity.ok()
-                                .contentType(MediaType.parseMediaType(contentType))
-                                .body(resource);
-                    }
-                } catch (Exception e) {
-                    logger.debug("Banner path not accessible: {} - {}", imagePath, e.getMessage());
-                    continue;
-                }
-            }
-            
-            logger.error("Banner image not found: {}", imageName);
+            logger.error("Banner image not found: {} at {}", cleanImageName, imagePath.toAbsolutePath());
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             logger.error("Error loading banner image: {}", imageName, e);
@@ -232,11 +234,9 @@ public class BannerController {
 
     private String storeFile(MultipartFile file) throws IOException {
         String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path uploadDir = Paths.get("uploads");
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
+        Path uploadDir = getUploadDirectory();
         Path destination = uploadDir.resolve(filename);
+        logger.info("Storing banner image to: {}", destination.toAbsolutePath());
         Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
         return filename;
     }
